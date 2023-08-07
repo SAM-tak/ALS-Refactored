@@ -1598,7 +1598,7 @@ void UAlsAnimationInstance::RefreshTurnInPlace(const float DeltaTime)
 		}
 	}
 
-	if (IsValid(TurnInPlaceSettings) && ALS_ENSURE(IsValid(TurnInPlaceSettings->Animation)))
+	if (TurnInPlaceSettings && IsValid(TurnInPlaceSettings) && ALS_ENSURE(IsValid(TurnInPlaceSettings->Animation)))
 	{
 		// Animation montages can't be played in the worker thread, so queue them up to play later in the game thread.
 
