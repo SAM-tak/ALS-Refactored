@@ -1,0 +1,3 @@
+[submodule "ContentSources/Blender"]
+	path = ContentSources/Blender
+	url = git@github.com:SAM-tak/ALS-Blender-Files.git
