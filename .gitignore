@@ -76,4 +76,5 @@ Plugins/**/Intermediate/*
 # Cache files for the editor to use
 DerivedDataCache/*
 
+**.blend
 **.blend[1-9]*
