@@ -895,20 +895,12 @@ void UAlsAnimationInstance::RefreshFeetOnGameThread()
 
 	const auto* Mesh{GetSkelMeshComponent()};
 
-	const auto FootLeftTargetTransform{
-		Mesh->GetSocketTransform(Settings->General.bUseFootIkBones
-			                         ? UAlsConstants::FootLeftIkBoneName()
-			                         : UAlsConstants::FootLeftVirtualBoneName())
-	};
+	const auto FootLeftTargetTransform{Mesh->GetSocketTransform(UAlsConstants::FootLeftVirtualBoneName())};
 
 	FeetState.Left.TargetLocation = FootLeftTargetTransform.GetLocation();
 	FeetState.Left.TargetRotation = FootLeftTargetTransform.GetRotation();
 
-	const auto FootRightTargetTransform{
-		Mesh->GetSocketTransform(Settings->General.bUseFootIkBones
-			                         ? UAlsConstants::FootRightIkBoneName()
-			                         : UAlsConstants::FootRightVirtualBoneName())
-	};
+	const auto FootRightTargetTransform{Mesh->GetSocketTransform(UAlsConstants::FootRightVirtualBoneName())};
 
 	FeetState.Right.TargetLocation = FootRightTargetTransform.GetLocation();
 	FeetState.Right.TargetRotation = FootRightTargetTransform.GetRotation();

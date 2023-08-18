@@ -36,12 +36,6 @@ public:
 	static const FName& HandRightGunVirtualBoneName();
 
 	UFUNCTION(BlueprintPure, Category = "ALS|Als Constants|Bones", Meta = (ReturnDisplayName = "Bone Name"))
-	static const FName& FootLeftIkBoneName();
-
-	UFUNCTION(BlueprintPure, Category = "ALS|Als Constants|Bones", Meta = (ReturnDisplayName = "Bone Name"))
-	static const FName& FootRightIkBoneName();
-
-	UFUNCTION(BlueprintPure, Category = "ALS|Als Constants|Bones", Meta = (ReturnDisplayName = "Bone Name"))
 	static const FName& FootLeftVirtualBoneName();
 
 	UFUNCTION(BlueprintPure, Category = "ALS|Als Constants|Bones", Meta = (ReturnDisplayName = "Bone Name"))
@@ -258,18 +252,6 @@ inline const FName& UAlsConstants::HandLeftGunVirtualBoneName()
 inline const FName& UAlsConstants::HandRightGunVirtualBoneName()
 {
 	static const FName Name{TEXTVIEW("VB hand_r_to_ik_hand_gun")};
-	return Name;
-}
-
-inline const FName& UAlsConstants::FootLeftIkBoneName()
-{
-	static const FName Name{TEXTVIEW("ik_foot_l")};
-	return Name;
-}
-
-inline const FName& UAlsConstants::FootRightIkBoneName()
-{
-	static const FName Name{TEXTVIEW("ik_foot_r")};
 	return Name;
 }
 
