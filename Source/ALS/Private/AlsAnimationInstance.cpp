@@ -170,8 +170,6 @@ FAnimInstanceProxy* UAlsAnimationInstance::CreateAnimInstanceProxy()
 FAlsControlRigInput UAlsAnimationInstance::GetControlRigInput() const
 {
 	return {
-		!IsValid(Settings) || Settings->General.bUseHandIkBones,
-		!IsValid(Settings) || Settings->General.bUseFootIkBones,
 		GroundedState.VelocityBlend.ForwardAmount,
 		GroundedState.VelocityBlend.BackwardAmount,
 		ViewState.SpineRotation.YawAngle,

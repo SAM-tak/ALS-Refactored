@@ -171,8 +171,6 @@ void UAlsSkeletonUtility::AddOrReplaceVirtualBone(USkeleton* Skeleton, const FNa
 
 	if (ExistingVirtualBone != nullptr)
 	{
-		ExistingVirtualBone = nullptr;
-
 		static TArray<FName> BoneNames;
 		check(BoneNames.IsEmpty())
 
@@ -253,7 +251,7 @@ void UAlsSkeletonUtility::AddOrReplaceSocket(USkeleton* Skeleton, FName SocketNa
 	Skeleton->Sockets.Add(Socket);
 }
 
-void UAlsSkeletonUtility::AddOrReplaceWeightBlendProfile(USkeleton* Skeleton, FName BlendProfileName,
+void UAlsSkeletonUtility::AddOrReplaceBlendProfile(USkeleton* Skeleton, FName BlendProfileName,
                                                          const TArray<FAlsBlendProfileEntry>& Entries)
 {
 	if (!ALS_ENSURE(IsValid(Skeleton)))
@@ -321,6 +319,17 @@ void UAlsSkeletonUtility::SetBoneRetargetingMode(USkeleton* Skeleton, const FNam
 
 	Skeleton->Modify();
 	Skeleton->SetBoneTranslationRetargetingMode(BoneIndex, RetargetingMode, bIncludeDescendants);
+}
+
+
+bool UAlsSkeletonUtility::HasBone(USkeleton* Skeleton, const FName& BoneName)
+{
+	if(!ALS_ENSURE(IsValid(Skeleton)))
+	{
+		return false;
+	}
+
+	return Skeleton->GetReferenceSkeleton().FindBoneIndex(BoneName) >= 0;
 }
 
 #undef LOCTEXT_NAMESPACE

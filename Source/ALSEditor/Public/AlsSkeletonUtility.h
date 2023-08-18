@@ -40,9 +40,12 @@ public:
 	                               const FVector& RelativeLocation, const FRotator& RelativeRotation);
 
 	UFUNCTION(BlueprintCallable, Category = "ALS|Als Skeleton Utility")
-	static void AddOrReplaceWeightBlendProfile(USkeleton* Skeleton, FName BlendProfileName, const TArray<FAlsBlendProfileEntry>& Entries);
+	static void AddOrReplaceBlendProfile(USkeleton* Skeleton, FName BlendProfileName, const TArray<FAlsBlendProfileEntry>& Entries);
 
 	UFUNCTION(BlueprintCallable, Category = "ALS|Als Skeleton Utility", Meta = (AutoCreateRefTerm = "BoneName"))
 	static void SetBoneRetargetingMode(USkeleton* Skeleton, const FName& BoneName,
 	                                   EBoneTranslationRetargetingMode::Type RetargetingMode, bool bIncludeDescendants);
+
+	UFUNCTION(BlueprintPure, Category = "ALS|Als Skeleton Utility", Meta = (AutoCreateRefTerm = "BoneName"))
+	static bool HasBone(USkeleton* Skeleton, const FName& BoneName);
 };
