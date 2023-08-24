@@ -195,6 +195,20 @@ public:
 	void SetMovementModeLocked(bool bNewMovementModeLocked);
 
 	bool TryConsumePrePenetrationAdjustmentVelocity(FVector& OutVelocity);
+
+public:
+	/** If true, try to crouch (or keep crouching) on next update. If false, try to stop crouching on next update. */
+	UPROPERTY(Category = "Als|Als Character Movement", VisibleInstanceOnly, BlueprintReadOnly)
+	uint8 bWantsToLie : 1;
+
+	virtual void Crouch(bool bClientSimulation = false) override;
+	virtual void UnCrouch(bool bClientSimulation = false) override;
+	virtual void Lie(bool bClientSimulation = false);
+	virtual void UnLie(bool bClientSimulation = false);
+
+	inline TObjectPtr<class AAlsCharacter> GetAlsCharacter();
+
+	virtual void UpdateCapsuleSize(float DeltaTime, float TargetHalfHeight, float HeightSpeed, float TargetRadius, float RadiusSpeed);
 };
 
 inline const FAlsMovementGaitSettings& UAlsCharacterMovementComponent::GetGaitSettings() const

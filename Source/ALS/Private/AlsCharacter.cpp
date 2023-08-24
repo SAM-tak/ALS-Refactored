@@ -31,6 +31,9 @@ AAlsCharacter::AAlsCharacter(const FObjectInitializer& ObjectInitializer) : Supe
 	bUseControllerRotationYaw = false;
 	bClientCheckEncroachmentOnNetUpdate = true; // Required for bSimGravityDisabled to be updated.
 
+	CapsuleUpdateSpeed = 0.3f;
+	bIsLied = false;
+
 	GetCapsuleComponent()->InitCapsuleSize(30.0f, 90.0f);
 
 	GetMesh()->SetRelativeLocation_Direct({0.0f, 0.0f, -92.0f});
@@ -259,6 +262,8 @@ void AAlsCharacter::Tick(const float DeltaTime)
 		Super::Tick(DeltaTime);
 		return;
 	}
+
+	RefreshCapsuleSize(DeltaTime);
 
 	RefreshVisibilityBasedAnimTickOption();
 
@@ -724,7 +729,7 @@ void AAlsCharacter::OnStartCrouch(const float HalfHeightAdjust, const float Scal
 		PredictionData->OriginalMeshTranslationOffset = PredictionData->MeshTranslationOffset;
 	}
 
-	Super::OnStartCrouch(HalfHeightAdjust, ScaledHalfHeightAdjust);
+	K2_OnStartCrouch(HalfHeightAdjust, ScaledHalfHeightAdjust);
 
 	SetStance(AlsStanceTags::Crouching);
 }
@@ -742,7 +747,7 @@ void AAlsCharacter::OnEndCrouch(const float HalfHeightAdjust, const float Scaled
 		PredictionData->OriginalMeshTranslationOffset = PredictionData->MeshTranslationOffset;
 	}
 
-	Super::OnEndCrouch(HalfHeightAdjust, ScaledHalfHeightAdjust);
+	K2_OnEndCrouch(HalfHeightAdjust, ScaledHalfHeightAdjust);
 
 	SetStance(AlsStanceTags::Standing);
 }
@@ -1610,4 +1615,109 @@ void AAlsCharacter::RefreshViewRelativeTargetYawAngle()
 {
 	LocomotionState.ViewRelativeTargetYawAngle = FRotator3f::NormalizeAxis(UE_REAL_TO_FLOAT(
 		ViewState.Rotation.Yaw - LocomotionState.TargetYawAngle));
+}
+
+bool AAlsCharacter::CanLie() const
+{
+	return true;
+}
+
+void AAlsCharacter::OnStartLie(const float HalfHeightAdjust, const float ScaledHalfHeightAdjust)
+{
+	auto* PredictionData{GetCharacterMovement()->GetPredictionData_Client_Character()};
+
+	if (PredictionData != nullptr && GetLocalRole() <= ROLE_SimulatedProxy &&
+		ScaledHalfHeightAdjust > 0.0f && IsPlayingNetworkedRootMotionMontage())
+	{
+		// The code below essentially undoes the changes that will be made later at the end of the UCharacterMovementComponent::Crouch()
+		// function because they literally break network smoothing when crouching while the root motion montage is playing, causing the
+		// mesh to take an incorrect location for a while.
+
+		// TODO Check the need for this fix in future engine versions.
+
+		PredictionData->MeshTranslationOffset.Z += ScaledHalfHeightAdjust;
+		PredictionData->OriginalMeshTranslationOffset = PredictionData->MeshTranslationOffset;
+	}
+
+	//K2_OnStartLie(HalfHeightAdjust, ScaledHalfHeightAdjust);
+
+	SetStance(AlsStanceTags::Lying);
+}
+
+void AAlsCharacter::OnEndLie(const float HalfHeightAdjust, const float ScaledHalfHeightAdjust)
+{
+	auto* PredictionData{GetCharacterMovement()->GetPredictionData_Client_Character()};
+
+	if (PredictionData != nullptr && GetLocalRole() <= ROLE_SimulatedProxy &&
+		ScaledHalfHeightAdjust > 0.0f && IsPlayingNetworkedRootMotionMontage())
+	{
+		// Same fix as in AAlsCharacter::OnStartCrouch().
+
+		PredictionData->MeshTranslationOffset.Z -= ScaledHalfHeightAdjust;
+		PredictionData->OriginalMeshTranslationOffset = PredictionData->MeshTranslationOffset;
+	}
+
+	//K2_OnEndLie(HalfHeightAdjust, ScaledHalfHeightAdjust);
+
+	SetStance(AlsStanceTags::Standing);
+}
+
+void AAlsCharacter::RefreshCapsuleSize(float DeltaTime)
+{
+	// Update capsule height and radius
+	auto DefaultCharacter = GetDefault<AAlsCharacter>(GetClass());
+	auto InitialEyeHeight = DefaultCharacter->BaseEyeHeight;
+	auto InitialHalfHeight = DefaultCharacter->GetCapsuleComponent()->GetUnscaledCapsuleHalfHeight();
+	auto InitialRadius = DefaultCharacter->GetCapsuleComponent()->GetUnscaledCapsuleRadius();
+	auto CrouchedHalfHeight = AlsCharacterMovement->GetCrouchedHalfHeight();
+	auto EyeHeightSpeed = CapsuleUpdateSpeed > 0 ? FMath::Abs(InitialEyeHeight - CrouchedEyeHeight) / CapsuleUpdateSpeed : .0f;
+	auto HalfHeightSpeed = CapsuleUpdateSpeed > 0 ? FMath::Abs(InitialHalfHeight - CrouchedHalfHeight) / CapsuleUpdateSpeed : .0f;
+	if (bIsLied)
+	{
+		UpdateCapsule(DeltaTime, CrouchedEyeHeight, EyeHeightSpeed, CrouchedHalfHeight, HalfHeightSpeed, InitialRadius, 0.0f);
+	}
+	else if (bIsCrouched)
+	{
+		UpdateCapsule(DeltaTime, CrouchedEyeHeight, EyeHeightSpeed, CrouchedHalfHeight, HalfHeightSpeed, InitialRadius, 0.0f);
+	}
+	else
+	{
+		UpdateCapsule(DeltaTime, InitialEyeHeight, EyeHeightSpeed, InitialHalfHeight, HalfHeightSpeed, InitialRadius, 0.0f);
+	}
+}
+
+void AAlsCharacter::UpdateCapsule(float DeltaTime, float EyeHeight, float EyeHeightSpeed, float HalfHeight, float HalfHeightSpeed, float Radius, float RadiusSpeed)
+{
+	AlsCharacterMovement->UpdateCapsuleSize(DeltaTime, HalfHeight, HalfHeightSpeed, Radius, RadiusSpeed);
+
+	BaseEyeHeight = FMath::FInterpConstantTo(BaseEyeHeight, EyeHeight, DeltaTime, EyeHeightSpeed);
+
+	if (GetMesh())
+	{
+		FVector& MeshRelativeLocation = GetMesh()->GetRelativeLocation_DirectMutable();
+		MeshRelativeLocation.Z = FMath::FInterpConstantTo(MeshRelativeLocation.Z, -HalfHeight, DeltaTime, HalfHeightSpeed);
+		BaseTranslationOffset.Z = MeshRelativeLocation.Z;
+	}
+	else
+	{
+		BaseTranslationOffset.Z = FMath::FInterpConstantTo(BaseTranslationOffset.Z, -HalfHeight, DeltaTime, HalfHeightSpeed);
+	}
+}
+
+void AAlsCharacter::OnRep_IsLied()
+{
+	if(AlsCharacterMovement)
+	{
+		if(bIsLied)
+		{
+			AlsCharacterMovement->bWantsToLie = true;
+			AlsCharacterMovement->Lie(true);
+		}
+		else
+		{
+			AlsCharacterMovement->bWantsToLie = false;
+			AlsCharacterMovement->UnLie(true);
+		}
+		AlsCharacterMovement->bNetworkUpdateReceived = true;
+	}
 }

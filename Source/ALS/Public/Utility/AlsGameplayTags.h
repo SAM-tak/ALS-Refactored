@@ -25,6 +25,7 @@ namespace AlsStanceTags
 {
 	ALS_API UE_DECLARE_GAMEPLAY_TAG_EXTERN(Standing)
 	ALS_API UE_DECLARE_GAMEPLAY_TAG_EXTERN(Crouching)
+	ALS_API UE_DECLARE_GAMEPLAY_TAG_EXTERN(Lying)
 }
 
 namespace AlsGaitTags

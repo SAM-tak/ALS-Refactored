@@ -539,6 +539,26 @@ private:
 
 	void RefreshRagdollingActorTransform(float DeltaTime);
 
+public:
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings|Als Character", Replicated, Meta = (ForceUnits = "s"))
+	float CapsuleUpdateSpeed;
+
+	UPROPERTY(BlueprintReadOnly, Category = "State|Als Character", replicatedUsing = OnRep_IsLied)
+	uint32 bIsLied : 1;
+
+	bool CanLie() const;
+	void OnStartLie(const float HalfHeightAdjust, const float ScaledHalfHeightAdjust);
+	void OnEndLie(const float HalfHeightAdjust, const float ScaledHalfHeightAdjust);
+
+private:
+	void RefreshCapsuleSize(float DeltaTime);
+
+	void UpdateCapsule(float DeltaTime, float EyeHeight, float EyeHeightSpeed, float HalfHeight, float HalfHeightSpeed, float Radius, float RadiusSpeed);
+
+	/** Handle Lying replicated from server */
+	UFUNCTION()
+	virtual void OnRep_IsLied();
+
 	// Debug
 
 public:
