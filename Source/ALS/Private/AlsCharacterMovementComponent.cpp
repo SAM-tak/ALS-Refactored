@@ -169,6 +169,8 @@ UAlsCharacterMovementComponent::UAlsCharacterMovementComponent()
 	NavAgentProps.bCanCrouch = true;
 	NavAgentProps.bCanFly = true;
 	bUseAccelerationForPaths = true;
+
+	bWantsToLie = false;
 }
 
 #if WITH_EDITOR
@@ -1399,7 +1401,6 @@ void UAlsCharacterMovementComponent::UpdateCapsuleSize(float DeltaTime, float Ta
 	TargetRadius = FMath::Max(0.f, TargetRadius);
 	TargetHalfHeight = FMath::Max3(0.f, TargetRadius, TargetHalfHeight);
 
-	const float ComponentScale = CharacterOwner->GetCapsuleComponent()->GetShapeScale();
 	const float OldUnscaledHalfHeight = CharacterOwner->GetCapsuleComponent()->GetUnscaledCapsuleHalfHeight();
 	const float OldUnscaledRadius = CharacterOwner->GetCapsuleComponent()->GetUnscaledCapsuleRadius();
 	const float HalfHeight = FMath::FInterpConstantTo(OldUnscaledHalfHeight, TargetHalfHeight, DeltaTime, HeightSpeed);
