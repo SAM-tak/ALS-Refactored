@@ -159,7 +159,6 @@ public:
 public:
 	const FGameplayTag& GetLocomotionMode() const;
 
-protected:
 	void SetLocomotionMode(const FGameplayTag& NewLocomotionMode);
 
 private:
@@ -454,11 +453,11 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "ALS|Character", Meta = (ReturnDisplayName = "Success"))
 	bool StartMantlingGrounded();
 
+	bool TryStartMantlingInAir();
+
+	bool TryStartMantling(const FAlsMantlingTraceSettings& TraceSettings, float ForwardTraceDeltaAngle);
+
 private:
-	bool StartMantlingInAir();
-
-	bool StartMantling(const FAlsMantlingTraceSettings& TraceSettings);
-
 	UFUNCTION(Server, Reliable)
 	void ServerStartMantling(const FAlsMantlingParameters& Parameters);
 
@@ -475,6 +474,8 @@ protected:
 	void OnMantlingStarted(const FAlsMantlingParameters& Parameters);
 
 private:
+	float CalculateForwardTraceDeltaAngle() const;
+	
 	void RefreshMantling();
 
 	void StopMantling();
