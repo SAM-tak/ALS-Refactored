@@ -453,9 +453,9 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "ALS|Character", Meta = (ReturnDisplayName = "Success"))
 	bool StartMantlingGrounded();
 
-	bool TryStartMantlingInAir();
+	bool StartMantlingInAir();
 
-	bool TryStartMantling(const FAlsMantlingTraceSettings& TraceSettings, float ForwardTraceDeltaAngle);
+	bool StartMantling(const FAlsMantlingTraceSettings& TraceSettings, float ForwardTraceDeltaAngle);
 
 private:
 	UFUNCTION(Server, Reliable)

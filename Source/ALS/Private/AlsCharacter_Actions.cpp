@@ -136,13 +136,13 @@ void AAlsCharacter::RefreshRollingPhysics(const float DeltaTime)
 bool AAlsCharacter::StartMantlingGrounded()
 {
 	return LocomotionMode == AlsLocomotionModeTags::Grounded &&
-	       TryStartMantling(Settings->Mantling.GroundedTrace, CalculateForwardTraceDeltaAngle());
+	       StartMantling(Settings->Mantling.GroundedTrace, CalculateForwardTraceDeltaAngle());
 }
 
 bool AAlsCharacter::StartMantlingInAir()
 {
 	return LocomotionMode == AlsLocomotionModeTags::InAir && IsLocallyControlled() &&
-	       TryStartMantling(Settings->Mantling.InAirTrace, CalculateForwardTraceDeltaAngle());
+	       StartMantling(Settings->Mantling.InAirTrace, CalculateForwardTraceDeltaAngle());
 }
 
 bool AAlsCharacter::IsMantlingAllowedToStart_Implementation() const
@@ -150,7 +150,7 @@ bool AAlsCharacter::IsMantlingAllowedToStart_Implementation() const
 	return !LocomotionAction.IsValid();
 }
 
-bool AAlsCharacter::TryStartMantling(const FAlsMantlingTraceSettings& TraceSettings, const float ForwardTraceDeltaAngle)
+bool AAlsCharacter::StartMantling(const FAlsMantlingTraceSettings& TraceSettings, const float ForwardTraceDeltaAngle)
 {
 	if (!Settings->Mantling.bAllowMantling || GetLocalRole() <= ROLE_SimulatedProxy || !IsMantlingAllowedToStart())
 	{
@@ -160,12 +160,6 @@ bool AAlsCharacter::TryStartMantling(const FAlsMantlingTraceSettings& TraceSetti
 	if (FMath::Abs(ForwardTraceDeltaAngle) > Settings->Mantling.TraceAngleThreshold)
 	{
 		return false;
-	}
-
-	FCollisionObjectQueryParams ObjectQueryParameters;
-	for (const auto ObjectType : Settings->Mantling.MantlingTraceObjectTypes)
-	{
-		ObjectQueryParameters.AddObjectTypesToQuery(UCollisionProfile::Get()->ConvertToCollisionChannel(false, ObjectType));
 	}
 
 	const auto ActorYawAngle{UE_REAL_TO_FLOAT(FRotator::NormalizeAxis(GetActorRotation().Yaw))};
