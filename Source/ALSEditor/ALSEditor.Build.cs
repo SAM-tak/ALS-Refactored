@@ -6,7 +6,7 @@ public class ALSEditor : ModuleRules
 	{
 		PCHUsage = PCHUsageMode.UseExplicitOrSharedPCHs;
 		IncludeOrderVersion = EngineIncludeOrderVersion.Latest;
-		
+
 		bEnableNonInlinedGenCppWarnings = true;
 
 		PrivateDependencyModuleNames.AddRange(new[]
