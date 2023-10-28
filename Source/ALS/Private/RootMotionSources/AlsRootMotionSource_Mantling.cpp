@@ -58,8 +58,6 @@ void FAlsRootMotionSource_Mantling::PrepareRootMotion(const float SimulationDelt
 		return;
 	}
 
-	const auto InterpolationAmount{ CurrentAnimationLocation.Z / TargetAnimationLocation.Z };
-
 	// Synchronize the mantling animation montage's time with the mantling root motion source's time.
 	// Delta time subtraction is necessary here, otherwise there will be a one frame lag between them.
 
@@ -82,6 +80,8 @@ void FAlsRootMotionSource_Mantling::PrepareRootMotion(const float SimulationDelt
 		BlendInAmount = FAlphaBlend::AlphaToBlendOption(GetTime() / MontageBlendIn.GetBlendTime(),
 														MontageBlendIn.GetBlendOption(), MontageBlendIn.GetCustomCurve());
 	}
+
+	const auto InterpolationAmount{CurrentAnimationLocation.Z / TargetAnimationLocation.Z};
 
 	if (!FAnimWeight::IsFullWeight(BlendInAmount * InterpolationAmount))
 	{
