@@ -1177,14 +1177,18 @@ void UAlsAnimationInstance::RefreshFootOffset(FAlsFootState& FootState, const fl
 	};
 
 	FHitResult Hit;
-	GetWorld()->LineTraceSingleByChannel(Hit,
-	                                     TraceLocation + FVector{
-		                                     0.0f, 0.0f, Settings->Feet.IkTraceDistanceUpward * LocomotionState.Scale
-	                                     },
-	                                     TraceLocation - FVector{
-		                                     0.0f, 0.0f, Settings->Feet.IkTraceDistanceDownward * LocomotionState.Scale
-	                                     },
-	                                     Settings->Feet.IkTraceChannel, {__FUNCTION__, true, Character});
+	if (!GetWorld()->IsPreviewWorld()) // In preview world, some times returns a wrong result.
+	{
+		GetWorld()->LineTraceSingleByChannel(
+			Hit,
+			TraceLocation + FVector{
+				0.0f, 0.0f, Settings->Feet.IkTraceDistanceUpward * LocomotionState.Scale
+			},
+			TraceLocation - FVector{
+				0.0f, 0.0f, Settings->Feet.IkTraceDistanceDownward * LocomotionState.Scale
+			},
+			Settings->Feet.IkTraceChannel, { __FUNCTION__, true, Character });
+	}
 
 	const auto bGroundValid{Hit.IsValidBlockingHit() && Hit.ImpactNormal.Z >= LocomotionState.WalkableFloorZ};
 

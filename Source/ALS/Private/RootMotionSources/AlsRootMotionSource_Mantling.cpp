@@ -31,11 +31,11 @@ bool FAlsRootMotionSource_Mantling::Matches(const FRootMotionSource* Other) cons
 	const auto* OtherCasted{static_cast<const FAlsRootMotionSource_Mantling*>(Other)};
 
 	return MantlingSettings == OtherCasted->MantlingSettings &&
-	       TargetPrimitive == OtherCasted->TargetPrimitive;
+		   TargetPrimitive == OtherCasted->TargetPrimitive;
 }
 
 void FAlsRootMotionSource_Mantling::PrepareRootMotion(const float SimulationDeltaTime, const float DeltaTime,
-                                                      const ACharacter& Character, const UCharacterMovementComponent& Movement)
+													  const ACharacter& Character, const UCharacterMovementComponent& Movement)
 {
 	SetTime(GetTime() + SimulationDeltaTime);
 
@@ -47,6 +47,18 @@ void FAlsRootMotionSource_Mantling::PrepareRootMotion(const float SimulationDelt
 
 	const auto* Montage{MantlingSettings->Montage.Get()};
 	const auto MontageTime{MontageStartTime + GetTime() * Montage->RateScale};
+	
+	const auto TargetAnimationLocation{UAlsUtility::ExtractLastRootTransformFromMontage(Montage).GetLocation()};
+	const auto CurrentAnimationLocation{UAlsUtility::ExtractRootTransformFromMontage(Montage, MontageTime).GetLocation()};
+
+	if (FMath::IsNearlyZero(TargetAnimationLocation.Z))
+	{
+		UE_LOG(LogRootMotion, Warning, TEXT("FAlsRootMotionSource_Mantling::PrepareRootMotion fail : %s"), *Montage->GetFName().ToString());
+		RootMotionParams.Clear();
+		return;
+	}
+
+	const auto InterpolationAmount{ CurrentAnimationLocation.Z / TargetAnimationLocation.Z };
 
 	// Synchronize the mantling animation montage's time with the mantling root motion source's time.
 	// Delta time subtraction is necessary here, otherwise there will be a one frame lag between them.
@@ -68,13 +80,8 @@ void FAlsRootMotionSource_Mantling::PrepareRootMotion(const float SimulationDelt
 	if (MontageBlendIn.GetBlendTime() > 0.0f)
 	{
 		BlendInAmount = FAlphaBlend::AlphaToBlendOption(GetTime() / MontageBlendIn.GetBlendTime(),
-		                                                MontageBlendIn.GetBlendOption(), MontageBlendIn.GetCustomCurve());
+														MontageBlendIn.GetBlendOption(), MontageBlendIn.GetCustomCurve());
 	}
-
-	const auto TargetAnimationLocation{UAlsUtility::ExtractRootTransformFromMontage(Montage, Montage->GetPlayLength()).GetLocation()};
-	const auto CurrentAnimationLocation{UAlsUtility::ExtractRootTransformFromMontage(Montage, MontageTime).GetLocation()};
-
-	const auto InterpolationAmount{CurrentAnimationLocation.Z / TargetAnimationLocation.Z};
 
 	if (!FAnimWeight::IsFullWeight(BlendInAmount * InterpolationAmount))
 	{
