@@ -139,8 +139,7 @@ bool AAlsCharacter::StartMantlingGrounded()
 
 bool AAlsCharacter::StartMantlingInAir()
 {
-	return LocomotionMode == AlsLocomotionModeTags::InAir &&
-	       (GetLocalRole() == ROLE_AutonomousProxy || (GetLocalRole() >= ROLE_Authority && GetRemoteRole() != ROLE_AutonomousProxy)) &&
+	return LocomotionMode == AlsLocomotionModeTags::InAir && IsLocallyControlled() &&
 	       StartMantling(Settings->Mantling.InAirTrace, CalculateForwardTraceDeltaAngle());
 }
 
@@ -222,17 +221,17 @@ bool AAlsCharacter::StartMantling(const FAlsMantlingTraceSettings& TraceSettings
 		return false;
 	}
 
+	const auto TargetDirection{-ForwardTraceHit.ImpactNormal.GetSafeNormal2D()};
+
 	// Trace downward from the first trace's impact point and determine if the hit location is walkable.
 
 	static const FName DownwardTraceTag{FString::Printf(TEXT("%hs (Downward Trace)"), __FUNCTION__)};
 
-	const auto TargetLocationOffset{
-		FVector2D{ForwardTraceHit.ImpactNormal.GetSafeNormal2D()} * (TraceSettings.TargetLocationOffset * CapsuleScale)
-	};
+	const FVector2D TargetLocationOffset{TargetDirection * (TraceSettings.TargetLocationOffset * CapsuleScale)};
 
 	const FVector DownwardTraceStart{
-		ForwardTraceHit.ImpactPoint.X - TargetLocationOffset.X,
-		ForwardTraceHit.ImpactPoint.Y - TargetLocationOffset.Y,
+		ForwardTraceHit.ImpactPoint.X + TargetLocationOffset.X,
+		ForwardTraceHit.ImpactPoint.Y + TargetLocationOffset.Y,
 		CapsuleBottomLocation.Z + LedgeHeightDelta + 2.5f * TraceCapsuleRadius + UCharacterMovementComponent::MIN_FLOOR_DIST
 	};
 
@@ -279,10 +278,9 @@ bool AAlsCharacter::StartMantling(const FAlsMantlingTraceSettings& TraceSettings
 		return false;
 	}
 
-	// Check if the capsule has room to stand at the downward trace's location. If so,
-	// set that location as the target transform and calculate the mantling height.
+	// Check that there is enough free space for the capsule at the target location.
 
-	static const FName FreeSpaceTraceTag{FString::Printf(TEXT("%hs (Free Space Overlap)"), __FUNCTION__)};
+	static const FName TargetLocationTraceTag{FString::Printf(TEXT("%hs (Target Location Overlap)"), __FUNCTION__)};
 
 	const FVector TargetLocation{
 		DownwardTraceHit.Location.X,
@@ -294,7 +292,7 @@ bool AAlsCharacter::StartMantling(const FAlsMantlingTraceSettings& TraceSettings
 
 	if (GetWorld()->OverlapBlockingTestByChannel(TargetCapsuleLocation, FQuat::Identity, Settings->Mantling.MantlingTraceChannel,
 	                                             FCollisionShape::MakeCapsule(CapsuleRadius, CapsuleHalfHeight),
-	                                             {FreeSpaceTraceTag, false, this}, Settings->Mantling.MantlingTraceResponses))
+	                                             {TargetLocationTraceTag, false, this}, Settings->Mantling.MantlingTraceResponses))
 	{
 #if ENABLE_DRAW_DEBUG
 		if (bDisplayDebug)
@@ -315,6 +313,45 @@ bool AAlsCharacter::StartMantling(const FAlsMantlingTraceSettings& TraceSettings
 		return false;
 	}
 
+	// Perform additional overlap at the approximate start location to
+	// ensure there are no vertical obstacles on the path, such as a ceiling.
+
+	static const FName StartLocationTraceTag{FString::Printf(TEXT("%hs (Start Location Overlap)"), __FUNCTION__)};
+
+	const FVector2D StartLocationOffset{TargetDirection * (TraceSettings.StartLocationOffset * CapsuleScale)};
+
+	const FVector StartLocation{
+		ForwardTraceHit.ImpactPoint.X - StartLocationOffset.X,
+		ForwardTraceHit.ImpactPoint.Y - StartLocationOffset.Y,
+		(DownwardTraceHit.Location.Z + DownwardTraceEnd.Z) * 0.5f
+	};
+
+	const auto StartLocationTraceCapsuleHalfHeight{(DownwardTraceHit.Location.Z - DownwardTraceEnd.Z) * 0.5f + TraceCapsuleRadius};
+
+	if (GetWorld()->OverlapBlockingTestByChannel(StartLocation, FQuat::Identity, Settings->Mantling.MantlingTraceChannel,
+	                                             FCollisionShape::MakeCapsule(TraceCapsuleRadius, StartLocationTraceCapsuleHalfHeight),
+	                                             {StartLocationTraceTag, false, this}, Settings->Mantling.MantlingTraceResponses))
+	{
+#if ENABLE_DRAW_DEBUG
+		if (bDisplayDebug)
+		{
+			UAlsUtility::DrawDebugSweepSingleCapsuleAlternative(GetWorld(), ForwardTraceStart, ForwardTraceEnd, TraceCapsuleRadius,
+			                                                    ForwardTraceCapsuleHalfHeight, true, ForwardTraceHit,
+			                                                    {0.0f, 0.25f, 1.0f},
+			                                                    {0.0f, 0.75f, 1.0f}, TraceSettings.bDrawFailedTraces ? 5.0f : 0.0f);
+
+			UAlsUtility::DrawDebugSweepSingleSphere(GetWorld(), DownwardTraceStart, DownwardTraceEnd, TraceCapsuleRadius,
+			                                        false, DownwardTraceHit, {0.25f, 0.0f, 1.0f}, {0.75f, 0.0f, 1.0f},
+			                                        TraceSettings.bDrawFailedTraces ? 7.5f : 0.0f);
+
+			DrawDebugCapsule(GetWorld(), StartLocation, StartLocationTraceCapsuleHalfHeight, TraceCapsuleRadius, FQuat::Identity,
+			                 FLinearColor{1.0f, 0.5f, 0.0f}.ToFColor(true), false, TraceSettings.bDrawFailedTraces ? 10.0f : 0.0f);
+		}
+#endif
+
+		return false;
+	}
+
 #if ENABLE_DRAW_DEBUG
 	if (bDisplayDebug)
 	{
@@ -328,7 +365,7 @@ bool AAlsCharacter::StartMantling(const FAlsMantlingTraceSettings& TraceSettings
 	}
 #endif
 
-	const auto TargetRotation{(-ForwardTraceHit.ImpactNormal.GetSafeNormal2D()).ToOrientationQuat()};
+	const auto TargetRotation{TargetDirection.ToOrientationQuat()};
 
 	FAlsMantlingParameters Parameters;
 
@@ -732,7 +769,7 @@ void AAlsCharacter::StartRagdollingImplementation()
 	RagdollingState.PullForce = 0.0f;
 	RagdollingState.bPendingFinalization = false;
 
-	if (GetLocalRole() == ROLE_AutonomousProxy || (GetLocalRole() >= ROLE_Authority && GetRemoteRole() != ROLE_AutonomousProxy))
+	if (IsLocallyControlled() || (GetLocalRole() >= ROLE_Authority && !IsValid(GetController())))
 	{
 		SetRagdollTargetLocation(GetMesh()->GetSocketLocation(UAlsConstants::PelvisBoneName()));
 	}
@@ -806,12 +843,18 @@ void AAlsCharacter::RefreshRagdollingActorTransform(const float DeltaTime)
 	const auto PelvisTransform{GetMesh()->GetSocketTransform(UAlsConstants::PelvisBoneName())};
 
 	const auto bShouldSendTargetLocation{
-		GetLocalRole() == ROLE_AutonomousProxy || (GetLocalRole() >= ROLE_Authority && GetRemoteRole() != ROLE_AutonomousProxy)
+		IsLocallyControlled() || (GetLocalRole() >= ROLE_Authority && !IsValid(GetController()))
 	};
 
 	if (bShouldSendTargetLocation)
 	{
 		SetRagdollTargetLocation(PelvisTransform.GetLocation());
+	}
+
+	if (RagdollTargetLocation.IsZero())
+	{
+		// Zero target location means that it has not yet replicated, so we can't apply any corrections yet.
+		return;
 	}
 
 	// Trace downward from the target location to offset the target location, preventing the lower
@@ -907,6 +950,8 @@ void AAlsCharacter::StopRagdollingImplementation()
 	{
 		return;
 	}
+
+	SetRagdollTargetLocation(FVector::ZeroVector);
 
 	AnimationInstance->StopRagdolling();
 
