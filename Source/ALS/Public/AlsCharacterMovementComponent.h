@@ -2,6 +2,7 @@
 
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Settings/AlsMovementSettings.h"
+#include "MultiCollisionMovementComponent.h"
 #include "AlsCharacterMovementComponent.generated.h"
 
 using FAlsPhysicsRotationDelegate = TMulticastDelegate<void(float DeltaTime)>;
@@ -71,7 +72,7 @@ public:
 };
 
 UCLASS()
-class ALS_API UAlsCharacterMovementComponent : public UCharacterMovementComponent
+class ALS_API UAlsCharacterMovementComponent : public UMultiCollisionMovementComponent
 {
 	GENERATED_BODY()
 
@@ -115,7 +116,7 @@ public:
 	FAlsPhysicsRotationDelegate OnPhysicsRotation;
 
 public:
-	UAlsCharacterMovementComponent();
+	UAlsCharacterMovementComponent(const FObjectInitializer& ObjectInitializer = FObjectInitializer::Get());
 
 #if WITH_EDITOR
 	virtual bool CanEditChange(const FProperty* Property) const override;

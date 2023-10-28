@@ -11,7 +11,7 @@ public class ALSEditor : ModuleRules
 
 		PrivateDependencyModuleNames.AddRange(new[]
 		{
-			"Core", "CoreUObject", "Engine", "AnimationModifiers", "AnimationBlueprintLibrary", "ALS"
+			"Core", "CoreUObject", "Engine", "AnimationModifiers", "AnimationBlueprintLibrary", "MultiCollisionMovement", "ALS"
 		});
 
 		if (Target.bBuildEditor)

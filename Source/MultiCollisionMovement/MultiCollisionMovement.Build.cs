@@ -1,17 +1,17 @@
 using UnrealBuildTool;
 
-public class ALSCamera : ModuleRules
+public class MultiCollisionMovement : ModuleRules
 {
-	public ALSCamera(ReadOnlyTargetRules Target) : base(Target)
+	public MultiCollisionMovement(ReadOnlyTargetRules Target) : base(Target)
 	{
 		PCHUsage = PCHUsageMode.UseExplicitOrSharedPCHs;
 		IncludeOrderVersion = EngineIncludeOrderVersion.Latest;
-
+		
 		bEnableNonInlinedGenCppWarnings = true;
 
 		PrivateDependencyModuleNames.AddRange(new[]
 		{
-			"Core", "CoreUObject", "Engine", "GameplayTags", "MultiCollisionMovement", "ALS"
+			"Core", "CoreUObject", "Engine"
 		});
 	}
 }

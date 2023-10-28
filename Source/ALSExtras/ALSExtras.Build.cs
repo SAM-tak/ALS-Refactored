@@ -11,7 +11,7 @@ public class ALSExtras : ModuleRules
 
 		PrivateDependencyModuleNames.AddRange(new[]
 		{
-			"Core", "CoreUObject", "Engine", "EnhancedInput", "GameplayTags", "AIModule", "ALS", "ALSCamera"
+			"Core", "CoreUObject", "Engine", "EnhancedInput", "GameplayTags", "AIModule", "MultiCollisionMovement", "ALS", "ALSCamera"
 		});
 	}
 }

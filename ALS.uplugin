@@ -18,6 +18,11 @@
 	"Installed": false,
 	"Modules": [
 		{
+			"Name": "MultiCollisionMovement",
+			"Type": "Runtime",
+			"LoadingPhase": "Default"
+		},
+		{
 			"Name": "ALS",
 			"Type": "Runtime",
 			"LoadingPhase": "Default"
