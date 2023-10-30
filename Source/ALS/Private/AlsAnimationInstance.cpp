@@ -99,6 +99,7 @@ void UAlsAnimationInstance::NativeUpdateAnimation(const float DeltaTime)
 	RefreshFeetOnGameThread();
 
 	RefreshRagdollingOnGameThread();
+	RefreshPhysicalAnimationOnGameThread();
 }
 
 void UAlsAnimationInstance::NativeThreadSafeUpdateAnimation(const float DeltaTime)
@@ -656,6 +657,40 @@ void UAlsAnimationInstance::RefreshSprint(const FVector3f& RelativeAccelerationA
 	GroundedState.SprintAccelerationAmount = GroundedState.SprintTime >= TimeThreshold
 		                                         ? 0.0f
 		                                         : RelativeAccelerationAmount.X;
+
+	if (GroundedState.SprintAccelerationAmount > 0.0f)
+	{
+		FHitResult Hit;
+		GetWorld()->SweepSingleByChannel(Hit, LocomotionState.Location, LocomotionState.Location + LocomotionState.Velocity * 0.4f, FQuat::Identity,
+			ECC_Visibility, FCollisionShape::MakeCapsule(LocomotionState.CapsuleRadius, LocomotionState.CapsuleRadius),
+			{ __FUNCTION__, false, Character });
+
+		const auto bSprintAccelerationBlocked{Hit.IsValidBlockingHit() && Hit.ImpactNormal.Z < LocomotionState.WalkableFloorZ};
+
+		if (bSprintAccelerationBlocked)
+		{
+			GroundedState.SprintTime = 0.0f;
+			GroundedState.SprintAccelerationAmount = TimeThreshold;
+		}
+
+#if WITH_EDITORONLY_DATA && ENABLE_DRAW_DEBUG
+		if(bDisplayDebugTraces) {
+			if(IsInGameThread()) {
+				UAlsUtility::DrawDebugSweepSingleCapsule(GetWorld(), Hit.TraceStart, Hit.TraceEnd, FRotator::ZeroRotator,
+					LocomotionState.CapsuleRadius, LocomotionState.CapsuleHalfHeight,
+					bSprintAccelerationBlocked, Hit, { 0.25f, 0.0f, 1.0f }, { 0.75f, 0.0f, 1.0f });
+			}
+			else {
+				DisplayDebugTracesQueue.Emplace([this, Hit, bSprintAccelerationBlocked] {
+					UAlsUtility::DrawDebugSweepSingleCapsule(GetWorld(), Hit.TraceStart, Hit.TraceEnd, FRotator::ZeroRotator,
+					LocomotionState.CapsuleRadius, LocomotionState.CapsuleHalfHeight,
+					bSprintAccelerationBlocked, Hit, { 0.25f, 0.0f, 1.0f }, { 0.75f, 0.0f, 1.0f });
+				}
+				);
+			}
+		}
+#endif
+	}
 }
 
 void UAlsAnimationInstance::RefreshStrideBlendAmount()
@@ -1760,6 +1795,15 @@ void UAlsAnimationInstance::StopRagdolling()
 	// Save a snapshot of the current ragdoll pose for use in animation graph to blend out of the ragdoll.
 
 	SnapshotPose(RagdollingState.FinalRagdollPose);
+}
+
+void UAlsAnimationInstance::RefreshPhysicalAnimationOnGameThread()
+{
+	check(IsInGameThread());
+
+	PhysicalAnimationCurveState.HitReaction = GetCurveValueClamped01(UAlsConstants::HitReactionPACurveName());
+	PhysicalAnimationCurveState.Idle = GetCurveValueClamped01(UAlsConstants::IdlePACurveName());
+	PhysicalAnimationCurveState.Mantle = GetCurveValueClamped01(UAlsConstants::MantlePACurveName());
 }
 
 float UAlsAnimationInstance::GetCurveValueClamped01(const FName& CurveName) const

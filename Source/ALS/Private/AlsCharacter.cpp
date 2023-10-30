@@ -5,6 +5,7 @@
 #include "TimerManager.h"
 #include "Components/CapsuleComponent.h"
 #include "Components/SkeletalMeshComponent.h"
+#include "PhysicsEngine/PhysicalAnimationComponent.h"
 #include "Curves/CurveFloat.h"
 #include "GameFramework/GameNetworkManager.h"
 #include "GameFramework/PlayerController.h"
@@ -21,6 +22,8 @@ namespace AlsCharacterConstants
 {
 	constexpr auto TeleportDistanceThresholdSquared{FMath::Square(50.0f)};
 }
+
+FName AAlsCharacter::PhysicalAnimationComponentName(TEXT("PhysicalAnimComp"));
 
 AAlsCharacter::AAlsCharacter(const FObjectInitializer& ObjectInitializer) : Super{
 	ObjectInitializer.SetDefaultSubobjectClass<UAlsCharacterMovementComponent>(CharacterMovementComponentName)
@@ -46,6 +49,8 @@ AAlsCharacter::AAlsCharacter(const FObjectInitializer& ObjectInitializer) : Supe
 	}
 
 	AlsCharacterMovement = Cast<UAlsCharacterMovementComponent>(GetCharacterMovement());
+
+	PhysicalAnimation = CreateDefaultSubobject<UPhysicalAnimationComponent>(PhysicalAnimationComponentName);
 
 	// This will prevent the editor from combining component details with actor details.
 	// Component details can still be accessed from the actor's component hierarchy.
@@ -86,6 +91,9 @@ void AAlsCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLif
 	DOREPLIFETIME_WITH_PARAMS_FAST(ThisClass, InputDirection, Parameters)
 	DOREPLIFETIME_WITH_PARAMS_FAST(ThisClass, DesiredVelocityYawAngle, Parameters)
 	DOREPLIFETIME_WITH_PARAMS_FAST(ThisClass, RagdollTargetLocation, Parameters)
+
+	DOREPLIFETIME_WITH_PARAMS_FAST(ThisClass, CapsuleUpdateSpeed, Parameters)
+	DOREPLIFETIME_WITH_PARAMS_FAST(ThisClass, bIsLied, Parameters)
 }
 
 void AAlsCharacter::PostRegisterAllComponents()
@@ -134,6 +142,8 @@ void AAlsCharacter::PostInitializeComponents()
 	AlsCharacterMovement->SetMovementSettings(MovementSettings);
 
 	AnimationInstance = Cast<UAlsAnimationInstance>(GetMesh()->GetAnimInstance());
+
+	PhysicalAnimation->SetSkeletalMeshComponent(GetMesh());
 
 	Super::PostInitializeComponents();
 }
@@ -287,8 +297,9 @@ void AAlsCharacter::Tick(const float DeltaTime)
 
 	StartMantlingInAir();
 	RefreshMantling();
-	RefreshRagdolling(DeltaTime);
 	RefreshRolling(DeltaTime);
+	RefreshRagdolling(DeltaTime);
+	RefreshPhysicalAnimation(DeltaTime);
 
 	Super::Tick(DeltaTime);
 
@@ -466,7 +477,7 @@ void AAlsCharacter::OnMovementModeChanged(const EMovementMode PreviousMovementMo
 				break;
 			}
 			// else : CustomMovementMode is 0, fall into default case
-
+			[[fallthrough]];
 		default:
 			SetLocomotionMode(FGameplayTag::EmptyTag);
 			break;

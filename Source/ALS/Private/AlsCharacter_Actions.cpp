@@ -5,6 +5,7 @@
 #include "DrawDebugHelpers.h"
 #include "Components/CapsuleComponent.h"
 #include "Components/SkeletalMeshComponent.h"
+#include "PhysicsEngine/PhysicalAnimationComponent.h"
 #include "Engine/NetConnection.h"
 #include "Net/Core/PushModel/PushModel.h"
 #include "RootMotionSources/AlsRootMotionSource_Mantling.h"
@@ -743,9 +744,19 @@ void AAlsCharacter::StartRagdollingImplementation()
 
 	GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 
-	GetMesh()->SetCollisionObjectType(ECC_PhysicsBody);
-	GetMesh()->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
-	GetMesh()->SetAllBodiesBelowSimulatePhysics(UAlsConstants::PelvisBoneName(), true, true);
+	if (PhysicalAnimationState.BlendWeight == 0)
+	{
+		PhysicalAnimationState.PrevCollisionObjectType = TEnumAsByte(GetMesh()->GetCollisionObjectType());
+		PhysicalAnimationState.PrevCollisionEnabled = TEnumAsByte(GetMesh()->GetCollisionEnabled());
+		GetMesh()->SetCollisionObjectType(ECC_PhysicsBody);
+		GetMesh()->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+	}
+	PhysicalAnimationState.PrevBlendWeight = PhysicalAnimationState.BlendWeight = 1.0f;
+	PhysicalAnimationState.PrevActiveParts = PhysicalAnimationState.ActiveParts = (uint8)EAlsPhysicalAnimationPartMask::WholeBody;
+
+	GetMesh()->SetAllBodiesBelowSimulatePhysics(UAlsConstants::PelvisBoneName(), true);
+	GetMesh()->SetAllBodiesBelowPhysicsBlendWeight(UAlsConstants::PelvisBoneName(), 1.0f);
+	PhysicalAnimation->ApplyPhysicalAnimationProfileBelow(NAME_None, NAME_None, true, true);
 
 	if (Settings->Ragdolling.bLimitInitialRagdollSpeed)
 	{
@@ -1008,11 +1019,7 @@ void AAlsCharacter::FinalizeRagdolling()
 
 	RagdollingState.bPendingFinalization = false;
 
-	// Disable physics simulation of a mesh and enable capsule collision.
-
-	GetMesh()->SetAllBodiesSimulatePhysics(false);
-	GetMesh()->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
-	GetMesh()->SetCollisionObjectType(ECC_Pawn);
+	// Re-enable capsule collision.
 
 	GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
 }
@@ -1023,3 +1030,88 @@ UAnimMontage* AAlsCharacter::SelectGetUpMontage_Implementation(const bool bRagdo
 }
 
 void AAlsCharacter::OnRagdollingEnded_Implementation() {}
+
+void AAlsCharacter::RefreshPhysicalAnimation(float DeltaTime)
+{
+	EAlsPhysicalAnimationPartMask PrevActiveParts{PhysicalAnimationState.PrevActiveParts};
+	EAlsPhysicalAnimationPartMask ActiveParts{0};
+	const auto& PhysicalAnimationCurveState = AnimationInstance->GetPhysicalAnimationCurveState();
+	if (LocomotionAction == AlsLocomotionActionTags::Ragdolling)
+	{
+		PhysicalAnimation->ApplyPhysicalAnimationProfileBelow(NAME_None, UAlsConstants::RagdollPAProfileName());
+		ActiveParts |= EAlsPhysicalAnimationPartMask::WholeBody;
+	}
+	else
+	{
+		if (PhysicalAnimationCurveState.Idle > 0.0f
+			&& RotationMode != AlsRotationModeTags::Aiming
+			&& Gait != AlsGaitTags::Sprinting
+			&& !LocomotionAction.IsValid())
+		{
+			PhysicalAnimation->ApplyPhysicalAnimationProfileBelow(NAME_None, UAlsConstants::IdlePAProfileName());
+			ActiveParts |= EAlsPhysicalAnimationPartMask::LeftArm | EAlsPhysicalAnimationPartMask::RightArm;
+		}
+		if (PhysicalAnimationCurveState.Mantle > 0.0f)
+		{
+			PhysicalAnimation->ApplyPhysicalAnimationProfileBelow(NAME_None, UAlsConstants::MantlePAProfileName());
+			ActiveParts |= EAlsPhysicalAnimationPartMask::LeftLeg | EAlsPhysicalAnimationPartMask::RightLeg;
+		}
+		if (PhysicalAnimationCurveState.HitReaction > 0.0f)
+		{
+			PhysicalAnimation->ApplyPhysicalAnimationProfileBelow(NAME_None, UAlsConstants::HitReactionPAProfileName());
+			ActiveParts |= EAlsPhysicalAnimationPartMask::Torso;
+		}
+	}
+	PhysicalAnimationState.PrevActiveParts = PhysicalAnimationState.ActiveParts;
+	PhysicalAnimationState.ActiveParts = (uint8)ActiveParts;
+	if (PrevActiveParts != ActiveParts)
+	{
+		if(PhysicalAnimationState.ActiveParts) GetMesh()->SetAllBodiesSimulatePhysics(false);
+		if (EnumHasAnyFlags(ActiveParts, EAlsPhysicalAnimationPartMask::WholeBody))
+		{
+			GetMesh()->SetAllBodiesBelowSimulatePhysics(UAlsConstants::PelvisBoneName(), true);
+		}
+		else if(EnumHasAnyFlags(ActiveParts, EAlsPhysicalAnimationPartMask::Torso))
+		{
+			GetMesh()->SetAllBodiesBelowSimulatePhysics(UAlsConstants::SpineBoneName(), true);
+		}
+		if (EnumHasAnyFlags(ActiveParts, EAlsPhysicalAnimationPartMask::LeftArm))
+		{
+			GetMesh()->SetAllBodiesBelowSimulatePhysics(UAlsConstants::LeftArmBoneName(), true);
+		}
+		if (EnumHasAnyFlags(ActiveParts, EAlsPhysicalAnimationPartMask::RightArm))
+		{
+			GetMesh()->SetAllBodiesBelowSimulatePhysics(UAlsConstants::RightArmBoneName(), true);
+		}
+		if (EnumHasAnyFlags(ActiveParts, EAlsPhysicalAnimationPartMask::LeftLeg))
+		{
+			GetMesh()->SetAllBodiesBelowSimulatePhysics(UAlsConstants::LeftLegBoneName(), true);
+		}
+		if (EnumHasAnyFlags(ActiveParts, EAlsPhysicalAnimationPartMask::RightLeg))
+		{
+			GetMesh()->SetAllBodiesBelowSimulatePhysics(UAlsConstants::RightLegBoneName(), true);
+		}
+	}
+	PhysicalAnimationState.PrevBlendWeight = PhysicalAnimationState.BlendWeight;
+	PhysicalAnimationState.BlendWeight = FMath::FInterpConstantTo(PhysicalAnimationState.BlendWeight, (uint8)ActiveParts ? 1.0f : 0.0f, DeltaTime, 15.0f);
+	if (PhysicalAnimationState.PrevBlendWeight != PhysicalAnimationState.BlendWeight)
+	{
+		if (PhysicalAnimationState.BlendWeight > 0)
+		{
+			if (PhysicalAnimationState.PrevBlendWeight == 0.0f)
+			{
+				PhysicalAnimationState.PrevCollisionObjectType = TEnumAsByte(GetMesh()->GetCollisionObjectType());
+				PhysicalAnimationState.PrevCollisionEnabled = TEnumAsByte(GetMesh()->GetCollisionEnabled());
+				GetMesh()->SetCollisionObjectType(ECC_PhysicsBody);
+				GetMesh()->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+			}
+			GetMesh()->SetAllBodiesBelowPhysicsBlendWeight(UAlsConstants::PelvisBoneName(), PhysicalAnimationState.BlendWeight);
+		}
+		else
+		{
+			GetMesh()->SetAllBodiesSimulatePhysics(false);
+			GetMesh()->SetCollisionObjectType(PhysicalAnimationState.PrevCollisionObjectType);
+			GetMesh()->SetCollisionEnabled(PhysicalAnimationState.PrevCollisionEnabled);
+		}
+	}
+}

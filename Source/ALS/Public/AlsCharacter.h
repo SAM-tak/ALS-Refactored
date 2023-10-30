@@ -7,6 +7,7 @@
 #include "State/AlsRagdollingState.h"
 #include "State/AlsRollingState.h"
 #include "State/AlsViewState.h"
+#include "State/AlsPhysicalAnimationState.h"
 #include "Utility/AlsGameplayTags.h"
 #include "AlsCharacter.generated.h"
 
@@ -17,6 +18,7 @@ class UAlsCharacterSettings;
 class UAlsMovementSettings;
 class UAlsAnimationInstance;
 class UAlsMantlingSettings;
+class UPhysicalAnimationComponent;
 
 UCLASS(AutoExpandCategories = ("Settings|Als Character", "Settings|Als Character|Desired State", "State|Als Character"))
 class ALS_API AAlsCharacter : public ACharacter
@@ -26,6 +28,9 @@ class ALS_API AAlsCharacter : public ACharacter
 protected:
 	UPROPERTY(BlueprintReadOnly, Category = "Als Character")
 	TObjectPtr<UAlsCharacterMovementComponent> AlsCharacterMovement;
+
+	UPROPERTY(BlueprintReadOnly, Category = "Als Character")
+	TObjectPtr<UPhysicalAnimationComponent> PhysicalAnimation;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings|Als Character")
 	TObjectPtr<UAlsCharacterSettings> Settings;
@@ -105,6 +110,9 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State|Als Character", Transient)
 	FAlsRollingState RollingState;
 
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State|Als Character", Transient)
+	FAlsPhysicalAnimationState PhysicalAnimationState;
+
 	FTimerHandle BrakingFrictionFactorResetTimer;
 
 public:
@@ -119,6 +127,17 @@ public:
 	virtual void PostRegisterAllComponents() override;
 
 	virtual void PostInitializeComponents() override;
+
+	/** Name of the PhysicalAnimationComponent. */
+	static FName PhysicalAnimationComponentName;
+
+	/** Returns PhysicalAnimation subobject **/
+	template <class T>
+	FORCEINLINE_DEBUGGABLE T* GetPhysicalAnimation() const
+	{
+		return CastChecked<T>(PhysicalAnimation, ECastCheckedType::NullAllowed);
+	}
+	FORCEINLINE UPhysicalAnimationComponent* GetPhysicalAnimation() const { return PhysicalAnimation; }
 
 protected:
 	virtual void BeginPlay() override;
@@ -569,6 +588,8 @@ private:
 	void RefreshRagdolling(float DeltaTime);
 
 	void RefreshRagdollingActorTransform(float DeltaTime);
+
+	void RefreshPhysicalAnimation(float DeltaTime);
 
 public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings|Als Character", Replicated, Meta = (ForceUnits = "s"))
