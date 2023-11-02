@@ -48,16 +48,6 @@ void FAlsRootMotionSource_Mantling::PrepareRootMotion(const float SimulationDelt
 	const auto* Montage{MantlingSettings->Montage.Get()};
 	const auto MontageTime{MontageStartTime + GetTime() * Montage->RateScale};
 	
-	const auto TargetAnimationLocation{UAlsUtility::ExtractLastRootTransformFromMontage(Montage).GetLocation()};
-	const auto CurrentAnimationLocation{UAlsUtility::ExtractRootTransformFromMontage(Montage, MontageTime).GetLocation()};
-
-	if (FMath::IsNearlyZero(TargetAnimationLocation.Z))
-	{
-		UE_LOG(LogRootMotion, Warning, TEXT("FAlsRootMotionSource_Mantling::PrepareRootMotion fail : %s"), *Montage->GetFName().ToString());
-		RootMotionParams.Clear();
-		return;
-	}
-
 	// Synchronize the mantling animation montage's time with the mantling root motion source's time.
 	// Delta time subtraction is necessary here, otherwise there will be a one frame lag between them.
 
