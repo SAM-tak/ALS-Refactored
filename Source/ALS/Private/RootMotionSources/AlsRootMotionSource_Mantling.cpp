@@ -81,6 +81,10 @@ void FAlsRootMotionSource_Mantling::PrepareRootMotion(const float SimulationDelt
 														MontageBlendIn.GetBlendOption(), MontageBlendIn.GetCustomCurve());
 	}
 
+	const auto CurrentAnimationLocation{UAlsUtility::ExtractRootTransformFromMontage(Montage, MontageTime).GetLocation()};
+
+	// The target animation location is expected to be non-zero, so it's safe to divide by it here.
+
 	const auto InterpolationAmount{CurrentAnimationLocation.Z / TargetAnimationLocation.Z};
 
 	if (!FAnimWeight::IsFullWeight(BlendInAmount * InterpolationAmount))
@@ -166,6 +170,8 @@ bool FAlsRootMotionSource_Mantling::NetSerialize(FArchive& Archive, UPackageMap*
 	ActorRotationOffset.NetSerialize(Archive, Map, bSuccessLocal);
 	ActorRotationOffset.Normalize();
 	bSuccess &= bSuccessLocal;
+
+	bSuccess &= SerializePackedVector<100, 30>(TargetAnimationLocation, Archive);
 
 	Archive << MontageStartTime;
 
