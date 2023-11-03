@@ -1068,6 +1068,7 @@ void AAlsCharacter::RefreshPhysicalAnimation(float DeltaTime)
 		if (OverlayMode == AlsOverlayModeTags::Injured)
 		{
 			PhysicalAnimation->ApplyPhysicalAnimationProfileBelow(NAME_None, UAlsConstants::InjuredPAProfileName());
+			ActiveParts |= EAlsPhysicalAnimationPartMask::BelowTorso;
 		}
 		else
 		{
@@ -1089,6 +1090,14 @@ void AAlsCharacter::RefreshPhysicalAnimation(float DeltaTime)
 		if (PhysicalAnimationCurveState.FreeRightLeg > 0.0f)
 		{
 			ActiveParts |= EAlsPhysicalAnimationPartMask::RightLeg | EAlsPhysicalAnimationPartMask::RightFoot;
+		}
+		if (PhysicalAnimationCurveState.LockLeftHand > 0.0f)
+		{
+			ActiveParts &= ~(EAlsPhysicalAnimationPartMask::LeftArm | EAlsPhysicalAnimationPartMask::LeftHand);
+		}
+		if (PhysicalAnimationCurveState.LockRightHand > 0.0f)
+		{
+			ActiveParts &= ~(EAlsPhysicalAnimationPartMask::RightArm | EAlsPhysicalAnimationPartMask::RightHand);
 		}
 	}
 
@@ -1124,7 +1133,7 @@ void AAlsCharacter::RefreshPhysicalAnimation(float DeltaTime)
 		{
 			bool Active = EnumHasAnyFlags(ActiveParts, EAlsPhysicalAnimationPartMask::Torso);
 			GetMesh()->SetAllBodiesBelowSimulatePhysics(UAlsConstants::SpineBoneName(), Active);
-			ActiveParts = (PrevActiveParts & ~EAlsPhysicalAnimationPartMask::BelowTorso)
+			ActiveParts = (ActiveParts & ~EAlsPhysicalAnimationPartMask::BelowTorso)
 				| (Active ? EAlsPhysicalAnimationPartMask::BelowTorso : EAlsPhysicalAnimationPartMask::None);
 			skip = true;
 		}
@@ -1132,7 +1141,7 @@ void AAlsCharacter::RefreshPhysicalAnimation(float DeltaTime)
 		{
 			bool Active = EnumHasAnyFlags(ActiveParts, EAlsPhysicalAnimationPartMask::LeftLeg);
 			GetMesh()->SetAllBodiesBelowSimulatePhysics(UAlsConstants::LegLeftBoneName(), Active);
-			ActiveParts = (PrevActiveParts & ~EAlsPhysicalAnimationPartMask::BelowLeftLeg)
+			ActiveParts = (ActiveParts & ~EAlsPhysicalAnimationPartMask::BelowLeftLeg)
 				| (Active ? EAlsPhysicalAnimationPartMask::BelowLeftLeg : EAlsPhysicalAnimationPartMask::None);
 			skip = true;
 		}
@@ -1140,7 +1149,7 @@ void AAlsCharacter::RefreshPhysicalAnimation(float DeltaTime)
 		{
 			bool Active = EnumHasAnyFlags(ActiveParts, EAlsPhysicalAnimationPartMask::RightLeg);
 			GetMesh()->SetAllBodiesBelowSimulatePhysics(UAlsConstants::LegRightBoneName(), Active);
-			ActiveParts = (PrevActiveParts & ~EAlsPhysicalAnimationPartMask::BelowRightLeg)
+			ActiveParts = (ActiveParts & ~EAlsPhysicalAnimationPartMask::BelowRightLeg)
 				| (Active ? EAlsPhysicalAnimationPartMask::BelowRightLeg : EAlsPhysicalAnimationPartMask::None);
 			skip = true;
 		}
@@ -1165,7 +1174,7 @@ void AAlsCharacter::RefreshPhysicalAnimation(float DeltaTime)
 		{
 			bool Active = EnumHasAnyFlags(ActiveParts, EAlsPhysicalAnimationPartMask::LeftArm);
 			GetMesh()->SetAllBodiesBelowSimulatePhysics(UAlsConstants::ArmLeftBoneName(), Active);
-			ActiveParts = (PrevActiveParts & ~EAlsPhysicalAnimationPartMask::BelowLeftArm)
+			ActiveParts = (ActiveParts & ~EAlsPhysicalAnimationPartMask::BelowLeftArm)
 				| (Active ? EAlsPhysicalAnimationPartMask::BelowLeftArm : EAlsPhysicalAnimationPartMask::None);
 			skip = true;
 		}
@@ -1173,7 +1182,7 @@ void AAlsCharacter::RefreshPhysicalAnimation(float DeltaTime)
 		{
 			bool Active = EnumHasAnyFlags(ActiveParts, EAlsPhysicalAnimationPartMask::RightArm);
 			GetMesh()->SetAllBodiesBelowSimulatePhysics(UAlsConstants::ArmRightBoneName(), Active);
-			ActiveParts = (PrevActiveParts & ~EAlsPhysicalAnimationPartMask::BelowRightArm)
+			ActiveParts = (ActiveParts & ~EAlsPhysicalAnimationPartMask::BelowRightArm)
 				| (Active ? EAlsPhysicalAnimationPartMask::BelowRightArm : EAlsPhysicalAnimationPartMask::None);
 			skip = true;
 		}
