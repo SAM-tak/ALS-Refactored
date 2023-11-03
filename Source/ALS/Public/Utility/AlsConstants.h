@@ -45,16 +45,22 @@ public:
 	static const FName& SpineBoneName();
 
 	UFUNCTION(BlueprintPure, Category = "ALS|Constants|Bones", Meta = (ReturnDisplayName = "Bone Name"))
-	static const FName& LeftArmBoneName();
+	static const FName& ArmLeftBoneName();
 
 	UFUNCTION(BlueprintPure, Category = "ALS|Constants|Bones", Meta = (ReturnDisplayName = "Bone Name"))
-	static const FName& RightArmBoneName();
+	static const FName& ArmRightBoneName();
 
 	UFUNCTION(BlueprintPure, Category = "ALS|Constants|Bones", Meta = (ReturnDisplayName = "Bone Name"))
-	static const FName& LeftLegBoneName();
+	static const FName& LegLeftBoneName();
 
 	UFUNCTION(BlueprintPure, Category = "ALS|Constants|Bones", Meta = (ReturnDisplayName = "Bone Name"))
-	static const FName& RightLegBoneName();
+	static const FName& LegRightBoneName();
+
+	UFUNCTION(BlueprintPure, Category = "ALS|Constants|Bones", Meta = (ReturnDisplayName = "Bone Name"))
+	static const FName& HandLeftBoneName();
+
+	UFUNCTION(BlueprintPure, Category = "ALS|Constants|Bones", Meta = (ReturnDisplayName = "Bone Name"))
+	static const FName& HandRightBoneName();
 
 	// Animation Slots
 
@@ -207,13 +213,16 @@ public:
 	// Physical Animation Curves
 
 	UFUNCTION(BlueprintPure, Category = "ALS|Constants|Physical Animation", Meta = (ReturnDisplayName = "Curve Name"))
-	static const FName& HitReactionPACurveName();
+	static const FName& PALockLeftHandCurveName();
 
 	UFUNCTION(BlueprintPure, Category = "ALS|Constants|Physical Animation", Meta = (ReturnDisplayName = "Curve Name"))
-	static const FName& IdlePACurveName();
+	static const FName& PALockRightHandCurveName();
 
 	UFUNCTION(BlueprintPure, Category = "ALS|Constants|Physical Animation", Meta = (ReturnDisplayName = "Curve Name"))
-	static const FName& MantlePACurveName();
+	static const FName& PAFreeLeftLegCurveName();
+
+	UFUNCTION(BlueprintPure, Category = "ALS|Constants|Physical Animation", Meta = (ReturnDisplayName = "Curve Name"))
+	static const FName& PAFreeRightLegCurveName();
 
 	// Physical Animation Profile Names
 
@@ -221,16 +230,10 @@ public:
 	static const FName& RagdollPAProfileName();
 
 	UFUNCTION(BlueprintPure, Category = "ALS|Constants|Physical Animation", Meta = (ReturnDisplayName = "Profile Name"))
-	static const FName& HitReactionPAProfileName();
+	static const FName& FreeLimbPAProfileName();
 
 	UFUNCTION(BlueprintPure, Category = "ALS|Constants|Physical Animation", Meta = (ReturnDisplayName = "Profile Name"))
-	static const FName& IdlePAProfileName();
-
-	UFUNCTION(BlueprintPure, Category = "ALS|Constants|Physical Animation", Meta = (ReturnDisplayName = "Profile Name"))
-	static const FName& MantlePAProfileName();
-
-	UFUNCTION(BlueprintPure, Category = "ALS|Constants|Physical Animation", Meta = (ReturnDisplayName = "Profile Name"))
-	static const FName& SprintAccelerationPAProfileName();
+	static const FName& InjuredPAProfileName();
 
 	// Debug
 
@@ -316,27 +319,39 @@ inline const FName& UAlsConstants::SpineBoneName()
 	return Name;
 }
 
-inline const FName& UAlsConstants::LeftArmBoneName()
+inline const FName& UAlsConstants::ArmLeftBoneName()
 {
 	static const FName Name{ TEXTVIEW("upperarm_l") };
 	return Name;
 }
 
-inline const FName& UAlsConstants::RightArmBoneName()
+inline const FName& UAlsConstants::ArmRightBoneName()
 {
 	static const FName Name{ TEXTVIEW("upperarm_r") };
 	return Name;
 }
 
-inline const FName& UAlsConstants::LeftLegBoneName()
+inline const FName& UAlsConstants::LegLeftBoneName()
 {
 	static const FName Name{ TEXTVIEW("thigh_l") };
 	return Name;
 }
 
-inline const FName& UAlsConstants::RightLegBoneName()
+inline const FName& UAlsConstants::LegRightBoneName()
 {
 	static const FName Name{ TEXTVIEW("thigh_r") };
+	return Name;
+}
+
+inline const FName& UAlsConstants::HandLeftBoneName()
+{
+	static const FName Name{ TEXTVIEW("hand_l") };
+	return Name;
+}
+
+inline const FName& UAlsConstants::HandRightBoneName()
+{
+	static const FName Name{ TEXTVIEW("hand_r") };
 	return Name;
 }
 
@@ -616,21 +631,27 @@ inline const FName& UAlsConstants::FootstepSoundBlockCurveName()
 	return Name;
 }
 
-inline const FName& UAlsConstants::HitReactionPACurveName()
+inline const FName& UAlsConstants::PALockLeftHandCurveName()
 {
-	static const FName Name{ TEXTVIEW("PAHitReaction") };
+	static const FName Name{TEXTVIEW("PALockLeftHand")};
 	return Name;
 }
 
-inline const FName& UAlsConstants::IdlePACurveName()
+inline const FName& UAlsConstants::PALockRightHandCurveName()
 {
-	static const FName Name{ TEXTVIEW("PAIdle") };
+	static const FName Name{TEXTVIEW("PALockRightHand")};
 	return Name;
 }
 
-inline const FName& UAlsConstants::MantlePACurveName()
+inline const FName& UAlsConstants::PAFreeLeftLegCurveName()
 {
-	static const FName Name{ TEXTVIEW("PAMantle") };
+	static const FName Name{TEXTVIEW("PAFreeLeftLeg")};
+	return Name;
+}
+
+inline const FName& UAlsConstants::PAFreeRightLegCurveName()
+{
+	static const FName Name{TEXTVIEW("PAFreeRightLeg")};
 	return Name;
 }
 
@@ -640,27 +661,15 @@ inline const FName& UAlsConstants::RagdollPAProfileName()
 	return Name;
 }
 
-inline const FName& UAlsConstants::HitReactionPAProfileName()
+inline const FName& UAlsConstants::FreeLimbPAProfileName()
 {
-	static const FName Name{TEXTVIEW("HitReaction")};
+	static const FName Name{TEXTVIEW("FreeLimb")};
 	return Name;
 }
 
-inline const FName& UAlsConstants::IdlePAProfileName()
+inline const FName& UAlsConstants::InjuredPAProfileName()
 {
-	static const FName Name{TEXTVIEW("Idle")};
-	return Name;
-}
-
-inline const FName& UAlsConstants::MantlePAProfileName()
-{
-	static const FName Name{TEXTVIEW("Mantle")};
-	return Name;
-}
-
-inline const FName& UAlsConstants::SprintAccelerationPAProfileName()
-{
-	static const FName Name{TEXTVIEW("SprintAcc")};
+	static const FName Name{TEXTVIEW("Injured")};
 	return Name;
 }
 

@@ -1801,9 +1801,10 @@ void UAlsAnimationInstance::RefreshPhysicalAnimationOnGameThread()
 {
 	check(IsInGameThread());
 
-	PhysicalAnimationCurveState.HitReaction = GetCurveValueClamped01(UAlsConstants::HitReactionPACurveName());
-	PhysicalAnimationCurveState.Idle = GetCurveValueClamped01(UAlsConstants::IdlePACurveName());
-	PhysicalAnimationCurveState.Mantle = GetCurveValueClamped01(UAlsConstants::MantlePACurveName());
+	PhysicalAnimationCurveState.LockLeftHand = GetCurveValueClamped01(UAlsConstants::PALockLeftHandCurveName());
+	PhysicalAnimationCurveState.LockRightHand = GetCurveValueClamped01(UAlsConstants::PALockRightHandCurveName());
+	PhysicalAnimationCurveState.FreeLeftLeg = GetCurveValueClamped01(UAlsConstants::PAFreeLeftLegCurveName());
+	PhysicalAnimationCurveState.FreeRightLeg = GetCurveValueClamped01(UAlsConstants::PAFreeRightLegCurveName());
 }
 
 float UAlsAnimationInstance::GetCurveValueClamped01(const FName& CurveName) const
