@@ -776,7 +776,7 @@ void AAlsCharacter::StartRagdollingImplementation()
 
 	RagdollingState.PullForce = 0.0f;
 	RagdollingState.bPendingFinalization = false;
-	RagdollingState.TimeAfterGrounded = 0.0f;
+	RagdollingState.TimeAfterGrounded = RagdollingState.TimeAfterGroundedAndStopped = 0.0f;
 	RagdollingState.bFreezing = false;
 
 	AnimationInstance->ResetFreezeRagdolling();
