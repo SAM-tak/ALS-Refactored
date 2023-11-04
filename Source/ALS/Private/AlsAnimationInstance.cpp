@@ -1797,6 +1797,23 @@ void UAlsAnimationInstance::StopRagdolling()
 	SnapshotPose(RagdollingState.FinalRagdollPose);
 }
 
+void UAlsAnimationInstance::ResetFreezeRagdolling()
+{
+	check(IsInGameThread())
+
+	RagdollingState.bFreezed = false;
+}
+
+void UAlsAnimationInstance::FreezeRagdolling()
+{
+	check(IsInGameThread())
+
+	// Save a snapshot of the current ragdoll pose for use in animation graph to blend out of the ragdoll.
+
+	SnapshotPose(RagdollingState.FinalRagdollPose);
+	RagdollingState.bFreezed = true;
+}
+
 void UAlsAnimationInstance::RefreshPhysicalAnimationOnGameThread()
 {
 	check(IsInGameThread());

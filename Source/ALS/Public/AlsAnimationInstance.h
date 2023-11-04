@@ -321,6 +321,12 @@ private:
 public:
 	void StopRagdolling();
 
+	void ResetFreezeRagdolling();
+
+	void FreezeRagdolling();
+	
+	bool IsFreezingRagdoll() const;
+
 	// PhysicalAnimation
 
 private:
@@ -378,6 +384,11 @@ inline void UAlsAnimationInstance::Jump()
 inline void UAlsAnimationInstance::ResetJumped()
 {
 	InAirState.bJumped = false;
+}
+
+inline bool UAlsAnimationInstance::IsFreezingRagdoll() const
+{
+	return RagdollingState.bFreezed;
 }
 
 inline const FAlsPhysicalAnimationCurveState& UAlsAnimationInstance::GetPhysicalAnimationCurveState() const

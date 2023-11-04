@@ -27,4 +27,22 @@ struct ALS_API FAlsRagdollingState
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS")
 	bool bPendingFinalization{false};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS", Meta = (ForceUnits = "s"))
+	float TimeAfterGrounded{0};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS", Meta = (ForceUnits = "s"))
+	float TimeAfterGroundedAndStopped{ 0 };
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS")
+	bool bFreezing{false};
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "ALS")
+	float RootBoneSpeed{0.0f};
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "ALS")
+	float MaxBoneSpeed{0.0f};
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "ALS")
+	float MaxBoneAngularSpeed{0.0f};
 };

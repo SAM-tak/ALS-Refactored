@@ -227,10 +227,10 @@ public:
 	// Physical Animation Profile Names
 
 	UFUNCTION(BlueprintPure, Category = "ALS|Constants|Physical Animation", Meta = (ReturnDisplayName = "Profile Name"))
-	static const FName& RagdollPAProfileName();
+	static const FName& DefaultPAProfileName();
 
 	UFUNCTION(BlueprintPure, Category = "ALS|Constants|Physical Animation", Meta = (ReturnDisplayName = "Profile Name"))
-	static const FName& FreeLimbPAProfileName();
+	static const FName& RagdollPAProfileName();
 
 	UFUNCTION(BlueprintPure, Category = "ALS|Constants|Physical Animation", Meta = (ReturnDisplayName = "Profile Name"))
 	static const FName& InjuredPAProfileName();
@@ -655,15 +655,15 @@ inline const FName& UAlsConstants::PAFreeRightLegCurveName()
 	return Name;
 }
 
-inline const FName& UAlsConstants::RagdollPAProfileName()
+inline const FName& UAlsConstants::DefaultPAProfileName()
 {
-	static const FName Name{TEXTVIEW("Ragdoll")};
+	static const FName Name{TEXTVIEW("Default")};
 	return Name;
 }
 
-inline const FName& UAlsConstants::FreeLimbPAProfileName()
+inline const FName& UAlsConstants::RagdollPAProfileName()
 {
-	static const FName Name{TEXTVIEW("FreeLimb")};
+	static const FName Name{TEXTVIEW("Ragdoll")};
 	return Name;
 }
 

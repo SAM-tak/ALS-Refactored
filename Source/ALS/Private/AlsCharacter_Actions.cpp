@@ -776,6 +776,10 @@ void AAlsCharacter::StartRagdollingImplementation()
 
 	RagdollingState.PullForce = 0.0f;
 	RagdollingState.bPendingFinalization = false;
+	RagdollingState.TimeAfterGrounded = 0.0f;
+	RagdollingState.bFreezing = false;
+
+	AnimationInstance->ResetFreezeRagdolling();
 
 	if (IsLocallyControlled() || (GetLocalRole() >= ROLE_Authority && !IsValid(GetController())))
 	{
@@ -813,6 +817,11 @@ void AAlsCharacter::RefreshRagdolling(const float DeltaTime)
 	{
 		return;
 	}
+	
+	if (RagdollingState.bFreezing)
+	{
+		return;
+	}
 
 	if (RagdollingState.SpeedLimitFrameTimeRemaining > 0)
 	{
@@ -839,11 +848,75 @@ void AAlsCharacter::RefreshRagdolling(const float DeltaTime)
 	static constexpr auto ReferenceSpeed{1000.0f};
 	static constexpr auto Stiffness{25000.0f};
 
-	GetMesh()->SetAllMotorsAngularDriveParams(UAlsMath::Clamp01(UE_REAL_TO_FLOAT(
-		                                          RagdollingState.RootBoneVelocity.Size() / ReferenceSpeed)) * Stiffness,
-	                                          0.0f, 0.0f, false);
+	RagdollingState.RootBoneSpeed = RagdollingState.RootBoneVelocity.Size();
+
+	GetMesh()->SetAllMotorsAngularDriveParams(UAlsMath::Clamp01(
+		UE_REAL_TO_FLOAT(RagdollingState.RootBoneSpeed / ReferenceSpeed)) * Stiffness,
+		0.0f, 0.0f, false);
 
 	RefreshRagdollingActorTransform(DeltaTime);
+
+	if (Settings->Ragdolling.bAllowFreeze)
+	{
+		if (AnimationInstance->IsFreezingRagdoll())
+		{
+			AnimationInstance->ResetFreezeRagdolling();
+			PhysicalAnimation->Activate();
+			GetMesh()->SetAllBodiesBelowSimulatePhysics(UAlsConstants::PelvisBoneName(), true);
+			GetMesh()->SetCollisionObjectType(ECC_PhysicsBody);
+			GetMesh()->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+		}
+
+		if (RagdollingState.bGrounded)
+		{
+			RagdollingState.TimeAfterGrounded += DeltaTime;
+
+			if (RagdollingState.TimeAfterGrounded > Settings->Ragdolling.TimeAfterGroundedForForceFreezing)
+			{
+				RagdollingState.bFreezing = true;
+			}
+			else if (RagdollingState.RootBoneSpeed < Settings->Ragdolling.RootBoneSpeedConsideredAsStopped)
+			{
+				RagdollingState.TimeAfterGroundedAndStopped += DeltaTime;
+
+				if (RagdollingState.TimeAfterGroundedAndStopped > Settings->Ragdolling.TimeAfterGroundedAndStoppedForForceFreezing)
+				{
+					RagdollingState.bFreezing = true;
+				}
+				else
+				{
+					RagdollingState.MaxBoneSpeed = 0.0f;
+					RagdollingState.MaxBoneAngularSpeed = 0.0f;
+					GetMesh()->ForEachBodyBelow(UAlsConstants::PelvisBoneName(), true, false, [&](FBodyInstance* Body)
+					{
+						float v = Body->GetUnrealWorldVelocity().Size();
+						if(v > RagdollingState.MaxBoneSpeed) RagdollingState.MaxBoneSpeed = v;
+						v = FMath::RadiansToDegrees(Body->GetUnrealWorldAngularVelocityInRadians().Size());
+						if(v > RagdollingState.MaxBoneAngularSpeed) RagdollingState.MaxBoneAngularSpeed = v;
+					});
+					RagdollingState.bFreezing = RagdollingState.MaxBoneSpeed < Settings->Ragdolling.SpeedThresholdToFreeze
+						&& RagdollingState.MaxBoneAngularSpeed < Settings->Ragdolling.AngularSpeedThresholdToFreeze;
+				}
+			}
+			else
+			{
+				RagdollingState.TimeAfterGroundedAndStopped = 0.0f;
+			}
+
+			if (RagdollingState.bFreezing)
+			{
+				AnimationInstance->FreezeRagdolling();
+				PhysicalAnimation->Deactivate();
+				GetMesh()->SetAllBodiesSimulatePhysics(false);
+				GetMesh()->SetCollisionObjectType(PhysicalAnimationState.PrevCollisionObjectType);
+				GetMesh()->SetCollisionEnabled(PhysicalAnimationState.PrevCollisionEnabled);
+			}
+		}
+		else
+		{
+			RagdollingState.TimeAfterGrounded = RagdollingState.TimeAfterGroundedAndStopped = 0.0f;
+		}
+	}
 }
 
 void AAlsCharacter::RefreshRagdollingActorTransform(const float DeltaTime)
@@ -1038,41 +1111,51 @@ void AAlsCharacter::RefreshPhysicalAnimation(float DeltaTime)
 
 	if (!PhysicalAnimationState.bInitialized)
 	{
-		PhysicalAnimationState.bIsRagdolling = false;
-		PhysicalAnimationState.BlendWeight = 0.0f;
 		PhysicalAnimation->ApplyPhysicalAnimationProfileBelow(NAME_None, NAME_None, true, true);
+		PhysicalAnimationState.Current = EAlsPhysicalAnimationProfile::None;
+		PhysicalAnimationState.BlendWeight = 0.0f;
 		PhysicalAnimationState.ActiveParts = 0;
 	}
 	else if (LocomotionAction == AlsLocomotionActionTags::Ragdolling)
 	{
-		if (!PhysicalAnimationState.bIsRagdolling)
+		if (PhysicalAnimationState.Current != EAlsPhysicalAnimationProfile::Ragdoll)
 		{
-			PhysicalAnimationState.bIsRagdolling = true;
+			PhysicalAnimationState.Current = EAlsPhysicalAnimationProfile::Ragdoll;
+			PhysicalAnimation->ApplyPhysicalAnimationProfileBelow(NAME_None, UAlsConstants::RagdollPAProfileName());
 		}
-		PhysicalAnimation->ApplyPhysicalAnimationProfileBelow(NAME_None, UAlsConstants::RagdollPAProfileName());
 		ActiveParts = EAlsPhysicalAnimationPartMask::WholeBody;
 	}
 	else
 	{
-		if (PhysicalAnimationState.bIsRagdolling)
+		if (PhysicalAnimationState.Current == EAlsPhysicalAnimationProfile::Ragdoll)
 		{
-			PhysicalAnimationState.bIsRagdolling = false;
+			PhysicalAnimationState.Current = EAlsPhysicalAnimationProfile::None;
 			GetMesh()->SetAllBodiesSimulatePhysics(false);
 			GetMesh()->SetCollisionObjectType(PhysicalAnimationState.PrevCollisionObjectType);
 			GetMesh()->SetCollisionEnabled(PhysicalAnimationState.PrevCollisionEnabled);
-			PhysicalAnimationState.BlendWeight = 0.0f;
 			PhysicalAnimation->ApplyPhysicalAnimationProfileBelow(NAME_None, NAME_None, true, true);
+			PhysicalAnimation->Activate();
+			PhysicalAnimationState.BlendWeight = 0.0f;
 			PhysicalAnimationState.ActiveParts = 0;
-			return;
+
+			return; // delay to next frame
 		}
 		if (OverlayMode == AlsOverlayModeTags::Injured)
 		{
-			PhysicalAnimation->ApplyPhysicalAnimationProfileBelow(NAME_None, UAlsConstants::InjuredPAProfileName());
+			if (PhysicalAnimationState.Current != EAlsPhysicalAnimationProfile::Injured)
+			{
+				PhysicalAnimationState.Current = EAlsPhysicalAnimationProfile::Injured;
+				PhysicalAnimation->ApplyPhysicalAnimationProfileBelow(NAME_None, UAlsConstants::InjuredPAProfileName());
+			}
 			ActiveParts |= EAlsPhysicalAnimationPartMask::BelowTorso;
 		}
 		else
 		{
-			PhysicalAnimation->ApplyPhysicalAnimationProfileBelow(NAME_None, UAlsConstants::FreeLimbPAProfileName());
+			if (PhysicalAnimationState.Current != EAlsPhysicalAnimationProfile::Default)
+			{
+				PhysicalAnimationState.Current = EAlsPhysicalAnimationProfile::Default;
+				PhysicalAnimation->ApplyPhysicalAnimationProfileBelow(NAME_None, UAlsConstants::DefaultPAProfileName());
+			}
 		}
 		if (!LocomotionAction.IsValid()
 			&& RotationMode != AlsRotationModeTags::Aiming
@@ -1209,7 +1292,7 @@ void AAlsCharacter::RefreshPhysicalAnimation(float DeltaTime)
 	{
 		auto PrevBlendWeight{PhysicalAnimationState.BlendWeight};
 		PhysicalAnimationState.BlendWeight = FMath::FInterpConstantTo(PhysicalAnimationState.BlendWeight,
-			(uint16)ActiveParts || PhysicalAnimationState.bIsRagdolling ? 1.0f : 0.0f, DeltaTime, 15.0f);
+			(uint16)ActiveParts || PhysicalAnimationState.Current == EAlsPhysicalAnimationProfile::Ragdoll ? 1.0f : 0.0f, DeltaTime, 15.0f);
 		if (PrevBlendWeight != PhysicalAnimationState.BlendWeight)
 		{
 			if (PhysicalAnimationState.BlendWeight > 0)

@@ -26,6 +26,15 @@ enum class EAlsPhysicalAnimationPartMask : uint16
 };
 ENUM_CLASS_FLAGS(EAlsPhysicalAnimationPartMask)
 
+UENUM(BlueprintType)
+enum class EAlsPhysicalAnimationProfile : uint8
+{
+	None,
+	Default,
+	Ragdoll,
+	Injured,
+};
+
 USTRUCT(BlueprintType)
 struct ALS_API FAlsPhysicalAnimationState
 {
@@ -38,14 +47,16 @@ struct ALS_API FAlsPhysicalAnimationState
 	TEnumAsByte<ECollisionEnabled::Type> PrevCollisionEnabled{ECollisionEnabled::QueryOnly};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS")
+	EAlsPhysicalAnimationProfile Current{0};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS")
+	bool bInitialized{false};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS")
 	float BlendWeight{0.0f};
 
 	//static const int PartNum = 11;
 	//float PartBlendWeight[PartNum]{0.0f,};
 
 	uint16 ActiveParts{0};
-
-	bool bIsRagdolling{false};
-
-	bool bInitialized{false};
 };

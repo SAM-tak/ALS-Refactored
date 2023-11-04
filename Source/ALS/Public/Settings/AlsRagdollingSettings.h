@@ -26,6 +26,24 @@ public:
 	bool bLimitInitialRagdollSpeed{false};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS")
+	bool bAllowFreeze{false};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS", Meta = (ClampMin = 0, EditCondition = "bAllowFreeze", ForceUnits = "s"))
+	float TimeAfterGroundedForForceFreezing{5.0f};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS", Meta = (ClampMin = 0, EditCondition = "bAllowFreeze", ForceUnits = "s"))
+	float TimeAfterGroundedAndStoppedForForceFreezing{1.0f};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS", Meta = (ClampMin = 0, EditCondition = "bAllowFreeze", ForceUnits = "cm/s"))
+	float RootBoneSpeedConsideredAsStopped{20.0f};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS", Meta = (ClampMin = 0, EditCondition = "bAllowFreeze", ForceUnits = "cm/s"))
+	float SpeedThresholdToFreeze{25.0f};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS", Meta = (ClampMin = 0, EditCondition = "bAllowFreeze", ForceUnits = "deg"))
+	float AngularSpeedThresholdToFreeze{60.0f};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS")
 	TEnumAsByte<ECollisionChannel> GroundTraceChannel{ECC_Visibility};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS")
