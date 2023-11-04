@@ -3,20 +3,37 @@
 #include "Utility/AlsMath.h"
 #include "AlsPhysicalAnimationState.generated.h"
 
+UENUM(BlueprintType)
+enum EAlsPhysicalAnimationPart
+{
+	Pelvis,		// 0
+	Torso,		// 1
+	LeftLeg,	// 2
+	RightLeg,	// 3
+	Head,		// 4
+	LeftArm,	// 5
+	RightArm,	// 6
+	LeftFoot,	// 7
+	RightFoot,	// 8
+	LeftHand,	// 9
+	RightHand,	// 10
+	MAX_NUM		// 11
+};
+
 enum class EAlsPhysicalAnimationPartMask : uint16
 {
 	None,
-	Pelvis    = 1 << 0,
-	Torso     = 1 << 1,
-	Head      = 1 << 2,
-	LeftArm   = 1 << 3,
-	RightArm  = 1 << 4,
-	LeftLeg   = 1 << 5,
-	RightLeg  = 1 << 6,
-	LeftHand  = 1 << 7,
-	RightHand = 1 << 8,
-	LeftFoot  = 1 << 9,
-	RightFoot = 1 << 10,
+	Pelvis    = 1 << EAlsPhysicalAnimationPart::Pelvis,
+	Torso     = 1 << EAlsPhysicalAnimationPart::Torso,
+	LeftLeg   = 1 << EAlsPhysicalAnimationPart::LeftLeg,
+	RightLeg  = 1 << EAlsPhysicalAnimationPart::RightLeg,
+	Head      = 1 << EAlsPhysicalAnimationPart::Head,
+	LeftArm   = 1 << EAlsPhysicalAnimationPart::LeftArm,
+	RightArm  = 1 << EAlsPhysicalAnimationPart::RightArm,
+	LeftFoot  = 1 << EAlsPhysicalAnimationPart::LeftFoot,
+	RightFoot = 1 << EAlsPhysicalAnimationPart::RightFoot,
+	LeftHand  = 1 << EAlsPhysicalAnimationPart::LeftHand,
+	RightHand = 1 << EAlsPhysicalAnimationPart::RightHand,
 	WholeBody = Pelvis | Torso | Head | LeftArm | RightArm | LeftLeg | RightLeg | LeftHand | RightHand | LeftFoot | RightFoot,
 	BelowTorso = Torso | Head | LeftArm | RightArm | LeftHand | RightHand,
 	BelowLeftArm = LeftArm | LeftHand,
@@ -49,14 +66,13 @@ struct ALS_API FAlsPhysicalAnimationState
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS")
 	EAlsPhysicalAnimationProfile Current{0};
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS")
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "ALS")
 	bool bInitialized{false};
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS")
-	float BlendWeight{0.0f};
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "ALS")
+	bool bActive{false};
 
-	//static const int PartNum = 11;
-	//float PartBlendWeight[PartNum]{0.0f,};
+	float PartBlendWeight[EAlsPhysicalAnimationPart::MAX_NUM]{};
 
 	uint16 ActiveParts{0};
 };

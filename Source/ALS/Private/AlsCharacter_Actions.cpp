@@ -871,7 +871,8 @@ void AAlsCharacter::RefreshRagdolling(const float DeltaTime)
 		{
 			RagdollingState.TimeAfterGrounded += DeltaTime;
 
-			if (RagdollingState.TimeAfterGrounded > Settings->Ragdolling.TimeAfterGroundedForForceFreezing)
+			if (Settings->Ragdolling.TimeAfterGroundedForForceFreezing > 0.0f
+				&& RagdollingState.TimeAfterGrounded > Settings->Ragdolling.TimeAfterGroundedForForceFreezing)
 			{
 				RagdollingState.bFreezing = true;
 			}
@@ -879,7 +880,8 @@ void AAlsCharacter::RefreshRagdolling(const float DeltaTime)
 			{
 				RagdollingState.TimeAfterGroundedAndStopped += DeltaTime;
 
-				if (RagdollingState.TimeAfterGroundedAndStopped > Settings->Ragdolling.TimeAfterGroundedAndStoppedForForceFreezing)
+				if (Settings->Ragdolling.TimeAfterGroundedAndStoppedForForceFreezing > 0.0f
+					&& RagdollingState.TimeAfterGroundedAndStopped > Settings->Ragdolling.TimeAfterGroundedAndStoppedForForceFreezing)
 				{
 					RagdollingState.bFreezing = true;
 				}
@@ -907,9 +909,9 @@ void AAlsCharacter::RefreshRagdolling(const float DeltaTime)
 			{
 				AnimationInstance->FreezeRagdolling();
 				PhysicalAnimation->Deactivate();
-				GetMesh()->SetAllBodiesSimulatePhysics(false);
 				GetMesh()->SetCollisionObjectType(PhysicalAnimationState.PrevCollisionObjectType);
 				GetMesh()->SetCollisionEnabled(PhysicalAnimationState.PrevCollisionEnabled);
+				GetMesh()->SetAllBodiesSimulatePhysics(false);
 			}
 		}
 		else
@@ -1103,7 +1105,6 @@ void AAlsCharacter::OnRagdollingEnded_Implementation() {}
 
 void AAlsCharacter::RefreshPhysicalAnimation(float DeltaTime)
 {
-	EAlsPhysicalAnimationPartMask PrevActiveParts{PhysicalAnimationState.ActiveParts};
 	EAlsPhysicalAnimationPartMask ActiveParts{EAlsPhysicalAnimationPartMask::None};
 	const auto& PhysicalAnimationCurveState = AnimationInstance->GetPhysicalAnimationCurveState();
 
@@ -1113,15 +1114,18 @@ void AAlsCharacter::RefreshPhysicalAnimation(float DeltaTime)
 	{
 		PhysicalAnimation->ApplyPhysicalAnimationProfileBelow(NAME_None, NAME_None, true, true);
 		PhysicalAnimationState.Current = EAlsPhysicalAnimationProfile::None;
-		PhysicalAnimationState.BlendWeight = 0.0f;
+		for(auto& i : PhysicalAnimationState.PartBlendWeight) i = 0.0f;
 		PhysicalAnimationState.ActiveParts = 0;
+		PhysicalAnimationState.bActive = false;
 	}
 	else if (LocomotionAction == AlsLocomotionActionTags::Ragdolling)
 	{
 		if (PhysicalAnimationState.Current != EAlsPhysicalAnimationProfile::Ragdoll)
 		{
 			PhysicalAnimationState.Current = EAlsPhysicalAnimationProfile::Ragdoll;
+			GetMesh()->SetAllBodiesBelowSimulatePhysics(UAlsConstants::PelvisBoneName(), true);
 			PhysicalAnimation->ApplyPhysicalAnimationProfileBelow(NAME_None, UAlsConstants::RagdollPAProfileName());
+			for(auto& i : PhysicalAnimationState.PartBlendWeight) i = 1.0f;
 		}
 		ActiveParts = EAlsPhysicalAnimationPartMask::WholeBody;
 	}
@@ -1130,12 +1134,12 @@ void AAlsCharacter::RefreshPhysicalAnimation(float DeltaTime)
 		if (PhysicalAnimationState.Current == EAlsPhysicalAnimationProfile::Ragdoll)
 		{
 			PhysicalAnimationState.Current = EAlsPhysicalAnimationProfile::None;
-			GetMesh()->SetAllBodiesSimulatePhysics(false);
 			GetMesh()->SetCollisionObjectType(PhysicalAnimationState.PrevCollisionObjectType);
 			GetMesh()->SetCollisionEnabled(PhysicalAnimationState.PrevCollisionEnabled);
+			GetMesh()->SetAllBodiesSimulatePhysics(false);
 			PhysicalAnimation->ApplyPhysicalAnimationProfileBelow(NAME_None, NAME_None, true, true);
 			PhysicalAnimation->Activate();
-			PhysicalAnimationState.BlendWeight = 0.0f;
+			for(auto& i : PhysicalAnimationState.PartBlendWeight) i = 0.0f;
 			PhysicalAnimationState.ActiveParts = 0;
 
 			return; // delay to next frame
@@ -1157,13 +1161,10 @@ void AAlsCharacter::RefreshPhysicalAnimation(float DeltaTime)
 				PhysicalAnimation->ApplyPhysicalAnimationProfileBelow(NAME_None, UAlsConstants::DefaultPAProfileName());
 			}
 		}
-		if (!LocomotionAction.IsValid()
-			&& RotationMode != AlsRotationModeTags::Aiming
-			&& Gait != AlsGaitTags::Sprinting
-			&& !LocomotionAction.IsValid())
+		if (!LocomotionAction.IsValid() && Gait != AlsGaitTags::Sprinting)
 		{
 			ActiveParts |= EAlsPhysicalAnimationPartMask::LeftArm | EAlsPhysicalAnimationPartMask::RightArm
-				//| EAlsPhysicalAnimationPartMask::LeftLeg | EAlsPhysicalAnimationPartMask::RightLeg
+				| EAlsPhysicalAnimationPartMask::LeftLeg | EAlsPhysicalAnimationPartMask::RightLeg
 				| EAlsPhysicalAnimationPartMask::LeftHand | EAlsPhysicalAnimationPartMask::RightHand;
 		}
 		if (PhysicalAnimationCurveState.FreeLeftLeg > 0.0f)
@@ -1176,113 +1177,13 @@ void AAlsCharacter::RefreshPhysicalAnimation(float DeltaTime)
 		}
 		if (PhysicalAnimationCurveState.LockLeftHand > 0.0f)
 		{
-			ActiveParts &= ~(EAlsPhysicalAnimationPartMask::LeftArm | EAlsPhysicalAnimationPartMask::LeftHand);
+			ActiveParts &= ~EAlsPhysicalAnimationPartMask::LeftHand;
 		}
 		if (PhysicalAnimationCurveState.LockRightHand > 0.0f)
 		{
-			ActiveParts &= ~(EAlsPhysicalAnimationPartMask::RightArm | EAlsPhysicalAnimationPartMask::RightHand);
+			ActiveParts &= ~EAlsPhysicalAnimationPartMask::RightHand;
 		}
 	}
-
-	// Set up bodie's Simulation flag
-
-	do {
-		if (PrevActiveParts == ActiveParts)
-		{
-			break;
-		}
-
-		// Activate after inactivate or inactivate after activate in same frame makes wrong behavior.
-		// Then, delay to next frame if upper hierarchy's simulation state has been changed.
-
-		if (EnumHasAnyFlags(PrevActiveParts, ~ActiveParts))
-		{
-			GetMesh()->SetAllBodiesSimulatePhysics(false);
-			ActiveParts = EAlsPhysicalAnimationPartMask::None;
-			break;
-		}
-
-		if ((PrevActiveParts & EAlsPhysicalAnimationPartMask::Pelvis) != (ActiveParts & EAlsPhysicalAnimationPartMask::Pelvis))
-		{
-			bool Active = EnumHasAnyFlags(ActiveParts, EAlsPhysicalAnimationPartMask::Pelvis);
-			GetMesh()->SetAllBodiesBelowSimulatePhysics(UAlsConstants::PelvisBoneName(), Active);
-			ActiveParts = Active ? EAlsPhysicalAnimationPartMask::WholeBody : EAlsPhysicalAnimationPartMask::None;
-			break;
-		}
-
-		bool skip{false};
-
-		if ((PrevActiveParts & EAlsPhysicalAnimationPartMask::Torso) != (ActiveParts & EAlsPhysicalAnimationPartMask::Torso))
-		{
-			bool Active = EnumHasAnyFlags(ActiveParts, EAlsPhysicalAnimationPartMask::Torso);
-			GetMesh()->SetAllBodiesBelowSimulatePhysics(UAlsConstants::SpineBoneName(), Active);
-			ActiveParts = (ActiveParts & ~EAlsPhysicalAnimationPartMask::BelowTorso)
-				| (Active ? EAlsPhysicalAnimationPartMask::BelowTorso : EAlsPhysicalAnimationPartMask::None);
-			skip = true;
-		}
-		if ((PrevActiveParts & EAlsPhysicalAnimationPartMask::LeftLeg) != (ActiveParts & EAlsPhysicalAnimationPartMask::LeftLeg))
-		{
-			bool Active = EnumHasAnyFlags(ActiveParts, EAlsPhysicalAnimationPartMask::LeftLeg);
-			GetMesh()->SetAllBodiesBelowSimulatePhysics(UAlsConstants::LegLeftBoneName(), Active);
-			ActiveParts = (ActiveParts & ~EAlsPhysicalAnimationPartMask::BelowLeftLeg)
-				| (Active ? EAlsPhysicalAnimationPartMask::BelowLeftLeg : EAlsPhysicalAnimationPartMask::None);
-			skip = true;
-		}
-		if ((PrevActiveParts & EAlsPhysicalAnimationPartMask::RightLeg) != (ActiveParts & EAlsPhysicalAnimationPartMask::RightLeg))
-		{
-			bool Active = EnumHasAnyFlags(ActiveParts, EAlsPhysicalAnimationPartMask::RightLeg);
-			GetMesh()->SetAllBodiesBelowSimulatePhysics(UAlsConstants::LegRightBoneName(), Active);
-			ActiveParts = (ActiveParts & ~EAlsPhysicalAnimationPartMask::BelowRightLeg)
-				| (Active ? EAlsPhysicalAnimationPartMask::BelowRightLeg : EAlsPhysicalAnimationPartMask::None);
-			skip = true;
-		}
-		if (skip)
-		{
-			break;
-		}
-
-		if ((PrevActiveParts & EAlsPhysicalAnimationPartMask::Head) != (ActiveParts & EAlsPhysicalAnimationPartMask::Head))
-		{
-			GetMesh()->SetAllBodiesBelowSimulatePhysics(UAlsConstants::HeadBoneName(), EnumHasAnyFlags(ActiveParts, EAlsPhysicalAnimationPartMask::Head));
-		}
-		if ((PrevActiveParts & EAlsPhysicalAnimationPartMask::LeftFoot) != (ActiveParts & EAlsPhysicalAnimationPartMask::LeftFoot))
-		{
-			GetMesh()->SetAllBodiesBelowSimulatePhysics(UAlsConstants::FootLeftBoneName(), EnumHasAnyFlags(ActiveParts, EAlsPhysicalAnimationPartMask::LeftFoot));
-		}
-		if ((PrevActiveParts & EAlsPhysicalAnimationPartMask::RightFoot) != (ActiveParts & EAlsPhysicalAnimationPartMask::RightFoot))
-		{
-			GetMesh()->SetAllBodiesBelowSimulatePhysics(UAlsConstants::FootRightBoneName(), EnumHasAnyFlags(ActiveParts, EAlsPhysicalAnimationPartMask::RightFoot));
-		}
-		if ((PrevActiveParts & EAlsPhysicalAnimationPartMask::LeftArm) != (ActiveParts & EAlsPhysicalAnimationPartMask::LeftArm))
-		{
-			bool Active = EnumHasAnyFlags(ActiveParts, EAlsPhysicalAnimationPartMask::LeftArm);
-			GetMesh()->SetAllBodiesBelowSimulatePhysics(UAlsConstants::ArmLeftBoneName(), Active);
-			ActiveParts = (ActiveParts & ~EAlsPhysicalAnimationPartMask::BelowLeftArm)
-				| (Active ? EAlsPhysicalAnimationPartMask::BelowLeftArm : EAlsPhysicalAnimationPartMask::None);
-			skip = true;
-		}
-		if ((PrevActiveParts & EAlsPhysicalAnimationPartMask::RightArm) != (ActiveParts & EAlsPhysicalAnimationPartMask::RightArm))
-		{
-			bool Active = EnumHasAnyFlags(ActiveParts, EAlsPhysicalAnimationPartMask::RightArm);
-			GetMesh()->SetAllBodiesBelowSimulatePhysics(UAlsConstants::ArmRightBoneName(), Active);
-			ActiveParts = (ActiveParts & ~EAlsPhysicalAnimationPartMask::BelowRightArm)
-				| (Active ? EAlsPhysicalAnimationPartMask::BelowRightArm : EAlsPhysicalAnimationPartMask::None);
-			skip = true;
-		}
-		if (skip)
-		{
-			break;
-		}
-
-		if ((PrevActiveParts & EAlsPhysicalAnimationPartMask::LeftHand) != (ActiveParts & EAlsPhysicalAnimationPartMask::LeftHand))
-		{
-			GetMesh()->SetAllBodiesBelowSimulatePhysics(UAlsConstants::HandLeftBoneName(), EnumHasAnyFlags(ActiveParts, EAlsPhysicalAnimationPartMask::LeftHand));
-		}
-		if ((PrevActiveParts & EAlsPhysicalAnimationPartMask::RightHand) != (ActiveParts & EAlsPhysicalAnimationPartMask::RightHand))
-		{
-			GetMesh()->SetAllBodiesBelowSimulatePhysics(UAlsConstants::HandRightBoneName(), EnumHasAnyFlags(ActiveParts, EAlsPhysicalAnimationPartMask::RightHand));
-		}
-	} while(0);
 
 	PhysicalAnimationState.ActiveParts = (uint16)ActiveParts;
 
@@ -1290,28 +1191,94 @@ void AAlsCharacter::RefreshPhysicalAnimation(float DeltaTime)
 
 	if (PhysicalAnimationState.bInitialized)
 	{
-		auto PrevBlendWeight{PhysicalAnimationState.BlendWeight};
-		PhysicalAnimationState.BlendWeight = FMath::FInterpConstantTo(PhysicalAnimationState.BlendWeight,
-			(uint16)ActiveParts || PhysicalAnimationState.Current == EAlsPhysicalAnimationProfile::Ragdoll ? 1.0f : 0.0f, DeltaTime, 15.0f);
-		if (PrevBlendWeight != PhysicalAnimationState.BlendWeight)
+		bool bChangeAny = false;
+		bool bChangeAnyActivity = false;
+		bool bActiveAny = false;
+		for (int i = 0; i < EAlsPhysicalAnimationPart::MAX_NUM; ++i)
 		{
-			if (PhysicalAnimationState.BlendWeight > 0)
+			auto Prev = PhysicalAnimationState.PartBlendWeight[i];
+			PhysicalAnimationState.PartBlendWeight[i] = FMath::FInterpConstantTo(Prev,
+				PhysicalAnimationState.ActiveParts & 1 << i ? 1.0f : 0.0f, DeltaTime, 15.0f);
+			if (Prev != PhysicalAnimationState.PartBlendWeight[i])
 			{
-				if (PrevBlendWeight == 0.0f)
+				bChangeAny = true;
+				if ((Prev > 0.0f && PhysicalAnimationState.PartBlendWeight[i] == 0.0f)
+					|| (Prev == 0.0f && PhysicalAnimationState.PartBlendWeight[i] > 0.0f))
 				{
-					PhysicalAnimationState.PrevCollisionObjectType = TEnumAsByte(GetMesh()->GetCollisionObjectType());
-					PhysicalAnimationState.PrevCollisionEnabled = TEnumAsByte(GetMesh()->GetCollisionEnabled());
-					GetMesh()->SetCollisionObjectType(ECC_PhysicsBody);
-					GetMesh()->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+					bChangeAnyActivity = true;
 				}
-				GetMesh()->SetAllBodiesBelowPhysicsBlendWeight(UAlsConstants::PelvisBoneName(), PhysicalAnimationState.BlendWeight);
 			}
-			else
+			if (PhysicalAnimationState.PartBlendWeight[i] > 0.0f)
 			{
-				GetMesh()->SetAllBodiesSimulatePhysics(false);
-				GetMesh()->SetCollisionObjectType(PhysicalAnimationState.PrevCollisionObjectType);
-				GetMesh()->SetCollisionEnabled(PhysicalAnimationState.PrevCollisionEnabled);
+				bActiveAny = true;
 			}
+		}
+
+		if (bChangeAny)
+		{
+			for (int i = 0; i < EAlsPhysicalAnimationPart::MAX_NUM; ++i)
+			{
+				FName BoneName = NAME_None;
+				switch (i)
+				{
+				case EAlsPhysicalAnimationPart::Pelvis:
+					BoneName = UAlsConstants::PelvisBoneName();
+					break;
+				case EAlsPhysicalAnimationPart::Torso:
+					BoneName = UAlsConstants::SpineBoneName();
+					break;
+				case EAlsPhysicalAnimationPart::LeftLeg:
+					BoneName = UAlsConstants::LegLeftBoneName();
+					break;
+				case EAlsPhysicalAnimationPart::RightLeg:
+					BoneName = UAlsConstants::LegRightBoneName();
+					break;
+				case EAlsPhysicalAnimationPart::Head:
+					BoneName = UAlsConstants::HeadBoneName();
+					break;
+				case EAlsPhysicalAnimationPart::LeftArm:
+					BoneName = UAlsConstants::ArmLeftBoneName();
+					break;
+				case EAlsPhysicalAnimationPart::RightArm:
+					BoneName = UAlsConstants::ArmRightBoneName();
+					break;
+				case EAlsPhysicalAnimationPart::LeftFoot:
+					BoneName = UAlsConstants::FootLeftBoneName();
+					break;
+				case EAlsPhysicalAnimationPart::RightFoot:
+					BoneName = UAlsConstants::FootRightBoneName();
+					break;
+				case EAlsPhysicalAnimationPart::LeftHand:
+					BoneName = UAlsConstants::HandLeftBoneName();
+					break;
+				case EAlsPhysicalAnimationPart::RightHand:
+					BoneName = UAlsConstants::HandRightBoneName();
+					break;
+				default:
+					break;
+				}
+
+				if (bChangeAnyActivity)
+				{
+					GetMesh()->SetAllBodiesBelowSimulatePhysics(BoneName, PhysicalAnimationState.PartBlendWeight[i] > 0.0f);
+				}
+				GetMesh()->SetAllBodiesBelowPhysicsBlendWeight(BoneName, PhysicalAnimationState.PartBlendWeight[i]);
+			}
+		}
+
+		if (bActiveAny && !PhysicalAnimationState.bActive)
+		{
+			PhysicalAnimationState.PrevCollisionObjectType = TEnumAsByte(GetMesh()->GetCollisionObjectType());
+			PhysicalAnimationState.PrevCollisionEnabled = TEnumAsByte(GetMesh()->GetCollisionEnabled());
+			GetMesh()->SetCollisionObjectType(ECC_PhysicsBody);
+			GetMesh()->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+			PhysicalAnimationState.bActive = true;
+		}
+		if (!bActiveAny && PhysicalAnimationState.bActive)
+		{
+			GetMesh()->SetCollisionObjectType(PhysicalAnimationState.PrevCollisionObjectType);
+			GetMesh()->SetCollisionEnabled(PhysicalAnimationState.PrevCollisionEnabled);
+			PhysicalAnimationState.bActive = false;
 		}
 	}
 	PhysicalAnimationState.bInitialized = true;
