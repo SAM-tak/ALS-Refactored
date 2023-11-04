@@ -665,23 +665,36 @@ void UAlsAnimationInstance::RefreshSprint(const FVector3f& RelativeAccelerationA
 			ECC_Visibility, FCollisionShape::MakeCapsule(LocomotionState.CapsuleRadius, LocomotionState.CapsuleRadius),
 			{ __FUNCTION__, false, Character });
 
-		const auto bSprintAccelerationBlocked{Hit.IsValidBlockingHit() && Hit.ImpactNormal.Z < LocomotionState.WalkableFloorZ};
+		
+		static constexpr auto MinVerticalVelocity{-4000.0f};
+		static constexpr auto MaxVerticalVelocity{-200.0f};
+
+		auto VelocityDirection{LocomotionState.Velocity};
+		VelocityDirection.Z = FMath::Clamp(VelocityDirection.Z, MinVerticalVelocity, MaxVerticalVelocity);
+		VelocityDirection.Normalize();
+
+		const auto bSprintAccelerationBlocked{Hit.IsValidBlockingHit() && Hit.ImpactNormal.Z < LocomotionState.WalkableFloorZ
+			&& Hit.ImpactNormal.Dot(VelocityDirection) < -0.5f};
 
 		if (bSprintAccelerationBlocked)
 		{
-			GroundedState.SprintTime = 0.0f;
-			GroundedState.SprintAccelerationAmount = TimeThreshold;
+			GroundedState.SprintTime = TimeThreshold;
+			GroundedState.SprintAccelerationAmount = 0.0f;
 		}
 
 #if WITH_EDITORONLY_DATA && ENABLE_DRAW_DEBUG
-		if(bDisplayDebugTraces) {
-			if(IsInGameThread()) {
+		if (bDisplayDebugTraces)
+		{
+			if (IsInGameThread())
+			{
 				UAlsUtility::DrawDebugSweepSingleCapsule(GetWorld(), Hit.TraceStart, Hit.TraceEnd, FRotator::ZeroRotator,
 					LocomotionState.CapsuleRadius, LocomotionState.CapsuleHalfHeight,
 					bSprintAccelerationBlocked, Hit, { 0.25f, 0.0f, 1.0f }, { 0.75f, 0.0f, 1.0f });
 			}
-			else {
-				DisplayDebugTracesQueue.Emplace([this, Hit, bSprintAccelerationBlocked] {
+			else
+			{
+				DisplayDebugTracesQueue.Emplace([this, Hit, bSprintAccelerationBlocked]
+				{
 					UAlsUtility::DrawDebugSweepSingleCapsule(GetWorld(), Hit.TraceStart, Hit.TraceEnd, FRotator::ZeroRotator,
 					LocomotionState.CapsuleRadius, LocomotionState.CapsuleHalfHeight,
 					bSprintAccelerationBlocked, Hit, { 0.25f, 0.0f, 1.0f }, { 0.75f, 0.0f, 1.0f });

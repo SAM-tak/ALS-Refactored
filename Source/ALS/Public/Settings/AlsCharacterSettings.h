@@ -49,6 +49,9 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings")
 	FAlsRollingSettings Rolling;
 
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings")
+	bool bPhysicalAnimationApplyToSpineWhileSprinting;
+
 public:
 	UAlsCharacterSettings();
 

@@ -1161,11 +1161,25 @@ void AAlsCharacter::RefreshPhysicalAnimation(float DeltaTime)
 				PhysicalAnimation->ApplyPhysicalAnimationProfileBelow(NAME_None, UAlsConstants::DefaultPAProfileName());
 			}
 		}
-		if (!LocomotionAction.IsValid() && Gait != AlsGaitTags::Sprinting)
+		if (!LocomotionAction.IsValid())
 		{
-			ActiveParts |= EAlsPhysicalAnimationPartMask::LeftArm | EAlsPhysicalAnimationPartMask::RightArm
-				| EAlsPhysicalAnimationPartMask::LeftLeg | EAlsPhysicalAnimationPartMask::RightLeg
-				| EAlsPhysicalAnimationPartMask::LeftHand | EAlsPhysicalAnimationPartMask::RightHand;
+			if (Gait == AlsGaitTags::Sprinting)
+			{
+				if (Settings->bPhysicalAnimationApplyToSpineWhileSprinting)
+				{
+					ActiveParts |= EAlsPhysicalAnimationPartMask::BelowTorso;
+				}
+				else
+				{
+					ActiveParts |= EAlsPhysicalAnimationPartMask::BelowLeftArm | EAlsPhysicalAnimationPartMask::BelowRightArm;
+				}
+			}
+			else
+			{
+				ActiveParts |= EAlsPhysicalAnimationPartMask::LeftArm | EAlsPhysicalAnimationPartMask::RightArm
+					| EAlsPhysicalAnimationPartMask::LeftLeg | EAlsPhysicalAnimationPartMask::RightLeg
+					| EAlsPhysicalAnimationPartMask::LeftHand | EAlsPhysicalAnimationPartMask::RightHand;
+			}
 		}
 		if (PhysicalAnimationCurveState.FreeLeftLeg > 0.0f)
 		{
