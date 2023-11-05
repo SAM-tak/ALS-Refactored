@@ -1103,12 +1103,12 @@ void AAlsCharacter::RefreshPhysicalAnimation(float DeltaTime)
 {
 	EAlsPhysicalAnimationPartMask ActiveParts{EAlsPhysicalAnimationPartMask::None};
 	const auto& PhysicalAnimationCurveState = AnimationInstance->GetPhysicalAnimationCurveState();
+	FName NewProfile{NAME_None};
 
-	// Choose Physical Animation Profile
+	// Choose Physical Animation Profile and active part
 
 	if (!PhysicalAnimationState.bInitialized)
 	{
-		PhysicalAnimation->ApplyPhysicalAnimationProfileBelow(NAME_None, NAME_None, true, true);
 		PhysicalAnimationState.Current = EAlsPhysicalAnimationProfile::None;
 		for(auto& i : PhysicalAnimationState.PartBlendWeight) i = 0.0f;
 		PhysicalAnimationState.ActiveParts = 0;
@@ -1121,6 +1121,7 @@ void AAlsCharacter::RefreshPhysicalAnimation(float DeltaTime)
 			PhysicalAnimationState.Current = EAlsPhysicalAnimationProfile::Ragdoll;
 			GetMesh()->SetAllBodiesBelowSimulatePhysics(UAlsConstants::PelvisBoneName(), true);
 			PhysicalAnimation->ApplyPhysicalAnimationProfileBelow(NAME_None, UAlsConstants::RagdollPAProfileName());
+			PhysicalAnimation->Activate();
 			for(auto& i : PhysicalAnimationState.PartBlendWeight) i = 1.0f;
 		}
 		ActiveParts = EAlsPhysicalAnimationPartMask::WholeBody;
@@ -1130,11 +1131,7 @@ void AAlsCharacter::RefreshPhysicalAnimation(float DeltaTime)
 		if (PhysicalAnimationState.Current == EAlsPhysicalAnimationProfile::Ragdoll)
 		{
 			PhysicalAnimationState.Current = EAlsPhysicalAnimationProfile::None;
-			GetMesh()->SetCollisionObjectType(PhysicalAnimationState.PrevCollisionObjectType);
-			GetMesh()->SetCollisionEnabled(PhysicalAnimationState.PrevCollisionEnabled);
 			GetMesh()->SetAllBodiesSimulatePhysics(false);
-			PhysicalAnimation->ApplyPhysicalAnimationProfileBelow(NAME_None, NAME_None, true, true);
-			PhysicalAnimation->Activate();
 			for(auto& i : PhysicalAnimationState.PartBlendWeight) i = 0.0f;
 			PhysicalAnimationState.ActiveParts = 0;
 
@@ -1146,6 +1143,7 @@ void AAlsCharacter::RefreshPhysicalAnimation(float DeltaTime)
 			{
 				PhysicalAnimationState.Current = EAlsPhysicalAnimationProfile::Injured;
 				PhysicalAnimation->ApplyPhysicalAnimationProfileBelow(NAME_None, UAlsConstants::InjuredPAProfileName());
+				PhysicalAnimation->Activate();
 			}
 			ActiveParts |= EAlsPhysicalAnimationPartMask::BelowTorso;
 		}
@@ -1155,26 +1153,15 @@ void AAlsCharacter::RefreshPhysicalAnimation(float DeltaTime)
 			{
 				PhysicalAnimationState.Current = EAlsPhysicalAnimationProfile::Default;
 				PhysicalAnimation->ApplyPhysicalAnimationProfileBelow(NAME_None, UAlsConstants::DefaultPAProfileName());
+				PhysicalAnimation->Activate();
 			}
 		}
 		if (!LocomotionAction.IsValid())
 		{
-			if (Gait == AlsGaitTags::Sprinting)
+			ActiveParts |= EAlsPhysicalAnimationPartMask::BelowLeftArm | EAlsPhysicalAnimationPartMask::BelowRightArm;
+			if (Gait != AlsGaitTags::Sprinting)
 			{
-				if (Settings->bPhysicalAnimationApplyToSpineWhileSprinting)
-				{
-					ActiveParts |= EAlsPhysicalAnimationPartMask::BelowTorso;
-				}
-				else
-				{
-					ActiveParts |= EAlsPhysicalAnimationPartMask::BelowLeftArm | EAlsPhysicalAnimationPartMask::BelowRightArm;
-				}
-			}
-			else
-			{
-				ActiveParts |= EAlsPhysicalAnimationPartMask::LeftArm | EAlsPhysicalAnimationPartMask::RightArm
-					| EAlsPhysicalAnimationPartMask::LeftLeg | EAlsPhysicalAnimationPartMask::RightLeg
-					| EAlsPhysicalAnimationPartMask::LeftHand | EAlsPhysicalAnimationPartMask::RightHand;
+				ActiveParts |= EAlsPhysicalAnimationPartMask::LeftLeg | EAlsPhysicalAnimationPartMask::RightLeg;
 			}
 		}
 		if (PhysicalAnimationCurveState.FreeLeftLeg > 0.0f)
@@ -1184,6 +1171,10 @@ void AAlsCharacter::RefreshPhysicalAnimation(float DeltaTime)
 		if (PhysicalAnimationCurveState.FreeRightLeg > 0.0f)
 		{
 			ActiveParts |= EAlsPhysicalAnimationPartMask::RightLeg | EAlsPhysicalAnimationPartMask::RightFoot;
+		}
+		if (PhysicalAnimationCurveState.FreeNeck > 0.0f)
+		{
+			ActiveParts |= EAlsPhysicalAnimationPartMask::BelowNeck;
 		}
 		if (PhysicalAnimationCurveState.LockLeftHand > 0.0f)
 		{
@@ -1243,8 +1234,14 @@ void AAlsCharacter::RefreshPhysicalAnimation(float DeltaTime)
 				case EAlsPhysicalAnimationPart::RightLeg:
 					BoneName = UAlsConstants::LegRightBoneName();
 					break;
-				case EAlsPhysicalAnimationPart::Head:
-					BoneName = UAlsConstants::HeadBoneName();
+				case EAlsPhysicalAnimationPart::LeftFoot:
+					BoneName = UAlsConstants::FootLeftBoneName();
+					break;
+				case EAlsPhysicalAnimationPart::RightFoot:
+					BoneName = UAlsConstants::FootRightBoneName();
+					break;
+				case EAlsPhysicalAnimationPart::Neck:
+					BoneName = UAlsConstants::NeckBoneName();
 					break;
 				case EAlsPhysicalAnimationPart::LeftArm:
 					BoneName = UAlsConstants::ArmLeftBoneName();
@@ -1252,11 +1249,8 @@ void AAlsCharacter::RefreshPhysicalAnimation(float DeltaTime)
 				case EAlsPhysicalAnimationPart::RightArm:
 					BoneName = UAlsConstants::ArmRightBoneName();
 					break;
-				case EAlsPhysicalAnimationPart::LeftFoot:
-					BoneName = UAlsConstants::FootLeftBoneName();
-					break;
-				case EAlsPhysicalAnimationPart::RightFoot:
-					BoneName = UAlsConstants::FootRightBoneName();
+				case EAlsPhysicalAnimationPart::Head:
+					BoneName = UAlsConstants::HeadBoneName();
 					break;
 				case EAlsPhysicalAnimationPart::LeftHand:
 					BoneName = UAlsConstants::HandLeftBoneName();

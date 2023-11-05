@@ -657,53 +657,6 @@ void UAlsAnimationInstance::RefreshSprint(const FVector3f& RelativeAccelerationA
 	GroundedState.SprintAccelerationAmount = GroundedState.SprintTime >= TimeThreshold
 		                                         ? 0.0f
 		                                         : RelativeAccelerationAmount.X;
-
-	if (GroundedState.SprintAccelerationAmount > 0.0f)
-	{
-		FHitResult Hit;
-		GetWorld()->SweepSingleByChannel(Hit, LocomotionState.Location, LocomotionState.Location + LocomotionState.Velocity * 0.4f, FQuat::Identity,
-			ECC_Visibility, FCollisionShape::MakeCapsule(LocomotionState.CapsuleRadius, LocomotionState.CapsuleRadius),
-			{ __FUNCTION__, false, Character });
-
-		
-		static constexpr auto MinVerticalVelocity{-4000.0f};
-		static constexpr auto MaxVerticalVelocity{-200.0f};
-
-		auto VelocityDirection{LocomotionState.Velocity};
-		VelocityDirection.Z = FMath::Clamp(VelocityDirection.Z, MinVerticalVelocity, MaxVerticalVelocity);
-		VelocityDirection.Normalize();
-
-		const auto bSprintAccelerationBlocked{Hit.IsValidBlockingHit() && Hit.ImpactNormal.Z < LocomotionState.WalkableFloorZ
-			&& Hit.ImpactNormal.Dot(VelocityDirection) < -0.5f};
-
-		if (bSprintAccelerationBlocked)
-		{
-			GroundedState.SprintTime = TimeThreshold;
-			GroundedState.SprintAccelerationAmount = 0.0f;
-		}
-
-#if WITH_EDITORONLY_DATA && ENABLE_DRAW_DEBUG
-		if (bDisplayDebugTraces)
-		{
-			if (IsInGameThread())
-			{
-				UAlsUtility::DrawDebugSweepSingleCapsule(GetWorld(), Hit.TraceStart, Hit.TraceEnd, FRotator::ZeroRotator,
-					LocomotionState.CapsuleRadius, LocomotionState.CapsuleHalfHeight,
-					bSprintAccelerationBlocked, Hit, { 0.25f, 0.0f, 1.0f }, { 0.75f, 0.0f, 1.0f });
-			}
-			else
-			{
-				DisplayDebugTracesQueue.Emplace([this, Hit, bSprintAccelerationBlocked]
-				{
-					UAlsUtility::DrawDebugSweepSingleCapsule(GetWorld(), Hit.TraceStart, Hit.TraceEnd, FRotator::ZeroRotator,
-					LocomotionState.CapsuleRadius, LocomotionState.CapsuleHalfHeight,
-					bSprintAccelerationBlocked, Hit, { 0.25f, 0.0f, 1.0f }, { 0.75f, 0.0f, 1.0f });
-				}
-				);
-			}
-		}
-#endif
-	}
 }
 
 void UAlsAnimationInstance::RefreshStrideBlendAmount()
@@ -1835,6 +1788,7 @@ void UAlsAnimationInstance::RefreshPhysicalAnimationOnGameThread()
 	PhysicalAnimationCurveState.LockRightHand = GetCurveValueClamped01(UAlsConstants::PALockRightHandCurveName());
 	PhysicalAnimationCurveState.FreeLeftLeg = GetCurveValueClamped01(UAlsConstants::PAFreeLeftLegCurveName());
 	PhysicalAnimationCurveState.FreeRightLeg = GetCurveValueClamped01(UAlsConstants::PAFreeRightLegCurveName());
+	PhysicalAnimationCurveState.FreeNeck = GetCurveValueClamped01(UAlsConstants::PAFreeNeckCurveName());
 }
 
 float UAlsAnimationInstance::GetCurveValueClamped01(const FName& CurveName) const

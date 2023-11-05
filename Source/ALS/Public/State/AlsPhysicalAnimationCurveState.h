@@ -19,4 +19,7 @@ struct ALS_API FAlsPhysicalAnimationCurveState
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS")
 	float FreeRightLeg{0.0f};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS")
+	float FreeNeck{0.0f};
 };

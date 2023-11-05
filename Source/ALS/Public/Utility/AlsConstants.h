@@ -45,6 +45,9 @@ public:
 	static const FName& SpineBoneName();
 
 	UFUNCTION(BlueprintPure, Category = "ALS|Constants|Bones", Meta = (ReturnDisplayName = "Bone Name"))
+	static const FName& NeckBoneName();
+
+	UFUNCTION(BlueprintPure, Category = "ALS|Constants|Bones", Meta = (ReturnDisplayName = "Bone Name"))
 	static const FName& ArmLeftBoneName();
 
 	UFUNCTION(BlueprintPure, Category = "ALS|Constants|Bones", Meta = (ReturnDisplayName = "Bone Name"))
@@ -224,6 +227,9 @@ public:
 	UFUNCTION(BlueprintPure, Category = "ALS|Constants|Physical Animation", Meta = (ReturnDisplayName = "Curve Name"))
 	static const FName& PAFreeRightLegCurveName();
 
+	UFUNCTION(BlueprintPure, Category = "ALS|Constants|Physical Animation", Meta = (ReturnDisplayName = "Curve Name"))
+	static const FName& PAFreeNeckCurveName();
+
 	// Physical Animation Profile Names
 
 	UFUNCTION(BlueprintPure, Category = "ALS|Constants|Physical Animation", Meta = (ReturnDisplayName = "Profile Name"))
@@ -316,6 +322,12 @@ inline const FName& UAlsConstants::FootRightVirtualBoneName()
 inline const FName& UAlsConstants::SpineBoneName()
 {
 	static const FName Name{ TEXTVIEW("spine_01") };
+	return Name;
+}
+
+inline const FName& UAlsConstants::NeckBoneName()
+{
+	static const FName Name{ TEXTVIEW("neck_01") };
 	return Name;
 }
 
@@ -652,6 +664,12 @@ inline const FName& UAlsConstants::PAFreeLeftLegCurveName()
 inline const FName& UAlsConstants::PAFreeRightLegCurveName()
 {
 	static const FName Name{TEXTVIEW("PAFreeRightLeg")};
+	return Name;
+}
+
+inline const FName& UAlsConstants::PAFreeNeckCurveName()
+{
+	static const FName Name{ TEXTVIEW("PAFreeNeck") };
 	return Name;
 }
 

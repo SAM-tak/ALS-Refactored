@@ -155,7 +155,7 @@ TSet<FName> AAlsCharacter::CurveNameSet;
 void AAlsCharacter::InitializeCurveNameSet()
 {
 	CurveNameSet.Reset();
-	// 諦めた
+	// surrendered
 	//UClass* _Class = UAlsConstants::StaticClass();
 	//for (TFieldIterator<UFunction> FuncIt(_Class); FuncIt; ++FuncIt)
 	//{
@@ -164,7 +164,7 @@ void AAlsCharacter::InitializeCurveNameSet()
 	//		const auto ReturnDisplayName = FuncIt->FindMetaData("ReturnDisplayName");
 	//		if (ReturnDisplayName && ReturnDisplayName->Equals("Curve Name"))
 	//		{
-	//			const FName& CurveName = CallFunction(...);
+	//			const FName& CurveName = FuncIt->CallStaticFunction();
 	//			CurveNamesSet.Add(CurveName);
 	//		}
 	//	}
@@ -224,6 +224,9 @@ void AAlsCharacter::InitializeCurveNameSet()
 	// Physical Animation Curves
 	CurveNameSet.Add(UAlsConstants::PAFreeLeftLegCurveName());
 	CurveNameSet.Add(UAlsConstants::PAFreeRightLegCurveName());
+	CurveNameSet.Add(UAlsConstants::PAFreeNeckCurveName());
+	CurveNameSet.Add(UAlsConstants::PALockLeftHandCurveName());
+	CurveNameSet.Add(UAlsConstants::PALockRightHandCurveName());
 }
 
 void AAlsCharacter::DisplayDebugCurves(const UCanvas* Canvas, const float Scale,
