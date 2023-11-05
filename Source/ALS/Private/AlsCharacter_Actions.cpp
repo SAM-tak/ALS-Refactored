@@ -863,8 +863,6 @@ void AAlsCharacter::RefreshRagdolling(const float DeltaTime)
 			AnimationInstance->ResetFreezeRagdolling();
 			PhysicalAnimation->Activate();
 			GetMesh()->SetAllBodiesBelowSimulatePhysics(UAlsConstants::PelvisBoneName(), true);
-			GetMesh()->SetCollisionObjectType(ECC_PhysicsBody);
-			GetMesh()->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
 		}
 
 		if (RagdollingState.bGrounded)
@@ -909,8 +907,6 @@ void AAlsCharacter::RefreshRagdolling(const float DeltaTime)
 			{
 				AnimationInstance->FreezeRagdolling();
 				PhysicalAnimation->Deactivate();
-				GetMesh()->SetCollisionObjectType(PhysicalAnimationState.PrevCollisionObjectType);
-				GetMesh()->SetCollisionEnabled(PhysicalAnimationState.PrevCollisionEnabled);
 				GetMesh()->SetAllBodiesSimulatePhysics(false);
 			}
 		}
