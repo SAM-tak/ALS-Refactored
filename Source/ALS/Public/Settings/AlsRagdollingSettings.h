@@ -41,13 +41,13 @@ public:
 	float TimeAfterGroundedAndStoppedForForceFreezing{1.0f};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS", Meta = (ClampMin = 0, EditCondition = "bAllowFreeze", ForceUnits = "cm/s"))
-	float RootBoneSpeedConsideredAsStopped{20.0f};
+	float RootBoneSpeedConsideredAsStopped{5.0f};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS", Meta = (ClampMin = 0, EditCondition = "bAllowFreeze", ForceUnits = "cm/s"))
-	float SpeedThresholdToFreeze{25.0f};
+	float SpeedThresholdToFreeze{5.0f};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS", Meta = (ClampMin = 0, EditCondition = "bAllowFreeze", ForceUnits = "deg"))
-	float AngularSpeedThresholdToFreeze{60.0f};
+	float AngularSpeedThresholdToFreeze{45.0f};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS")
 	TEnumAsByte<ECollisionChannel> GroundTraceChannel{ECC_Visibility};

@@ -896,7 +896,6 @@ void AAlsCharacter::RefreshRagdolling(const float DeltaTime)
 			if (RagdollingState.bFreezing)
 			{
 				AnimationInstance->FreezeRagdolling();
-				GetMesh()->SetAllBodiesSimulatePhysics(false);
 			}
 		}
 		else
@@ -1130,6 +1129,13 @@ void AAlsCharacter::RefreshPhysicalAnimation(float DeltaTime)
 			for(auto& i : PhysicalAnimationState.PartBlendWeight) i = 0.0f;
 			PhysicalAnimationState.ActiveParts = 0;
 
+			if (PhysicalAnimationState.bActive)
+			{
+				GetMesh()->SetCollisionObjectType(PhysicalAnimationState.PrevCollisionObjectType);
+				GetMesh()->SetCollisionEnabled(PhysicalAnimationState.PrevCollisionEnabled);
+				PhysicalAnimationState.bActive = false;
+			}
+
 			return; // delay to next frame
 		}
 		if (OverlayMode == AlsOverlayModeTags::Injured)
@@ -1286,7 +1292,7 @@ void AAlsCharacter::RefreshPhysicalAnimation(float DeltaTime)
 			PhysicalAnimationState.bActive = true;
 		}
 
-		if (!bActiveAny && PhysicalAnimationState.bActive)
+		if (!bActiveAny && PhysicalAnimationState.bActive && LocomotionAction != AlsLocomotionActionTags::Ragdolling)
 		{
 			GetMesh()->SetCollisionObjectType(PhysicalAnimationState.PrevCollisionObjectType);
 			GetMesh()->SetCollisionEnabled(PhysicalAnimationState.PrevCollisionEnabled);
