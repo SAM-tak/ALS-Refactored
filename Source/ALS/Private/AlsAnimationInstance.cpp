@@ -10,6 +10,7 @@
 #include "Utility/AlsConstants.h"
 #include "Utility/AlsMacros.h"
 #include "Utility/AlsUtility.h"
+#include "Utility/AlsLog.h"
 
 #include UE_INLINE_GENERATED_CPP_BY_NAME(AlsAnimationInstance)
 
@@ -1746,6 +1747,16 @@ void UAlsAnimationInstance::RefreshRagdollingOnGameThread()
 		return;
 	}
 
+	if (RagdollingState.bFreezed)
+	{
+		if (RagdollingState.bPendingUpdateFinalPose)
+		{
+			RagdollingState.bPendingUpdateFinalPose = false;
+			SnapshotPose(RagdollingState.FinalRagdollPose);
+		}
+		return;
+	}
+
 	// Scale the flail play rate by the root speed. The faster the ragdoll moves, the faster the character will flail.
 
 	static constexpr auto ReferenceSpeed{1000.0f};
@@ -1754,18 +1765,13 @@ void UAlsAnimationInstance::RefreshRagdollingOnGameThread()
 		UE_REAL_TO_FLOAT(GetSkelMeshComponent()->GetPhysicsLinearVelocity(UAlsConstants::RootBoneName()).Size() / ReferenceSpeed));
 }
 
-void UAlsAnimationInstance::StopRagdolling()
+void UAlsAnimationInstance::OnStartRagdolling()
 {
 	check(IsInGameThread())
 
 	// Save a snapshot of the current ragdoll pose for use in animation graph to blend out of the ragdoll.
 
-	SnapshotPose(RagdollingState.FinalRagdollPose);
-}
-
-void UAlsAnimationInstance::ResetFreezeRagdolling()
-{
-	check(IsInGameThread())
+	SnapshotPose(RagdollingState.InitialRagdollPose);
 
 	RagdollingState.bFreezed = false;
 }
@@ -1774,21 +1780,25 @@ void UAlsAnimationInstance::FreezeRagdolling()
 {
 	check(IsInGameThread())
 
-	// Save a snapshot of the current ragdoll pose for use in animation graph to blend out of the ragdoll.
+	if (!RagdollingState.bFreezed)
+	{
+		// Save a snapshot of the current ragdoll pose for use in animation graph to blend out of the ragdoll.
 
-	SnapshotPose(RagdollingState.FinalRagdollPose);
-	RagdollingState.bFreezed = true;
+		SnapshotPose(RagdollingState.FinalRagdollPose);
+
+		RagdollingState.bFreezed = true;
+	}
 }
 
 void UAlsAnimationInstance::RefreshPhysicalAnimationOnGameThread()
 {
-	check(IsInGameThread());
+	check(IsInGameThread())
 
 	PhysicalAnimationCurveState.LockLeftHand = GetCurveValueClamped01(UAlsConstants::PALockLeftHandCurveName());
 	PhysicalAnimationCurveState.LockRightHand = GetCurveValueClamped01(UAlsConstants::PALockRightHandCurveName());
 	PhysicalAnimationCurveState.FreeLeftLeg = GetCurveValueClamped01(UAlsConstants::PAFreeLeftLegCurveName());
 	PhysicalAnimationCurveState.FreeRightLeg = GetCurveValueClamped01(UAlsConstants::PAFreeRightLegCurveName());
-	PhysicalAnimationCurveState.FreeNeck = GetCurveValueClamped01(UAlsConstants::PAFreeNeckCurveName());
+	PhysicalAnimationCurveState.FreeTorso = GetCurveValueClamped01(UAlsConstants::PAFreeTorsoCurveName());
 }
 
 float UAlsAnimationInstance::GetCurveValueClamped01(const FName& CurveName) const

@@ -224,7 +224,7 @@ void AAlsCharacter::InitializeCurveNameSet()
 	// Physical Animation Curves
 	CurveNameSet.Add(UAlsConstants::PAFreeLeftLegCurveName());
 	CurveNameSet.Add(UAlsConstants::PAFreeRightLegCurveName());
-	CurveNameSet.Add(UAlsConstants::PAFreeNeckCurveName());
+	CurveNameSet.Add(UAlsConstants::PAFreeTorsoCurveName());
 	CurveNameSet.Add(UAlsConstants::PALockLeftHandCurveName());
 	CurveNameSet.Add(UAlsConstants::PALockRightHandCurveName());
 }

@@ -228,7 +228,7 @@ public:
 	static const FName& PAFreeRightLegCurveName();
 
 	UFUNCTION(BlueprintPure, Category = "ALS|Constants|Physical Animation", Meta = (ReturnDisplayName = "Curve Name"))
-	static const FName& PAFreeNeckCurveName();
+	static const FName& PAFreeTorsoCurveName();
 
 	// Physical Animation Profile Names
 
@@ -667,9 +667,9 @@ inline const FName& UAlsConstants::PAFreeRightLegCurveName()
 	return Name;
 }
 
-inline const FName& UAlsConstants::PAFreeNeckCurveName()
+inline const FName& UAlsConstants::PAFreeTorsoCurveName()
 {
-	static const FName Name{ TEXTVIEW("PAFreeNeck") };
+	static const FName Name{ TEXTVIEW("PAFreeTorso") };
 	return Name;
 }
 

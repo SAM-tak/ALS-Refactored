@@ -319,13 +319,17 @@ private:
 	void RefreshRagdollingOnGameThread();
 
 public:
-	void StopRagdolling();
-
-	void ResetFreezeRagdolling();
+	void OnStartRagdolling();
 
 	void FreezeRagdolling();
-	
+
+	void UnFreezeRagdolling();
+
 	bool IsFreezingRagdoll() const;
+
+	void UpdateRagdollingFlags(bool bGrounded, bool bFacedUpward);
+
+	void RequestUpdateFinalPoseAfterFreeze();
 
 	// PhysicalAnimation
 
@@ -384,6 +388,25 @@ inline void UAlsAnimationInstance::Jump()
 inline void UAlsAnimationInstance::ResetJumped()
 {
 	InAirState.bJumped = false;
+}
+
+inline void UAlsAnimationInstance::UpdateRagdollingFlags(bool bGrounded, bool bFacedUpward)
+{
+	RagdollingState.bGrounded = bGrounded;
+	RagdollingState.bFacedUpward = bFacedUpward;
+}
+
+inline void UAlsAnimationInstance::RequestUpdateFinalPoseAfterFreeze()
+{
+	if (RagdollingState.bFreezed)
+	{
+		RagdollingState.bPendingUpdateFinalPose = true;
+	}
+}
+
+inline void UAlsAnimationInstance::UnFreezeRagdolling()
+{
+	RagdollingState.bFreezed = false;
 }
 
 inline bool UAlsAnimationInstance::IsFreezingRagdoll() const
