@@ -25,7 +25,4 @@ struct ALS_API FAlsRagdollingAnimationState
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS")
 	bool bFreezed{false};
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS")
-	bool bPendingUpdateFinalPose{false};
 };

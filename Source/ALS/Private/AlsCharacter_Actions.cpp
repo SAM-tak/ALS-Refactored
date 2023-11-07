@@ -896,6 +896,7 @@ void AAlsCharacter::RefreshRagdolling(const float DeltaTime)
 			if (RagdollingState.bFreezing)
 			{
 				AnimationInstance->FreezeRagdolling();
+				GetMesh()->SetAllBodiesSimulatePhysics(false);
 			}
 		}
 		else
@@ -1091,8 +1092,7 @@ void AAlsCharacter::RefreshPhysicalAnimation(float DeltaTime)
 {
 	EAlsPhysicalAnimationPartMask ActiveParts{EAlsPhysicalAnimationPartMask::None};
 	const auto& PhysicalAnimationCurveState = AnimationInstance->GetPhysicalAnimationCurveState();
-	FName NewProfile{NAME_None};
-
+	
 	// Choose Physical Animation Profile and active part
 
 	if (!PhysicalAnimationState.bInitialized)
@@ -1118,7 +1118,8 @@ void AAlsCharacter::RefreshPhysicalAnimation(float DeltaTime)
 		RagdollingState.PAStrengthMultiplierBlendAlpha = FMath::Clamp(FMath::FInterpConstantTo(
 			RagdollingState.PAStrengthMultiplierBlendAlpha, 1.0f, DeltaTime, 1.0f / Settings->Ragdolling.StrengthMultiplierBlendTime),
 			0.0f, 1.0f);
-		ActiveParts = RagdollingState.bFreezing ? EAlsPhysicalAnimationPartMask::None : EAlsPhysicalAnimationPartMask::WholeBody;
+
+		ActiveParts = EAlsPhysicalAnimationPartMask::WholeBody;
 	}
 	else
 	{
@@ -1278,11 +1279,6 @@ void AAlsCharacter::RefreshPhysicalAnimation(float DeltaTime)
 			}
 		}
 		
-		if (LocomotionAction == AlsLocomotionActionTags::Ragdolling && RagdollingState.bFreezing && bChangeAnyActivity && !bActiveAny)
-		{
-			AnimationInstance->RequestUpdateFinalPoseAfterFreeze();
-		}
-
 		if (bActiveAny && !PhysicalAnimationState.bActive)
 		{
 			PhysicalAnimationState.PrevCollisionObjectType = TEnumAsByte(GetMesh()->GetCollisionObjectType());
@@ -1292,7 +1288,7 @@ void AAlsCharacter::RefreshPhysicalAnimation(float DeltaTime)
 			PhysicalAnimationState.bActive = true;
 		}
 
-		if (!bActiveAny && PhysicalAnimationState.bActive && LocomotionAction != AlsLocomotionActionTags::Ragdolling)
+		if (!bActiveAny && PhysicalAnimationState.bActive)
 		{
 			GetMesh()->SetCollisionObjectType(PhysicalAnimationState.PrevCollisionObjectType);
 			GetMesh()->SetCollisionEnabled(PhysicalAnimationState.PrevCollisionEnabled);

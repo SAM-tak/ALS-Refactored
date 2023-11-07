@@ -1749,11 +1749,6 @@ void UAlsAnimationInstance::RefreshRagdollingOnGameThread()
 
 	if (RagdollingState.bFreezed)
 	{
-		if (RagdollingState.bPendingUpdateFinalPose)
-		{
-			RagdollingState.bPendingUpdateFinalPose = false;
-			SnapshotPose(RagdollingState.FinalRagdollPose);
-		}
 		return;
 	}
 

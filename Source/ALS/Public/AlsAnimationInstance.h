@@ -329,8 +329,6 @@ public:
 
 	void UpdateRagdollingFlags(bool bGrounded, bool bFacedUpward);
 
-	void RequestUpdateFinalPoseAfterFreeze();
-
 	// PhysicalAnimation
 
 private:
@@ -394,14 +392,6 @@ inline void UAlsAnimationInstance::UpdateRagdollingFlags(bool bGrounded, bool bF
 {
 	RagdollingState.bGrounded = bGrounded;
 	RagdollingState.bFacedUpward = bFacedUpward;
-}
-
-inline void UAlsAnimationInstance::RequestUpdateFinalPoseAfterFreeze()
-{
-	if (RagdollingState.bFreezed)
-	{
-		RagdollingState.bPendingUpdateFinalPose = true;
-	}
 }
 
 inline void UAlsAnimationInstance::UnFreezeRagdolling()
