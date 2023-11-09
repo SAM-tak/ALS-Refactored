@@ -503,7 +503,7 @@ public:
 private:
 	bool StartMantlingInAir();
 
-	bool StartMantling(const FAlsMantlingTraceSettings& TraceSettings, float ForwardTraceDeltaAngle);
+	bool StartMantling(const FAlsMantlingTraceSettings& TraceSettings);
 
 	UFUNCTION(Server, Reliable)
 	void ServerStartMantling(const FAlsMantlingParameters& Parameters);
@@ -523,8 +523,6 @@ protected:
 	void OnMantlingStarted(const FAlsMantlingParameters& Parameters);
 
 private:
-	float CalculateForwardTraceDeltaAngle() const;
-	
 	void RefreshMantling();
 
 	void StopMantling(bool bStopMontage = false);
