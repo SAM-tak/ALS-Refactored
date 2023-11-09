@@ -325,8 +325,6 @@ public:
 
 	void UnFreezeRagdolling();
 
-	bool IsFreezingRagdoll() const;
-
 	void UpdateRagdollingFlags(bool bGrounded, bool bFacedUpward);
 
 	// PhysicalAnimation
@@ -392,16 +390,6 @@ inline void UAlsAnimationInstance::UpdateRagdollingFlags(bool bGrounded, bool bF
 {
 	RagdollingState.bGrounded = bGrounded;
 	RagdollingState.bFacedUpward = bFacedUpward;
-}
-
-inline void UAlsAnimationInstance::UnFreezeRagdolling()
-{
-	RagdollingState.bFreezed = false;
-}
-
-inline bool UAlsAnimationInstance::IsFreezingRagdoll() const
-{
-	return RagdollingState.bFreezed;
 }
 
 inline const FAlsPhysicalAnimationCurveState& UAlsAnimationInstance::GetPhysicalAnimationCurveState() const

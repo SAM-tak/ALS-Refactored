@@ -48,6 +48,12 @@ public:
 	static const FName& NeckBoneName();
 
 	UFUNCTION(BlueprintPure, Category = "ALS|Constants|Bones", Meta = (ReturnDisplayName = "Bone Name"))
+	static const FName& ClavicleLeftBoneName();
+
+	UFUNCTION(BlueprintPure, Category = "ALS|Constants|Bones", Meta = (ReturnDisplayName = "Bone Name"))
+	static const FName& ClavicleRightBoneName();
+
+	UFUNCTION(BlueprintPure, Category = "ALS|Constants|Bones", Meta = (ReturnDisplayName = "Bone Name"))
 	static const FName& ArmLeftBoneName();
 
 	UFUNCTION(BlueprintPure, Category = "ALS|Constants|Bones", Meta = (ReturnDisplayName = "Bone Name"))
@@ -216,19 +222,16 @@ public:
 	// Physical Animation Curves
 
 	UFUNCTION(BlueprintPure, Category = "ALS|Constants|Physical Animation", Meta = (ReturnDisplayName = "Curve Name"))
-	static const FName& PALockLeftHandCurveName();
+	static const FName& PALockHandLeftCurveName();
 
 	UFUNCTION(BlueprintPure, Category = "ALS|Constants|Physical Animation", Meta = (ReturnDisplayName = "Curve Name"))
-	static const FName& PALockRightHandCurveName();
+	static const FName& PALockHandRightCurveName();
 
 	UFUNCTION(BlueprintPure, Category = "ALS|Constants|Physical Animation", Meta = (ReturnDisplayName = "Curve Name"))
-	static const FName& PAFreeLeftLegCurveName();
+	static const FName& PAFreeLegLeftCurveName();
 
 	UFUNCTION(BlueprintPure, Category = "ALS|Constants|Physical Animation", Meta = (ReturnDisplayName = "Curve Name"))
-	static const FName& PAFreeRightLegCurveName();
-
-	UFUNCTION(BlueprintPure, Category = "ALS|Constants|Physical Animation", Meta = (ReturnDisplayName = "Curve Name"))
-	static const FName& PAFreeTorsoCurveName();
+	static const FName& PAFreeLegRightCurveName();
 
 	// Physical Animation Profile Names
 
@@ -321,49 +324,61 @@ inline const FName& UAlsConstants::FootRightVirtualBoneName()
 
 inline const FName& UAlsConstants::SpineBoneName()
 {
-	static const FName Name{ TEXTVIEW("spine_01") };
+	static const FName Name{TEXTVIEW("spine_01")};
 	return Name;
 }
 
 inline const FName& UAlsConstants::NeckBoneName()
 {
-	static const FName Name{ TEXTVIEW("neck_01") };
+	static const FName Name{TEXTVIEW("neck_01")};
+	return Name;
+}
+
+inline const FName& UAlsConstants::ClavicleLeftBoneName()
+{
+	static const FName Name{TEXTVIEW("clavicle_l")};
+	return Name;
+}
+
+inline const FName& UAlsConstants::ClavicleRightBoneName()
+{
+	static const FName Name{TEXTVIEW("clavicle_r")};
 	return Name;
 }
 
 inline const FName& UAlsConstants::ArmLeftBoneName()
 {
-	static const FName Name{ TEXTVIEW("upperarm_l") };
+	static const FName Name{TEXTVIEW("upperarm_l")};
 	return Name;
 }
 
 inline const FName& UAlsConstants::ArmRightBoneName()
 {
-	static const FName Name{ TEXTVIEW("upperarm_r") };
+	static const FName Name{TEXTVIEW("upperarm_r")};
 	return Name;
 }
 
 inline const FName& UAlsConstants::LegLeftBoneName()
 {
-	static const FName Name{ TEXTVIEW("thigh_l") };
+	static const FName Name{TEXTVIEW("thigh_l")};
 	return Name;
 }
 
 inline const FName& UAlsConstants::LegRightBoneName()
 {
-	static const FName Name{ TEXTVIEW("thigh_r") };
+	static const FName Name{TEXTVIEW("thigh_r")};
 	return Name;
 }
 
 inline const FName& UAlsConstants::HandLeftBoneName()
 {
-	static const FName Name{ TEXTVIEW("hand_l") };
+	static const FName Name{TEXTVIEW("hand_l")};
 	return Name;
 }
 
 inline const FName& UAlsConstants::HandRightBoneName()
 {
-	static const FName Name{ TEXTVIEW("hand_r") };
+	static const FName Name{TEXTVIEW("hand_r")};
 	return Name;
 }
 
@@ -643,33 +658,27 @@ inline const FName& UAlsConstants::FootstepSoundBlockCurveName()
 	return Name;
 }
 
-inline const FName& UAlsConstants::PALockLeftHandCurveName()
+inline const FName& UAlsConstants::PALockHandLeftCurveName()
 {
-	static const FName Name{TEXTVIEW("PALockLeftHand")};
+	static const FName Name{TEXTVIEW("PALockHandLeft")};
 	return Name;
 }
 
-inline const FName& UAlsConstants::PALockRightHandCurveName()
+inline const FName& UAlsConstants::PALockHandRightCurveName()
 {
-	static const FName Name{TEXTVIEW("PALockRightHand")};
+	static const FName Name{TEXTVIEW("PALockHandRight")};
 	return Name;
 }
 
-inline const FName& UAlsConstants::PAFreeLeftLegCurveName()
+inline const FName& UAlsConstants::PAFreeLegLeftCurveName()
 {
-	static const FName Name{TEXTVIEW("PAFreeLeftLeg")};
+	static const FName Name{TEXTVIEW("PAFreeLegLeft")};
 	return Name;
 }
 
-inline const FName& UAlsConstants::PAFreeRightLegCurveName()
+inline const FName& UAlsConstants::PAFreeLegRightCurveName()
 {
-	static const FName Name{TEXTVIEW("PAFreeRightLeg")};
-	return Name;
-}
-
-inline const FName& UAlsConstants::PAFreeTorsoCurveName()
-{
-	static const FName Name{ TEXTVIEW("PAFreeTorso") };
+	static const FName Name{TEXTVIEW("PAFreeLegRight")};
 	return Name;
 }
 

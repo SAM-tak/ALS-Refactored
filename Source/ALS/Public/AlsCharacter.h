@@ -589,7 +589,12 @@ private:
 
 	void RefreshRagdollingActorTransform(float DeltaTime);
 
+	// Physical Animation
+
+private:
 	void RefreshPhysicalAnimation(float DeltaTime);
+
+	// Others
 
 public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings|Als Character", Replicated, Meta = (ForceUnits = "s"))

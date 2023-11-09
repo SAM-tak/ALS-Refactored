@@ -1785,15 +1785,28 @@ void UAlsAnimationInstance::FreezeRagdolling()
 	}
 }
 
+void UAlsAnimationInstance::UnFreezeRagdolling()
+{
+	check(IsInGameThread())
+
+	if (RagdollingState.bFreezed)
+	{
+		// Save a snapshot of the current ragdoll pose for use in animation graph to blend out of the ragdoll.
+
+		SnapshotPose(RagdollingState.InitialRagdollPose);
+
+		RagdollingState.bFreezed = false;
+	}
+}
+
 void UAlsAnimationInstance::RefreshPhysicalAnimationOnGameThread()
 {
 	check(IsInGameThread())
 
-	PhysicalAnimationCurveState.LockLeftHand = GetCurveValueClamped01(UAlsConstants::PALockLeftHandCurveName());
-	PhysicalAnimationCurveState.LockRightHand = GetCurveValueClamped01(UAlsConstants::PALockRightHandCurveName());
-	PhysicalAnimationCurveState.FreeLeftLeg = GetCurveValueClamped01(UAlsConstants::PAFreeLeftLegCurveName());
-	PhysicalAnimationCurveState.FreeRightLeg = GetCurveValueClamped01(UAlsConstants::PAFreeRightLegCurveName());
-	PhysicalAnimationCurveState.FreeTorso = GetCurveValueClamped01(UAlsConstants::PAFreeTorsoCurveName());
+	PhysicalAnimationCurveState.LockLeftHand = GetCurveValueClamped01(UAlsConstants::PALockHandLeftCurveName());
+	PhysicalAnimationCurveState.LockRightHand = GetCurveValueClamped01(UAlsConstants::PALockHandRightCurveName());
+	PhysicalAnimationCurveState.FreeLeftLeg = GetCurveValueClamped01(UAlsConstants::PAFreeLegLeftCurveName());
+	PhysicalAnimationCurveState.FreeRightLeg = GetCurveValueClamped01(UAlsConstants::PAFreeLegRightCurveName());
 }
 
 float UAlsAnimationInstance::GetCurveValueClamped01(const FName& CurveName) const

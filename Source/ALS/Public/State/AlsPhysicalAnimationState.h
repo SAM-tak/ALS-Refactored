@@ -6,39 +6,43 @@
 UENUM(BlueprintType)
 enum EAlsPhysicalAnimationPart
 {
-	Pelvis,		// 0
-	Torso,		// 1
-	LeftLeg,	// 2
-	RightLeg,	// 3
-	LeftFoot,	// 4
-	RightFoot,	// 5
-	Neck,		// 6
-	LeftArm,	// 7
-	RightArm,	// 8
-	Head,		// 9
-	LeftHand,	// 10
-	RightHand,	// 11
-	MAX_NUM		// 12
+	Pelvis,		   // 0
+	Torso,		   // 1
+	LeftLeg,	   // 2
+	RightLeg,	   // 3
+	Neck,		   // 4
+	LeftClavicle,  // 5
+	RightClavicle, // 6
+	LeftFoot,	   // 7
+	RightFoot,	   // 8
+	Head,		   // 9
+	LeftArm,	   // 10
+	RightArm,	   // 11
+	LeftHand,	   // 12
+	RightHand,	   // 13
+	MAX_NUM		   // 14
 };
 
 enum class EAlsPhysicalAnimationPartMask : uint16
 {
 	None,
-	Pelvis    = 1 << EAlsPhysicalAnimationPart::Pelvis,
-	Torso     = 1 << EAlsPhysicalAnimationPart::Torso,
-	LeftLeg   = 1 << EAlsPhysicalAnimationPart::LeftLeg,
-	RightLeg  = 1 << EAlsPhysicalAnimationPart::RightLeg,
-	LeftFoot  = 1 << EAlsPhysicalAnimationPart::LeftFoot,
-	RightFoot = 1 << EAlsPhysicalAnimationPart::RightFoot,
-	Neck      = 1 << EAlsPhysicalAnimationPart::Neck,
-	LeftArm   = 1 << EAlsPhysicalAnimationPart::LeftArm,
-	RightArm  = 1 << EAlsPhysicalAnimationPart::RightArm,
-	Head      = 1 << EAlsPhysicalAnimationPart::Head,
-	LeftHand  = 1 << EAlsPhysicalAnimationPart::LeftHand,
-	RightHand = 1 << EAlsPhysicalAnimationPart::RightHand,
-	WholeBody = Pelvis | Torso | Neck | Head | LeftArm | RightArm
-	          | LeftLeg | RightLeg | LeftHand | RightHand | LeftFoot | RightFoot,
-	BelowTorso    = Torso | Neck | Head | LeftArm | RightArm | LeftHand | RightHand,
+	Pelvis        = 1 << EAlsPhysicalAnimationPart::Pelvis,
+	Torso         = 1 << EAlsPhysicalAnimationPart::Torso,
+	LeftLeg       = 1 << EAlsPhysicalAnimationPart::LeftLeg,
+	RightLeg      = 1 << EAlsPhysicalAnimationPart::RightLeg,
+	Neck          = 1 << EAlsPhysicalAnimationPart::Neck,
+	LeftClavicle  = 1 << EAlsPhysicalAnimationPart::LeftClavicle,
+	RightClavicle = 1 << EAlsPhysicalAnimationPart::RightClavicle,
+	LeftFoot      = 1 << EAlsPhysicalAnimationPart::LeftFoot,
+	RightFoot     = 1 << EAlsPhysicalAnimationPart::RightFoot,
+	LeftArm       = 1 << EAlsPhysicalAnimationPart::LeftArm,
+	RightArm      = 1 << EAlsPhysicalAnimationPart::RightArm,
+	Head          = 1 << EAlsPhysicalAnimationPart::Head,
+	LeftHand      = 1 << EAlsPhysicalAnimationPart::LeftHand,
+	RightHand     = 1 << EAlsPhysicalAnimationPart::RightHand,
+	WholeBody     = Pelvis | Torso | LeftLeg | RightLeg | Neck | LeftClavicle | RightClavicle
+	              | LeftFoot | RightFoot | LeftArm | RightArm | Head | LeftHand | RightHand,
+	BelowTorso    = Torso | Neck | LeftClavicle | RightClavicle | Head | LeftArm | RightArm | LeftHand | RightHand,
 	BelowNeck     = Neck | Head,
 	BelowLeftArm  = LeftArm | LeftHand,
 	BelowRightArm = RightArm | RightHand,

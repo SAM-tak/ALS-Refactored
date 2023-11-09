@@ -222,11 +222,10 @@ void AAlsCharacter::InitializeCurveNameSet()
 	CurveNameSet.Add(UAlsConstants::FootstepSoundBlockCurveName());
 
 	// Physical Animation Curves
-	CurveNameSet.Add(UAlsConstants::PAFreeLeftLegCurveName());
-	CurveNameSet.Add(UAlsConstants::PAFreeRightLegCurveName());
-	CurveNameSet.Add(UAlsConstants::PAFreeTorsoCurveName());
-	CurveNameSet.Add(UAlsConstants::PALockLeftHandCurveName());
-	CurveNameSet.Add(UAlsConstants::PALockRightHandCurveName());
+	CurveNameSet.Add(UAlsConstants::PAFreeLegLeftCurveName());
+	CurveNameSet.Add(UAlsConstants::PAFreeLegRightCurveName());
+	CurveNameSet.Add(UAlsConstants::PALockHandLeftCurveName());
+	CurveNameSet.Add(UAlsConstants::PALockHandRightCurveName());
 }
 
 void AAlsCharacter::DisplayDebugCurves(const UCanvas* Canvas, const float Scale,
