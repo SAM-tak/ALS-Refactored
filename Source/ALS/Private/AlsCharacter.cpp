@@ -295,8 +295,8 @@ void AAlsCharacter::Tick(const float DeltaTime)
 
 	StartMantlingInAir();
 	RefreshMantling();
-	RefreshRolling(DeltaTime);
 	RefreshRagdolling(DeltaTime);
+	RefreshRolling(DeltaTime);
 	RefreshPhysicalAnimation(DeltaTime);
 
 	Super::Tick(DeltaTime);

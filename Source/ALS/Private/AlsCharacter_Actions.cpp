@@ -986,7 +986,7 @@ void AAlsCharacter::RefreshRagdollingActorTransform(const float DeltaTime)
 
 bool AAlsCharacter::IsRagdollingAllowedToStop() const
 {
-	return LocomotionAction == AlsLocomotionActionTags::Ragdolling;
+	return LocomotionAction == AlsLocomotionActionTags::Ragdolling && RagdollingState.PAStrengthMultiplierBlendAlpha >= 1.0f;
 }
 
 bool AAlsCharacter::StopRagdolling()
@@ -1024,11 +1024,6 @@ void AAlsCharacter::MulticastStopRagdolling_Implementation()
 
 void AAlsCharacter::StopRagdollingImplementation()
 {
-	if (!IsRagdollingAllowedToStop())
-	{
-		return;
-	}
-
 	SetRagdollTargetLocation(FVector::ZeroVector);
 
 	AnimationInstance->FreezeRagdolling();

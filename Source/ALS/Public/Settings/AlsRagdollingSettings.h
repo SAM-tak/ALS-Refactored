@@ -29,7 +29,7 @@ public:
 	float StrengthMultiplier{1.0f};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS", Meta = (ClampMin = 0, ForceUnits = "s"))
-	float StrengthMultiplierBlendTime{0.3f};
+	float StrengthMultiplierBlendTime{0.15f};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS")
 	bool bAllowFreeze{false};
