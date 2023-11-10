@@ -589,6 +589,11 @@ private:
 
 	// Physical Animation
 
+public:
+	/** Name of PhysicalAnimationProfile Name for override. */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "State|Als Character", Transient, Replicated)
+	FName OverridePAProfileName;
+
 private:
 	void RefreshPhysicalAnimation(float DeltaTime);
 

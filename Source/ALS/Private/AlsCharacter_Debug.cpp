@@ -155,7 +155,7 @@ TSet<FName> AAlsCharacter::CurveNameSet;
 void AAlsCharacter::InitializeCurveNameSet()
 {
 	CurveNameSet.Reset();
-	// surrendered
+	// gave up
 	//UClass* _Class = UAlsConstants::StaticClass();
 	//for (TFieldIterator<UFunction> FuncIt(_Class); FuncIt; ++FuncIt)
 	//{
@@ -222,10 +222,14 @@ void AAlsCharacter::InitializeCurveNameSet()
 	CurveNameSet.Add(UAlsConstants::FootstepSoundBlockCurveName());
 
 	// Physical Animation Curves
-	CurveNameSet.Add(UAlsConstants::PAFreeLegLeftCurveName());
-	CurveNameSet.Add(UAlsConstants::PAFreeLegRightCurveName());
+	CurveNameSet.Add(UAlsConstants::PALockArmLeftCurveName());
+	CurveNameSet.Add(UAlsConstants::PALockArmRightCurveName());
+	CurveNameSet.Add(UAlsConstants::PALockLegLeftCurveName());
+	CurveNameSet.Add(UAlsConstants::PALockLegRightCurveName());
 	CurveNameSet.Add(UAlsConstants::PALockHandLeftCurveName());
 	CurveNameSet.Add(UAlsConstants::PALockHandRightCurveName());
+	CurveNameSet.Add(UAlsConstants::PALockFootLeftCurveName());
+	CurveNameSet.Add(UAlsConstants::PALockFootRightCurveName());
 }
 
 void AAlsCharacter::DisplayDebugCurves(const UCanvas* Canvas, const float Scale,

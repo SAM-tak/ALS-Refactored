@@ -1803,10 +1803,14 @@ void UAlsAnimationInstance::RefreshPhysicalAnimationOnGameThread()
 {
 	check(IsInGameThread())
 
+	PhysicalAnimationCurveState.LockLeftArm = GetCurveValueClamped01(UAlsConstants::PALockArmLeftCurveName());
+	PhysicalAnimationCurveState.LockRightArm = GetCurveValueClamped01(UAlsConstants::PALockArmRightCurveName());
 	PhysicalAnimationCurveState.LockLeftHand = GetCurveValueClamped01(UAlsConstants::PALockHandLeftCurveName());
 	PhysicalAnimationCurveState.LockRightHand = GetCurveValueClamped01(UAlsConstants::PALockHandRightCurveName());
-	PhysicalAnimationCurveState.FreeLeftLeg = GetCurveValueClamped01(UAlsConstants::PAFreeLegLeftCurveName());
-	PhysicalAnimationCurveState.FreeRightLeg = GetCurveValueClamped01(UAlsConstants::PAFreeLegRightCurveName());
+	PhysicalAnimationCurveState.LockLeftLeg = GetCurveValueClamped01(UAlsConstants::PALockLegLeftCurveName());
+	PhysicalAnimationCurveState.LockRightLeg = GetCurveValueClamped01(UAlsConstants::PALockLegRightCurveName());
+	PhysicalAnimationCurveState.LockLeftFoot = GetCurveValueClamped01(UAlsConstants::PALockFootLeftCurveName());
+	PhysicalAnimationCurveState.LockRightFoot = GetCurveValueClamped01(UAlsConstants::PALockFootRightCurveName());
 }
 
 float UAlsAnimationInstance::GetCurveValueClamped01(const FName& CurveName) const

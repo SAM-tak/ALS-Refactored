@@ -9,17 +9,26 @@ struct ALS_API FAlsPhysicalAnimationCurveState
 	GENERATED_BODY()
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS")
-	float LockLeftHand{0.0f};
+	float LockLeftArm{0.0f};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS")
+	float LockRightArm{ 0.0f };
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS")
+	float LockLeftHand{ 0.0f };
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS")
 	float LockRightHand{0.0f};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS")
-	float FreeLeftLeg{0.0f};
+	float LockLeftLeg{ 0.0f };
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS")
-	float FreeRightLeg{0.0f};
+	float LockRightLeg{ 0.0f };
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS")
-	float FreeTorso{0.0f};
+	float LockLeftFoot{0.0f};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS")
+	float LockRightFoot{0.0f};
 };
