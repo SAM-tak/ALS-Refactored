@@ -1412,7 +1412,8 @@ void AAlsCharacter::RefreshLocomotion(const float DeltaTime)
 	LocomotionState.bMoving = (LocomotionState.bHasInput && LocomotionState.bHasSpeed) ||
 	                          LocomotionState.Speed > Settings->MovingSpeedThreshold;
 
-	if ((LocomotionAction.IsValid() || LocomotionMode == AlsLocomotionModeTags::Grounded)
+	if (Settings->bAutoTurnOffSprint
+		&& (LocomotionAction.IsValid() || LocomotionMode == AlsLocomotionModeTags::Grounded)
 		&& LocomotionState.Speed < AlsCharacterMovement->GetGaitSettings().WalkSpeed && GetDesiredGait() == AlsGaitTags::Sprinting)
 	{
 		SetDesiredGait(AlsGaitTags::Running);

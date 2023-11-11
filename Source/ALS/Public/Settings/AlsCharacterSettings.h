@@ -39,6 +39,9 @@ public:
 	bool bRotateTowardsDesiredVelocityInVelocityDirectionRotationMode{true};
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings")
+	bool bAutoTurnOffSprint{false};
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings")
 	FAlsViewSettings View;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings")
