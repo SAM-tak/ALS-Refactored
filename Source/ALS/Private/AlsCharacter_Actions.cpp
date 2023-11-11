@@ -10,6 +10,7 @@
 #include "RootMotionSources/AlsRootMotionSource_Mantling.h"
 #include "Settings/AlsCharacterSettings.h"
 #include "Utility/AlsConstants.h"
+#include "Utility/AlsLog.h"
 #include "Utility/AlsMacros.h"
 #include "Utility/AlsUtility.h"
 
@@ -726,10 +727,10 @@ void AAlsCharacter::StartRagdollingImplementation()
 		GetMesh()->bOnlyAllowAutonomousTickPose = false;
 	}
 
-	// Take snapshot current pose.
+	// Ensure freeze flag is off.
 
-	AnimationInstance->OnStartRagdolling();
-	
+	AnimationInstance->UnFreezeRagdolling();
+
 	// Initialize bFacedUpward flag by current movement direction. If Velocity is Zero, it is chosen bFacedUpward is true.
 
 	RagdollingState.bFacedUpward = GetActorForwardVector().Dot(AlsCharacterMovement->Velocity.GetSafeNormal2D()) <= 0.0f;
@@ -777,6 +778,7 @@ void AAlsCharacter::StartRagdollingImplementation()
 
 	RagdollingState.PullForce = 0.0f;
 	RagdollingState.bPendingFinalization = false;
+	RagdollingState.ElapsedTime = 0.0f;
 	RagdollingState.TimeAfterGrounded = RagdollingState.TimeAfterGroundedAndStopped = 0.0f;
 	RagdollingState.bFreezing = false;
 
@@ -844,7 +846,7 @@ void AAlsCharacter::RefreshRagdolling(const float DeltaTime)
 
 	RefreshRagdollingActorTransform(DeltaTime);
 
-	AnimationInstance->UpdateRagdollingFlags(RagdollingState.bGrounded, RagdollingState.bFacedUpward);
+	AnimationInstance->UpdateRagdollingFlags(IsRagdollingGroundedAndAged(), RagdollingState.bFacedUpward);
 
 	if (Settings->Ragdolling.bAllowFreeze)
 	{
@@ -901,6 +903,8 @@ void AAlsCharacter::RefreshRagdolling(const float DeltaTime)
 			RagdollingState.TimeAfterGrounded = RagdollingState.TimeAfterGroundedAndStopped = 0.0f;
 		}
 	}
+
+	RagdollingState.ElapsedTime += DeltaTime;
 }
 
 void AAlsCharacter::RefreshRagdollingActorTransform(const float DeltaTime)
@@ -959,22 +963,32 @@ void AAlsCharacter::RefreshRagdollingActorTransform(const float DeltaTime)
 		                    PullForceSocketName, true);
 	}
 
-	// Determine whether the ragdoll is facing upward or downward and set the target rotation accordingly.
-
-	const auto PelvisDirDotUp{PelvisTransform.TransformVector(FVector::RightVector).Dot(FVector::UpVector)};
-
-	if (FMath::Abs(PelvisDirDotUp) > 0.5f)
-	{
-		RagdollingState.bFacedUpward = PelvisDirDotUp > 0.0f;
-	}
-
 	// Just for info.
 	GetCharacterMovement()->Velocity = DeltaTime > 0.0f ? (NewActorLocation - GetActorLocation()) / DeltaTime : FVector::Zero();
 
 	SetActorLocation(NewActorLocation);
 
-	if (RagdollingState.bGrounded)
+	if (IsRagdollingGroundedAndAged())
 	{
+		// Determine whether the ragdoll is facing upward or downward and set the target rotation accordingly.
+
+		const auto PelvisDirDotUp{PelvisTransform.TransformVector(FVector::RightVector).Dot(FVector::UpVector)};
+
+		if (RagdollingState.bFacedUpward)
+		{
+			if (PelvisDirDotUp < -0.5f)
+			{
+				RagdollingState.bFacedUpward = false;
+			}
+		}
+		else
+		{
+			if (PelvisDirDotUp > 0.5f)
+			{
+				RagdollingState.bFacedUpward = true;
+			}
+		}
+
 		const auto PelvisRotation{GetMesh()->GetSocketTransform(UAlsConstants::PelvisBoneName()).Rotator()};
 
 		auto NewActorRotation{GetActorRotation()};
@@ -986,7 +1000,7 @@ void AAlsCharacter::RefreshRagdollingActorTransform(const float DeltaTime)
 
 bool AAlsCharacter::IsRagdollingAllowedToStop() const
 {
-	return LocomotionAction == AlsLocomotionActionTags::Ragdolling && RagdollingState.PAStrengthMultiplierBlendAlpha >= 1.0f;
+	return LocomotionAction == AlsLocomotionActionTags::Ragdolling;
 }
 
 bool AAlsCharacter::StopRagdolling()
@@ -1063,7 +1077,7 @@ void AAlsCharacter::StopRagdollingImplementation()
 
 	OnRagdollingEnded();
 
-	if (RagdollingState.bGrounded &&
+	if (IsRagdollingGroundedAndAged() &&
 	    GetMesh()->GetAnimInstance()->Montage_Play(SelectGetUpMontage(RagdollingState.bFacedUpward), 1.0f,
 	                                               EMontagePlayReturnType::MontageLength, 0.0f, true))
 	{
@@ -1088,6 +1102,11 @@ void AAlsCharacter::FinalizeRagdolling()
 UAnimMontage* AAlsCharacter::SelectGetUpMontage_Implementation(const bool bRagdollFacedUpward)
 {
 	return bRagdollFacedUpward ? Settings->Ragdolling.GetUpBackMontage : Settings->Ragdolling.GetUpFrontMontage;
+}
+
+bool AAlsCharacter::IsRagdollingGroundedAndAged() const
+{
+	return RagdollingState.bGrounded && RagdollingState.ElapsedTime > AnimationInstance->GetRagdollingStartBlendTime();
 }
 
 void AAlsCharacter::OnRagdollingEnded_Implementation() {}

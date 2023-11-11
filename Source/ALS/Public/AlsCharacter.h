@@ -587,6 +587,8 @@ private:
 
 	void RefreshRagdollingActorTransform(float DeltaTime);
 
+	bool IsRagdollingGroundedAndAged() const;
+
 	// Physical Animation
 
 public:

@@ -10,7 +10,6 @@
 #include "Utility/AlsConstants.h"
 #include "Utility/AlsMacros.h"
 #include "Utility/AlsUtility.h"
-#include "Utility/AlsLog.h"
 
 #include UE_INLINE_GENERATED_CPP_BY_NAME(AlsAnimationInstance)
 
@@ -1179,18 +1178,14 @@ void UAlsAnimationInstance::RefreshFootOffset(FAlsFootState& FootState, const fl
 	};
 
 	FHitResult Hit;
-	if (!GetWorld()->IsPreviewWorld()) // In preview world, some times returns a wrong result.
-	{
-		GetWorld()->LineTraceSingleByChannel(
-			Hit,
-			TraceLocation + FVector{
-				0.0f, 0.0f, Settings->Feet.IkTraceDistanceUpward * LocomotionState.Scale
-			},
-			TraceLocation - FVector{
-				0.0f, 0.0f, Settings->Feet.IkTraceDistanceDownward * LocomotionState.Scale
-			},
-			Settings->Feet.IkTraceChannel, { __FUNCTION__, true, Character });
-	}
+	GetWorld()->LineTraceSingleByChannel(Hit,
+	                                     TraceLocation + FVector{
+		                                     0.0f, 0.0f, Settings->Feet.IkTraceDistanceUpward * LocomotionState.Scale
+	                                     },
+	                                     TraceLocation - FVector{
+		                                     0.0f, 0.0f, Settings->Feet.IkTraceDistanceDownward * LocomotionState.Scale
+	                                     },
+	                                     Settings->Feet.IkTraceChannel, {__FUNCTION__, true, Character});
 
 	const auto bGroundValid{Hit.IsValidBlockingHit() && Hit.ImpactNormal.Z >= LocomotionState.WalkableFloorZ};
 
@@ -1760,17 +1755,6 @@ void UAlsAnimationInstance::RefreshRagdollingOnGameThread()
 		UE_REAL_TO_FLOAT(GetSkelMeshComponent()->GetPhysicsLinearVelocity(UAlsConstants::RootBoneName()).Size() / ReferenceSpeed));
 }
 
-void UAlsAnimationInstance::OnStartRagdolling()
-{
-	check(IsInGameThread())
-
-	// Save a snapshot of the current ragdoll pose for use in animation graph to blend out of the ragdoll.
-
-	SnapshotPose(RagdollingState.InitialRagdollPose);
-
-	RagdollingState.bFreezed = false;
-}
-
 void UAlsAnimationInstance::FreezeRagdolling()
 {
 	check(IsInGameThread())
@@ -1791,12 +1775,15 @@ void UAlsAnimationInstance::UnFreezeRagdolling()
 
 	if (RagdollingState.bFreezed)
 	{
-		// Save a snapshot of the current ragdoll pose for use in animation graph to blend out of the ragdoll.
-
-		SnapshotPose(RagdollingState.InitialRagdollPose);
-
 		RagdollingState.bFreezed = false;
 	}
+}
+
+float UAlsAnimationInstance::GetRagdollingStartBlendTime() const
+{
+	check(IsInGameThread())
+
+	return Settings->RagdollingStartBlendTime;
 }
 
 void UAlsAnimationInstance::RefreshPhysicalAnimationOnGameThread()

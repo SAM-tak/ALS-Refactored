@@ -15,11 +15,14 @@ namespace
 {
 	bool IsProfileExist(const USkeletalMeshComponent* Mesh, const FName& ProfileName)
 	{
-		for(auto i : Mesh->Bodies)
+		for (auto i : Mesh->Bodies)
 		{
 			if (USkeletalBodySetup* BodySetup = Cast<USkeletalBodySetup>(i->BodySetup.Get()))
 			{
-				if (BodySetup->FindPhysicalAnimationProfile(ProfileName)) return true;
+				if (BodySetup->FindPhysicalAnimationProfile(ProfileName))
+				{
+					return true;
+				}
 			}
 		}
 		return false;
@@ -44,13 +47,7 @@ void AAlsCharacter::RefreshPhysicalAnimation(float DeltaTime)
 			GetMesh()->SetAllBodiesBelowSimulatePhysics(UAlsConstants::PelvisBoneName(), true);
 			GetMesh()->SetAllBodiesPhysicsBlendWeight(1.0f);
 			PhysicalAnimation->ApplyPhysicalAnimationProfileBelow(NAME_None, NAME_None, true, true);
-			RagdollingState.PAStrengthMultiplierBlendAlpha = 0.0f;
 		}
-
-		PhysicalAnimation->SetStrengthMultiplyer(RagdollingState.PAStrengthMultiplierBlendAlpha * Settings->Ragdolling.StrengthMultiplier);
-		RagdollingState.PAStrengthMultiplierBlendAlpha = FMath::Clamp(FMath::FInterpConstantTo(
-			RagdollingState.PAStrengthMultiplierBlendAlpha, 1.0f, DeltaTime, 1.0f / Settings->Ragdolling.StrengthMultiplierBlendTime),
-			0.0f, 1.0f);
 	}
 	else
 	{
@@ -206,10 +203,6 @@ void AAlsCharacter::RefreshPhysicalAnimation(float DeltaTime)
 	{
 		PhysicalAnimationState.ProfileName = CurrentProfileName;
 		PhysicalAnimation->ApplyPhysicalAnimationProfileBelow(NAME_None, CurrentProfileName);
-		if (!PhysicalAnimationState.bRagdolling)
-		{
-			PhysicalAnimation->SetStrengthMultiplyer(1.0f);
-		}
 		PhysicalAnimation->Activate();
 		if (Settings->PhysicalAnimation.bUseConstraintProfile)
 		{
@@ -219,7 +212,7 @@ void AAlsCharacter::RefreshPhysicalAnimation(float DeltaTime)
 
 	// Update PhysicsBlendWeight and Collision settings
 
-	if(LocomotionAction != AlsLocomotionActionTags::Ragdolling || !RagdollingState.bFreezing)
+	if (LocomotionAction != AlsLocomotionActionTags::Ragdolling || !RagdollingState.bFreezing)
 	{
 		PhysicalAnimationState.Refresh(DeltaTime, GetMesh(), Settings->PhysicalAnimation, AnimationInstance->GetPhysicalAnimationCurveState());
 	}

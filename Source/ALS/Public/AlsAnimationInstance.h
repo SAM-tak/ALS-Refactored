@@ -319,13 +319,13 @@ private:
 	void RefreshRagdollingOnGameThread();
 
 public:
-	void OnStartRagdolling();
-
 	void FreezeRagdolling();
 
 	void UnFreezeRagdolling();
 
-	void UpdateRagdollingFlags(bool bGrounded, bool bFacedUpward);
+	void UpdateRagdollingFlags(bool bGroundedAndAged, bool bFacedUpward);
+
+	float GetRagdollingStartBlendTime() const;
 
 	// PhysicalAnimation
 
@@ -386,9 +386,9 @@ inline void UAlsAnimationInstance::ResetJumped()
 	InAirState.bJumped = false;
 }
 
-inline void UAlsAnimationInstance::UpdateRagdollingFlags(bool bGrounded, bool bFacedUpward)
+inline void UAlsAnimationInstance::UpdateRagdollingFlags(bool bGroundedAndAged, bool bFacedUpward)
 {
-	RagdollingState.bGrounded = bGrounded;
+	RagdollingState.bGroundedAndAged = bGroundedAndAged;
 	RagdollingState.bFacedUpward = bFacedUpward;
 }
 
