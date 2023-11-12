@@ -7,6 +7,7 @@
 #include "State/AlsRagdollingState.h"
 #include "State/AlsRollingState.h"
 #include "State/AlsViewState.h"
+#include "State/AlsPhysicalAnimationState.h"
 #include "Utility/AlsGameplayTags.h"
 #include "AlsCharacter.generated.h"
 
@@ -17,6 +18,7 @@ class UAlsCharacterSettings;
 class UAlsMovementSettings;
 class UAlsAnimationInstance;
 class UAlsMantlingSettings;
+class UPhysicalAnimationComponent;
 
 UCLASS(AutoExpandCategories = ("Settings|Als Character", "Settings|Als Character|Desired State", "State|Als Character"))
 class ALS_API AAlsCharacter : public ACharacter
@@ -26,6 +28,9 @@ class ALS_API AAlsCharacter : public ACharacter
 protected:
 	UPROPERTY(BlueprintReadOnly, Category = "Als Character")
 	TObjectPtr<UAlsCharacterMovementComponent> AlsCharacterMovement;
+
+	UPROPERTY(BlueprintReadOnly, Category = "Als Character")
+	TObjectPtr<UPhysicalAnimationComponent> PhysicalAnimation;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings|Als Character")
 	TObjectPtr<UAlsCharacterSettings> Settings;
@@ -105,6 +110,9 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State|Als Character", Transient)
 	FAlsRollingState RollingState;
 
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State|Als Character", Transient)
+	FAlsPhysicalAnimationState PhysicalAnimationState;
+
 	FTimerHandle BrakingFrictionFactorResetTimer;
 
 public:
@@ -121,6 +129,17 @@ public:
 	virtual void PostRegisterAllComponents() override;
 
 	virtual void PostInitializeComponents() override;
+
+	/** Name of the PhysicalAnimationComponent. */
+	static FName PhysicalAnimationComponentName;
+
+	/** Returns PhysicalAnimation subobject **/
+	template <class T>
+	FORCEINLINE_DEBUGGABLE T* GetPhysicalAnimation() const
+	{
+		return CastChecked<T>(PhysicalAnimation, ECastCheckedType::NullAllowed);
+	}
+	FORCEINLINE UPhysicalAnimationComponent* GetPhysicalAnimation() const { return PhysicalAnimation; }
 
 protected:
 	virtual void BeginPlay() override;
@@ -569,7 +588,28 @@ private:
 
 	FVector RagdollTraceGround(bool& bGrounded) const;
 
-	void LimitRagdollSpeed() const;
+	bool IsRagdollingGroundedAndAged() const;
+
+	// Physical Animation
+
+public:
+	/** Name list of PhysicalAnimationProfile Name for override.
+	  Only bodies with physical animation parameters set in any of the profiles in the list will be subject to physical simulation,
+	  and the simulation for other bodies will be turned off.
+	  Physical animation parameters are applied in order from the beginning of the list,
+	  and if multiple parameters are set for the same body in different profiles,
+	  they are overwritten by the later parameters in the list. */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "State|Als Character")
+	TArray<FName> OverridePAProfileNames;
+
+	/** Name list of PhysicalAnimationProfile Name for multiply.
+	  'Multiply' means only overwriting the physical animation parameters,
+	  without affecting the on/off state of the physical simulation.*/
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "State|Als Character")
+	TArray<FName> MultiplyPAProfileNames;
+
+private:
+	void RefreshPhysicalAnimation(float DeltaTime);
 
 	// Debug
 

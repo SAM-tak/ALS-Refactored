@@ -95,6 +95,7 @@ void UAlsAnimationInstance::NativeUpdateAnimation(const float DeltaTime)
 	RefreshFeetOnGameThread();
 
 	RefreshRagdollingOnGameThread();
+	RefreshPhysicalAnimationOnGameThread();
 }
 
 void UAlsAnimationInstance::NativeThreadSafeUpdateAnimation(const float DeltaTime)
@@ -1694,7 +1695,7 @@ void UAlsAnimationInstance::RefreshTurnInPlace(const float DeltaTime)
 		}
 	}
 
-	if (IsValid(TurnInPlaceSettings) && ALS_ENSURE(IsValid(TurnInPlaceSettings->Animation)))
+	if (TurnInPlaceSettings && IsValid(TurnInPlaceSettings) && ALS_ENSURE(IsValid(TurnInPlaceSettings->Animation)))
 	{
 		// Animation montages can't be played in the worker thread, so queue them up to play later in the game thread.
 
@@ -1747,22 +1748,67 @@ void UAlsAnimationInstance::RefreshRagdollingOnGameThread()
 		return;
 	}
 
+	if (RagdollingState.bFreezed)
+	{
+		return;
+	}
+
 	// Scale the flail play rate by the root speed. The faster the ragdoll moves, the faster the character will flail.
 
 	static constexpr auto ReferenceSpeed{1000.0f};
 
-	RagdollingState.FlailPlayRate = UAlsMath::Clamp01(UE_REAL_TO_FLOAT(Character->GetRagdollingState().Velocity.Size() / ReferenceSpeed));
+	RagdollingState.FlailPlayRate = UAlsMath::Clamp01(UE_REAL_TO_FLOAT(Character->GetCharacterMovement()->Velocity.Size() / ReferenceSpeed));
 }
 
-FPoseSnapshot& UAlsAnimationInstance::SnapshotFinalRagdollPose()
+FPoseSnapshot& UAlsAnimationInstance::GetFinalRagdollPoseSnapshot()
 {
 	check(IsInGameThread())
 
-	// Save a snapshot of the current ragdoll pose for use in animation graph to blend out of the ragdoll.
-
-	SnapshotPose(RagdollingState.FinalRagdollPose);
-
 	return RagdollingState.FinalRagdollPose;
+}
+
+void UAlsAnimationInstance::FreezeRagdolling()
+{
+	check(IsInGameThread())
+
+	if (!RagdollingState.bFreezed)
+	{
+		// Save a snapshot of the current ragdoll pose for use in animation graph to blend out of the ragdoll.
+		SnapshotPose(RagdollingState.FinalRagdollPose);
+
+		RagdollingState.bFreezed = true;
+	}
+}
+
+void UAlsAnimationInstance::UnFreezeRagdolling()
+{
+	check(IsInGameThread())
+
+	if (RagdollingState.bFreezed)
+	{
+		RagdollingState.bFreezed = false;
+	}
+}
+
+float UAlsAnimationInstance::GetRagdollingStartBlendTime() const
+{
+	check(IsInGameThread())
+
+	return Settings->RagdollingStartBlendTime;
+}
+
+void UAlsAnimationInstance::RefreshPhysicalAnimationOnGameThread()
+{
+	check(IsInGameThread())
+
+	PhysicalAnimationCurveState.LockLeftArm = GetCurveValueClamped01(UAlsConstants::PALockArmLeftCurveName());
+	PhysicalAnimationCurveState.LockRightArm = GetCurveValueClamped01(UAlsConstants::PALockArmRightCurveName());
+	PhysicalAnimationCurveState.LockLeftHand = GetCurveValueClamped01(UAlsConstants::PALockHandLeftCurveName());
+	PhysicalAnimationCurveState.LockRightHand = GetCurveValueClamped01(UAlsConstants::PALockHandRightCurveName());
+	PhysicalAnimationCurveState.LockLeftLeg = GetCurveValueClamped01(UAlsConstants::PALockLegLeftCurveName());
+	PhysicalAnimationCurveState.LockRightLeg = GetCurveValueClamped01(UAlsConstants::PALockLegRightCurveName());
+	PhysicalAnimationCurveState.LockLeftFoot = GetCurveValueClamped01(UAlsConstants::PALockFootLeftCurveName());
+	PhysicalAnimationCurveState.LockRightFoot = GetCurveValueClamped01(UAlsConstants::PALockFootRightCurveName());
 }
 
 float UAlsAnimationInstance::GetCurveValueClamped01(const FName& CurveName) const

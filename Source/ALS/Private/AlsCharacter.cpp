@@ -5,6 +5,7 @@
 #include "TimerManager.h"
 #include "Components/CapsuleComponent.h"
 #include "Components/SkeletalMeshComponent.h"
+#include "PhysicsEngine/PhysicalAnimationComponent.h"
 #include "Curves/CurveFloat.h"
 #include "GameFramework/GameNetworkManager.h"
 #include "GameFramework/PlayerController.h"
@@ -43,6 +44,8 @@ AAlsCharacter::AAlsCharacter(const FObjectInitializer& ObjectInitializer) : Supe
 	}
 
 	AlsCharacterMovement = Cast<UAlsCharacterMovementComponent>(GetCharacterMovement());
+
+	PhysicalAnimation = CreateDefaultSubobject<UPhysicalAnimationComponent>(PhysicalAnimationComponentName);
 
 	// This will prevent the editor from combining component details with actor details.
 	// Component details can still be accessed from the actor's component hierarchy.
@@ -136,6 +139,8 @@ void AAlsCharacter::PostInitializeComponents()
 	AlsCharacterMovement->SetMovementSettings(MovementSettings);
 
 	AnimationInstance = Cast<UAlsAnimationInstance>(GetMesh()->GetAnimInstance());
+
+	PhysicalAnimation->SetSkeletalMeshComponent(GetMesh());
 
 	Super::PostInitializeComponents();
 }
@@ -289,6 +294,7 @@ void AAlsCharacter::Tick(const float DeltaTime)
 	RefreshMantling();
 	RefreshRagdolling(DeltaTime);
 	RefreshRolling(DeltaTime);
+	RefreshPhysicalAnimation(DeltaTime);
 
 	Super::Tick(DeltaTime);
 
