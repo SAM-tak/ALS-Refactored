@@ -31,11 +31,11 @@ bool FAlsRootMotionSource_Mantling::Matches(const FRootMotionSource* Other) cons
 	const auto* OtherCasted{static_cast<const FAlsRootMotionSource_Mantling*>(Other)};
 
 	return MantlingSettings == OtherCasted->MantlingSettings &&
-		   TargetPrimitive == OtherCasted->TargetPrimitive;
+	       TargetPrimitive == OtherCasted->TargetPrimitive;
 }
 
 void FAlsRootMotionSource_Mantling::PrepareRootMotion(const float SimulationDeltaTime, const float DeltaTime,
-													  const ACharacter& Character, const UCharacterMovementComponent& Movement)
+                                                      const ACharacter& Character, const UCharacterMovementComponent& Movement)
 {
 	SetTime(GetTime() + SimulationDeltaTime);
 
@@ -47,7 +47,7 @@ void FAlsRootMotionSource_Mantling::PrepareRootMotion(const float SimulationDelt
 
 	const auto* Montage{MantlingSettings->Montage.Get()};
 	const auto MontageTime{MontageStartTime + GetTime() * Montage->RateScale};
-	
+
 	// Synchronize the mantling animation montage's time with the mantling root motion source's time.
 	// Delta time subtraction is necessary here, otherwise there will be a one frame lag between them.
 
@@ -68,7 +68,7 @@ void FAlsRootMotionSource_Mantling::PrepareRootMotion(const float SimulationDelt
 	if (MontageBlendIn.GetBlendTime() > 0.0f)
 	{
 		BlendInAmount = FAlphaBlend::AlphaToBlendOption(GetTime() / MontageBlendIn.GetBlendTime(),
-														MontageBlendIn.GetBlendOption(), MontageBlendIn.GetCustomCurve());
+		                                                MontageBlendIn.GetBlendOption(), MontageBlendIn.GetCustomCurve());
 	}
 
 	const auto CurrentAnimationLocation{UAlsUtility::ExtractRootTransformFromMontage(Montage, MontageTime).GetLocation()};

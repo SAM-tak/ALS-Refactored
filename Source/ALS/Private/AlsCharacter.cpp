@@ -467,15 +467,7 @@ void AAlsCharacter::OnMovementModeChanged(const EMovementMode PreviousMovementMo
 		case MOVE_Falling:
 			SetLocomotionMode(AlsLocomotionModeTags::InAir);
 			break;
-			
-		case MOVE_Custom:
-			if (GetCharacterMovement()->CustomMovementMode != 0)
-			{
-				// CustomMovementMode should be handled elsewhere
-				break;
-			}
-			// else : CustomMovementMode is 0, fall into default case
-			[[fallthrough]];
+
 		default:
 			SetLocomotionMode(FGameplayTag::EmptyTag);
 			break;

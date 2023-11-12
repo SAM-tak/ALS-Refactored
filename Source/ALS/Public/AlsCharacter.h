@@ -592,9 +592,20 @@ private:
 	// Physical Animation
 
 public:
-	/** Name of PhysicalAnimationProfile Name for override. */
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "State|Als Character", Transient, Replicated)
-	FName OverridePAProfileName;
+	/** Name list of PhysicalAnimationProfile Name for override.
+	  Only bodies with physical animation parameters set in any of the profiles in the list will be subject to physical simulation,
+	  and the simulation for other bodies will be turned off.
+	  Physical animation parameters are applied in order from the beginning of the list,
+	  and if multiple parameters are set for the same body in different profiles,
+	  they are overwritten by the later parameters in the list. */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "State|Als Character")
+	TArray<FName> OverridePAProfileNames;
+
+	/** Name list of PhysicalAnimationProfile Name for multiply.
+	  'Multiply' means only overwriting the physical animation parameters,
+	  without affecting the on/off state of the physical simulation.*/
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "State|Als Character")
+	TArray<FName> MultiplyPAProfileNames;
 
 private:
 	void RefreshPhysicalAnimation(float DeltaTime);

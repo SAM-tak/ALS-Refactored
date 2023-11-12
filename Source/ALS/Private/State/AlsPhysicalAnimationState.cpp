@@ -70,17 +70,70 @@ namespace
 	}
 }
 
+bool FAlsPhysicalAnimationState::HasAnyProfile(const USkeletalBodySetup* BodySetup)
+{
+	for (const auto& ProfileName : ProfileNames)
+	{
+		if (BodySetup->FindPhysicalAnimationProfile(ProfileName))
+		{
+			return true;
+		}
+	}
+	return false;
+}
+
+bool FAlsPhysicalAnimationState::NeedsProfielChange(const FGameplayTag& NewLocomotionMode, const FGameplayTag& NewLocomotionAction,
+	const FGameplayTag& NewStance, const FGameplayTag& NewGait, const FGameplayTag& NewOverlayMode, const TArray<FName>& NewMultiplyProfileNames)
+{
+	bool RetVal = false;
+	const FGameplayTag& NewLocomotion = NewLocomotionAction.IsValid() ? NewLocomotionAction : NewLocomotionMode;
+	if (Locomotion != NewLocomotion)
+	{
+		RetVal = true;
+	}
+	else if (Stance != NewStance)
+	{
+		RetVal = true;
+	}
+	else if (Gait != NewGait)
+	{
+		RetVal = true;
+	}
+	else if (OverlayMode != NewOverlayMode)
+	{
+		RetVal = true;
+	}
+	Locomotion = NewLocomotion;
+	Stance = NewStance;
+	Gait = NewGait;
+	OverlayMode = NewOverlayMode;
+	if (MultiplyProfileNames != NewMultiplyProfileNames)
+	{
+		MultiplyProfileNames = NewMultiplyProfileNames;
+		RetVal = true;
+	}
+	return RetVal;
+}
+
+void FAlsPhysicalAnimationState::ClearAlsTags()
+{
+	Locomotion = FGameplayTag::EmptyTag;
+	Stance = FGameplayTag::EmptyTag;
+	Gait = FGameplayTag::EmptyTag;
+	OverlayMode = FGameplayTag::EmptyTag;
+}
+
 void FAlsPhysicalAnimationState::Refresh(float DeltaTime, USkeletalMeshComponent* Mesh, const FAlsPhysicalAnimationSettings& Settings, const FAlsPhysicalAnimationCurveState& Curves)
 {
 	bool bNeedUpdate = bActive;
 
-	if (!bActive && ProfileName != NAME_None)
+	if (!bActive && ProfileNames.Num() > 0)
 	{
-		for(auto BI : Mesh->Bodies)
+		for (auto BI : Mesh->Bodies)
 		{
 			if (USkeletalBodySetup* BodySetup = Cast<USkeletalBodySetup>(BI->BodySetup.Get()))
 			{
-				if (!IsLocked(Curves, BodySetup->BoneName) && BodySetup->FindPhysicalAnimationProfile(ProfileName))
+				if (!IsLocked(Curves, BodySetup->BoneName) && HasAnyProfile(BodySetup))
 				{
 					bNeedUpdate = true;
 					break;
@@ -93,11 +146,11 @@ void FAlsPhysicalAnimationState::Refresh(float DeltaTime, USkeletalMeshComponent
 
 	if (bNeedUpdate)
 	{
-		for(auto BI : Mesh->Bodies)
+		for (auto BI : Mesh->Bodies)
 		{
 			if (USkeletalBodySetup* BodySetup = Cast<USkeletalBodySetup>(BI->BodySetup.Get()))
 			{
-				if (!IsLocked(Curves, BodySetup->BoneName) && BodySetup->FindPhysicalAnimationProfile(ProfileName))
+				if (!IsLocked(Curves, BodySetup->BoneName) && HasAnyProfile(BodySetup))
 				{
 					bActiveAny = true;
 					float Speed = 1.0f / FMath::Max(0.000001f, Settings.BlendTimeOfBlendWeightOnActivate);

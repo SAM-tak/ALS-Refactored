@@ -190,7 +190,7 @@ public:
 	static const FName& FootstepSoundBlockCurveName();
 
 	// Physical Animation Curves
-	
+
 	UFUNCTION(BlueprintPure, Category = "ALS|Constants|Physical Animation", Meta = (ReturnDisplayName = "Curve Name"))
 	static const FName& PALockArmLeftCurveName();
 

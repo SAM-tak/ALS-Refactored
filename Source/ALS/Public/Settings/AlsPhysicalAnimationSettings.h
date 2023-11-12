@@ -13,8 +13,4 @@ struct ALS_API FAlsPhysicalAnimationSettings
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS", Meta = (ClampMin = 0, ForceUnits = "s"))
 	float BlendTimeOfBlendWeightOnDeactivate{0.3f};
-
-	/** Apply the constraint profile with the same name as the physical animation profile if it exists. */
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS")
-	bool bUseConstraintProfile{false};
 };
