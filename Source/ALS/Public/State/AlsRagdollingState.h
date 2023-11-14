@@ -7,6 +7,12 @@ struct ALS_API FAlsRagdollingState
 {
 	GENERATED_BODY()
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS")
+	FVector Velocity{ForceInit};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS", Meta = (ForceUnits = "N"))
+	float PullForce{0.0f};
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS", Meta = (ClampMin = 0))
 	int32 SpeedLimitFrameTimeRemaining{0};
 
@@ -14,20 +20,11 @@ struct ALS_API FAlsRagdollingState
 	float SpeedLimit{0.0f};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS")
-	FVector RootBoneVelocity{ForceInit};
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS", Meta = (ForceUnits = "N"))
-	float PullForce{0.0f};
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS")
 	bool bGrounded{false};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS")
-	bool bFacedUpward{false};
+	bool bFacingUpward{false};
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS")
-	bool bPendingFinalization{false};
-	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS", Meta = (ForceUnits = "s"))
 	float ElapsedTime{0.0f};
 
@@ -40,12 +37,12 @@ struct ALS_API FAlsRagdollingState
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS")
 	bool bFreezing{false};
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "ALS")
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "ALS", Meta = (ForceUnits = "cm/s"))
 	float RootBoneSpeed{0.0f};
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "ALS")
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "ALS", Meta = (ForceUnits = "cm/s"))
 	float MaxBoneSpeed{0.0f};
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "ALS")
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "ALS", Meta = (ForceUnits = "deg"))
 	float MaxBoneAngularSpeed{0.0f};
 };

@@ -379,6 +379,19 @@ void AAlsCharacter::RefreshMeshProperties() const
 	if (GetMesh()->IsUsingAbsoluteRotation() != bUseAbsoluteRotation)
 	{
 		GetMesh()->SetUsingAbsoluteRotation(bUseAbsoluteRotation);
+
+		// Instantly update the relative mesh rotation, otherwise it will be incorrect during this tick.
+
+		if (bUseAbsoluteRotation || !IsValid(GetMesh()->GetAttachParent()))
+		{
+			GetMesh()->SetRelativeRotation_Direct(
+				GetMesh()->GetRelativeRotationCache().QuatToRotator(GetMesh()->GetComponentQuat()));
+		}
+		else
+		{
+			GetMesh()->SetRelativeRotation_Direct(
+				GetMesh()->GetRelativeRotationCache().QuatToRotator(GetActorQuat().Inverse() * GetMesh()->GetComponentQuat()));
+		}
 	}
 
 	if (!bMeshIsTicking)
@@ -1069,6 +1082,11 @@ void AAlsCharacter::SetLocomotionAction(const FGameplayTag& NewLocomotionAction)
 
 void AAlsCharacter::NotifyLocomotionActionChanged(const FGameplayTag& PreviousLocomotionAction)
 {
+	if (!LocomotionAction.IsValid())
+	{
+		AlsCharacterMovement->SetInputBlocked(false);
+	}
+
 	ApplyDesiredStance();
 
 	OnLocomotionActionChanged(PreviousLocomotionAction);
@@ -1324,7 +1342,8 @@ void AAlsCharacter::RefreshLocomotionLocationAndRotation()
 	{
 		const auto SmoothTransform{
 			ActorTransform * FTransform{
-				GetMesh()->GetRelativeRotationCache().RotatorToQuat(GetMesh()->GetRelativeRotation()) * GetBaseRotationOffset().Inverse(),
+				GetMesh()->GetRelativeRotationCache().RotatorToQuat_ReadOnly(
+					GetMesh()->GetRelativeRotation()) * GetBaseRotationOffset().Inverse(),
 				GetMesh()->GetRelativeLocation() - GetBaseTranslationOffset()
 			}
 		};

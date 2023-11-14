@@ -18,7 +18,7 @@ struct ALS_API FAlsRagdollingAnimationState
 	bool bGroundedAndAged{false};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS")
-	bool bFacedUpward{false};
+	bool bFacingUpward{false};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS")
 	bool bFreezed{false};

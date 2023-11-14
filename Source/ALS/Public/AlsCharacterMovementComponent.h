@@ -98,6 +98,10 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient)
 	bool bMovementModeLocked;
 
+	// Used to temporarily prohibit the player from moving the character. Also works for AI-controlled characters.
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient)
+	bool bInputBlocked;
+
 	// Valid only on locally controlled characters.
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient)
 	FRotator PreviousControlRotation;
@@ -127,7 +131,12 @@ public:
 
 	virtual void OnMovementModeChanged(EMovementMode PreviousMovementMode, uint8 PreviousCustomMode) override;
 
+	virtual bool ShouldPerformAirControlForPathFollowing() const override;
+
 	virtual void UpdateBasedRotation(FRotator& FinalRotation, const FRotator& ReducedRotation) override;
+
+	virtual bool ApplyRequestedMove(float DeltaTime, float CurrentMaxAcceleration, float MaxSpeed, float Friction,
+	                                float BrakingDeceleration, FVector& RequestedAcceleration, float& RequestedSpeed) override;
 
 	virtual void CalcVelocity(float DeltaTime, float Friction, bool bFluid, float BrakingDeceleration) override;
 
@@ -194,10 +203,12 @@ public:
 
 	void SetMovementModeLocked(bool bNewMovementModeLocked);
 
+	void SetInputBlocked(bool bNewInputBlocked);
+
 	bool TryConsumePrePenetrationAdjustmentVelocity(FVector& OutVelocity);
 
 public:
-	/** If true, try to crouch (or keep crouching) on next update. If false, try to stop crouching on next update. */
+	/** If true, try to lie (or keep lying down) on next update. If false, try to stop lying on next update. */
 	UPROPERTY(Category = "Als|Als Character Movement", VisibleInstanceOnly, BlueprintReadOnly)
 	uint8 bWantsToLie : 1;
 

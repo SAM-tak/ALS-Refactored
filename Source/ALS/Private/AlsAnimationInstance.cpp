@@ -49,27 +49,23 @@ void UAlsAnimationInstance::NativeUpdateAnimation(const float DeltaTime)
 		return;
 	}
 
-	// AAlsCharacter::FinalizeRagdolling() should only be called from here, not from AAlsCharacter::StopRagdollingImplementation(),
-	// otherwise the character mesh can sometimes take a strange pose when transitioning from ragdoll states to animation states.
+	auto* Mesh{GetSkelMeshComponent()};
 
-	Character->FinalizeRagdolling();
-
-	if (GetSkelMeshComponent()->IsUsingAbsoluteRotation())
+	if (Mesh->IsUsingAbsoluteRotation() && IsValid(Mesh->GetAttachParent()))
 	{
-		const auto& ActorTransform{Character->GetActorTransform()};
+		const auto& ParentTransform{Mesh->GetAttachParent()->GetComponentTransform()};
 
 		// Manually synchronize mesh rotation with character rotation.
 
-		GetSkelMeshComponent()->MoveComponent(
-			FVector::ZeroVector, ActorTransform.GetRotation() * Character->GetBaseRotationOffset(), false);
+		Mesh->MoveComponent(FVector::ZeroVector, ParentTransform.GetRotation() * Character->GetBaseRotationOffset(), false);
 
 		// Re-cache proxy transforms to match the modified mesh transform.
 
 		const auto& Proxy{GetProxyOnGameThread<FAnimInstanceProxy>()};
 
-		const_cast<FTransform&>(Proxy.GetComponentTransform()) = GetSkelMeshComponent()->GetComponentTransform();
-		const_cast<FTransform&>(Proxy.GetComponentRelativeTransform()) = GetSkelMeshComponent()->GetRelativeTransform();
-		const_cast<FTransform&>(Proxy.GetActorTransform()) = ActorTransform;
+		const_cast<FTransform&>(Proxy.GetComponentTransform()) = Mesh->GetComponentTransform();
+		const_cast<FTransform&>(Proxy.GetComponentRelativeTransform()) = Mesh->GetRelativeTransform();
+		const_cast<FTransform&>(Proxy.GetActorTransform()) = Character->GetActorTransform();
 	}
 
 #if WITH_EDITORONLY_DATA && ENABLE_DRAW_DEBUG
@@ -1751,8 +1747,14 @@ void UAlsAnimationInstance::RefreshRagdollingOnGameThread()
 
 	static constexpr auto ReferenceSpeed{1000.0f};
 
-	RagdollingState.FlailPlayRate = UAlsMath::Clamp01(
-		UE_REAL_TO_FLOAT(GetSkelMeshComponent()->GetPhysicsLinearVelocity(UAlsConstants::RootBoneName()).Size() / ReferenceSpeed));
+	RagdollingState.FlailPlayRate = UAlsMath::Clamp01(UE_REAL_TO_FLOAT(Character->GetRagdollingState().Velocity.Size() / ReferenceSpeed));
+}
+
+FPoseSnapshot& UAlsAnimationInstance::GetFinalRagdollPoseSnapshot()
+{
+	check(IsInGameThread())
+
+	return RagdollingState.FinalRagdollPose;
 }
 
 void UAlsAnimationInstance::FreezeRagdolling()
@@ -1762,7 +1764,6 @@ void UAlsAnimationInstance::FreezeRagdolling()
 	if (!RagdollingState.bFreezed)
 	{
 		// Save a snapshot of the current ragdoll pose for use in animation graph to blend out of the ragdoll.
-
 		SnapshotPose(RagdollingState.FinalRagdollPose);
 
 		RagdollingState.bFreezed = true;
