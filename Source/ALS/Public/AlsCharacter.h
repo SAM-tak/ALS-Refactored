@@ -586,8 +586,6 @@ private:
 
 	FVector RagdollTraceGround(bool& bGrounded) const;
 
-	void LimitRagdollSpeed() const;
-
 	bool IsRagdollingGroundedAndAged() const;
 
 	// Physical Animation
