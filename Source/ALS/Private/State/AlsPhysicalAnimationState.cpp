@@ -86,8 +86,11 @@ bool FAlsPhysicalAnimationState::NeedsProfielChange(const FGameplayTag& NewLocom
 	const FGameplayTag& NewStance, const FGameplayTag& NewGait, const FGameplayTag& NewOverlayMode, const TArray<FName>& NewMultiplyProfileNames)
 {
 	bool RetVal = false;
-	const FGameplayTag& NewLocomotion = NewLocomotionAction.IsValid() ? NewLocomotionAction : NewLocomotionMode;
-	if (Locomotion != NewLocomotion)
+	if (LocomotionAction != NewLocomotionAction)
+	{
+		RetVal = true;
+	}
+	else if(LocomotionMode != NewLocomotionMode)
 	{
 		RetVal = true;
 	}
@@ -103,7 +106,8 @@ bool FAlsPhysicalAnimationState::NeedsProfielChange(const FGameplayTag& NewLocom
 	{
 		RetVal = true;
 	}
-	Locomotion = NewLocomotion;
+	LocomotionAction = NewLocomotionAction;
+	LocomotionMode = NewLocomotionMode;
 	Stance = NewStance;
 	Gait = NewGait;
 	OverlayMode = NewOverlayMode;
@@ -117,7 +121,8 @@ bool FAlsPhysicalAnimationState::NeedsProfielChange(const FGameplayTag& NewLocom
 
 void FAlsPhysicalAnimationState::ClearAlsTags()
 {
-	Locomotion = FGameplayTag::EmptyTag;
+	LocomotionAction = FGameplayTag::EmptyTag;
+	LocomotionMode = FGameplayTag::EmptyTag;
 	Stance = FGameplayTag::EmptyTag;
 	Gait = FGameplayTag::EmptyTag;
 	OverlayMode = FGameplayTag::EmptyTag;

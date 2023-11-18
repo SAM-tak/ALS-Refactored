@@ -25,7 +25,10 @@ struct ALS_API FAlsPhysicalAnimationState
 	TArray<FName> MultiplyProfileNames;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "ALS", Transient)
-	FGameplayTag Locomotion;
+	FGameplayTag LocomotionAction;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "ALS", Transient)
+	FGameplayTag LocomotionMode;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "ALS", Transient)
 	FGameplayTag Stance;
