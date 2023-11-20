@@ -7,6 +7,9 @@ struct ALS_API FAlsRagdollingState
 {
 	GENERATED_BODY()
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS", Meta = (ForceUnits = "deg"))
+	float LyingDownYawAngleDelta{0.0f};
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS")
 	bool bGrounded{false};
 
@@ -17,10 +20,10 @@ struct ALS_API FAlsRagdollingState
 	float ElapsedTime{0.0f};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS", Meta = (ForceUnits = "s"))
-	float TimeAfterGrounded{0};
+	float TimeAfterGrounded{0.0f};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS", Meta = (ForceUnits = "s"))
-	float TimeAfterGroundedAndStopped{0};
+	float TimeAfterGroundedAndStopped{0.0f};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS")
 	bool bFreezing{false};

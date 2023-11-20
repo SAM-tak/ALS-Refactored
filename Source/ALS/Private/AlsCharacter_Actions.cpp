@@ -714,6 +714,22 @@ void AAlsCharacter::StartRagdollingImplementation()
 
 	AnimationInstance->UnFreezeRagdolling();
 
+	// Initialize bFacingUpward flag by current movement direction. If Velocity is Zero, it is chosen bFacingUpward is true.
+	// And determine target yaw angle of the character.
+
+	const auto Direction = AlsCharacterMovement->Velocity.GetSafeNormal2D();
+
+	if (Direction.SizeSquared2D() > 0.0)
+	{
+		RagdollingState.bFacingUpward = GetActorForwardVector().Dot(Direction) < -0.25f;
+		RagdollingState.LyingDownYawAngleDelta = UAlsMath::DirectionToAngleXY(RagdollingState.bFacingUpward ? -Direction : Direction) - GetActorRotation().Yaw;
+	}
+	else
+	{
+		RagdollingState.bFacingUpward = true;
+		RagdollingState.LyingDownYawAngleDelta = 0.0;
+	}
+
 	// Stop any active montages.
 
 	static constexpr auto BlendOutDuration{0.2f};
@@ -796,7 +812,7 @@ void AAlsCharacter::RefreshRagdolling(const float DeltaTime)
 	// as the character's location, we don't do that because the camera depends on the
 	// capsule's bottom location, so its removal will cause the camera to behave erratically.
 
-	auto NewActorLocation = RagdollTraceGround(RagdollingState.bGrounded);
+	auto NewActorLocation{RagdollTraceGround(RagdollingState.bGrounded)};
 
 	// Just for info.
 	GetCharacterMovement()->Velocity = DeltaTime > 0.0f ? (NewActorLocation - GetActorLocation()) / DeltaTime : FVector::Zero();
@@ -827,7 +843,7 @@ void AAlsCharacter::RefreshRagdolling(const float DeltaTime)
 		}
 	}
 
-	AnimationInstance->UpdateRagdollingFlags(IsRagdollingGroundedAndAged(), RagdollingState.bFacingUpward);
+	AnimationInstance->UpdateRagdollingAnimationState(RagdollingState);
 
 	if (Settings->Ragdolling.bAllowFreeze)
 	{
@@ -884,11 +900,10 @@ void AAlsCharacter::RefreshRagdolling(const float DeltaTime)
 		}
 	}
 
-
 	if (RagdollingState.ElapsedTime <= AnimationInstance->GetRagdollingStartBlendTime() &&
 		RagdollingState.ElapsedTime + DeltaTime > AnimationInstance->GetRagdollingStartBlendTime())
 	{
-		// Initialize bFacingUpward flag by current movement direction. If Velocity is Zero, it is chosen bFacingUpward is true.
+		// Re-initialize bFacingUpward flag by current movement direction. If Velocity is Zero, it is chosen bFacingUpward is true.
 		RagdollingState.bFacingUpward = GetActorForwardVector().Dot(AlsCharacterMovement->Velocity.GetSafeNormal2D()) <= 0.0f;
 	}
 

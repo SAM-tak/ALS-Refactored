@@ -7,6 +7,9 @@ USTRUCT(BlueprintType)
 struct ALS_API FAlsRagdollingAnimationState
 {
 	GENERATED_BODY()
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS", Meta = (ForceUnits = "deg"))
+	float LyingDownYawAngleDelta{0.0f};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS")
 	FPoseSnapshot FinalRagdollPose;

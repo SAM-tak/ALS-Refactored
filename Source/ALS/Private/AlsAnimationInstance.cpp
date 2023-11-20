@@ -1174,15 +1174,36 @@ void UAlsAnimationInstance::RefreshFootOffset(FAlsFootState& FootState, const fl
 	};
 
 	FHitResult Hit;
-	GetWorld()->LineTraceSingleByChannel(Hit,
-	                                     TraceLocation + FVector{
-		                                     0.0f, 0.0f, Settings->Feet.IkTraceDistanceUpward * LocomotionState.Scale
-	                                     },
-	                                     TraceLocation - FVector{
-		                                     0.0f, 0.0f, Settings->Feet.IkTraceDistanceDownward * LocomotionState.Scale
-	                                     },
-	                                     Settings->Feet.IkTraceChannel, {__FUNCTION__, true, Character});
-
+	if(IsInGameThread())
+	{
+		FTraceDelegate TraceDelegate = FTraceDelegate::CreateWeakLambda(this, [FootState](const FTraceHandle& Handle, FTraceDatum& Data) mutable {
+			if (Data.OutHits.Num() > 0)
+			{
+				FootState.Hit = Data.OutHits[0];
+			}
+		});
+		GetWorld()->AsyncLineTraceByChannel(EAsyncTraceType::Single,
+											TraceLocation + FVector{
+												0.0f, 0.0f, Settings->Feet.IkTraceDistanceUpward * LocomotionState.Scale
+											},
+											TraceLocation - FVector{
+												0.0f, 0.0f, Settings->Feet.IkTraceDistanceDownward * LocomotionState.Scale
+											},
+											Settings->Feet.IkTraceChannel, {__FUNCTION__, true, Character},
+											FCollisionResponseParams::DefaultResponseParam, &TraceDelegate);
+		Hit = FootState.Hit;
+	}
+	else
+	{
+		GetWorld()->LineTraceSingleByChannel(Hit,
+											 TraceLocation + FVector{
+												 0.0f, 0.0f, Settings->Feet.IkTraceDistanceUpward * LocomotionState.Scale
+											 },
+											 TraceLocation - FVector{
+												 0.0f, 0.0f, Settings->Feet.IkTraceDistanceDownward * LocomotionState.Scale
+											 },
+											 Settings->Feet.IkTraceChannel, {__FUNCTION__, true, Character});
+	}
 	const auto bGroundValid{Hit.IsValidBlockingHit() && Hit.ImpactNormal.Z >= LocomotionState.WalkableFloorZ};
 
 #if WITH_EDITORONLY_DATA && ENABLE_DRAW_DEBUG
