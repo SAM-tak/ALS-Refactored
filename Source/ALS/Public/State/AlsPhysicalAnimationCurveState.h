@@ -12,19 +12,19 @@ struct ALS_API FAlsPhysicalAnimationCurveState
 	float LockLeftArm{0.0f};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS")
-	float LockRightArm{ 0.0f };
+	float LockRightArm{0.0f};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS")
-	float LockLeftHand{ 0.0f };
+	float LockLeftHand{0.0f};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS")
 	float LockRightHand{0.0f};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS")
-	float LockLeftLeg{ 0.0f };
+	float LockLeftLeg{0.0f};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS")
-	float LockRightLeg{ 0.0f };
+	float LockRightLeg{0.0f};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS")
 	float LockLeftFoot{0.0f};

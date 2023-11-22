@@ -40,7 +40,7 @@ protected:
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings|Als Character|Desired State",
 		ReplicatedUsing = "OnReplicated_DesiredAiming")
-	bool bDesiredAiming;
+	uint8 bDesiredAiming : 1;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings|Als Character|Desired State", Replicated)
 	FGameplayTag DesiredRotationMode{AlsRotationModeTags::ViewDirection};
@@ -123,6 +123,8 @@ public:
 #endif
 
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
+
+	virtual void PreRegisterAllComponents() override;
 
 	virtual void PostRegisterAllComponents() override;
 

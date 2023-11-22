@@ -927,6 +927,82 @@ FVector AAlsCharacter::RagdollTraceGround(bool& bGrounded) const
 		TraceStart.X, TraceStart.Y,
 		bGrounded ? Hit.ImpactPoint.Z + CapsuleHalfHeight + UCharacterMovementComponent::MIN_FLOOR_DIST : TraceStart.Z
 	};
+		if (RagdollingState.bGrounded)
+		{
+			RagdollingState.TimeAfterGrounded += DeltaTime;
+
+			if (Settings->Ragdolling.TimeAfterGroundedForForceFreezing > 0.0f &&
+				RagdollingState.TimeAfterGrounded > Settings->Ragdolling.TimeAfterGroundedForForceFreezing)
+			{
+				RagdollingState.bFreezing = true;
+			}
+			else if (RagdollingState.RootBoneSpeed < Settings->Ragdolling.RootBoneSpeedConsideredAsStopped)
+			{
+				RagdollingState.TimeAfterGroundedAndStopped += DeltaTime;
+
+				if (Settings->Ragdolling.TimeAfterGroundedAndStoppedForForceFreezing > 0.0f &&
+					RagdollingState.TimeAfterGroundedAndStopped > Settings->Ragdolling.TimeAfterGroundedAndStoppedForForceFreezing)
+				{
+					RagdollingState.bFreezing = true;
+				}
+				else
+				{
+					RagdollingState.MaxBoneSpeed = 0.0f;
+					RagdollingState.MaxBoneAngularSpeed = 0.0f;
+					GetMesh()->ForEachBodyBelow(UAlsConstants::PelvisBoneName(), true, false, [&](FBodyInstance *Body) {
+						float v = Body->GetUnrealWorldVelocity().Size();
+						if(v > RagdollingState.MaxBoneSpeed) RagdollingState.MaxBoneSpeed = v;
+						v = FMath::RadiansToDegrees(Body->GetUnrealWorldAngularVelocityInRadians().Size());
+						if(v > RagdollingState.MaxBoneAngularSpeed) RagdollingState.MaxBoneAngularSpeed = v;
+					});
+					RagdollingState.bFreezing = RagdollingState.MaxBoneSpeed < Settings->Ragdolling.SpeedThresholdToFreeze &&
+						RagdollingState.MaxBoneAngularSpeed < Settings->Ragdolling.AngularSpeedThresholdToFreeze;
+				}
+			}
+			else
+			{
+				RagdollingState.TimeAfterGroundedAndStopped = 0.0f;
+			}
+
+			if (RagdollingState.bFreezing)
+			{
+				AnimationInstance->FreezeRagdolling();
+				GetMesh()->SetAllBodiesSimulatePhysics(false);
+			}
+		}
+		else
+		{
+			RagdollingState.TimeAfterGrounded = RagdollingState.TimeAfterGroundedAndStopped = 0.0f;
+		}
+	}
+
+	if (RagdollingState.ElapsedTime <= AnimationInstance->GetRagdollingStartBlendTime() &&
+		RagdollingState.ElapsedTime + DeltaTime > AnimationInstance->GetRagdollingStartBlendTime())
+	{
+		// Re-initialize bFacingUpward flag by current movement direction. If Velocity is Zero, it is chosen bFacingUpward is true.
+		RagdollingState.bFacingUpward = GetActorForwardVector().Dot(AlsCharacterMovement->Velocity.GetSafeNormal2D()) <= 0.0f;
+	}
+
+	RagdollingState.ElapsedTime += DeltaTime;
+}
+
+FVector AAlsCharacter::RagdollTraceGround(bool& bGrounded) const
+{
+	const auto CapsuleHalfHeight{GetCapsuleComponent()->GetScaledCapsuleHalfHeight()};
+
+	const auto TraceStart{!RagdollTargetLocation.IsZero() ? FVector{RagdollTargetLocation} : GetActorLocation()};
+	const FVector TraceEnd{TraceStart.X, TraceStart.Y, TraceStart.Z - CapsuleHalfHeight};
+
+	FHitResult Hit;
+	GetWorld()->LineTraceSingleByChannel(Hit, TraceStart, TraceEnd, Settings->Ragdolling.GroundTraceChannel,
+		                                 {__FUNCTION__, false, this}, Settings->Ragdolling.GroundTraceResponses);
+
+	bGrounded = AlsCharacterMovement->IsWalkable(Hit);
+
+	return {
+		TraceStart.X, TraceStart.Y,
+		bGrounded ? Hit.ImpactPoint.Z + CapsuleHalfHeight + UCharacterMovementComponent::MIN_FLOOR_DIST : TraceStart.Z
+	};
 }
 
 bool AAlsCharacter::IsRagdollingAllowedToStop() const

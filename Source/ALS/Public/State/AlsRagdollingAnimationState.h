@@ -18,11 +18,11 @@ struct ALS_API FAlsRagdollingAnimationState
 	float FlailPlayRate{1.0f};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS")
-	bool bGroundedAndAged{false};
+	uint8 bGroundedAndAged : 1 {false};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS")
-	bool bFacingUpward{false};
+	uint8 bFacingUpward : 1 {false};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS")
-	bool bFreezed{false};
+	uint8 bFreezed : 1 {false};
 };
