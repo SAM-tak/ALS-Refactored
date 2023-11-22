@@ -102,10 +102,6 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient)
 	uint8 bInputBlocked : 1;
 
-	// Used to temporarily prohibit the player from moving the character. Also works for AI-controlled characters.
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient)
-	bool bInputBlocked;
-
 	// Valid only on locally controlled characters.
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient)
 	FRotator PreviousControlRotation;
