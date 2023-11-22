@@ -40,10 +40,10 @@ struct ALS_API FAlsPhysicalAnimationState
 	FGameplayTag OverlayMode;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "ALS", Transient)
-	bool bActive{false};
+	uint8 bActive : 1 {false};
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "ALS", Transient)
-	bool bRagdolling{false};
+	uint8 bRagdolling : 1 {false};
 
 	bool NeedsProfielChange(const FGameplayTag& LocomotionMode, const FGameplayTag& LocomotionAction, const FGameplayTag& Stance,
 		const FGameplayTag& Gait, const FGameplayTag& OverlayMode, const TArray<FName>& MultiplyProfileNames);

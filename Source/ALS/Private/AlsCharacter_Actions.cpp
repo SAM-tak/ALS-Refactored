@@ -812,7 +812,9 @@ void AAlsCharacter::RefreshRagdolling(const float DeltaTime)
 	// as the character's location, we don't do that because the camera depends on the
 	// capsule's bottom location, so its removal will cause the camera to behave erratically.
 
-	auto NewActorLocation{RagdollTraceGround(RagdollingState.bGrounded)};
+	bool bGrounded;
+	auto NewActorLocation{RagdollTraceGround(bGrounded)};
+	RagdollingState.bGrounded = bGrounded;
 
 	// Just for info.
 	GetCharacterMovement()->Velocity = DeltaTime > 0.0f ? (NewActorLocation - GetActorLocation()) / DeltaTime : FVector::Zero();

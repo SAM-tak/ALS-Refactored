@@ -37,7 +37,7 @@ public:
 	// If checked, it stops the physical simulation and returns control of the bone to kinematic
 	// when the conditions mentioned later are met.
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS")
-	bool bAllowFreeze{false};
+	uint8 bAllowFreeze : 1 {false};
 
 	// The time until it freezes forcibly after landing.
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS", Meta = (ClampMin = 0, EditCondition = "bAllowFreeze", ForceUnits = "s"))

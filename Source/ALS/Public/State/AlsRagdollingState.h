@@ -11,10 +11,10 @@ struct ALS_API FAlsRagdollingState
 	float LyingDownYawAngleDelta{0.0f};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS")
-	bool bGrounded{false};
+	uint8 bGrounded : 1 {false};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS")
-	bool bFacingUpward{false};
+	uint8 bFacingUpward : 1 {false};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS", Meta = (ForceUnits = "s"))
 	float ElapsedTime{0.0f};
@@ -26,7 +26,7 @@ struct ALS_API FAlsRagdollingState
 	float TimeAfterGroundedAndStopped{0.0f};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS")
-	bool bFreezing{false};
+	uint8 bFreezing : 1 {false};
 
 	// Speed of root bone
 	// Exists solely for display in the editor. Useful when determining setting value.
