@@ -166,7 +166,7 @@ void FAlsPhysicalAnimationState::Refresh(float DeltaTime, USkeletalMeshComponent
 					else
 					{
 						BI->SetInstanceSimulatePhysics(true);
-						BI->PhysicsBlendWeight = FMath::Min(1.0f, FMath::FInterpConstantTo(0.0f, 1.0f, DeltaTime, Speed));
+						BI->PhysicsBlendWeight = 0.0f;
 					}
 				}
 				else
