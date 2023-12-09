@@ -135,7 +135,10 @@ void UAlsCameraComponent::GetViewInfo(FMinimalViewInfo& ViewInfo) const
 {
 	ViewInfo.Location = CameraLocation;
 	ViewInfo.Rotation = CameraRotation;
-	ViewInfo.FOV = CameraFov;
+	ViewInfo.FOV = CameraFOV;
+	ViewInfo.bPanoramic = bPanoramic;
+	ViewInfo.PanoramaFOV = PanoramaFOV;
+	ViewInfo.PanoramaSideViewRate = PanoramaSideViewRate;
 
 	ViewInfo.PostProcessBlendWeight = IsValid(Settings) ? PostProcessWeight : 0.0f;
 
@@ -219,7 +222,10 @@ void UAlsCameraComponent::TickCamera(const float DeltaTime, bool bAllowLag)
 
 		CameraLocation = GetFirstPersonCameraLocation();
 		CameraRotation = CameraTargetRotation;
-		CameraFov = Settings->FirstPerson.Fov;
+		CameraFOV = Settings->FirstPerson.FOV;
+		bPanoramic = Settings->FirstPerson.bPanoramic;
+		PanoramaFOV = Settings->FirstPerson.PanoramaFOV;
+		PanoramaSideViewRate = Settings->FirstPerson.PanoramaSideViewRate;
 		return;
 	}
 
@@ -306,12 +312,18 @@ void UAlsCameraComponent::TickCamera(const float DeltaTime, bool bAllowLag)
 	if (!FAnimWeight::IsRelevant(FirstPersonOverride))
 	{
 		CameraLocation = CameraResultLocation;
-		CameraFov = Settings->ThirdPerson.Fov;
+		CameraFOV = Settings->ThirdPerson.FOV;
+		bPanoramic = Settings->ThirdPerson.bPanoramic;
+		PanoramaFOV = Settings->ThirdPerson.PanoramaFOV;
+		PanoramaSideViewRate = Settings->ThirdPerson.PanoramaSideViewRate;
 	}
 	else
 	{
 		CameraLocation = FMath::Lerp(CameraResultLocation, GetFirstPersonCameraLocation(), FirstPersonOverride);
-		CameraFov = FMath::Lerp(Settings->ThirdPerson.Fov, Settings->FirstPerson.Fov, FirstPersonOverride);
+		CameraFOV = FMath::Lerp(Settings->ThirdPerson.FOV, Settings->FirstPerson.FOV, FirstPersonOverride);
+		bPanoramic = Settings->ThirdPerson.bPanoramic || Settings->FirstPerson.bPanoramic;
+		PanoramaFOV = FMath::Lerp(Settings->ThirdPerson.PanoramaFOV, Settings->FirstPerson.PanoramaFOV, FirstPersonOverride);
+		PanoramaSideViewRate = FMath::Lerp(Settings->ThirdPerson.PanoramaSideViewRate, Settings->FirstPerson.PanoramaSideViewRate, FirstPersonOverride);
 	}
 }
 

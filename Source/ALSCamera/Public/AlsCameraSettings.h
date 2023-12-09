@@ -10,11 +10,26 @@ struct ALSCAMERA_API FAlsFirstPersonCameraSettings
 {
 	GENERATED_BODY()
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS", Meta = (ClampMin = 5, ClampMax = 360, ForceUnits = "deg"))
-	float Fov{90.0f};
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS", Meta = (ClampMin = 5, ClampMax = 170, ForceUnits = "deg"))
+	float FOV{90.0f};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS")
 	FName CameraSocketName{TEXTVIEW("FirstPersonCamera")};
+
+	// If bPanoramic is true, renders panoramic with partial multi-view.
+	UPROPERTY(EditAnywhere, AdvancedDisplay, BlueprintReadWrite, Category = "ALS")
+	uint8 bPanoramic : 1 {false};
+
+	// The horizontal field of view (in degrees) in panoramic rendering.
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS", Meta = (ClampMin = 180, ClampMax = 360, ForceUnits = "deg"))
+	float PanoramaFOV{180.0f};
+
+	/**
+	 * This specifies the proportion of the side view within the range of 0 to 1.
+	 * A value of 0 means no side view, and a value of 1 means the side view takes up one third of the entire screen.
+	 */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS", Meta = (ClampMin = 0, ClampMax = 1))
+	float PanoramaSideViewRate{0.5f};
 };
 
 USTRUCT(BlueprintType)
@@ -31,8 +46,8 @@ struct ALSCAMERA_API FAlsThirdPersonCameraSettings
 {
 	GENERATED_BODY()
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS", Meta = (ClampMin = 5, ClampMax = 360, ForceUnits = "deg"))
-	float Fov{90.0f};
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS", Meta = (ClampMin = 5, ClampMax = 170, ForceUnits = "deg"))
+	float FOV{90.0f};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS")
 	FName FirstPivotSocketName{UAlsConstants::RootBoneName()};
@@ -61,6 +76,22 @@ struct ALSCAMERA_API FAlsThirdPersonCameraSettings
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS",
 		DisplayName = "Enable Trace Distance Smoothing", Meta = (EditCondition = "bEnableTraceDistanceSmoothing"))
 	FAlsTraceDistanceSmoothingSettings TraceDistanceSmoothing;
+
+
+	// If bPanoramic is true, renders panoramic with partial multi-view.
+	UPROPERTY(EditAnywhere, AdvancedDisplay, BlueprintReadWrite, Category = "ALS")
+	uint8 bPanoramic : 1 {false};
+
+	// The horizontal field of view (in degrees) in panoramic rendering.
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS", Meta = (ClampMin = 180, ClampMax = 360, ForceUnits = "deg"))
+	float PanoramaFOV{180.0f};
+
+	/**
+	 * This specifies the proportion of the side view within the range of 0 to 1.
+	 * A value of 0 means no side view, and a value of 1 means the side view takes up one third of the entire screen.
+	 */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS", Meta = (ClampMin = 0, ClampMax = 1))
+	float PanoramaSideViewRate{0.5f};
 };
 
 USTRUCT(BlueprintType)

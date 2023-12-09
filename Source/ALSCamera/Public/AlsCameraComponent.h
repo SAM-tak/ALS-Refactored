@@ -7,9 +7,10 @@
 class UAlsCameraSettings;
 class ACharacter;
 
-UCLASS(HideCategories = ("ComponentTick", "Clothing", "Physics", "MasterPoseComponent", "Collision", "AnimationRig",
-	"Lighting", "Deformer", "Rendering", "PathTracing", "HLOD", "Navigation", "VirtualTexture", "SkeletalMesh",
-	"LeaderPoseComponent", "Optimization", "LOD", "MaterialParameters", "TextureStreaming", "Mobile", "RayTracing"))
+UCLASS(HideCategories = (ComponentTick, Clothing, Physics, MasterPoseComponent, Collision, AnimationRig,
+	Lighting, Deformer, Rendering, PathTracing, HLOD, Navigation, VirtualTexture, SkeletalMesh,
+	LeaderPoseComponent, Optimization, LOD, MaterialParameters, TextureStreaming, Mobile, RayTracing),
+	ClassGroup = Camera, editinlinenew)
 class ALSCAMERA_API UAlsCameraComponent : public USkeletalMeshComponent
 {
 	GENERATED_BODY()
@@ -60,11 +61,26 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient, Meta = (ClampMin = 0, ClampMax = 1, ForceUnits = "%"))
 	float TraceDistanceRatio{1.0f};
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient, Meta = (ClampMin = 5, ClampMax = 360, ForceUnits = "deg"))
-	float CameraFov{90.0f};
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient, Meta = (ClampMin = 5, ClampMax = 170, ForceUnits = "deg"))
+	float CameraFOV{90.0f};
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient)
 	uint8 bRightShoulder : 1 {true};
+
+	// If bPanoramic is true, renders panoramic with partial multi-view.
+	UPROPERTY(EditAnywhere, AdvancedDisplay, BlueprintReadWrite, Category = "State", Transient)
+	uint8 bPanoramic : 1 {false};
+
+	// The horizontal field of view (in degrees) in panoramic rendering.
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "State", Transient, Meta = (ClampMin = 180, ClampMax = 360, ForceUnits = "deg"))
+	float PanoramaFOV{180.0f};
+
+	/**
+	 * This specifies the proportion of the side view within the range of 0 to 1.
+	 * A value of 0 means no side view, and a value of 1 means the side view takes up one third of the entire screen.
+	 */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "State", Transient, Meta = (ClampMin = 0, ClampMax = 1))
+	float PanoramaSideViewRate{0.5f};
 
 public:
 	UAlsCameraComponent();
