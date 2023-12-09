@@ -87,6 +87,8 @@ void UAlsCameraComponent::TickComponent(float DeltaTime, const ELevelTick TickTy
 	{
 		TickCamera(DeltaTime);
 	}
+
+	SetWorldLocationAndRotation(CameraLocation, CameraRotation);
 }
 
 void UAlsCameraComponent::CompleteParallelAnimationEvaluation(const bool bDoPostAnimationEvaluation)
