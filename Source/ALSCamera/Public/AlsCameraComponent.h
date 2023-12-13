@@ -68,18 +68,18 @@ protected:
 	uint8 bRightShoulder : 1 {true};
 
 	// If bPanoramic is true, renders panoramic with partial multi-view.
-	UPROPERTY(EditAnywhere, AdvancedDisplay, BlueprintReadWrite, Category = "State", Transient)
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient)
 	uint8 bPanoramic : 1 {false};
 
 	// The horizontal field of view (in degrees) in panoramic rendering.
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "State", Transient, Meta = (ClampMin = 180, ClampMax = 360, ForceUnits = "deg"))
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient, Meta = (ClampMin = 180, ClampMax = 360, ForceUnits = "deg"))
 	float PanoramaFOV{180.0f};
 
 	/**
 	 * This specifies the proportion of the side view within the range of 0 to 1.
 	 * A value of 0 means no side view, and a value of 1 means the side view takes up one third of the entire screen.
 	 */
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "State", Transient, Meta = (ClampMin = 0, ClampMax = 1))
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient, Meta = (ClampMin = 0, ClampMax = 1))
 	float PanoramaSideViewRate{0.5f};
 
 public:

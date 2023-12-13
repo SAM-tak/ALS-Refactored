@@ -17,7 +17,7 @@ struct ALSCAMERA_API FAlsFirstPersonCameraSettings
 	FName CameraSocketName{TEXTVIEW("FirstPersonCamera")};
 
 	// If bPanoramic is true, renders panoramic with partial multi-view.
-	UPROPERTY(EditAnywhere, AdvancedDisplay, BlueprintReadWrite, Category = "ALS")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS")
 	uint8 bPanoramic : 1 {false};
 
 	// The horizontal field of view (in degrees) in panoramic rendering.
@@ -79,7 +79,7 @@ struct ALSCAMERA_API FAlsThirdPersonCameraSettings
 
 
 	// If bPanoramic is true, renders panoramic with partial multi-view.
-	UPROPERTY(EditAnywhere, AdvancedDisplay, BlueprintReadWrite, Category = "ALS")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS")
 	uint8 bPanoramic : 1 {false};
 
 	// The horizontal field of view (in degrees) in panoramic rendering.
