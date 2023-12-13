@@ -20,7 +20,7 @@ protected:
 	TObjectPtr<UAlsCameraSettings> Settings;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Settings", Meta = (ClampMin = 0, ClampMax = 1))
-	float PostProcessWeight;
+	float PostProcessWeight{1.0f};
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient)
 	TObjectPtr<ACharacter> Character;

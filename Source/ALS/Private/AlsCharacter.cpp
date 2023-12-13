@@ -419,7 +419,7 @@ void AAlsCharacter::RefreshMovementBase()
 	}
 
 	MovementBase.bHasRelativeLocation = BasedMovement.HasRelativeLocation();
-	MovementBase.bHasRelativeRotation = MovementBase.bHasRelativeLocation && BasedMovement.bRelativeRotation;
+	MovementBase.bHasRelativeRotation = MovementBase.bHasRelativeLocation & BasedMovement.bRelativeRotation;
 
 	const auto PreviousRotation{MovementBase.Rotation};
 

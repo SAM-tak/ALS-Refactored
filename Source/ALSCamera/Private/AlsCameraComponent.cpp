@@ -1,6 +1,7 @@
 #include "AlsCameraComponent.h"
 
 #include "AlsCameraSettings.h"
+#include "AlsCharacterMovementComponent.h"
 #include "DrawDebugHelpers.h"
 #include "Animation/AnimInstance.h"
 #include "GameFramework/Character.h"
@@ -120,6 +121,8 @@ FVector UAlsCameraComponent::GetThirdPersonPivotLocation() const
 	{
 		FirstPivotLocation = Mesh->GetSocketLocation(Settings->ThirdPerson.FirstPivotSocketName);
 	}
+
+	FirstPivotLocation += Character->GetCharacterMovement()->Velocity * Settings->ThirdPerson.VelocityLeadRate;
 
 	return (FirstPivotLocation + Mesh->GetSocketLocation(Settings->ThirdPerson.SecondPivotSocketName)) * 0.5f;
 }
@@ -472,7 +475,7 @@ FVector UAlsCameraComponent::CalculateCameraTrace(const FVector& CameraTargetLoc
 			UAlsMath::Clamp01(GetAnimInstance()->GetCurveValue(UAlsCameraConstants::TraceOverrideCurveName())))
 	};
 
-	const auto TraceEnd{CameraTargetLocation};
+	const FVector TraceEnd{CameraTargetLocation};
 	const auto CollisionShape{FCollisionShape::MakeSphere(Settings->ThirdPerson.TraceRadius * MeshScale)};
 
 	auto TraceResult{TraceEnd};
