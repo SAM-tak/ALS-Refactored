@@ -8,6 +8,7 @@
 #include "GameFramework/Controller.h"
 #include "Utility/AlsMacros.h"
 #include "Utility/AlsUtility.h"
+#include "Utility/AlsLog.h"
 
 #include UE_INLINE_GENERATED_CPP_BY_NAME(AlsCharacterMovementComponent)
 
@@ -622,7 +623,7 @@ void UAlsCharacterMovementComponent::ComputeFloorDist(const FVector& CapsuleLoca
 
 	// ReSharper disable All
 
-	// UE_LOG(LogCharacterMovement, VeryVerbose, TEXT("[Role:%d] ComputeFloorDist: %s at location %s"), (int32)CharacterOwner->GetLocalRole(), *GetNameSafe(CharacterOwner), *CapsuleLocation.ToString());
+	UE_LOG(LogAls, VeryVerbose, TEXT("[Role:%d] ComputeFloorDist: %s at location %s"), (int32)CharacterOwner->GetLocalRole(), *GetNameSafe(CharacterOwner), *CapsuleLocation.ToString());
 	OutFloorResult.Clear();
 
 	float PawnRadius, PawnHalfHeight;
@@ -780,7 +781,7 @@ void UAlsCharacterMovementComponent::PerformMovement(const float DeltaTime)
 
 	const auto* Controller{HasValidData() ? CharacterOwner->GetController() : nullptr};
 
-	if (IsValid(Controller) && CharacterOwner->GetLocalRole() >= ROLE_Authority &&
+	if (Controller != nullptr && IsValid(Controller) && CharacterOwner->GetLocalRole() >= ROLE_Authority &&
 	    PreviousControlRotation != Controller->GetControlRotation())
 	{
 		if (CharacterOwner->GetRemoteRole() == ROLE_AutonomousProxy)
@@ -811,7 +812,7 @@ void UAlsCharacterMovementComponent::SmoothClientPosition(const float DeltaTime)
 	auto* PredictionData{GetPredictionData_Client_Character()};
 	const auto* Mesh{HasValidData() ? CharacterOwner->GetMesh() : nullptr};
 
-	if (PredictionData != nullptr && IsValid(Mesh) && Mesh->IsUsingAbsoluteRotation())
+	if (PredictionData != nullptr && Mesh != nullptr && IsValid(Mesh) && Mesh->IsUsingAbsoluteRotation())
 	{
 		// Calling Super::SmoothClientPosition() will change the mesh's rotation, which is undesirable when using
 		// absolute mesh rotation since we're manually updating the mesh's rotation from the animation instance. So,
@@ -846,7 +847,7 @@ void UAlsCharacterMovementComponent::MoveAutonomous(const float ClientTimeStamp,
 
 	const auto* Controller{HasValidData() ? CharacterOwner->GetController() : nullptr};
 
-	if (IsValid(Controller) && IsNetMode(NM_ListenServer) && CharacterOwner->GetRemoteRole() == ROLE_AutonomousProxy)
+	if (Controller != nullptr && IsValid(Controller) && IsNetMode(NM_ListenServer) && CharacterOwner->GetRemoteRole() == ROLE_AutonomousProxy)
 	{
 		const auto NewControlRotation{Controller->GetControlRotation()};
 
