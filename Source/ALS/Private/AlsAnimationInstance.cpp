@@ -74,10 +74,15 @@ void UAlsAnimationInstance::NativeUpdateAnimation(const float DeltaTime)
 
 	ViewMode = Character->GetViewMode();
 	LocomotionMode = Character->GetLocomotionMode();
-	RotationMode = Character->GetRotationMode();
+	RotationMode = FaceRotationMode = Character->GetRotationMode();
 	Stance = Character->GetStance();
 	Gait = Character->GetGait();
 	OverlayMode = Character->GetOverlayMode();
+
+	if (FaceRotationMode != AlsRotationModeTags::Aiming)
+	{
+		FaceRotationMode = Character->GetDesiredRotationMode();
+	}
 
 	if (LocomotionAction != Character->GetLocomotionAction())
 	{
@@ -193,7 +198,7 @@ void UAlsAnimationInstance::RefreshMovementBaseOnGameThread()
 	}
 
 	MovementBase.bHasRelativeLocation = BasedMovement.HasRelativeLocation();
-	MovementBase.bHasRelativeRotation = MovementBase.bHasRelativeLocation && BasedMovement.bRelativeRotation;
+	MovementBase.bHasRelativeRotation = MovementBase.bHasRelativeLocation & BasedMovement.bRelativeRotation;
 
 	const auto PreviousRotation{MovementBase.Rotation};
 
@@ -329,7 +334,7 @@ void UAlsAnimationInstance::RefreshSpineRotation(const float SpineBlendAmount, c
 
 	if (SpineRotation.bSpineRotationAllowed != IsSpineRotationAllowed())
 	{
-		SpineRotation.bSpineRotationAllowed = !SpineRotation.bSpineRotationAllowed;
+		SpineRotation.bSpineRotationAllowed = ~SpineRotation.bSpineRotationAllowed;
 		SpineRotation.InitialYawAngle = SpineRotation.CurrentYawAngle;
 	}
 
@@ -390,7 +395,7 @@ void UAlsAnimationInstance::RefreshLook()
 	float TargetPitchAngle;
 	float InterpolationSpeed;
 
-	if (RotationMode == AlsRotationModeTags::VelocityDirection)
+	if (FaceRotationMode == AlsRotationModeTags::VelocityDirection)
 	{
 		// Look towards input direction.
 
