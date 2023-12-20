@@ -190,6 +190,8 @@ private:
 public:
 	void SetGroundedEntryMode(const FGameplayTag& NewGroundedEntryMode);
 
+	const FAlsGroundedState& GetGroundedState() const;
+
 protected:
 	UFUNCTION(BlueprintCallable, Category = "ALS|Animation Instance", Meta = (BlueprintProtected, BlueprintThreadSafe))
 	void ResetGroundedEntryMode();
@@ -367,6 +369,11 @@ inline void UAlsAnimationInstance::SetGroundedEntryMode(const FGameplayTag& NewG
 	GroundedEntryMode = NewGroundedEntryMode;
 }
 
+inline const FAlsGroundedState& UAlsAnimationInstance::GetGroundedState() const
+{
+	return GroundedState;
+}
+
 inline void UAlsAnimationInstance::ResetGroundedEntryMode()
 {
 	GroundedEntryMode = FGameplayTag::EmptyTag;
@@ -394,7 +401,7 @@ inline void UAlsAnimationInstance::ResetJumped()
 
 inline void UAlsAnimationInstance::UpdateRagdollingAnimationState(const FAlsRagdollingState& State)
 {
-	RagdollingState.bGroundedAndAged = State.bGrounded && State.ElapsedTime >= GetRagdollingStartBlendTime();
+	RagdollingState.bGroundedAndAged = State.bGrounded & (State.ElapsedTime >= GetRagdollingStartBlendTime());
 	RagdollingState.bFacingUpward = State.bFacingUpward;
 	RagdollingState.LyingDownYawAngleDelta = State.LyingDownYawAngleDelta;
 }

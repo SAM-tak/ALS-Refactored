@@ -40,7 +40,7 @@ protected:
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings|Als Character|Desired State",
 		ReplicatedUsing = "OnReplicated_DesiredAiming")
-	uint8 bDesiredAiming : 1;
+	uint8 bDesiredAiming : 1{false};
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings|Als Character|Desired State", Replicated)
 	FGameplayTag DesiredRotationMode{AlsRotationModeTags::ViewDirection};
@@ -129,6 +129,8 @@ public:
 	virtual void PostRegisterAllComponents() override;
 
 	virtual void PostInitializeComponents() override;
+
+	FORCEINLINE UAlsCharacterMovementComponent* GetAlsCharacterMovement() const { return AlsCharacterMovement; }
 
 	/** Name of the PhysicalAnimationComponent. */
 	static FName PhysicalAnimationComponentName;

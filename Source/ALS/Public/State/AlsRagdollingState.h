@@ -26,6 +26,9 @@ struct ALS_API FAlsRagdollingState
 	float TimeAfterGroundedAndStopped{0.0f};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS")
+	FVector PrevActorLocation{ForceInit};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS")
 	uint8 bFreezing : 1 {false};
 
 	// Speed of root bone

@@ -1,10 +1,10 @@
 #include "AlsCameraComponent.h"
 
 #include "AlsCameraSettings.h"
+#include "AlsCharacter.h"
 #include "AlsCharacterMovementComponent.h"
 #include "DrawDebugHelpers.h"
 #include "Animation/AnimInstance.h"
-#include "GameFramework/Character.h"
 #include "GameFramework/WorldSettings.h"
 #include "Utility/AlsCameraConstants.h"
 #include "Utility/AlsMacros.h"
@@ -23,7 +23,7 @@ UAlsCameraComponent::UAlsCameraComponent()
 
 void UAlsCameraComponent::OnRegister()
 {
-	Character = Cast<ACharacter>(GetOwner());
+	Character = Cast<AAlsCharacter>(GetOwner());
 
 	Super::OnRegister();
 }
@@ -122,7 +122,10 @@ FVector UAlsCameraComponent::GetThirdPersonPivotLocation() const
 		FirstPivotLocation = Mesh->GetSocketLocation(Settings->ThirdPerson.FirstPivotSocketName);
 	}
 
-	FirstPivotLocation += Character->GetCharacterMovement()->Velocity * Settings->ThirdPerson.VelocityLeadRate;
+	if (Settings->ThirdPerson.bApplyVelocityLead)
+	{
+		FirstPivotLocation += CurrentLeadVector;
+	}
 
 	return (FirstPivotLocation + Mesh->GetSocketLocation(Settings->ThirdPerson.SecondPivotSocketName)) * 0.5f;
 }
@@ -204,6 +207,16 @@ void UAlsCameraComponent::TickCamera(const float DeltaTime, bool bAllowLag)
 			PivotMovementBaseRelativeLagLocation = FVector::ZeroVector;
 			CameraMovementBaseRelativeRotation = FQuat::Identity;
 		}
+	}
+
+	// Refresh CurrentLeadVector if needed.
+
+	if (Settings->ThirdPerson.bApplyVelocityLead)
+	{
+		auto LeadVector = Character->GetRotationMode() != AlsRotationModeTags::Aiming ?
+			Character->GetAlsCharacterMovement()->Velocity * Settings->ThirdPerson.VelocityLeadRate :
+			FVector::ZeroVector;
+		CurrentLeadVector = FMath::VInterpTo(CurrentLeadVector, LeadVector, DeltaTime, Settings->ThirdPerson.VelocityLeadInterpSpeed);
 	}
 
 	const auto CameraTargetRotation{Character->GetViewRotation()};

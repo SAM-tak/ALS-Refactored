@@ -77,8 +77,16 @@ struct ALSCAMERA_API FAlsThirdPersonCameraSettings
 		DisplayName = "Enable Trace Distance Smoothing", Meta = (EditCondition = "bEnableTraceDistanceSmoothing"))
 	FAlsTraceDistanceSmoothingSettings TraceDistanceSmoothing;
 
+	// If bPanoramic is true, renders panoramic with partial multi-view.
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS")
+	uint8 bApplyVelocityLead : 1 {false};
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS", Meta = (ClampMin = 0, ForceUnits = "x"))
 	FVector VelocityLeadRate{0.0f, 0.0f, 0.0f};
+
+	// The horizontal field of view (in degrees) in panoramic rendering.
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS", Meta = (ClampMin = 0))
+	float VelocityLeadInterpSpeed{10.0f};
 
 	// If bPanoramic is true, renders panoramic with partial multi-view.
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS")

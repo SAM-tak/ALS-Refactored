@@ -761,6 +761,7 @@ void AAlsCharacter::StartRagdollingImplementation()
 	RagdollingState.TimeAfterGrounded = RagdollingState.TimeAfterGroundedAndStopped = 0.0f;
 	RagdollingState.bFacingUpward = RagdollingState.bGrounded = false;
 	RagdollingState.bFreezing = false;
+	RagdollingState.PrevActorLocation = GetActorLocation();
 
 	OnRagdollingStarted();
 }
@@ -806,6 +807,10 @@ void AAlsCharacter::RefreshRagdolling(const float DeltaTime)
 		SetRagdollTargetLocation(GetMesh()->GetBoneLocation(UAlsConstants::PelvisBoneName()));
 	}
 
+	// Just for info.
+	AlsCharacterMovement->Velocity = DeltaTime > 0.0f ? (GetActorLocation() - RagdollingState.PrevActorLocation) / DeltaTime : FVector::Zero();
+	RagdollingState.PrevActorLocation = GetActorLocation();
+
 	// Prevent the capsule from going through the ground when the ragdoll is lying on the ground.
 
 	// While we could get rid of the line trace here and just use RagdollTargetLocation
@@ -815,10 +820,6 @@ void AAlsCharacter::RefreshRagdolling(const float DeltaTime)
 	bool bGrounded;
 	auto NewActorLocation{RagdollTraceGround(bGrounded)};
 	RagdollingState.bGrounded = bGrounded;
-
-	// Just for info.
-	GetCharacterMovement()->Velocity = DeltaTime > 0.0f ? (NewActorLocation - GetActorLocation()) / DeltaTime : FVector::Zero();
-
 	SetActorLocation(NewActorLocation, true);
 
 	if (IsRagdollingGroundedAndAged())

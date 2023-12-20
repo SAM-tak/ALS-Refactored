@@ -5,7 +5,7 @@
 #include "AlsCameraComponent.generated.h"
 
 class UAlsCameraSettings;
-class ACharacter;
+class AAlsCharacter;
 
 UCLASS(HideCategories = (ComponentTick, Clothing, Physics, MasterPoseComponent, Collision, AnimationRig,
 	Lighting, Deformer, Rendering, PathTracing, HLOD, Navigation, VirtualTexture, SkeletalMesh,
@@ -23,7 +23,7 @@ protected:
 	float PostProcessWeight{1.0f};
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient)
-	TObjectPtr<ACharacter> Character;
+	TObjectPtr<AAlsCharacter> Character;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient, Meta = (ShowInnerProperties))
 	TWeakObjectPtr<UAnimInstance> AnimationInstance;
@@ -57,6 +57,9 @@ protected:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient)
 	FQuat CameraMovementBaseRelativeRotation;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient)
+	FVector CurrentLeadVector{ForceInit};
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient, Meta = (ClampMin = 0, ClampMax = 1, ForceUnits = "%"))
 	float TraceDistanceRatio{1.0f};
