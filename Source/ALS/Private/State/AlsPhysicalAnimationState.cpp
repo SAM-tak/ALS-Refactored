@@ -18,6 +18,10 @@ namespace
 {
 	bool IsLocked(const FAlsPhysicalAnimationCurveState& Curves, const FName& BoneName)
 	{
+		if (BoneName == FName{TEXT("clavicle_l")})
+		{
+			return Curves.LockLeftArm > 0.0f;
+		}
 		if (BoneName == FName{TEXT("upperarm_l")})
 		{
 			return Curves.LockLeftArm > 0.0f;
@@ -29,6 +33,10 @@ namespace
 		if (BoneName == FName{TEXT("hand_l")})
 		{
 			return Curves.LockLeftHand > 0.0f;
+		}
+		if (BoneName == FName{TEXT("clavicle_r")})
+		{
+			return Curves.LockRightArm > 0.0f;
 		}
 		if (BoneName == FName{TEXT("upperarm_r")})
 		{
@@ -171,18 +179,18 @@ void FAlsPhysicalAnimationState::Refresh(float DeltaTime, USkeletalMeshComponent
 				}
 				else
 				{
-					if (BI->IsInstanceSimulatingPhysics())
+					float Speed = 1.0f / FMath::Max(0.000001f, Settings.BlendTimeOfBlendWeightOnDeactivate);
+					BI->PhysicsBlendWeight = FMath::Max(0.0f, FMath::FInterpConstantTo(BI->PhysicsBlendWeight, 0.0f, DeltaTime, Speed));
+					if (BI->PhysicsBlendWeight == 0.0f)
 					{
-						float Speed = 1.0f / FMath::Max(0.000001f, Settings.BlendTimeOfBlendWeightOnDeactivate);
-						BI->PhysicsBlendWeight = FMath::Max(0.0f, FMath::FInterpConstantTo(BI->PhysicsBlendWeight, 0.0f, DeltaTime, Speed));
-						if (BI->PhysicsBlendWeight == 0.0f)
+						if (BI->IsInstanceSimulatingPhysics())
 						{
 							BI->SetInstanceSimulatePhysics(false);
 						}
-						else
-						{
-							bActiveAny = true;
-						}
+					}
+					else
+					{
+						bActiveAny = true;
 					}
 				}
 			}

@@ -208,15 +208,21 @@ void UAlsCameraComponent::TickCamera(const float DeltaTime, bool bAllowLag)
 			CameraMovementBaseRelativeRotation = FQuat::Identity;
 		}
 	}
+	
+	const auto FirstPersonOverride{
+		UAlsMath::Clamp01(GetAnimInstance()->GetCurveValue(UAlsCameraConstants::FirstPersonOverrideCurveName()))
+	};
 
 	// Refresh CurrentLeadVector if needed.
 
 	if (Settings->ThirdPerson.bApplyVelocityLead)
 	{
-		auto LeadVector = Character->GetRotationMode() != AlsRotationModeTags::Aiming ?
-			Character->GetAlsCharacterMovement()->Velocity * Settings->ThirdPerson.VelocityLeadRate :
-			FVector::ZeroVector;
+		const FRotator CameraYawRotation{0.0f, CameraRotation.Yaw, 0.0f};
+		auto LocalVelocity{CameraYawRotation.UnrotateVector(Character->GetAlsCharacterMovement()->Velocity) * Settings->ThirdPerson.VelocityLeadRate};
+		auto LeadVector = Character->GetRotationMode() != AlsRotationModeTags::Aiming && !FAnimWeight::IsFullWeight(FirstPersonOverride) ?
+			CameraYawRotation.RotateVector(LocalVelocity) : FVector::ZeroVector;
 		CurrentLeadVector = FMath::VInterpTo(CurrentLeadVector, LeadVector, DeltaTime, Settings->ThirdPerson.VelocityLeadInterpSpeed);
+		LatestCameraYawRotation = CameraYawRotation;
 	}
 
 	const auto CameraTargetRotation{Character->GetViewRotation()};
@@ -224,10 +230,6 @@ void UAlsCameraComponent::TickCamera(const float DeltaTime, bool bAllowLag)
 	const auto PreviousPivotTargetLocation{PivotTargetLocation};
 
 	PivotTargetLocation = GetThirdPersonPivotLocation();
-
-	const auto FirstPersonOverride{
-		UAlsMath::Clamp01(GetAnimInstance()->GetCurveValue(UAlsCameraConstants::FirstPersonOverrideCurveName()))
-	};
 
 	if (FAnimWeight::IsFullWeight(FirstPersonOverride))
 	{
