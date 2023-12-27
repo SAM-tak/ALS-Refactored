@@ -16,6 +16,9 @@ struct ALSCAMERA_API FAlsFirstPersonCameraSettings
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS")
 	FName CameraSocketName{TEXTVIEW("FirstPersonCamera")};
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS", Meta = (ClampMin = 0, ForceUnits = "cm"))
+	float HeadSize{30.0f};
+
 	// If bPanoramic is true, renders panoramic with partial multi-view.
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS")
 	uint8 bPanoramic : 1 {false};

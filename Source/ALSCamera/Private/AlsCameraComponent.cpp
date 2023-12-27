@@ -337,7 +337,9 @@ void UAlsCameraComponent::TickCamera(const float DeltaTime, bool bAllowLag)
 	}
 	else
 	{
-		CameraLocation = FMath::Lerp(CameraResultLocation, GetFirstPersonCameraLocation(), FirstPersonOverride);
+		auto FirstPersonCameraLocation{GetFirstPersonCameraLocation()};
+		FirstPersonCameraLocation -= GetForwardVector() * Settings->FirstPerson.HeadSize;
+		CameraLocation = FMath::Lerp(CameraResultLocation, FirstPersonCameraLocation, FirstPersonOverride);
 		CameraFOV = FMath::Lerp(Settings->ThirdPerson.FOV, Settings->FirstPerson.FOV, FirstPersonOverride);
 		bPanoramic = Settings->ThirdPerson.bPanoramic | Settings->FirstPerson.bPanoramic;
 		PanoramaFOV = FMath::Lerp(Settings->ThirdPerson.PanoramaFOV, Settings->FirstPerson.PanoramaFOV, FirstPersonOverride);
@@ -631,4 +633,9 @@ bool UAlsCameraComponent::TryAdjustLocationBlockedByGeometry(FVector& Location, 
 	return !GetWorld()->OverlapBlockingTestByChannel(Location, FQuat::Identity, Settings->ThirdPerson.TraceChannel,
 	                                                 FCollisionShape::MakeSphere(Settings->ThirdPerson.TraceRadius * MeshScale),
 	                                                 {FreeSpaceTraceTag, false, GetOwner()});
+}
+
+bool UAlsCameraComponent::IsFirstPerson() const
+{
+	return FAnimWeight::IsFullWeight(UAlsMath::Clamp01(GetAnimInstance()->GetCurveValue(UAlsCameraConstants::FirstPersonOverrideCurveName())));
 }

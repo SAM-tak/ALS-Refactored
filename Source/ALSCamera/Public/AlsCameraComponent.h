@@ -110,10 +110,14 @@ public:
 
 	void SetPostProcessWeight(float NewPostProcessWeight);
 
+	UFUNCTION(BlueprintPure, Category = "ALS|Camera")
 	bool IsRightShoulder() const;
 
 	UFUNCTION(BlueprintCallable, Category = "ALS|Camera")
 	void SetRightShoulder(bool bNewRightShoulder);
+
+	UFUNCTION(BlueprintPure, Category = "ALS|Camera")
+	bool IsFirstPerson() const;
 
 	UFUNCTION(BlueprintPure, Category = "ALS|Camera", Meta = (ReturnDisplayName = "Camera Location"))
 	FVector GetFirstPersonCameraLocation() const;

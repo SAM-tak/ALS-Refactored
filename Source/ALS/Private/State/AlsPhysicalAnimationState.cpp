@@ -62,6 +62,10 @@ namespace
 		{
 			return Curves.LockLeftFoot > 0.0f;
 		}
+		if (BoneName == FName{TEXT("ball_l")})
+		{
+			return Curves.LockLeftFoot > 0.0f;
+		}
 		if (BoneName == FName{TEXT("thigh_r")})
 		{
 			return Curves.LockRightLeg > 0.0f;
@@ -71,6 +75,10 @@ namespace
 			return Curves.LockRightLeg > 0.0f;
 		}
 		if (BoneName == UAlsConstants::FootRightBoneName())
+		{
+			return Curves.LockRightFoot > 0.0f;
+		}
+		if (BoneName == FName{TEXT("ball_r")})
 		{
 			return Curves.LockRightFoot > 0.0f;
 		}
