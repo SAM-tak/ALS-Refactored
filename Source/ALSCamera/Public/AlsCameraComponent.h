@@ -67,6 +67,9 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient, Meta = (ClampMin = 0, ClampMax = 1, ForceUnits = "%"))
 	float TraceDistanceRatio{1.0f};
 
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient)
+	uint8 bInAutoFPP : 1 {false};
+
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient, Meta = (ClampMin = 5, ClampMax = 170, ForceUnits = "deg"))
 	float CameraFOV{90.0f};
 
@@ -142,8 +145,7 @@ private:
 
 	FVector CalculateCameraOffset() const;
 
-	FVector CalculateCameraTrace(const FVector& CameraTargetLocation, const FVector& PivotOffset,
-	                             float DeltaTime, bool bAllowLag, float& NewTraceDistanceRatio) const;
+	FVector CalculateCameraTrace(const FVector& CameraTargetLocation, const FVector& PivotOffset, float DeltaTime, bool bAllowLag);
 
 	bool TryAdjustLocationBlockedByGeometry(FVector& Location, bool bDisplayDebugCameraTraces) const;
 

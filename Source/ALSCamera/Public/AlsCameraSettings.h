@@ -80,6 +80,14 @@ struct ALSCAMERA_API FAlsThirdPersonCameraSettings
 		DisplayName = "Enable Trace Distance Smoothing", Meta = (EditCondition = "bEnableTraceDistanceSmoothing"))
 	FAlsTraceDistanceSmoothingSettings TraceDistanceSmoothing;
 
+	// If greater than zero, camera location same as FPP when distance from third person camera pivot by blocking by geometry less than this value.
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS", Meta = (ClampMin = 0, ForceUnits = "cm"))
+	float AutoFPPStartDistance{80.0f};
+
+	// Ends Auto FPP when distance from third person camera pivot by blocking by geometry greater than this value.
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS", Meta = (ClampMin = 0, ForceUnits = "cm"))
+	float AutoFPPEndDistance{100.0f};
+
 	// If bPanoramic is true, renders panoramic with partial multi-view.
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS")
 	uint8 bApplyVelocityLead : 1 {false};

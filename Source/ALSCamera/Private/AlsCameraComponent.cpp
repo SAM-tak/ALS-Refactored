@@ -237,6 +237,7 @@ void UAlsCameraComponent::TickCamera(const float DeltaTime, bool bAllowLag)
 
 		PivotLagLocation = PivotTargetLocation;
 		PivotLocation = PivotTargetLocation;
+		bInAutoFPP = false;
 
 		CameraLocation = GetFirstPersonCameraLocation();
 		CameraRotation = CameraTargetRotation;
@@ -325,9 +326,18 @@ void UAlsCameraComponent::TickCamera(const float DeltaTime, bool bAllowLag)
 
 	// Trace for an object between the camera and character to apply a corrective offset.
 
-	const auto CameraResultLocation{CalculateCameraTrace(CameraTargetLocation, PivotOffset, DeltaTime, bAllowLag, TraceDistanceRatio)};
+	const auto CameraResultLocation{CalculateCameraTrace(CameraTargetLocation, PivotOffset, DeltaTime, bAllowLag)};
 
-	if (!FAnimWeight::IsRelevant(FirstPersonOverride))
+	if (bInAutoFPP)
+	{
+		CameraLocation = GetFirstPersonCameraLocation();
+		CameraRotation = CameraTargetRotation;
+		CameraFOV = Settings->FirstPerson.FOV;
+		bPanoramic = Settings->FirstPerson.bPanoramic;
+		PanoramaFOV = Settings->FirstPerson.PanoramaFOV;
+		PanoramaSideViewRate = Settings->FirstPerson.PanoramaSideViewRate;
+	}
+	else if (!FAnimWeight::IsRelevant(FirstPersonOverride))
 	{
 		CameraLocation = CameraResultLocation;
 		CameraFOV = Settings->ThirdPerson.FOV;
@@ -470,8 +480,7 @@ FVector UAlsCameraComponent::CalculateCameraOffset() const
 		} * Character->GetMesh()->GetComponentScale().Z);
 }
 
-FVector UAlsCameraComponent::CalculateCameraTrace(const FVector& CameraTargetLocation, const FVector& PivotOffset,
-                                                  const float DeltaTime, const bool bAllowLag, float& NewTraceDistanceRatio) const
+FVector UAlsCameraComponent::CalculateCameraTrace(const FVector& CameraTargetLocation, const FVector& PivotOffset, const float DeltaTime, const bool bAllowLag)
 {
 #if ENABLE_DRAW_DEBUG
 	const auto bDisplayDebugCameraTraces{
@@ -526,11 +535,40 @@ FVector UAlsCameraComponent::CalculateCameraTrace(const FVector& CameraTargetLoc
 	}
 #endif
 
+	// Auto FPP processing
+
+	if (bInAutoFPP || Settings->ThirdPerson.AutoFPPStartDistance > 0.0f)
+	{
+		auto Distance{FVector::Dist(TraceStart, TraceResult)};
+		if (bInAutoFPP)
+		{
+			if (Distance > Settings->ThirdPerson.AutoFPPEndDistance)
+			{
+				bInAutoFPP = false;
+				TraceDistanceRatio = Settings->ThirdPerson.AutoFPPStartDistance / FVector::Dist(TraceStart, TraceEnd);
+			}
+			else
+			{
+				TraceDistanceRatio = 1.0f;
+				return GetFirstPersonCameraLocation();
+			}
+		}
+		else
+		{
+			if (Distance < Settings->ThirdPerson.AutoFPPStartDistance)
+			{
+				TraceDistanceRatio = 1.0f;
+				bInAutoFPP = true;
+				return GetFirstPersonCameraLocation();
+			}
+		}
+	}
+
 	// Apply trace distance smoothing.
 
 	if (!bAllowLag || !Settings->ThirdPerson.bEnableTraceDistanceSmoothing)
 	{
-		NewTraceDistanceRatio = 1.0f;
+		TraceDistanceRatio = 1.0f;
 		return TraceResult;
 	}
 
@@ -539,16 +577,16 @@ FVector UAlsCameraComponent::CalculateCameraTrace(const FVector& CameraTargetLoc
 
 	if (TraceDistance <= UE_KINDA_SMALL_NUMBER)
 	{
-		NewTraceDistanceRatio = 1.0f;
+		TraceDistanceRatio = 1.0f;
 		return TraceResult;
 	}
 
-	const auto TargetTraceDistanceRatio{UE_REAL_TO_FLOAT((TraceResult - TraceStart).Size() / TraceDistance)};
+	const auto TargetTraceDistanceRatio{UE_REAL_TO_FLOAT(FVector::Dist(TraceStart, TraceResult) / TraceDistance)};
 
-	NewTraceDistanceRatio = TargetTraceDistanceRatio <= TraceDistanceRatio
-		                        ? TargetTraceDistanceRatio
-		                        : UAlsMath::ExponentialDecay(TraceDistanceRatio, TargetTraceDistanceRatio, DeltaTime,
-		                                                     Settings->ThirdPerson.TraceDistanceSmoothing.InterpolationSpeed);
+	TraceDistanceRatio = TargetTraceDistanceRatio <= TraceDistanceRatio
+					   ? TargetTraceDistanceRatio
+					   : UAlsMath::ExponentialDecay(TraceDistanceRatio, TargetTraceDistanceRatio, DeltaTime,
+													Settings->ThirdPerson.TraceDistanceSmoothing.InterpolationSpeed);
 
 	return TraceStart + TraceVector * TraceDistanceRatio;
 }
@@ -637,5 +675,6 @@ bool UAlsCameraComponent::TryAdjustLocationBlockedByGeometry(FVector& Location, 
 
 bool UAlsCameraComponent::IsFirstPerson() const
 {
-	return FAnimWeight::IsFullWeight(UAlsMath::Clamp01(GetAnimInstance()->GetCurveValue(UAlsCameraConstants::FirstPersonOverrideCurveName())));
+	return FAnimWeight::IsFullWeight(UAlsMath::Clamp01(GetAnimInstance()->GetCurveValue(UAlsCameraConstants::FirstPersonOverrideCurveName())))
+		|| bInAutoFPP;
 }
