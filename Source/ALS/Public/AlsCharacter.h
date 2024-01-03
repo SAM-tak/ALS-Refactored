@@ -167,7 +167,7 @@ private:
 public:
 	const FGameplayTag& GetViewMode() const;
 
-	UFUNCTION(BlueprintCallable, Category = "ALS|Character", Meta = (AutoCreateRefTerm = "NewViewMode"))
+	UFUNCTION(BlueprintCallable, Category = "Als Character", Meta = (AutoCreateRefTerm = "NewViewMode"))
 	void SetViewMode(const FGameplayTag& NewViewMode);
 
 private:
@@ -200,8 +200,11 @@ protected:
 public:
 	bool IsDesiredAiming() const;
 
-	UFUNCTION(BlueprintCallable, Category = "ALS|Character")
+	UFUNCTION(BlueprintCallable, Category = "Als Character")
 	void SetDesiredAiming(bool bNewDesiredAiming);
+
+	UFUNCTION(BlueprintPure, Category = "Als Character")
+	float GetAimAmount() const;
 
 private:
 	void SetDesiredAiming(bool bNewDesiredAiming, bool bSendRpc);
@@ -224,7 +227,7 @@ protected:
 public:
 	const FGameplayTag& GetDesiredRotationMode() const;
 
-	UFUNCTION(BlueprintCallable, Category = "ALS|Character", Meta = (AutoCreateRefTerm = "NewDesiredRotationMode"))
+	UFUNCTION(BlueprintCallable, Category = "Als Character", Meta = (AutoCreateRefTerm = "NewDesiredRotationMode"))
 	void SetDesiredRotationMode(const FGameplayTag& NewDesiredRotationMode);
 
 private:
@@ -254,7 +257,7 @@ protected:
 public:
 	const FGameplayTag& GetDesiredStance() const;
 
-	UFUNCTION(BlueprintCallable, Category = "ALS|Character", Meta = (AutoCreateRefTerm = "NewDesiredStance"))
+	UFUNCTION(BlueprintCallable, Category = "Als Character", Meta = (AutoCreateRefTerm = "NewDesiredStance"))
 	void SetDesiredStance(const FGameplayTag& NewDesiredStance);
 
 private:
@@ -292,7 +295,7 @@ protected:
 public:
 	const FGameplayTag& GetDesiredGait() const;
 
-	UFUNCTION(BlueprintCallable, Category = "ALS|Character", Meta = (AutoCreateRefTerm = "NewDesiredGait"))
+	UFUNCTION(BlueprintCallable, Category = "Als Character", Meta = (AutoCreateRefTerm = "NewDesiredGait"))
 	void SetDesiredGait(const FGameplayTag& NewDesiredGait);
 
 private:
@@ -329,7 +332,7 @@ private:
 public:
 	const FGameplayTag& GetOverlayMode() const;
 
-	UFUNCTION(BlueprintCallable, Category = "ALS|Character", Meta = (AutoCreateRefTerm = "NewOverlayMode"))
+	UFUNCTION(BlueprintCallable, Category = "Als Character", Meta = (AutoCreateRefTerm = "NewOverlayMode"))
 	void SetOverlayMode(const FGameplayTag& NewOverlayMode);
 
 private:
@@ -375,6 +378,9 @@ protected:
 
 public:
 	virtual FRotator GetViewRotation() const override;
+
+	UFUNCTION(BlueprintNativeEvent, Category = "Als Character")
+	void OnChangedPerspective(bool FirstPersonPerspective);
 
 private:
 	void SetReplicatedViewRotation(const FRotator& NewViewRotation, bool bSendRpc);
@@ -472,7 +478,7 @@ protected:
 	// Rolling
 
 public:
-	UFUNCTION(BlueprintCallable, Category = "ALS|Character")
+	UFUNCTION(BlueprintCallable, Category = "Als Character")
 	void StartRolling(float PlayRate = 1.0f);
 
 	UFUNCTION(BlueprintNativeEvent, Category = "Als Character")
@@ -501,7 +507,7 @@ public:
 	UFUNCTION(BlueprintNativeEvent, Category = "Als Character")
 	bool IsMantlingAllowedToStart() const;
 
-	UFUNCTION(BlueprintCallable, Category = "ALS|Character", Meta = (ReturnDisplayName = "Success"))
+	UFUNCTION(BlueprintCallable, Category = "Als Character", Meta = (ReturnDisplayName = "Success"))
 	bool StartMantlingGrounded();
 
 private:
@@ -542,7 +548,7 @@ public:
 
 	bool IsRagdollingAllowedToStart() const;
 
-	UFUNCTION(BlueprintCallable, Category = "ALS|Character")
+	UFUNCTION(BlueprintCallable, Category = "Als Character")
 	void StartRagdolling();
 
 private:
@@ -561,7 +567,7 @@ protected:
 public:
 	bool IsRagdollingAllowedToStop() const;
 
-	UFUNCTION(BlueprintCallable, Category = "ALS|Character", Meta = (ReturnDisplayName = "Success"))
+	UFUNCTION(BlueprintCallable, Category = "Als Character", Meta = (ReturnDisplayName = "Success"))
 	bool StopRagdolling();
 
 private:

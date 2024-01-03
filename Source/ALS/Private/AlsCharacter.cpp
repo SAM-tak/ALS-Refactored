@@ -612,6 +612,11 @@ void AAlsCharacter::OnReplicated_DesiredAiming(const bool bPreviousDesiredAiming
 
 void AAlsCharacter::OnDesiredAimingChanged_Implementation(const bool bPreviousDesiredAiming) {}
 
+float AAlsCharacter::GetAimAmount() const
+{
+	return AnimationInstance.IsValid() ? AnimationInstance->GetCurveValueClamped01(UAlsConstants::AllowAimingCurveName()) : 0.0f;
+}
+
 void AAlsCharacter::SetDesiredRotationMode(const FGameplayTag& NewDesiredRotationMode)
 {
 	SetDesiredRotationMode(NewDesiredRotationMode, true);
@@ -1103,6 +1108,8 @@ FRotator AAlsCharacter::GetViewRotation() const
 {
 	return ViewState.Rotation;
 }
+
+void AAlsCharacter::OnChangedPerspective_Implementation(bool FirstPersonPerspective) {}
 
 void AAlsCharacter::SetInputDirection(FVector NewInputDirection)
 {

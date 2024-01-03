@@ -16,8 +16,23 @@ struct ALSCAMERA_API FAlsFirstPersonCameraSettings
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS")
 	FName CameraSocketName{TEXTVIEW("FirstPersonCamera")};
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS")
+	FName AimingCameraLeftSocketName{TEXTVIEW("AimingFirstPersonCamera_l")};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS")
+	FName AimingCameraRightSocketName{TEXTVIEW("AimingFirstPersonCamera_r")};
+
+	// The distance to move backward from the camera sokcet position.
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS", Meta = (ClampMin = 0, ForceUnits = "cm"))
+	float RetreatDistance{10.0f};
+
+	// The warp threshold distance in trasitioning to first person view from third person view.
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS", Meta = (ClampMin = 0, ForceUnits = "cm"))
 	float HeadSize{30.0f};
+
+	// The dominant eye setting.
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS")
+	uint8 bLeftDominantEye : 1 {false};
 
 	// If bPanoramic is true, renders panoramic with partial multi-view.
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS")

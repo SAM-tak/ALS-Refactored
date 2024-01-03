@@ -64,6 +64,9 @@ void UAlsCameraComponent::BeginPlay()
 	ALS_ENSURE(IsValid(Character));
 
 	Super::BeginPlay();
+
+	bFPP = FAnimWeight::IsFullWeight(UAlsMath::Clamp01(GetAnimInstance()->GetCurveValue(UAlsCameraConstants::FirstPersonOverrideCurveName())));
+	Character->OnChangedPerspective(bFPP);
 }
 
 void UAlsCameraComponent::TickComponent(float DeltaTime, const ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
@@ -102,6 +105,29 @@ void UAlsCameraComponent::CompleteParallelAnimationEvaluation(const bool bDoPost
 FVector UAlsCameraComponent::GetFirstPersonCameraLocation() const
 {
 	return Character->GetMesh()->GetSocketLocation(Settings->FirstPerson.CameraSocketName);
+}
+
+FVector UAlsCameraComponent::GetAimingFirstPersonCameraLocation(float AimingAmount) const
+{
+	if (AimingAmount >= 1.0f)
+	{
+		return Character->GetMesh()->GetSocketLocation(Settings->FirstPerson.bLeftDominantEye
+			? Settings->FirstPerson.AimingCameraLeftSocketName
+			: Settings->FirstPerson.AimingCameraRightSocketName);
+	}
+	else if (AimingAmount > 0.0f)
+	{
+		return FMath::Lerp(
+			GetFirstPersonCameraLocation(),
+			Character->GetMesh()->GetSocketLocation(Settings->FirstPerson.bLeftDominantEye
+				? Settings->FirstPerson.AimingCameraLeftSocketName
+				: Settings->FirstPerson.AimingCameraRightSocketName),
+			AimingAmount);
+	}
+	else
+	{
+		return GetFirstPersonCameraLocation();
+	}
 }
 
 FVector UAlsCameraComponent::GetThirdPersonPivotLocation() const
@@ -213,6 +239,8 @@ void UAlsCameraComponent::TickCamera(const float DeltaTime, bool bAllowLag)
 		UAlsMath::Clamp01(GetAnimInstance()->GetCurveValue(UAlsCameraConstants::FirstPersonOverrideCurveName()))
 	};
 
+	const auto AimingAmount{Character->GetAimAmount()};
+
 	// Refresh CurrentLeadVector if needed.
 
 	if (Settings->ThirdPerson.bApplyVelocityLead)
@@ -239,12 +267,19 @@ void UAlsCameraComponent::TickCamera(const float DeltaTime, bool bAllowLag)
 		PivotLocation = PivotTargetLocation;
 		bInAutoFPP = false;
 
-		CameraLocation = GetFirstPersonCameraLocation();
+		CameraLocation = GetAimingFirstPersonCameraLocation(AimingAmount) - CameraTargetRotation.Vector() * Settings->FirstPerson.RetreatDistance;
 		CameraRotation = CameraTargetRotation;
 		CameraFOV = Settings->FirstPerson.FOV;
 		bPanoramic = Settings->FirstPerson.bPanoramic;
 		PanoramaFOV = Settings->FirstPerson.PanoramaFOV;
 		PanoramaSideViewRate = Settings->FirstPerson.PanoramaSideViewRate;
+
+		if(!bFPP)
+		{
+			// call Begin FPP Event
+			Character->OnChangedPerspective(true);
+		}
+		bFPP = true;
 		return;
 	}
 
@@ -328,9 +363,16 @@ void UAlsCameraComponent::TickCamera(const float DeltaTime, bool bAllowLag)
 
 	const auto CameraResultLocation{CalculateCameraTrace(CameraTargetLocation, PivotOffset, DeltaTime, bAllowLag)};
 
+	if (bFPP != bInAutoFPP)
+	{
+		// call Begin/End FPP Event
+		Character->OnChangedPerspective(!bFPP);
+	}
+	bFPP = bInAutoFPP;
+
 	if (bInAutoFPP)
 	{
-		CameraLocation = GetFirstPersonCameraLocation();
+		CameraLocation = GetAimingFirstPersonCameraLocation(AimingAmount) - CameraTargetRotation.Vector() * Settings->FirstPerson.RetreatDistance;
 		CameraRotation = CameraTargetRotation;
 		CameraFOV = Settings->FirstPerson.FOV;
 		bPanoramic = Settings->FirstPerson.bPanoramic;
@@ -347,8 +389,7 @@ void UAlsCameraComponent::TickCamera(const float DeltaTime, bool bAllowLag)
 	}
 	else
 	{
-		auto FirstPersonCameraLocation{GetFirstPersonCameraLocation()};
-		FirstPersonCameraLocation -= GetForwardVector() * Settings->FirstPerson.HeadSize;
+		auto FirstPersonCameraLocation{GetFirstPersonCameraLocation() - GetForwardVector() * Settings->FirstPerson.HeadSize};
 		CameraLocation = FMath::Lerp(CameraResultLocation, FirstPersonCameraLocation, FirstPersonOverride);
 		CameraFOV = FMath::Lerp(Settings->ThirdPerson.FOV, Settings->FirstPerson.FOV, FirstPersonOverride);
 		bPanoramic = Settings->ThirdPerson.bPanoramic | Settings->FirstPerson.bPanoramic;
