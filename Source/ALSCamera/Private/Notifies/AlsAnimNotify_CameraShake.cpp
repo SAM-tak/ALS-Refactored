@@ -34,8 +34,8 @@ void UAlsAnimNotify_CameraShake::Notify(USkeletalMeshComponent* Mesh, UAnimSeque
 	Super::Notify(Mesh, Animation, EventReference);
 
 	const auto* Pawn{Cast<APawn>(Mesh->GetOwner())};
-	const auto* Player{IsValid(Pawn) ? Cast<APlayerController>(Pawn->GetController()) : nullptr};
-	auto* CameraManager{IsValid(Player) ? Player->PlayerCameraManager.Get() : nullptr};
+	const auto* PlayerController{IsValid(Pawn) ? Cast<APlayerController>(Pawn->GetController()) : nullptr};
+	auto* CameraManager{PlayerController && IsValid(PlayerController) ? PlayerController->PlayerCameraManager.Get() : nullptr};
 
 	if (IsValid(CameraManager))
 	{

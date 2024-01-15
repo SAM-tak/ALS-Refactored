@@ -11,10 +11,10 @@ struct ALS_API FAlsAnimNode_GameplayTagsBlend : public FAnimNode_BlendListBase
 
 public:
 #if WITH_EDITORONLY_DATA
-	UPROPERTY(EditAnywhere, Category = "Settings", Meta = (FoldProperty, PinShownByDefault))
+	UPROPERTY(EditAnywhere, Category = Settings, Meta = (FoldProperty, PinShownByDefault))
 	FGameplayTag ActiveTag;
 
-	UPROPERTY(EditAnywhere, Category = "Settings", Meta = (FoldProperty))
+	UPROPERTY(EditAnywhere, Category = Settings, Meta = (FoldProperty))
 	TArray<FGameplayTag> Tags;
 #endif
 

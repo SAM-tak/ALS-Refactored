@@ -19,6 +19,12 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings")
 	TObjectPtr<UAlsCameraSettings> Settings;
 
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings")
+	TSubclassOf<UCameraShakeBase> ADSCameraShakeClass;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Settings", Meta = (ClampMin = 0, ClampMax = 1))
+	float ADSCameraShakeScale{1.0f};
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Settings", Meta = (ClampMin = 0, ClampMax = 1))
 	float PostProcessWeight{1.0f};
 
@@ -73,9 +79,6 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient)
 	uint8 bInAutoFPP : 1 {false};
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient, Meta = (ClampMin = 5, ClampMax = 170, ForceUnits = "deg"))
-	float CameraFOV{90.0f};
-
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient)
 	uint8 bRightShoulder : 1 {true};
 
@@ -83,16 +86,22 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient)
 	uint8 bPanoramic : 1 {false};
 
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient, Meta = (ClampMin = 5, ClampMax = 170, ForceUnits = "deg"))
+	float CameraFOV{ 90.0f };
+
 	// The horizontal field of view (in degrees) in panoramic rendering.
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient, Meta = (ClampMin = 180, ClampMax = 360, ForceUnits = "deg"))
 	float PanoramaFOV{180.0f};
-
+	
 	/**
 	 * This specifies the proportion of the side view within the range of 0 to 1.
 	 * A value of 0 means no side view, and a value of 1 means the side view takes up one third of the entire screen.
 	 */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient, Meta = (ClampMin = 0, ClampMax = 1))
 	float PanoramaSideViewRate{0.5f};
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient)
+	TObjectPtr<UCameraShakeBase> CurrentADSCameraShake;
 
 public:
 	UAlsCameraComponent();
@@ -152,7 +161,9 @@ private:
 
 	bool TryAdjustLocationBlockedByGeometry(FVector& Location, bool bDisplayDebugCameraTraces) const;
 
-	FVector GetAimingFirstPersonCameraLocation(float AimAmount) const;
+	void CalculateAimingFirstPersonCamera(float AimingAmount, const FRotator& TargetRotation);
+
+	void UpdateADSCameraShake(float FirstPersonOverride, float AimingAmount);
 
 	// Debug
 

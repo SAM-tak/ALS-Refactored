@@ -617,6 +617,15 @@ float AAlsCharacter::GetAimAmount() const
 	return AnimationInstance.IsValid() ? AnimationInstance->GetCurveValueClamped01(UAlsConstants::AllowAimingCurveName()) : 0.0f;
 }
 
+bool AAlsCharacter::HasSight_Implementation() const
+{
+	return false;
+}
+
+void AAlsCharacter::GetSightLocAndRot_Implementation(FVector& Loc, FRotator& Rot) const
+{
+}
+
 void AAlsCharacter::SetDesiredRotationMode(const FGameplayTag& NewDesiredRotationMode)
 {
 	SetDesiredRotationMode(NewDesiredRotationMode, true);
@@ -1864,6 +1873,37 @@ void AAlsCharacter::RefreshViewRelativeTargetYawAngle()
 {
 	LocomotionState.ViewRelativeTargetYawAngle = FRotator3f::NormalizeAxis(UE_REAL_TO_FLOAT(
 		ViewState.Rotation.Yaw - LocomotionState.TargetYawAngle));
+}
+
+
+bool AAlsCharacter::GetCachedTransform(const FName& CacheName, const FName& SocketName, FTransform& Transform) const
+{
+	auto Cache = CachedTransforms.Find(CacheName);
+	if (Cache)
+	{
+		auto Trs = Cache->Find(SocketName);
+		if (Trs)
+		{
+			Transform = *Trs;
+			return true;
+		}
+	}
+	return false;
+}
+
+void AAlsCharacter::SetCachedTransform(const FName& CacheName, const FName& SocketName, const FTransform& Transform)
+{
+	CachedTransforms.FindOrAdd(CacheName).FindOrAdd(SocketName) = Transform;
+}
+
+void AAlsCharacter::RemoveCachedTransforms(const FName& CacheName)
+{
+	CachedTransforms.Remove(CacheName);
+}
+
+void AAlsCharacter::ClearAllCachedTransforms()
+{
+	CachedTransforms.Empty();
 }
 
 bool AAlsCharacter::CanLie() const

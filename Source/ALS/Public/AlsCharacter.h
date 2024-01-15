@@ -206,6 +206,12 @@ public:
 	UFUNCTION(BlueprintPure, Category = "Als Character")
 	float GetAimAmount() const;
 
+	UFUNCTION(BlueprintNativeEvent, Category = "Als Character")
+	bool HasSight() const;
+
+	UFUNCTION(BlueprintNativeEvent, Category = "Als Character")
+	void GetSightLocAndRot(FVector& Loc, FRotator& Rot) const;
+
 private:
 	void SetDesiredAiming(bool bNewDesiredAiming, bool bSendRpc);
 
@@ -619,6 +625,24 @@ public:
 private:
 	void RefreshPhysicalAnimation(float DeltaTime);
 
+	// Cached Transforms
+
+public:
+	UFUNCTION(BlueprintPure, Category = "Als Character|Cached Transforms")
+	UPARAM(DisplayName = "Value Exists") bool GetCachedTransform(const FName& CacheName, const FName& SocketName, FTransform& Transform) const;
+
+	UFUNCTION(BlueprintCallable, Category = "Als Character|Cached Transforms")
+	void SetCachedTransform(const FName& CacheName, const FName& SocketName, const FTransform& Transform);
+
+	UFUNCTION(BlueprintCallable, Category = "Als Character|Cached Transforms")
+	void RemoveCachedTransforms(const FName& CacheName);
+
+	UFUNCTION(BlueprintCallable, Category = "Als Character|Cached Transforms")
+	void ClearAllCachedTransforms();
+
+private:
+	mutable TMap<FName, TMap<FName, FTransform>> CachedTransforms;
+
 	// Others
 
 public:
@@ -739,4 +763,3 @@ inline const FAlsRagdollingState& AAlsCharacter::GetRagdollingState() const
 {
 	return RagdollingState;
 }
-
