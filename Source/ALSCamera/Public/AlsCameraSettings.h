@@ -16,15 +16,17 @@ struct ALSCAMERA_API FAlsFirstPersonCameraSettings
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS")
 	FName CameraSocketName{TEXTVIEW("FirstPersonCamera")};
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS")
+	FName LeftEyeCameraSocketName{TEXTVIEW("ADSCameraLeft")};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS")
+	FName RightEyeCameraSocketName{TEXTVIEW("ADSCameraRight")};
+
 	// Threshold of Aiming Amount value for aim down sight.
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS", Meta = (ClampMin = 0, ClampMax = 0.99))
 	float ADSThreshold{0.9f};
 
-	// Inter-pupillary distance.
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS", Meta = (ClampMin = 0, ForceUnits = "cm"))
-	float IPD{6.0f};
-
-	// If bPanoramic is true, renders panoramic with partial multi-view.
+	// If bLeftDominantEye is true, use LeftEyeCameraSocketName instead of RightEyeCameraSocketName.
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS")
 	uint8 bLeftDominantEye : 1 {false};
 

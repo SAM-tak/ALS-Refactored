@@ -625,24 +625,6 @@ public:
 private:
 	void RefreshPhysicalAnimation(float DeltaTime);
 
-	// Cached Transforms
-
-public:
-	UFUNCTION(BlueprintPure, Category = "Als Character|Cached Transforms")
-	UPARAM(DisplayName = "Value Exists") bool GetCachedTransform(const FName& CacheName, const FName& SocketName, FTransform& Transform) const;
-
-	UFUNCTION(BlueprintCallable, Category = "Als Character|Cached Transforms")
-	void SetCachedTransform(const FName& CacheName, const FName& SocketName, const FTransform& Transform);
-
-	UFUNCTION(BlueprintCallable, Category = "Als Character|Cached Transforms")
-	void RemoveCachedTransforms(const FName& CacheName);
-
-	UFUNCTION(BlueprintCallable, Category = "Als Character|Cached Transforms")
-	void ClearAllCachedTransforms();
-
-private:
-	mutable TMap<FName, TMap<FName, FTransform>> CachedTransforms;
-
 	// Others
 
 public:

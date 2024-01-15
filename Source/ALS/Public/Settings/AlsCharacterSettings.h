@@ -17,6 +17,11 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings", Meta = (ClampMin = 0, ForceUnits = "cm/s"))
 	float MovingSpeedThreshold{50.0f};
 
+	// When FirstPerson Or RotateToVelocityWhenSprinting is False And DesiredRotationMode is not VelocityDirection,
+	// sprint will allow if View Relative Angle less than this value. 
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings", Meta = (ClampMin = 0, ClampMax = 180, ForceUnits = "deg"))
+	float ViewRelativeAngleThresholdForSprint{50.0f};
+
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings")
 	EAlsInAirRotationMode InAirRotationMode{EAlsInAirRotationMode::KeepRelativeRotation};
 

@@ -243,7 +243,7 @@ void UAlsSkeletonUtility::AddOrReplaceSocket(USkeleton* Skeleton, FName SocketNa
 	Skeleton->Sockets.Emplace(Socket);
 }
 
-void UAlsSkeletonUtility::AddOrReplaceBlendProfile(USkeleton* Skeleton, FName BlendProfileName, EAlsBlendProfileMode Mode,
+void UAlsSkeletonUtility::AddOrReplaceBlendProfile(USkeleton* Skeleton, FName BlendProfileName,
                                                    const TArray<FAlsBlendProfileEntry>& Entries)
 {
 	if (!ALS_ENSURE(IsValid(Skeleton)))
@@ -278,25 +278,7 @@ void UAlsSkeletonUtility::AddOrReplaceBlendProfile(USkeleton* Skeleton, FName Bl
 		BlendProfile = Skeleton->CreateNewBlendProfile(BlendProfileName);
 	}
 
-	switch(Mode)
-	{
-	case EAlsBlendProfileMode::WeightFactor:
-		BlendProfile->Mode = EBlendProfileMode::WeightFactor;
-		break;
-	case EAlsBlendProfileMode::BlendMask:
-		BlendProfile->Mode = EBlendProfileMode::BlendMask;
-		{
-			int32 BoneNum = Skeleton->GetReferenceSkeleton().GetNum();
-			for (int32 BoneIndex = 0; BoneIndex < BoneNum; ++BoneIndex)
-			{
-				BlendProfile->SetBoneBlendScale(BoneIndex, 1.0f, false, true);
-			}
-		}
-		break;
-	case EAlsBlendProfileMode::TimeFactor:
-		BlendProfile->Mode = EBlendProfileMode::TimeFactor;
-		break;
-	}
+	BlendProfile->Mode = EBlendProfileMode::WeightFactor;
 
 	for (const auto& Entry : Entries)
 	{

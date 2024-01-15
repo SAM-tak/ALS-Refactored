@@ -3,14 +3,6 @@
 #include "Animation/Skeleton.h"
 #include "AlsSkeletonUtility.generated.h"
 
-UENUM(BlueprintType)
-enum class EAlsBlendProfileMode : uint8
-{
-	WeightFactor,
-	BlendMask,
-	TimeFactor
-};
-
 USTRUCT(BlueprintType)
 struct ALSEDITOR_API FAlsBlendProfileEntry
 {
@@ -48,7 +40,7 @@ public:
 	                               const FVector& RelativeLocation, const FRotator& RelativeRotation);
 
 	UFUNCTION(BlueprintCallable, Category = "ALS|Skeleton Utility")
-	static void AddOrReplaceBlendProfile(USkeleton* Skeleton, FName BlendProfileName, EAlsBlendProfileMode Mode,
+	static void AddOrReplaceBlendProfile(USkeleton* Skeleton, FName BlendProfileName,
 	                                     const TArray<FAlsBlendProfileEntry>& Entries);
 
 	UFUNCTION(BlueprintCallable, Category = "ALS|Skeleton Utility", Meta = (AutoCreateRefTerm = "BoneName"))

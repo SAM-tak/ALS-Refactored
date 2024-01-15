@@ -107,16 +107,22 @@ FVector UAlsCameraComponent::GetFirstPersonCameraLocation() const
 	return Character->GetMesh()->GetSocketLocation(Settings->FirstPerson.CameraSocketName);
 }
 
+FVector UAlsCameraComponent::GetEyeCameraLocation() const
+{
+	return Character->GetMesh()->GetSocketLocation(Settings->FirstPerson.bLeftDominantEye ?
+												   Settings->FirstPerson.LeftEyeCameraSocketName :
+												   Settings->FirstPerson.RightEyeCameraSocketName);
+}
+
 void UAlsCameraComponent::CalculateAimingFirstPersonCamera(float AimingAmount, const FRotator& TargetRotation)
 {
-	const auto FirstPersonCameraLocation{GetFirstPersonCameraLocation()};
-
 	if (AimingAmount > 0.0f && Character->HasSight())
 	{
+		const auto EyeCameraLocation{GetEyeCameraLocation()};
 		FVector SightLoc;
 		FRotator SightRot;
 		Character->GetSightLocAndRot(SightLoc, SightRot);
-		SightLoc = FVector::PointPlaneProject(SightLoc, FirstPersonCameraLocation, SightRot.Vector());
+		SightLoc = FVector::PointPlaneProject(SightLoc, EyeCameraLocation, SightRot.Vector());
 		if (AimingAmount >= 1.0f)
 		{
 			CameraLocation = SightLoc - SightRot.Vector() * Settings->FirstPerson.RetreatDistance;
@@ -130,15 +136,14 @@ void UAlsCameraComponent::CalculateAimingFirstPersonCamera(float AimingAmount, c
 				(1.0f - Settings->FirstPerson.ADSThreshold));
 			CameraRotation = FRotator(FQuat::Slerp(TargetRotation.Quaternion(), SightRot.Quaternion(), SightAlpha));
 			auto Offset = CameraRotation.Vector() * Settings->FirstPerson.RetreatDistance;
-			auto Eye = FirstPersonCameraLocation +
-				GetRightVector() * Settings->FirstPerson.IPD * (Settings->FirstPerson.bLeftDominantEye ? -0.5f : 0.5f) * EyeAlpha;
-			CameraLocation = FMath::Lerp(Eye, SightLoc, SightAlpha) - Offset;
+			auto EyeLoc = FMath::Lerp(GetFirstPersonCameraLocation(), EyeCameraLocation, EyeAlpha);
+			CameraLocation = FMath::Lerp(EyeLoc, SightLoc, SightAlpha) - Offset;
 			return;
 		}
 	}
 
 	auto Offset = TargetRotation.Vector() * Settings->FirstPerson.RetreatDistance;
-	CameraLocation = FirstPersonCameraLocation - Offset;
+	CameraLocation = GetFirstPersonCameraLocation() - Offset;
 	CameraRotation = TargetRotation;
 }
 

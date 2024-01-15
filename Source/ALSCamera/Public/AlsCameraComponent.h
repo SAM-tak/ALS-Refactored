@@ -23,7 +23,7 @@ protected:
 	TSubclassOf<UCameraShakeBase> ADSCameraShakeClass;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Settings", Meta = (ClampMin = 0, ClampMax = 1))
-	float ADSCameraShakeScale{1.0f};
+	float ADSCameraShakeScale{0.2f};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Settings", Meta = (ClampMin = 0, ClampMax = 1))
 	float PostProcessWeight{1.0f};
@@ -136,6 +136,9 @@ public:
 
 	UFUNCTION(BlueprintPure, Category = "ALS|Camera", Meta = (ReturnDisplayName = "Camera Location"))
 	FVector GetFirstPersonCameraLocation() const;
+
+	UFUNCTION(BlueprintPure, Category = "ALS|Camera", Meta = (ReturnDisplayName = "Camera Location"))
+	FVector GetEyeCameraLocation() const;
 
 	UFUNCTION(BlueprintPure, Category = "ALS|Camera", Meta = (ReturnDisplayName = "Pivot Location"))
 	FVector GetThirdPersonPivotLocation() const;
