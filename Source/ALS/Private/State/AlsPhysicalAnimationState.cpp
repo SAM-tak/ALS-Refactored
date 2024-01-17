@@ -16,71 +16,71 @@
 
 namespace
 {
-	bool IsLocked(const FAlsPhysicalAnimationCurveState& Curves, const FName& BoneName)
+	float GetLockedValue(const FAlsPhysicalAnimationCurveState& Curves, const FName& BoneName)
 	{
 		if (BoneName == FName{TEXT("clavicle_l")})
 		{
-			return Curves.LockLeftArm > 0.0f;
+			return Curves.LockLeftArm;
 		}
 		if (BoneName == FName{TEXT("upperarm_l")})
 		{
-			return Curves.LockLeftArm > 0.0f;
+			return Curves.LockLeftArm;
 		}
 		if (BoneName == FName{TEXT("lowerarm_l")})
 		{
-			return Curves.LockLeftArm > 0.0f;
+			return Curves.LockLeftArm;
 		}
 		if (BoneName == FName{TEXT("hand_l")})
 		{
-			return Curves.LockLeftHand > 0.0f;
+			return Curves.LockLeftHand;
 		}
 		if (BoneName == FName{TEXT("clavicle_r")})
 		{
-			return Curves.LockRightArm > 0.0f;
+			return Curves.LockRightArm;
 		}
 		if (BoneName == FName{TEXT("upperarm_r")})
 		{
-			return Curves.LockRightArm > 0.0f;
+			return Curves.LockRightArm;
 		}
 		if (BoneName == FName{TEXT("lowerarm_r")})
 		{
-			return Curves.LockRightArm > 0.0f;
+			return Curves.LockRightArm;
 		}
 		if (BoneName == FName{TEXT("hand_r")})
 		{
-			return Curves.LockRightHand > 0.0f;
+			return Curves.LockRightHand;
 		}
 		if (BoneName == FName{TEXT("thigh_l")})
 		{
-			return Curves.LockLeftLeg > 0.0f;
+			return Curves.LockLeftLeg;
 		}
 		if (BoneName == FName{TEXT("calf_l")})
 		{
-			return Curves.LockLeftLeg > 0.0f;
+			return Curves.LockLeftLeg;
 		}
 		if (BoneName == UAlsConstants::FootLeftBoneName())
 		{
-			return Curves.LockLeftFoot > 0.0f;
+			return Curves.LockLeftFoot;
 		}
 		if (BoneName == FName{TEXT("ball_l")})
 		{
-			return Curves.LockLeftFoot > 0.0f;
+			return Curves.LockLeftFoot;
 		}
 		if (BoneName == FName{TEXT("thigh_r")})
 		{
-			return Curves.LockRightLeg > 0.0f;
+			return Curves.LockRightLeg;
 		}
 		if (BoneName == FName{TEXT("calf_r")})
 		{
-			return Curves.LockRightLeg > 0.0f;
+			return Curves.LockRightLeg;
 		}
 		if (BoneName == UAlsConstants::FootRightBoneName())
 		{
-			return Curves.LockRightFoot > 0.0f;
+			return Curves.LockRightFoot;
 		}
 		if (BoneName == FName{TEXT("ball_r")})
 		{
-			return Curves.LockRightFoot > 0.0f;
+			return Curves.LockRightFoot;
 		}
 		return false;
 	}
@@ -154,7 +154,7 @@ void FAlsPhysicalAnimationState::Refresh(float DeltaTime, USkeletalMeshComponent
 		{
 			if (USkeletalBodySetup* BodySetup = Cast<USkeletalBodySetup>(BI->BodySetup.Get()))
 			{
-				if (!IsLocked(Curves, BodySetup->BoneName) && HasAnyProfile(BodySetup))
+				if (GetLockedValue(Curves, BodySetup->BoneName) <= 0.0f && HasAnyProfile(BodySetup))
 				{
 					bNeedUpdate = true;
 					break;
@@ -171,7 +171,8 @@ void FAlsPhysicalAnimationState::Refresh(float DeltaTime, USkeletalMeshComponent
 		{
 			if (USkeletalBodySetup* BodySetup = Cast<USkeletalBodySetup>(BI->BodySetup.Get()))
 			{
-				if (!IsLocked(Curves, BodySetup->BoneName) && HasAnyProfile(BodySetup))
+				float LockedValue{GetLockedValue(Curves, BodySetup->BoneName)};
+				if (LockedValue <= 0.0f && HasAnyProfile(BodySetup))
 				{
 					bActiveAny = true;
 					float Speed = 1.0f / FMath::Max(0.000001f, Settings.BlendTimeOfBlendWeightOnActivate);
@@ -187,8 +188,15 @@ void FAlsPhysicalAnimationState::Refresh(float DeltaTime, USkeletalMeshComponent
 				}
 				else
 				{
-					float Speed = 1.0f / FMath::Max(0.000001f, Settings.BlendTimeOfBlendWeightOnDeactivate);
-					BI->PhysicsBlendWeight = FMath::Max(0.0f, FMath::FInterpConstantTo(BI->PhysicsBlendWeight, 0.0f, DeltaTime, Speed));
+					if (LockedValue > 0.0f)
+					{
+						BI->PhysicsBlendWeight = FMath::FInterpConstantTo(BI->PhysicsBlendWeight, 1.0f - LockedValue, DeltaTime, 15.0f);
+					}
+					else
+					{
+						float Speed = 1.0f / FMath::Max(0.000001f, Settings.BlendTimeOfBlendWeightOnDeactivate);
+						BI->PhysicsBlendWeight = FMath::FInterpConstantTo(BI->PhysicsBlendWeight, 0.0f, DeltaTime, Speed);
+					}
 					if (BI->PhysicsBlendWeight == 0.0f)
 					{
 						if (BI->IsInstanceSimulatingPhysics())
