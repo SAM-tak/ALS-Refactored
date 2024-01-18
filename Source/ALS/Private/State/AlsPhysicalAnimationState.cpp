@@ -82,7 +82,7 @@ namespace
 		{
 			return Curves.LockRightFoot;
 		}
-		return false;
+		return 0.0f;
 	}
 }
 
