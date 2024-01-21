@@ -10,6 +10,8 @@
 #include "Engine/Engine.h"
 #include "Engine/SkeletalMesh.h"
 #include "GameFramework/CharacterMovementComponent.h"
+#include "PhysicsEngine/PhysicalAnimationComponent.h"
+#include "PhysicsEngine/PhysicsAsset.h"
 #include "Utility/AlsConstants.h"
 #include "Utility/AlsMath.h"
 #include "Utility/AlsUtility.h"
@@ -37,7 +39,8 @@ void AAlsCharacter::DisplayDebug(UCanvas* Canvas, const FDebugDisplayInfo& Displ
 	    !DisplayInfo.IsDisplayOn(UAlsConstants::StateDebugDisplayName()) &&
 	    !DisplayInfo.IsDisplayOn(UAlsConstants::ShapesDebugDisplayName()) &&
 	    !DisplayInfo.IsDisplayOn(UAlsConstants::TracesDebugDisplayName()) &&
-	    !DisplayInfo.IsDisplayOn(UAlsConstants::MantlingDebugDisplayName()))
+	    !DisplayInfo.IsDisplayOn(UAlsConstants::MantlingDebugDisplayName()) &&
+	    !DisplayInfo.IsDisplayOn(UAlsConstants::PADebugDisplayName()))
 	{
 		VerticalLocation = MaxVerticalLocation;
 
@@ -122,6 +125,18 @@ void AAlsCharacter::DisplayDebug(UCanvas* Canvas, const FDebugDisplayInfo& Displ
 	else
 	{
 		DisplayDebugHeader(Canvas, MantlingHeaderText, {0.0f, 0.333333f, 0.0f}, Scale, HorizontalLocation, VerticalLocation);
+	}
+
+	static const auto PAHeaderText{FText::AsCultureInvariant(FString{TEXTVIEW("Als.PhysicalAnimation (Shift + 6)")})};
+
+	if (DisplayInfo.IsDisplayOn(UAlsConstants::PADebugDisplayName()))
+	{
+		DisplayDebugHeader(Canvas, PAHeaderText, {0.0f, 0.333333f, 0.0f}, Scale, HorizontalLocation, VerticalLocation);
+		DisplayDebugPA(Canvas, Scale, HorizontalLocation, VerticalLocation);
+	}
+	else
+	{
+		DisplayDebugHeader(Canvas, PAHeaderText, {0.0f, 0.333333f, 0.0f}, Scale, HorizontalLocation, VerticalLocation);
 	}
 
 	VerticalLocation += RowOffset;
@@ -719,6 +734,37 @@ void AAlsCharacter::DisplayDebugMantling(const UCanvas* Canvas, const float Scal
 	Text.Draw(Canvas->Canvas, {HorizontalLocation, VerticalLocation});
 
 	VerticalLocation += RowOffset;
+}
+
+
+void AAlsCharacter::DisplayDebugPA(const UCanvas* Canvas, const float Scale, const float HorizontalLocation, float& VerticalLocation) const
+{
+	VerticalLocation += 4.0f * Scale;
+
+	FCanvasTextItem Text{
+		FVector2D::ZeroVector,
+		FText::GetEmpty(),
+		GEngine->GetMediumFont(),
+		FLinearColor::White
+	};
+
+	Text.Scale = {Scale * 0.75f, Scale * 0.75f};
+	Text.EnableShadow(FLinearColor::Black);
+
+	const auto RowOffset{12.0f * Scale};
+	const auto ColumnOffset{145.0f * Scale};
+
+	for (auto BI : GetMesh()->Bodies)
+	{
+		Text.SetColor(FMath::Lerp(FLinearColor::Gray, FLinearColor::Red, UAlsMath::Clamp01(BI->PhysicsBlendWeight)));
+
+		Text.Text = FText::AsCultureInvariant(FString::Printf(TEXT("%s %s %1.2f"), *BI->GetBodySetup()->BoneName.ToString(),
+			BI->IsInstanceSimulatingPhysics() ? TEXT("ON") : TEXT("OFF"),
+			BI->PhysicsBlendWeight));
+		Text.Draw(Canvas->Canvas, {HorizontalLocation, VerticalLocation});
+
+		VerticalLocation += RowOffset;
+	}
 }
 
 #undef LOCTEXT_NAMESPACE

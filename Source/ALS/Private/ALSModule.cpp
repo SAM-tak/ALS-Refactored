@@ -78,6 +78,11 @@ void FALSModule::Console_OnRegisterAutoCompleteEntries(TArray<FAutoCompleteComma
 	Command->Command = FString{TEXTVIEW("ShowDebug Als.Mantling")};
 	Command->Desc = FString{TEXTVIEW("Displays mantling traces.")};
 	Command->Color = CommandColor;
+
+	Command = &AutoCompleteCommands.AddDefaulted_GetRef();
+	Command->Command = FString{TEXTVIEW("ShowDebug Als.PhysicalAnimation")};
+	Command->Desc = FString{TEXTVIEW("Displays Physical Animation Info.")};
+	Command->Color = CommandColor;
 }
 #endif
 

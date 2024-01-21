@@ -236,6 +236,9 @@ public:
 
 	UFUNCTION(BlueprintPure, Category = "ALS|Constants", Meta = (ReturnDisplayName = "Display Name"))
 	static const FName& MantlingDebugDisplayName();
+
+	UFUNCTION(BlueprintPure, Category = "ALS|Constants", Meta = (ReturnDisplayName = "Display Name"))
+	static const FName& PADebugDisplayName();
 };
 
 inline const FName& UAlsConstants::RootBoneName()
@@ -655,5 +658,11 @@ inline const FName& UAlsConstants::TracesDebugDisplayName()
 inline const FName& UAlsConstants::MantlingDebugDisplayName()
 {
 	static const FName Name{TEXTVIEW("ALS.Mantling")};
+	return Name;
+}
+
+inline const FName& UAlsConstants::PADebugDisplayName()
+{
+	static const FName Name{TEXTVIEW("ALS.PhysicalAnimation")};
 	return Name;
 }

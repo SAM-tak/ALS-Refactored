@@ -175,9 +175,9 @@ void FAlsPhysicalAnimationState::Refresh(float DeltaTime, USkeletalMeshComponent
 				if (LockedValue <= 0.0f && HasAnyProfile(BodySetup))
 				{
 					bActiveAny = true;
-					float Speed = 1.0f / FMath::Max(0.000001f, Settings.BlendTimeOfBlendWeightOnActivate);
 					if (BI->IsInstanceSimulatingPhysics())
 					{
+						float Speed = 1.0f / FMath::Max(0.000001f, Settings.BlendTimeOfBlendWeightOnActivate);
 						BI->PhysicsBlendWeight = FMath::Min(1.0f, FMath::FInterpConstantTo(BI->PhysicsBlendWeight, 1.0f, DeltaTime, Speed));
 					}
 					else
@@ -190,7 +190,15 @@ void FAlsPhysicalAnimationState::Refresh(float DeltaTime, USkeletalMeshComponent
 				{
 					if (LockedValue > 0.0f)
 					{
-						BI->PhysicsBlendWeight = FMath::FInterpConstantTo(BI->PhysicsBlendWeight, 1.0f - LockedValue, DeltaTime, 15.0f);
+						if (BI->IsInstanceSimulatingPhysics())
+						{
+							BI->PhysicsBlendWeight = FMath::FInterpConstantTo(BI->PhysicsBlendWeight, 1.0f - LockedValue, DeltaTime, 15.0f);
+						}
+						else
+						{
+							BI->SetInstanceSimulatePhysics(true);
+							BI->PhysicsBlendWeight = 1.0f - LockedValue;
+						}
 					}
 					else
 					{
