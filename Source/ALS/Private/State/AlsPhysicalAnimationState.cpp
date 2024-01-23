@@ -99,7 +99,8 @@ bool FAlsPhysicalAnimationState::HasAnyProfile(const USkeletalBodySetup* BodySet
 }
 
 bool FAlsPhysicalAnimationState::NeedsProfielChange(const FGameplayTag& NewLocomotionMode, const FGameplayTag& NewLocomotionAction,
-	const FGameplayTag& NewStance, const FGameplayTag& NewGait, const FGameplayTag& NewOverlayMode, const TArray<FName>& NewMultiplyProfileNames)
+													const FGameplayTag& NewStance, const FGameplayTag& NewGait,
+													const FGameplayTag& NewOverlayMode, const TArray<FName>& NewMultiplyProfileNames)
 {
 	bool RetVal = false;
 	if (LocomotionAction != NewLocomotionAction)
@@ -144,7 +145,8 @@ void FAlsPhysicalAnimationState::ClearAlsTags()
 	OverlayMode = FGameplayTag::EmptyTag;
 }
 
-void FAlsPhysicalAnimationState::Refresh(float DeltaTime, USkeletalMeshComponent* Mesh, const FAlsPhysicalAnimationSettings& Settings, const FAlsPhysicalAnimationCurveState& Curves)
+void FAlsPhysicalAnimationState::Refresh(float DeltaTime, USkeletalMeshComponent* Mesh, const FAlsPhysicalAnimationSettings& Settings,
+										 const FAlsPhysicalAnimationCurveState& Curves)
 {
 	bool bNeedUpdate = bActive;
 

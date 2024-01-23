@@ -187,8 +187,8 @@ void AAlsCharacterExample::Input_OnRoll()
 void AAlsCharacterExample::Input_OnRotationMode()
 {
 	SetDesiredRotationMode(GetDesiredRotationMode() == AlsRotationModeTags::VelocityDirection
-		                       ? AlsRotationModeTags::ViewDirection
-		                       : AlsRotationModeTags::VelocityDirection);
+						   ? AlsRotationModeTags::ViewDirection
+						   : AlsRotationModeTags::VelocityDirection);
 }
 
 void AAlsCharacterExample::Input_OnViewMode()
