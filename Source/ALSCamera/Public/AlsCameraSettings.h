@@ -114,9 +114,12 @@ struct ALSCAMERA_API FAlsThirdPersonCameraSettings
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS", Meta = (ClampMin = 0, ForceUnits = "x"))
 	FVector VelocityLeadRate{0.0f, 0.0f, 0.0f};
 
-	// The horizontal field of view (in degrees) in panoramic rendering.
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS", Meta = (ClampMin = 0))
 	float VelocityLeadInterpSpeed{10.0f};
+
+	// The horizontal field of view (in degrees) in panoramic rendering.
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS", Meta = (ClampMin = 0, ForceUnits = "cm"))
+	float FocusTraceStartOffset{10.0f};
 
 	// If bPanoramic is true, renders panoramic with partial multi-view.
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS")
@@ -169,6 +172,18 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings", DisplayName = "Enable Camera Lag Substepping",
 		Meta = (EditCondition = "bEnableCameraLagSubstepping"))
 	FAlsCameraLagSubsteppingSettings CameraLagSubstepping;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Settings")
+	TEnumAsByte<ECollisionChannel> FocusTraceChannel{ECC_Visibility};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Settings", Meta = (ClampMin = 0, ForceUnits = "cm"))
+	float MinFocalLength{10.0f};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Settings", Meta = (ClampMin = 0, ForceUnits = "cm"))
+	float MaxFocalLength{5000.0f};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Settings", Meta = (ClampMin = 0, ForceUnits = "cm"))
+	float FocusTraceRadius{3.0f};
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings")
 	FPostProcessSettings PostProcess;

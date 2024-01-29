@@ -1,4 +1,5 @@
 #include "AlsCameraComponent.h"
+#include "AlsCharacter.h"
 
 #include "DisplayDebugHelpers.h"
 #include "Animation/AnimInstance.h"
@@ -175,11 +176,11 @@ void UAlsCameraComponent::DisplayDebugShapes(const UCanvas* Canvas, const float 
 	Text.Text = PivotTargetLocationText;
 	Text.Draw(Canvas->Canvas, {HorizontalLocation, VerticalLocation});
 
-	DebugStringBuilder << TEXTVIEW("X: ");
+	DebugStringBuilder << TEXTVIEW("X:");
 	DebugStringBuilder.Appendf(TEXT("%.2f"), PivotTargetLocation.X);
-	DebugStringBuilder << TEXTVIEW("Y: ");
+	DebugStringBuilder << TEXTVIEW(" Y:");
 	DebugStringBuilder.Appendf(TEXT("%.2f"), PivotTargetLocation.Y);
-	DebugStringBuilder << TEXTVIEW("Z: ");
+	DebugStringBuilder << TEXTVIEW(" Z:");
 	DebugStringBuilder.Appendf(TEXT("%.2f"), PivotTargetLocation.Z);
 
 	Text.Text = FText::AsCultureInvariant(FString{DebugStringBuilder});
@@ -199,11 +200,11 @@ void UAlsCameraComponent::DisplayDebugShapes(const UCanvas* Canvas, const float 
 	Text.Text = PivotLagLocationText;
 	Text.Draw(Canvas->Canvas, {HorizontalLocation, VerticalLocation});
 
-	DebugStringBuilder << TEXTVIEW("X: ");
+	DebugStringBuilder << TEXTVIEW("X:");
 	DebugStringBuilder.Appendf(TEXT("%.2f"), PivotLagLocation.X);
-	DebugStringBuilder << TEXTVIEW("Y: ");
+	DebugStringBuilder << TEXTVIEW(" Y:");
 	DebugStringBuilder.Appendf(TEXT("%.2f"), PivotLagLocation.Y);
-	DebugStringBuilder << TEXTVIEW("Z: ");
+	DebugStringBuilder << TEXTVIEW(" Z:");
 	DebugStringBuilder.Appendf(TEXT("%.2f"), PivotLagLocation.Z);
 
 	Text.Text = FText::AsCultureInvariant(FString{DebugStringBuilder});
@@ -223,11 +224,11 @@ void UAlsCameraComponent::DisplayDebugShapes(const UCanvas* Canvas, const float 
 	Text.Text = PivotLocationText;
 	Text.Draw(Canvas->Canvas, {HorizontalLocation, VerticalLocation});
 
-	DebugStringBuilder << TEXTVIEW("X: ");
+	DebugStringBuilder << TEXTVIEW("X:");
 	DebugStringBuilder.Appendf(TEXT("%.2f"), PivotLocation.X);
-	DebugStringBuilder << TEXTVIEW("Y: ");
+	DebugStringBuilder << TEXTVIEW(" Y:");
 	DebugStringBuilder.Appendf(TEXT("%.2f"), PivotLocation.Y);
-	DebugStringBuilder << TEXTVIEW("Z: ");
+	DebugStringBuilder << TEXTVIEW(" Z:");
 	DebugStringBuilder.Appendf(TEXT("%.2f"), PivotLocation.Z);
 
 	Text.Text = FText::AsCultureInvariant(FString{DebugStringBuilder});
@@ -273,6 +274,8 @@ void UAlsCameraComponent::DisplayDebugTraces(const UCanvas* Canvas, const float 
                                              const float HorizontalLocation, float& VerticalLocation) const
 {
 	VerticalLocation += 4.0f * Scale;
+
+	TStringBuilder<256> DebugStringBuilder;
 
 	FCanvasTextItem Text{
 		FVector2D::ZeroVector,

@@ -72,12 +72,18 @@ protected:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient, Meta = (ClampMin = 0, ClampMax = 1, ForceUnits = "%"))
 	float TraceDistanceRatio{1.0f};
+	
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient, Meta = (ClampMin = 0, ForceUnits = "cm"))
+	float FocalLength{500.0f};
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient)
 	uint8 bFPP : 1 {false};
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient)
 	uint8 bInAutoFPP : 1 {false};
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient)
+	uint8 bInFPPTransition : 1 {false};
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient)
 	uint8 bRightShoulder : 1 {true};
@@ -87,7 +93,7 @@ protected:
 	uint8 bPanoramic : 1 {false};
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient, Meta = (ClampMin = 5, ClampMax = 170, ForceUnits = "deg"))
-	float CameraFOV{ 90.0f };
+	float CameraFOV{90.0f};
 
 	// The horizontal field of view (in degrees) in panoramic rendering.
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient, Meta = (ClampMin = 180, ClampMax = 360, ForceUnits = "deg"))
@@ -149,6 +155,9 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "ALS|Camera")
 	void GetViewInfo(FMinimalViewInfo& ViewInfo) const;
 
+	UFUNCTION(BlueprintPure, Category = "ALS|Camera", Meta = (ReturnDisplayName = "Focus Location"))
+	FVector GetCurrentFocusLocation() const;
+
 private:
 	void TickCamera(float DeltaTime, bool bAllowLag = true);
 
@@ -166,7 +175,13 @@ private:
 
 	void CalculateAimingFirstPersonCamera(float AimingAmount, const FRotator& TargetRotation);
 
+	float CalculateFocalLength() const;
+
 	void UpdateADSCameraShake(float FirstPersonOverride, float AimingAmount);
+
+	// Overlap
+
+	mutable TArray<FOverlapResult> Overlaps;
 
 	// Debug
 
@@ -202,4 +217,9 @@ inline bool UAlsCameraComponent::IsRightShoulder() const
 inline void UAlsCameraComponent::SetRightShoulder(const bool bNewRightShoulder)
 {
 	bRightShoulder = bNewRightShoulder;
+}
+
+inline FVector UAlsCameraComponent::GetCurrentFocusLocation() const
+{
+	return CameraLocation + CameraRotation.Vector() * FocalLength;
 }

@@ -38,8 +38,7 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings|Als Character")
 	TObjectPtr<UAlsMovementSettings> MovementSettings;
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings|Als Character|Desired State",
-		ReplicatedUsing = "OnReplicated_DesiredAiming")
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings|Als Character|Desired State", ReplicatedUsing = "OnReplicated_DesiredAiming")
 	uint8 bDesiredAiming : 1{false};
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings|Als Character|Desired State", Replicated)
@@ -54,8 +53,7 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings|Als Character|Desired State", Replicated)
 	FGameplayTag ViewMode{AlsViewModeTags::ThirdPerson};
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings|Als Character|Desired State",
-		ReplicatedUsing = "OnReplicated_OverlayMode")
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings|Als Character|Desired State", ReplicatedUsing = "OnReplicated_OverlayMode")
 	FGameplayTag OverlayMode{AlsOverlayModeTags::Default};
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State|Als Character", Transient, Meta = (ShowInnerProperties))
@@ -112,6 +110,9 @@ protected:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State|Als Character", Transient)
 	FAlsPhysicalAnimationState PhysicalAnimationState;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Als Character", Transient)
+	FRotator PendingFocalRotationRelativeAdjustment{ForceInit};
 
 	FTimerHandle BrakingFrictionFactorResetTimer;
 
@@ -380,6 +381,15 @@ protected:
 
 	virtual void RefreshInput(float DeltaTime);
 
+	// Controll Rotation Adjustment
+
+public:
+	UFUNCTION(BlueprintCallable, Category = "Als Character")
+	void SetFocalRotation(const FRotator& NewFocalRotation);
+
+private:
+	void TryAdjustControllRotation(float DeltaTime);
+
 	// View
 
 public:
@@ -387,6 +397,9 @@ public:
 
 	UFUNCTION(BlueprintNativeEvent, Category = "Als Character")
 	void OnChangedPerspective(bool FirstPersonPerspective);
+
+	UFUNCTION(BlueprintCallable, Category = "Als Character")
+	void SetLookRotation(const FRotator& NewLookRotation);
 
 private:
 	void SetReplicatedViewRotation(const FRotator& NewViewRotation, bool bSendRpc);
@@ -396,6 +409,8 @@ private:
 
 	UFUNCTION()
 	void OnReplicated_ReplicatedViewRotation();
+
+	FRotator TargetLookRotation{NAN, NAN, NAN};
 
 public:
 	void CorrectViewNetworkSmoothing(const FRotator& NewTargetRotation, bool bRelativeTargetRotation);

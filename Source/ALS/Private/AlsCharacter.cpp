@@ -15,6 +15,7 @@
 #include "Utility/AlsConstants.h"
 #include "Utility/AlsMacros.h"
 #include "Utility/AlsUtility.h"
+#include "Utility/AlsLog.h"
 
 #include UE_INLINE_GENERATED_CPP_BY_NAME(AlsCharacter)
 
@@ -116,7 +117,7 @@ void AAlsCharacter::PostRegisterAllComponents()
 	ViewState.NetworkSmoothing.TargetRotation = ReplicatedViewRotation;
 	ViewState.NetworkSmoothing.CurrentRotation = ReplicatedViewRotation;
 
-	ViewState.Rotation = ReplicatedViewRotation;
+	ViewState.Rotation = ViewState.LookRotation = ReplicatedViewRotation;
 	ViewState.PreviousYawAngle = UE_REAL_TO_FLOAT(ReplicatedViewRotation.Yaw);
 
 	const auto& ActorTransform{GetActorTransform()};
@@ -279,6 +280,8 @@ void AAlsCharacter::Tick(const float DeltaTime)
 		Super::Tick(DeltaTime);
 		return;
 	}
+
+	TryAdjustControllRotation(DeltaTime);
 
 	RefreshCapsuleSize(DeltaTime);
 
@@ -1226,6 +1229,36 @@ void AAlsCharacter::CorrectViewNetworkSmoothing(const FRotator& NewTargetRotatio
 	NetworkSmoothing.Duration = NetworkSmoothing.ServerTime - NetworkSmoothing.ClientTime;
 }
 
+void AAlsCharacter::SetLookRotation(const FRotator& NewLookRotation)
+{
+	TargetLookRotation = NewLookRotation;
+}
+
+void AAlsCharacter::SetFocalRotation(const FRotator& NewFocalRotation)
+{
+	PendingFocalRotationRelativeAdjustment = NewFocalRotation - GetViewRotation();
+	PendingFocalRotationRelativeAdjustment.Normalize();
+	UE_LOG(LogAls, VeryVerbose, TEXT("PendingFocalRotationRelativeAdjustment %s"), *PendingFocalRotationRelativeAdjustment.ToString());
+}
+
+void AAlsCharacter::TryAdjustControllRotation(float DeltaTime)
+{
+	if (!PendingFocalRotationRelativeAdjustment.IsNearlyZero())
+	{
+		const auto ControlRotation{Controller->GetControlRotation()};
+		const auto PreviousPendingFocalRotationRelativeAdjustment{PendingFocalRotationRelativeAdjustment};
+		Controller->SetControlRotation(FMath::RInterpTo(ControlRotation,
+														ControlRotation + PendingFocalRotationRelativeAdjustment,
+														DeltaTime,
+														Settings->View.AdjustControllRotationSpeed));
+		PendingFocalRotationRelativeAdjustment -= Controller->GetControlRotation() - ControlRotation;
+		PendingFocalRotationRelativeAdjustment.Normalize();
+		UE_LOG(LogAls, VeryVerbose, TEXT("Applay PendingFocalRotationRelativeAdjustment %s %s"),
+			   *(PendingFocalRotationRelativeAdjustment - PreviousPendingFocalRotationRelativeAdjustment).ToString(),
+			   *PendingFocalRotationRelativeAdjustment.ToString());
+	}
+}
+
 void AAlsCharacter::RefreshView(const float DeltaTime)
 {
 	if (MovementBase.bHasRelativeRotation)
@@ -1262,7 +1295,21 @@ void AAlsCharacter::RefreshView(const float DeltaTime)
 
 	RefreshViewNetworkSmoothing(DeltaTime);
 
-	ViewState.Rotation = ViewState.NetworkSmoothing.CurrentRotation;
+	if (IsLocallyControlled())
+	{
+		if (!TargetLookRotation.ContainsNaN())
+		{
+			ViewState.LookRotation = FMath::RInterpTo(ViewState.LookRotation, TargetLookRotation, DeltaTime, Settings->View.LookRotationInterpSpeed);
+		}
+		else
+		{
+			ViewState.LookRotation = FMath::RInterpTo(ViewState.LookRotation, ViewState.Rotation, DeltaTime, Settings->View.LookRotationInterpSpeed);
+		}
+	}
+	else
+	{
+		ViewState.LookRotation = ViewState.Rotation;
+	}
 
 	// Set the yaw speed by comparing the current and previous view yaw angle, divided by
 	// delta seconds. This represents the speed the camera is rotating from left to right.
@@ -1288,12 +1335,11 @@ void AAlsCharacter::RefreshViewNetworkSmoothing(const float DeltaTime)
 		// Can't use network smoothing on the listen server when the character
 		// is standing on a rotating object, as it causes constant rotation jitter.
 
-		NetworkSmoothing.InitialRotation = MovementBase.bHasRelativeRotation
-			                                   ? (MovementBase.Rotation * ReplicatedViewRotation.Quaternion()).Rotator()
-			                                   : ReplicatedViewRotation;
+		ViewState.Rotation = MovementBase.bHasRelativeRotation
+						   ? (MovementBase.Rotation * ReplicatedViewRotation.Quaternion()).Rotator()
+						   : ReplicatedViewRotation;
 
-		NetworkSmoothing.TargetRotation = NetworkSmoothing.InitialRotation;
-		NetworkSmoothing.CurrentRotation = NetworkSmoothing.InitialRotation;
+		NetworkSmoothing.InitialRotation = NetworkSmoothing.TargetRotation = NetworkSmoothing.CurrentRotation = ViewState.Rotation;
 
 		return;
 	}
@@ -1332,6 +1378,8 @@ void AAlsCharacter::RefreshViewNetworkSmoothing(const float DeltaTime)
 		NetworkSmoothing.ClientTime = NetworkSmoothing.ServerTime;
 		NetworkSmoothing.CurrentRotation = NetworkSmoothing.TargetRotation;
 	}
+
+	ViewState.Rotation = NetworkSmoothing.CurrentRotation;
 }
 
 void AAlsCharacter::SetDesiredVelocityYawAngle(const float NewDesiredVelocityYawAngle)
@@ -1944,20 +1992,10 @@ void AAlsCharacter::RefreshCapsuleSize(float DeltaTime)
 
 void AAlsCharacter::UpdateCapsule(float DeltaTime, float EyeHeight, float EyeHeightSpeed, float HalfHeight, float HalfHeightSpeed, float Radius, float RadiusSpeed)
 {
-	AlsCharacterMovement->UpdateCapsuleSize(DeltaTime, HalfHeight, HalfHeightSpeed, Radius, RadiusSpeed);
-
 	BaseEyeHeight = FMath::FInterpConstantTo(BaseEyeHeight, EyeHeight, DeltaTime, EyeHeightSpeed);
+	BaseTranslationOffset.Z = FMath::FInterpConstantTo(BaseTranslationOffset.Z, -HalfHeight, DeltaTime, HalfHeightSpeed);
 
-	if (GetMesh())
-	{
-		FVector& MeshRelativeLocation = GetMesh()->GetRelativeLocation_DirectMutable();
-		MeshRelativeLocation.Z = FMath::FInterpConstantTo(MeshRelativeLocation.Z, -HalfHeight, DeltaTime, HalfHeightSpeed);
-		BaseTranslationOffset.Z = MeshRelativeLocation.Z;
-	}
-	else
-	{
-		BaseTranslationOffset.Z = FMath::FInterpConstantTo(BaseTranslationOffset.Z, -HalfHeight, DeltaTime, HalfHeightSpeed);
-	}
+	AlsCharacterMovement->UpdateCapsuleSize(DeltaTime, HalfHeight, HalfHeightSpeed, Radius, RadiusSpeed);
 }
 
 void AAlsCharacter::OnRep_IsLied()

@@ -262,7 +262,7 @@ void AAlsCharacter::DisplayDebugCurves(const UCanvas* Canvas, const float Scale,
 	Text.Scale = {Scale * 0.75f, Scale * 0.75f};
 	Text.EnableShadow(FLinearColor::Black);
 
-	const auto RowOffset{12.0f * Scale};
+	const auto RowOffset{10.0f * Scale};
 	const auto ColumnOffset{145.0f * Scale};
 
 	TArray<FName> CurveNames;
@@ -485,11 +485,11 @@ void AAlsCharacter::DisplayDebugShapes(const UCanvas* Canvas, const float Scale,
 	Text.Text = ViewRotationText;
 	Text.Draw(Canvas->Canvas, {HorizontalLocation, VerticalLocation});
 
-	DebugStringBuilder << TEXTVIEW("R: ");
+	DebugStringBuilder << TEXTVIEW("R:");
 	DebugStringBuilder.Appendf(TEXT("%.2f"), ViewState.Rotation.Roll);
-	DebugStringBuilder << TEXTVIEW("P: ");
+	DebugStringBuilder << TEXTVIEW(" P:");
 	DebugStringBuilder.Appendf(TEXT("%.2f"), ViewState.Rotation.Pitch);
-	DebugStringBuilder << TEXTVIEW("Y: ");
+	DebugStringBuilder << TEXTVIEW(" Y:");
 	DebugStringBuilder.Appendf(TEXT("%.2f"), ViewState.Rotation.Yaw);
 
 	Text.Text = FText::AsCultureInvariant(FString{DebugStringBuilder});
@@ -501,6 +501,9 @@ void AAlsCharacter::DisplayDebugShapes(const UCanvas* Canvas, const float Scale,
 	DrawDebugCone(GetWorld(), GetPawnViewLocation(),
 	              ViewState.Rotation.Vector(), 100.0f, FMath::DegreesToRadians(15.0f), FMath::DegreesToRadians(15.0f),
 	              8, Color.ToFColor(true), false, -1.0f, SDPG_World, 1.0f);
+	DrawDebugCone(GetWorld(), GetPawnViewLocation(),
+	              ViewState.LookRotation.Vector(), 100.0f, FMath::DegreesToRadians(10.0f), FMath::DegreesToRadians(10.0f),
+	              8, FLinearColor::Blue.ToFColor(true), false, -1.0f, SDPG_World, 1.0f);
 #endif
 
 	VerticalLocation += RowOffset;
@@ -561,11 +564,11 @@ void AAlsCharacter::DisplayDebugShapes(const UCanvas* Canvas, const float Scale,
 	Text.Text = VelocityDirectionText;
 	Text.Draw(Canvas->Canvas, {HorizontalLocation, VerticalLocation});
 
-	DebugStringBuilder << TEXTVIEW("X: ");
+	DebugStringBuilder << TEXTVIEW("X:");
 	DebugStringBuilder.Appendf(TEXT("%.2f"), VelocityDirection.X);
-	DebugStringBuilder << TEXTVIEW("Y: ");
+	DebugStringBuilder << TEXTVIEW(" Y:");
 	DebugStringBuilder.Appendf(TEXT("%.2f"), VelocityDirection.Y);
-	DebugStringBuilder << TEXTVIEW("Z: ");
+	DebugStringBuilder << TEXTVIEW(" Z:");
 	DebugStringBuilder.Appendf(TEXT("%.2f"), VelocityDirection.Z);
 
 	Text.Text = FText::AsCultureInvariant(FString{DebugStringBuilder});

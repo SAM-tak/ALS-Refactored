@@ -174,7 +174,7 @@ void FAlsPhysicalAnimationState::Refresh(float DeltaTime, USkeletalMeshComponent
 			if (USkeletalBodySetup* BodySetup = Cast<USkeletalBodySetup>(BI->BodySetup.Get()))
 			{
 				float LockedValue{GetLockedValue(Curves, BodySetup->BoneName)};
-				if (LockedValue <= 0.0f && HasAnyProfile(BodySetup))
+				if (!FAnimWeight::IsRelevant(LockedValue) && HasAnyProfile(BodySetup))
 				{
 					bActiveAny = true;
 					if (BI->IsInstanceSimulatingPhysics())
@@ -190,7 +190,7 @@ void FAlsPhysicalAnimationState::Refresh(float DeltaTime, USkeletalMeshComponent
 				}
 				else
 				{
-					if (LockedValue > 0.0f)
+					if (FAnimWeight::IsRelevant(LockedValue))
 					{
 						if (BI->IsInstanceSimulatingPhysics())
 						{
@@ -198,8 +198,11 @@ void FAlsPhysicalAnimationState::Refresh(float DeltaTime, USkeletalMeshComponent
 						}
 						else
 						{
-							BI->SetInstanceSimulatePhysics(true);
-							BI->PhysicsBlendWeight = 1.0f - LockedValue;
+							if (!FAnimWeight::IsFullWeight(LockedValue))
+							{
+								BI->SetInstanceSimulatePhysics(true);
+							}
+							BI->PhysicsBlendWeight = 0.0f;
 						}
 					}
 					else

@@ -109,9 +109,9 @@ FVector UAlsCameraComponent::GetFirstPersonCameraLocation() const
 
 FVector UAlsCameraComponent::GetEyeCameraLocation() const
 {
-	return Character->GetMesh()->GetSocketLocation(Settings->FirstPerson.bLeftDominantEye ?
-												   Settings->FirstPerson.LeftEyeCameraSocketName :
-												   Settings->FirstPerson.RightEyeCameraSocketName);
+	return Character->GetMesh()->GetSocketLocation(Settings->FirstPerson.bLeftDominantEye
+												   ? Settings->FirstPerson.LeftEyeCameraSocketName
+												   : Settings->FirstPerson.RightEyeCameraSocketName);
 }
 
 void UAlsCameraComponent::CalculateAimingFirstPersonCamera(float AimingAmount, const FRotator& TargetRotation)
@@ -176,8 +176,8 @@ FVector UAlsCameraComponent::GetThirdPersonPivotLocation() const
 FVector UAlsCameraComponent::GetThirdPersonTraceStartLocation() const
 {
 	return Character->GetMesh()->GetSocketLocation(bRightShoulder
-		                                               ? Settings->ThirdPerson.TraceShoulderRightSocketName
-		                                               : Settings->ThirdPerson.TraceShoulderLeftSocketName);
+		                                           ? Settings->ThirdPerson.TraceShoulderRightSocketName
+		                                           : Settings->ThirdPerson.TraceShoulderLeftSocketName);
 }
 
 void UAlsCameraComponent::GetViewInfo(FMinimalViewInfo& ViewInfo) const
@@ -285,6 +285,7 @@ void UAlsCameraComponent::TickCamera(const float DeltaTime, bool bAllowLag)
 		PivotLagLocation = PivotTargetLocation;
 		PivotLocation = PivotTargetLocation;
 		bInAutoFPP = false;
+		bInFPPTransition = false;
 
 		CalculateAimingFirstPersonCamera(AimingAmount, CameraTargetRotation);
 		CameraFOV = Settings->FirstPerson.FOV;
@@ -292,12 +293,15 @@ void UAlsCameraComponent::TickCamera(const float DeltaTime, bool bAllowLag)
 		PanoramaFOV = Settings->FirstPerson.PanoramaFOV;
 		PanoramaSideViewRate = Settings->FirstPerson.PanoramaSideViewRate;
 
+		FocalLength = CalculateFocalLength();
+		Character->SetLookRotation(Character->GetViewRotation());
+
 		if(!bFPP)
 		{
+			bFPP = true;
 			// call Begin FPP Event
 			Character->OnChangedPerspective(true);
 		}
-		bFPP = true;
 		return;
 	}
 
@@ -381,13 +385,6 @@ void UAlsCameraComponent::TickCamera(const float DeltaTime, bool bAllowLag)
 
 	const auto CameraResultLocation{CalculateCameraTrace(CameraTargetLocation, PivotOffset, DeltaTime, bAllowLag)};
 
-	if (bFPP != bInAutoFPP)
-	{
-		// call Begin/End FPP Event
-		Character->OnChangedPerspective(!bFPP);
-	}
-	bFPP = bInAutoFPP;
-
 	if (bInAutoFPP)
 	{
 		CalculateAimingFirstPersonCamera(AimingAmount, CameraRotation);
@@ -395,6 +392,10 @@ void UAlsCameraComponent::TickCamera(const float DeltaTime, bool bAllowLag)
 		bPanoramic = Settings->FirstPerson.bPanoramic;
 		PanoramaFOV = Settings->FirstPerson.PanoramaFOV;
 		PanoramaSideViewRate = Settings->FirstPerson.PanoramaSideViewRate;
+		bInFPPTransition = false;
+
+		FocalLength = CalculateFocalLength();
+		Character->SetLookRotation(Character->GetViewRotation());
 	}
 	else if (!FAnimWeight::IsRelevant(FirstPersonOverride))
 	{
@@ -403,6 +404,10 @@ void UAlsCameraComponent::TickCamera(const float DeltaTime, bool bAllowLag)
 		bPanoramic = Settings->ThirdPerson.bPanoramic;
 		PanoramaFOV = Settings->ThirdPerson.PanoramaFOV;
 		PanoramaSideViewRate = Settings->ThirdPerson.PanoramaSideViewRate;
+		bInFPPTransition = false;
+
+		FocalLength = CalculateFocalLength();
+		Character->SetLookRotation((GetCurrentFocusLocation() - GetEyeCameraLocation()).Rotation());
 	}
 	else
 	{
@@ -412,6 +417,23 @@ void UAlsCameraComponent::TickCamera(const float DeltaTime, bool bAllowLag)
 		bPanoramic = Settings->ThirdPerson.bPanoramic | Settings->FirstPerson.bPanoramic;
 		PanoramaFOV = FMath::Lerp(Settings->ThirdPerson.PanoramaFOV, Settings->FirstPerson.PanoramaFOV, FirstPersonOverride);
 		PanoramaSideViewRate = FMath::Lerp(Settings->ThirdPerson.PanoramaSideViewRate, Settings->FirstPerson.PanoramaSideViewRate, FirstPersonOverride);
+		if (!bFPP && !bInFPPTransition)
+		{
+			Character->SetFocalRotation((GetCurrentFocusLocation() - GetEyeCameraLocation()).Rotation());
+		}
+		bInFPPTransition = true;
+	}
+
+	if (bFPP != bInAutoFPP)
+	{
+		bFPP = bInAutoFPP;
+		// call Begin/End FPP Event
+		Character->OnChangedPerspective(bFPP);
+
+		if (!bFPP)
+		{
+			Character->SetFocalRotation((GetCurrentFocusLocation() - CameraTargetLocation).Rotation());
+		}
 	}
 }
 
@@ -544,8 +566,6 @@ FVector UAlsCameraComponent::CalculateCameraTrace(const FVector& CameraTargetLoc
 	const auto bDisplayDebugCameraTraces{
 		UAlsUtility::ShouldDisplayDebugForActor(GetOwner(), UAlsCameraConstants::CameraTracesDebugDisplayName())
 	};
-#else
-	const auto bDisplayDebugCameraTraces{false};
 #endif
 
 	const auto MeshScale{Character->GetMesh()->GetComponentScale().Z};
@@ -656,7 +676,6 @@ bool UAlsCameraComponent::TryAdjustLocationBlockedByGeometry(FVector& Location, 
 	const auto MeshScale{Character->GetMesh()->GetComponentScale().Z};
 	const auto CollisionShape{FCollisionShape::MakeSphere((Settings->ThirdPerson.TraceRadius + 1.0f) * MeshScale)};
 
-	static TArray<FOverlapResult> Overlaps;
 	check(Overlaps.IsEmpty())
 
 	ON_SCOPE_EXIT
@@ -729,6 +748,45 @@ bool UAlsCameraComponent::TryAdjustLocationBlockedByGeometry(FVector& Location, 
 	return !GetWorld()->OverlapBlockingTestByChannel(Location, FQuat::Identity, Settings->ThirdPerson.TraceChannel,
 	                                                 FCollisionShape::MakeSphere(Settings->ThirdPerson.TraceRadius * MeshScale),
 	                                                 {FreeSpaceTraceTag, false, GetOwner()});
+}
+
+float UAlsCameraComponent::CalculateFocalLength() const
+{
+#if ENABLE_DRAW_DEBUG
+	const auto bDisplayDebugTraces{
+		UAlsUtility::ShouldDisplayDebugForActor(GetOwner(), UAlsCameraConstants::CameraTracesDebugDisplayName())
+	};
+#endif
+	static const FName MainTraceTag{FString::Printf(TEXT("%hs (Main Trace)"), __FUNCTION__)};
+	const auto CollisionShape{FCollisionShape::MakeSphere(Settings->FocusTraceRadius)};
+
+	auto EyeVec = CameraRotation.Vector();
+	FVector TraceStart = CameraLocation + EyeVec * Settings->MinFocalLength;
+	if (!IsFirstPerson())
+	{
+		auto ProjectedLocation = FVector::PointPlaneProject(CameraLocation, GetFirstPersonCameraLocation(), -EyeVec);
+		auto ProjectedLocationDistance = FVector::Distance(TraceStart, ProjectedLocation);
+		TraceStart = ProjectedLocation + EyeVec * FMath::Max(-ProjectedLocationDistance, Settings->ThirdPerson.FocusTraceStartOffset);
+	}
+	FVector TraceEnd{CameraLocation + EyeVec * Settings->MaxFocalLength};
+	FVector TraceResult{TraceEnd};
+
+	FHitResult Hit;
+	if (GetWorld()->SweepSingleByChannel(Hit, TraceStart, TraceEnd, FQuat::Identity, Settings->FocusTraceChannel,
+	                                     CollisionShape, {MainTraceTag, false, GetOwner()}))
+	{
+		TraceResult = Hit.Location;
+	}
+
+#if ENABLE_DRAW_DEBUG
+	if (bDisplayDebugTraces)
+	{
+		UAlsUtility::DrawDebugSweepSphere(GetWorld(), TraceStart, TraceResult, CollisionShape.GetSphereRadius(),
+			Hit.IsValidBlockingHit() ? FLinearColor::Red : FLinearColor::Green);
+	}
+#endif
+
+	return FMath::Max(Settings->MinFocalLength, FVector::Distance(TraceResult, CameraLocation));
 }
 
 void UAlsCameraComponent::UpdateADSCameraShake(float FirstPersonOverride, float AimingAmount)

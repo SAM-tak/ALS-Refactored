@@ -301,7 +301,7 @@ void UAlsAnimationInstance::RefreshViewOnGameThread()
 
 	const auto& View{Character->GetViewState()};
 
-	ViewState.Rotation = View.Rotation;
+	ViewState.Rotation = View.LookRotation;
 	ViewState.YawSpeed = View.YawSpeed;
 }
 

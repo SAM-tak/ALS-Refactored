@@ -1432,6 +1432,16 @@ void UAlsCharacterMovementComponent::UpdateCapsuleSize(float DeltaTime, float Ta
 	if (OldUnscaledHalfHeight != HalfHeight || OldUnscaledRadius != Radius)
 	{
 		// Now call SetCapsuleSize() to cause touch/untouch events and actually grow the capsule
-		CharacterOwner->GetCapsuleComponent()->SetCapsuleSize(Radius, HalfHeight);
+		CharacterOwner->GetCapsuleComponent()->SetCapsuleSize(Radius, HalfHeight, false);
+
+		auto* Mesh{HasValidData() ? CharacterOwner->GetMesh() : nullptr};
+
+		if (Mesh != nullptr && IsValid(Mesh))
+		{
+			Mesh->GetRelativeLocation_DirectMutable().Z = -HalfHeight;
+		}
+
+		// Change actor location must be applied after change mesh relative location.
+		CharacterOwner->AddActorLocalOffset(FVector{0.0, 0.0, HalfHeight - OldUnscaledHalfHeight});
 	}
 }
