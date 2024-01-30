@@ -88,6 +88,9 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient)
 	uint8 bRightShoulder : 1 {true};
 
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient)
+	uint8 bPreviousRightShoulder : 1 {true};
+
 	// If bPanoramic is true, renders panoramic with partial multi-view.
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient)
 	uint8 bPanoramic : 1 {false};
