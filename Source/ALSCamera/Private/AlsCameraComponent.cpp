@@ -215,8 +215,9 @@ void UAlsCameraComponent::TickCamera(const float DeltaTime, bool bAllowLag)
 	const auto bDisplayDebugCameraShapes{
 		UAlsUtility::ShouldDisplayDebugForActor(GetOwner(), UAlsCameraConstants::CameraShapesDebugDisplayName())
 	};
-#else
-	const auto bDisplayDebugCameraShapes{false};
+	const auto bDisplayDebugCameraTraces{
+		UAlsUtility::ShouldDisplayDebugForActor(GetOwner(), UAlsCameraConstants::CameraTracesDebugDisplayName())
+	};
 #endif
 
 	// Refresh movement base.
@@ -411,16 +412,41 @@ void UAlsCameraComponent::TickCamera(const float DeltaTime, bool bAllowLag)
 	}
 	else
 	{
+		if (!bInFPPTransition)
+		{
+			if (bFPP)
+			{
+				auto FocusLocation{GetCurrentFocusLocation()};
+				auto TPPCameraLocation{FVector::PointPlaneProject(CameraResultLocation, PivotLocation, -CameraRotation.Vector())};
+				Character->SetFocalRotation((GetCurrentFocusLocation() - TPPCameraLocation).Rotation());
+#if ENABLE_DRAW_DEBUG
+				if (bDisplayDebugCameraTraces)
+				{
+					DrawDebugLine(GetWorld(), TPPCameraLocation, GetCurrentFocusLocation(),
+									FLinearColor{0.0f, 0.75f, 1.0f}.ToFColor(true),
+									false, 3.0f, 0, UAlsUtility::DrawLineThickness);
+				}
+#endif
+			}
+			else
+			{
+				Character->SetFocalRotation((GetCurrentFocusLocation() - GetEyeCameraLocation()).Rotation());
+#if ENABLE_DRAW_DEBUG
+				if (bDisplayDebugCameraTraces)
+				{
+					DrawDebugLine(GetWorld(), GetEyeCameraLocation(), GetCurrentFocusLocation(),
+								  FLinearColor{0.75f, 0.0f, 1.0f}.ToFColor(true),
+								  false, 3.0f, 0, UAlsUtility::DrawLineThickness);
+				}
+#endif
+			}
+		}
 		auto FirstPersonCameraLocation{GetFirstPersonCameraLocation() - GetForwardVector() * Settings->FirstPerson.HeadSize};
 		CameraLocation = FMath::Lerp(CameraResultLocation, FirstPersonCameraLocation, FirstPersonOverride);
 		CameraFOV = FMath::Lerp(Settings->ThirdPerson.FOV, Settings->FirstPerson.FOV, FirstPersonOverride);
 		bPanoramic = Settings->ThirdPerson.bPanoramic | Settings->FirstPerson.bPanoramic;
 		PanoramaFOV = FMath::Lerp(Settings->ThirdPerson.PanoramaFOV, Settings->FirstPerson.PanoramaFOV, FirstPersonOverride);
 		PanoramaSideViewRate = FMath::Lerp(Settings->ThirdPerson.PanoramaSideViewRate, Settings->FirstPerson.PanoramaSideViewRate, FirstPersonOverride);
-		if (!bFPP && !bInFPPTransition)
-		{
-			Character->SetFocalRotation((GetCurrentFocusLocation() - GetEyeCameraLocation()).Rotation());
-		}
 		bInFPPTransition = true;
 	}
 
@@ -429,11 +455,6 @@ void UAlsCameraComponent::TickCamera(const float DeltaTime, bool bAllowLag)
 		bFPP = bInAutoFPP;
 		// call Begin/End FPP Event
 		Character->OnChangedPerspective(bFPP);
-
-		if (!bFPP)
-		{
-			Character->SetFocalRotation((GetCurrentFocusLocation() - CameraTargetLocation).Rotation());
-		}
 	}
 }
 
