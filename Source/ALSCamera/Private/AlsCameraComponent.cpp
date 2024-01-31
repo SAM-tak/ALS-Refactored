@@ -6,6 +6,7 @@
 #include "DrawDebugHelpers.h"
 #include "Animation/AnimInstance.h"
 #include "GameFramework/WorldSettings.h"
+#include "Curves/CurveFloat.h"
 #include "Utility/AlsCameraConstants.h"
 #include "Utility/AlsMacros.h"
 #include "Utility/AlsUtility.h"
@@ -395,7 +396,15 @@ void UAlsCameraComponent::TickCamera(const float DeltaTime, bool bAllowLag)
 		{
 			// FPP -> TPP
 			auto TPPCameraLocation{FVector::PointPlaneProject(CameraResultLocation, PivotLocation, -CameraRotation.Vector())};
-			Character->SetFocalRotation((FocusLocation - TPPCameraLocation).Rotation());
+			auto FocalRotation{(FocusLocation - TPPCameraLocation).Rotation()};
+			if(Settings->HeuristicPitchMapping && IsValid(Settings->HeuristicPitchMapping))
+			{
+				FocalRotation.Normalize();
+				auto Mapped = FMath::Lerp(-180.0, 180.0, Settings->HeuristicPitchMapping->GetFloatValue((FocalRotation.Pitch + 180.0) / 360.0));
+				//UE_LOG(LogTemp, Log, TEXT("%.2f -> %.2f"), FocalRotation.Pitch, Mapped);
+				FocalRotation.Pitch = Mapped;
+			}
+			Character->SetFocalRotation(FocalRotation);
 #if ENABLE_DRAW_DEBUG
 			if (bDisplayDebugCameraTraces)
 			{

@@ -5,6 +5,8 @@
 #include "Utility/AlsConstants.h"
 #include "AlsCameraSettings.generated.h"
 
+class UCurveFloat;
+
 USTRUCT(BlueprintType)
 struct ALSCAMERA_API FAlsFirstPersonCameraSettings
 {
@@ -184,6 +186,9 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Settings", Meta = (ClampMin = 0, ForceUnits = "cm"))
 	float FocusTraceRadius{3.0f};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Settings")
+	TObjectPtr<UCurveFloat> HeuristicPitchMapping{nullptr};
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings")
 	FPostProcessSettings PostProcess;
