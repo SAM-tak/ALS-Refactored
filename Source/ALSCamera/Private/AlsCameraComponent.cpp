@@ -67,6 +67,7 @@ void UAlsCameraComponent::BeginPlay()
 
 	bFPP = FAnimWeight::IsFullWeight(UAlsMath::Clamp01(GetAnimInstance()->GetCurveValue(UAlsCameraConstants::FirstPersonOverrideCurveName())));
 	bPreviousRightShoulder = bRightShoulder;
+	PreviousViewMode = Character->GetViewMode();
 	Character->OnChangedPerspective(bFPP);
 }
 
@@ -287,7 +288,6 @@ void UAlsCameraComponent::TickCamera(const float DeltaTime, bool bAllowLag)
 		PivotLagLocation = PivotTargetLocation;
 		PivotLocation = PivotTargetLocation;
 		bInAutoFPP = false;
-		bInFPPTransition = false;
 
 		CalculateAimingFirstPersonCamera(AimingAmount, CameraTargetRotation);
 		CameraFOV = Settings->FirstPerson.FOV;
@@ -387,6 +387,58 @@ void UAlsCameraComponent::TickCamera(const float DeltaTime, bool bAllowLag)
 
 	const auto CameraResultLocation{CalculateCameraTrace(CameraTargetLocation, PivotOffset, DeltaTime, bAllowLag)};
 
+	if (PreviousViewMode != Character->GetViewMode())
+	{
+		// Set aim point correction during change FPP/TPP
+		auto FocusLocation{GetCurrentFocusLocation()};
+		if (PreviousViewMode == AlsViewModeTags::FirstPerson)
+		{
+			// FPP -> TPP
+			auto TPPCameraLocation{FVector::PointPlaneProject(CameraResultLocation, PivotLocation, -CameraRotation.Vector())};
+			Character->SetFocalRotation((FocusLocation - TPPCameraLocation).Rotation());
+#if ENABLE_DRAW_DEBUG
+			if (bDisplayDebugCameraTraces)
+			{
+				DrawDebugLine(GetWorld(), TPPCameraLocation, FocusLocation, FLinearColor{0.0f, 0.75f, 1.0f}.ToFColor(true),
+								false, 3.0f, 0, UAlsUtility::DrawLineThickness);
+			}
+#endif
+		}
+		else if(PreviousViewMode == AlsViewModeTags::ThirdPerson)
+		{
+			// TPP -> FPP
+			Character->SetFocalRotation((FocusLocation - GetEyeCameraLocation()).Rotation());
+#if ENABLE_DRAW_DEBUG
+			if (bDisplayDebugCameraTraces)
+			{
+				DrawDebugLine(GetWorld(), GetEyeCameraLocation(), FocusLocation, FLinearColor{0.75f, 0.0f, 1.0f}.ToFColor(true),
+								false, 3.0f, 0, UAlsUtility::DrawLineThickness);
+			}
+#endif
+		}
+		PreviousViewMode = Character->GetViewMode();
+	}
+
+	if (bPreviousRightShoulder != bRightShoulder)
+	{
+		if (Character->GetViewMode() == AlsViewModeTags::ThirdPerson && Character->GetRotationMode() != AlsRotationModeTags::VelocityDirection)
+		{
+			// Set aim point correction during change shoulder
+			auto FocusLocation{GetCurrentFocusLocation()};
+			auto CounterpartCameraLocation{FVector::PointPlaneProject(CameraResultLocation, PivotLocation, -CameraRotation.Vector())
+				.MirrorByPlane(FPlane(Character->GetActorLocation(), CameraRotation.RotateVector(FVector::RightVector)))};
+			Character->SetFocalRotation((FocusLocation - CounterpartCameraLocation).Rotation());
+#if ENABLE_DRAW_DEBUG
+			if (bDisplayDebugCameraTraces)
+			{
+				DrawDebugLine(GetWorld(), CounterpartCameraLocation, FocusLocation, FLinearColor{0.0f, 0.75f, 1.0f}.ToFColor(true),
+							  false, 3.0f, 0, UAlsUtility::DrawLineThickness);
+			}
+#endif
+		}
+		bPreviousRightShoulder = bRightShoulder;
+	}
+
 	if (bInAutoFPP)
 	{
 		CalculateAimingFirstPersonCamera(AimingAmount, CameraRotation);
@@ -394,7 +446,6 @@ void UAlsCameraComponent::TickCamera(const float DeltaTime, bool bAllowLag)
 		bPanoramic = Settings->FirstPerson.bPanoramic;
 		PanoramaFOV = Settings->FirstPerson.PanoramaFOV;
 		PanoramaSideViewRate = Settings->FirstPerson.PanoramaSideViewRate;
-		bInFPPTransition = false;
 
 		FocalLength = CalculateFocalLength();
 		Character->SetLookRotation(Character->GetViewRotation());
@@ -406,47 +457,18 @@ void UAlsCameraComponent::TickCamera(const float DeltaTime, bool bAllowLag)
 		bPanoramic = Settings->ThirdPerson.bPanoramic;
 		PanoramaFOV = Settings->ThirdPerson.PanoramaFOV;
 		PanoramaSideViewRate = Settings->ThirdPerson.PanoramaSideViewRate;
-		bInFPPTransition = false;
 
 		FocalLength = CalculateFocalLength();
 		Character->SetLookRotation((GetCurrentFocusLocation() - GetEyeCameraLocation()).Rotation());
 	}
 	else
 	{
-		if (!bInFPPTransition)
-		{
-			auto FocusLocation{GetCurrentFocusLocation()};
-			if (bFPP)
-			{
-				auto TPPCameraLocation{FVector::PointPlaneProject(CameraResultLocation, PivotLocation, -CameraRotation.Vector())};
-				Character->SetFocalRotation((FocusLocation - TPPCameraLocation).Rotation());
-#if ENABLE_DRAW_DEBUG
-				if (bDisplayDebugCameraTraces)
-				{
-					DrawDebugLine(GetWorld(), TPPCameraLocation, FocusLocation, FLinearColor{0.0f, 0.75f, 1.0f}.ToFColor(true),
-								  false, 3.0f, 0, UAlsUtility::DrawLineThickness);
-				}
-#endif
-			}
-			else
-			{
-				Character->SetFocalRotation((FocusLocation - GetEyeCameraLocation()).Rotation());
-#if ENABLE_DRAW_DEBUG
-				if (bDisplayDebugCameraTraces)
-				{
-					DrawDebugLine(GetWorld(), GetEyeCameraLocation(), FocusLocation, FLinearColor{0.75f, 0.0f, 1.0f}.ToFColor(true),
-								  false, 3.0f, 0, UAlsUtility::DrawLineThickness);
-				}
-#endif
-			}
-		}
 		auto FirstPersonCameraLocation{GetFirstPersonCameraLocation() - GetForwardVector() * Settings->FirstPerson.HeadSize};
 		CameraLocation = FMath::Lerp(CameraResultLocation, FirstPersonCameraLocation, FirstPersonOverride);
 		CameraFOV = FMath::Lerp(Settings->ThirdPerson.FOV, Settings->FirstPerson.FOV, FirstPersonOverride);
 		bPanoramic = Settings->ThirdPerson.bPanoramic | Settings->FirstPerson.bPanoramic;
 		PanoramaFOV = FMath::Lerp(Settings->ThirdPerson.PanoramaFOV, Settings->FirstPerson.PanoramaFOV, FirstPersonOverride);
 		PanoramaSideViewRate = FMath::Lerp(Settings->ThirdPerson.PanoramaSideViewRate, Settings->FirstPerson.PanoramaSideViewRate, FirstPersonOverride);
-		bInFPPTransition = true;
 	}
 
 	if (bFPP != bInAutoFPP)
@@ -455,23 +477,6 @@ void UAlsCameraComponent::TickCamera(const float DeltaTime, bool bAllowLag)
 		// call Begin/End FPP Event
 		Character->OnChangedPerspective(bFPP);
 	}
-
-	if (!bFPP && Character->GetRotationMode() != AlsRotationModeTags::VelocityDirection && bPreviousRightShoulder != bRightShoulder)
-	{
-		auto FocusLocation{GetCurrentFocusLocation()};
-		auto CounterpartCameraLocation{FVector::PointPlaneProject(CameraResultLocation, PivotLocation, -CameraRotation.Vector())
-			.MirrorByPlane(FPlane(Character->GetActorLocation(), CameraRotation.RotateVector(FVector::RightVector)))};
-		Character->SetFocalRotation((FocusLocation - CounterpartCameraLocation).Rotation());
-#if ENABLE_DRAW_DEBUG
-		if (bDisplayDebugCameraTraces)
-		{
-			DrawDebugLine(GetWorld(), CounterpartCameraLocation, FocusLocation, FLinearColor{0.0f, 0.75f, 1.0f}.ToFColor(true),
-						  false, 3.0f, 0, UAlsUtility::DrawLineThickness);
-		}
-#endif
-	}
-
-	bPreviousRightShoulder = bRightShoulder;
 }
 
 FRotator UAlsCameraComponent::CalculateCameraRotation(const FRotator& CameraTargetRotation,

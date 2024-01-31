@@ -255,7 +255,7 @@ void AAlsCharacter::DisplayDebugCurves(const UCanvas* Canvas, const float Scale,
 	FCanvasTextItem Text{
 		FVector2D::ZeroVector,
 		FText::GetEmpty(),
-		GEngine->GetMediumFont(),
+		GEngine->GetSmallFont(),
 		FLinearColor::White
 	};
 

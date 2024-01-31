@@ -109,7 +109,7 @@ void UAlsCameraComponent::DisplayDebugCurves(const UCanvas* Canvas, const float 
 	FCanvasTextItem Text{
 		FVector2D::ZeroVector,
 		FText::GetEmpty(),
-		GEngine->GetMediumFont(),
+		GEngine->GetSmallFont(),
 		FLinearColor::White
 	};
 

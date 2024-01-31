@@ -111,7 +111,7 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State|Als Character", Transient)
 	FAlsPhysicalAnimationState PhysicalAnimationState;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Als Character", Transient)
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State|Als Character", Transient)
 	FRotator PendingFocalRotationRelativeAdjustment{ForceInit};
 
 	FTimerHandle BrakingFrictionFactorResetTimer;
