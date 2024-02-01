@@ -3,6 +3,7 @@
 #include "AlsCameraSettings.h"
 #include "AlsCharacter.h"
 #include "AlsCharacterMovementComponent.h"
+#include "AlsCameraSkeletalMeshComponent.h"
 #include "DrawDebugHelpers.h"
 #include "Animation/AnimInstance.h"
 #include "GameFramework/WorldSettings.h"
@@ -13,13 +14,19 @@
 
 #include UE_INLINE_GENERATED_CPP_BY_NAME(AlsCameraComponent)
 
-UAlsCameraComponent::UAlsCameraComponent()
+UAlsCameraComponent::UAlsCameraComponent(const FObjectInitializer& ObjectInitializer)
+: Super(ObjectInitializer)
 {
 	PrimaryComponentTick.bStartWithTickEnabled = false;
 	PrimaryComponentTick.TickGroup = TG_PostPhysics;
 
 	bTickInEditor = false;
 	bHiddenInGame = true;
+
+#if WITH_EDITOR
+	static ConstructorHelpers::FObjectFinder<UAlsCameraSettings> CameraSettings(TEXT("/ALS/ALSCamera/Data/CMS_Als_Default"));
+	Settings = CameraSettings.Object;
+#endif
 }
 
 void UAlsCameraComponent::OnRegister()
@@ -35,38 +42,49 @@ void UAlsCameraComponent::RegisterComponentTickFunctions(const bool bRegister)
 
 	// Tick after the owner to have access to the most up-to-date character state.
 
+	if (CameraSkeletalMesh)
+	{
+		AddTickPrerequisiteComponent(CameraSkeletalMesh);
+	}
+
 	AddTickPrerequisiteActor(GetOwner());
 }
 
 void UAlsCameraComponent::Activate(const bool bReset)
 {
+	Super::Activate(bReset);
+
 	if (!bReset && !ShouldActivate())
 	{
-		Super::Activate(bReset);
 		return;
 	}
-
-	Super::Activate(bReset);
 
 	TickCamera(0.0f, false);
 }
 
-void UAlsCameraComponent::InitAnim(const bool bForceReinitialize)
+void UAlsCameraComponent::SetCameraSkeletalMesh(USkeletalMeshComponent* NewCameraSkeletalMesh)
 {
-	Super::InitAnim(bForceReinitialize);
-
-	AnimationInstance = GetAnimInstance();
+	CameraSkeletalMesh = NewCameraSkeletalMesh;
 }
+
+//
+//void UAlsCameraComponent::InitAnim(const bool bForceReinitialize)
+//{
+//	Super::InitAnim(bForceReinitialize);
+//
+//	AnimationInstance = GetAnimInstance();
+//}
 
 void UAlsCameraComponent::BeginPlay()
 {
-	ALS_ENSURE(IsValid(GetAnimInstance()));
+	ALS_ENSURE(IsValid(CameraSkeletalMesh));
+	ALS_ENSURE(IsValid(CameraSkeletalMesh->GetAnimInstance()));
 	ALS_ENSURE(IsValid(Settings));
 	ALS_ENSURE(IsValid(Character));
 
 	Super::BeginPlay();
 
-	bFPP = FAnimWeight::IsFullWeight(UAlsMath::Clamp01(GetAnimInstance()->GetCurveValue(UAlsCameraConstants::FirstPersonOverrideCurveName())));
+	bFPP = FAnimWeight::IsFullWeight(UAlsMath::Clamp01(CameraSkeletalMesh->GetAnimInstance()->GetCurveValue(UAlsCameraConstants::FirstPersonOverrideCurveName())));
 	bPreviousRightShoulder = bRightShoulder;
 	PreviousViewMode = Character->GetViewMode();
 	Character->OnChangedPerspective(bFPP);
@@ -90,19 +108,28 @@ void UAlsCameraComponent::TickComponent(float DeltaTime, const ELevelTick TickTy
 
 	// Skip camera tick until parallel animation evaluation completes.
 
-	if (!IsRunningParallelEvaluation())
-	{
+	//if (!CameraSkeletalMesh->IsRunningParallelEvaluation())
+	//{
 		TickCamera(DeltaTime);
-	}
+	//}
 
 	SetWorldLocationAndRotation(CameraLocation, CameraRotation);
 }
 
-void UAlsCameraComponent::CompleteParallelAnimationEvaluation(const bool bDoPostAnimationEvaluation)
-{
-	Super::CompleteParallelAnimationEvaluation(bDoPostAnimationEvaluation);
+//void UAlsCameraComponent::CompleteParallelAnimationEvaluation(const bool bDoPostAnimationEvaluation)
+//{
+//	Super::CompleteParallelAnimationEvaluation(bDoPostAnimationEvaluation);
+//
+//	TickCamera(GetAnimInstance()->GetDeltaSeconds());
+//}
 
-	TickCamera(GetAnimInstance()->GetDeltaSeconds());
+UAnimInstance* UAlsCameraComponent::GetAnimInstance() const
+{
+	if (IsValid(CameraSkeletalMesh))
+	{
+		return CameraSkeletalMesh->GetAnimInstance();
+	}
+	return nullptr;
 }
 
 FVector UAlsCameraComponent::GetFirstPersonCameraLocation() const
@@ -183,23 +210,6 @@ FVector UAlsCameraComponent::GetThirdPersonTraceStartLocation() const
 		                                           : Settings->ThirdPerson.TraceShoulderLeftSocketName);
 }
 
-void UAlsCameraComponent::GetViewInfo(FMinimalViewInfo& ViewInfo) const
-{
-	ViewInfo.Location = CameraLocation;
-	ViewInfo.Rotation = CameraRotation;
-	ViewInfo.FOV = CameraFOV;
-	ViewInfo.bPanoramic = bPanoramic;
-	ViewInfo.PanoramaFOV = PanoramaFOV;
-	ViewInfo.PanoramaSideViewRate = PanoramaSideViewRate;
-
-	ViewInfo.PostProcessBlendWeight = IsValid(Settings) ? PostProcessWeight : 0.0f;
-
-	if (ViewInfo.PostProcessBlendWeight > UE_SMALL_NUMBER)
-	{
-		ViewInfo.PostProcessSettings = Settings->PostProcess;
-	}
-}
-
 void UAlsCameraComponent::TickCamera(const float DeltaTime, bool bAllowLag)
 {
 	DECLARE_SCOPE_CYCLE_COUNTER(TEXT("UAlsCameraComponent::TickCamera()"), STAT_UAlsCameraComponent_TickCamera, STATGROUP_Als)
@@ -209,7 +219,7 @@ void UAlsCameraComponent::TickCamera(const float DeltaTime, bool bAllowLag)
 		return;
 	}
 
-	ALS_ENSURE_MESSAGE(!IsRunningParallelEvaluation(),
+	ALS_ENSURE_MESSAGE(!CameraSkeletalMesh->IsRunningParallelEvaluation(),
 	                   TEXT("%hs should not be called during parallel animation evaluation, because accessing animation curves")
 	                   TEXT(" causes the game thread to wait for the parallel task to complete, resulting in performance degradation."),
 	                   __FUNCTION__);
@@ -257,7 +267,7 @@ void UAlsCameraComponent::TickCamera(const float DeltaTime, bool bAllowLag)
 	}
 	
 	const auto FirstPersonOverride{
-		UAlsMath::Clamp01(GetAnimInstance()->GetCurveValue(UAlsCameraConstants::FirstPersonOverrideCurveName()))
+		UAlsMath::Clamp01(CameraSkeletalMesh->GetAnimInstance()->GetCurveValue(UAlsCameraConstants::FirstPersonOverrideCurveName()))
 	};
 
 	const auto AimingAmount{Character->GetAimAmount()};
@@ -291,9 +301,9 @@ void UAlsCameraComponent::TickCamera(const float DeltaTime, bool bAllowLag)
 		bInAutoFPP = false;
 
 		CalculateAimingFirstPersonCamera(AimingAmount, CameraTargetRotation);
-		CameraFOV = Settings->FirstPerson.FOV;
+		FieldOfView = Settings->FirstPerson.FOV;
 		bPanoramic = Settings->FirstPerson.bPanoramic;
-		PanoramaFOV = Settings->FirstPerson.PanoramaFOV;
+		PanoramicFieldOfView = Settings->FirstPerson.PanoramaFOV;
 		PanoramaSideViewRate = Settings->FirstPerson.PanoramaSideViewRate;
 
 		FocalLength = CalculateFocalLength();
@@ -451,9 +461,9 @@ void UAlsCameraComponent::TickCamera(const float DeltaTime, bool bAllowLag)
 	if (bInAutoFPP)
 	{
 		CalculateAimingFirstPersonCamera(AimingAmount, CameraRotation);
-		CameraFOV = Settings->FirstPerson.FOV;
+		FieldOfView = Settings->FirstPerson.FOV;
 		bPanoramic = Settings->FirstPerson.bPanoramic;
-		PanoramaFOV = Settings->FirstPerson.PanoramaFOV;
+		PanoramicFieldOfView = Settings->FirstPerson.PanoramaFOV;
 		PanoramaSideViewRate = Settings->FirstPerson.PanoramaSideViewRate;
 
 		FocalLength = CalculateFocalLength();
@@ -462,9 +472,9 @@ void UAlsCameraComponent::TickCamera(const float DeltaTime, bool bAllowLag)
 	else if (!FAnimWeight::IsRelevant(FirstPersonOverride))
 	{
 		CameraLocation = CameraResultLocation;
-		CameraFOV = Settings->ThirdPerson.FOV;
+		FieldOfView = Settings->ThirdPerson.FOV;
 		bPanoramic = Settings->ThirdPerson.bPanoramic;
-		PanoramaFOV = Settings->ThirdPerson.PanoramaFOV;
+		PanoramicFieldOfView = Settings->ThirdPerson.PanoramaFOV;
 		PanoramaSideViewRate = Settings->ThirdPerson.PanoramaSideViewRate;
 
 		FocalLength = CalculateFocalLength();
@@ -474,9 +484,9 @@ void UAlsCameraComponent::TickCamera(const float DeltaTime, bool bAllowLag)
 	{
 		auto FirstPersonCameraLocation{GetFirstPersonCameraLocation() - GetForwardVector() * Settings->FirstPerson.HeadSize};
 		CameraLocation = FMath::Lerp(CameraResultLocation, FirstPersonCameraLocation, FirstPersonOverride);
-		CameraFOV = FMath::Lerp(Settings->ThirdPerson.FOV, Settings->FirstPerson.FOV, FirstPersonOverride);
+		FieldOfView = FMath::Lerp(Settings->ThirdPerson.FOV, Settings->FirstPerson.FOV, FirstPersonOverride);
 		bPanoramic = Settings->ThirdPerson.bPanoramic | Settings->FirstPerson.bPanoramic;
-		PanoramaFOV = FMath::Lerp(Settings->ThirdPerson.PanoramaFOV, Settings->FirstPerson.PanoramaFOV, FirstPersonOverride);
+		PanoramicFieldOfView = FMath::Lerp(Settings->ThirdPerson.PanoramaFOV, Settings->FirstPerson.PanoramaFOV, FirstPersonOverride);
 		PanoramaSideViewRate = FMath::Lerp(Settings->ThirdPerson.PanoramaSideViewRate, Settings->FirstPerson.PanoramaSideViewRate, FirstPersonOverride);
 	}
 
@@ -496,7 +506,7 @@ FRotator UAlsCameraComponent::CalculateCameraRotation(const FRotator& CameraTarg
 		return CameraTargetRotation;
 	}
 
-	const auto RotationLag{GetAnimInstance()->GetCurveValue(UAlsCameraConstants::RotationLagCurveName())};
+	const auto RotationLag{CameraSkeletalMesh->GetAnimInstance()->GetCurveValue(UAlsCameraConstants::RotationLagCurveName())};
 
 	if (!Settings->bEnableCameraLagSubstepping ||
 	    DeltaTime <= Settings->CameraLagSubstepping.LagSubstepDeltaTime ||
@@ -538,9 +548,9 @@ FVector UAlsCameraComponent::CalculatePivotLagLocation(const FQuat& CameraYawRot
 	const auto RelativePivotInitialLagLocation{CameraYawRotation.UnrotateVector(PivotLagLocation)};
 	const auto RelativePivotTargetLocation{CameraYawRotation.UnrotateVector(PivotTargetLocation)};
 
-	const auto LocationLagX{GetAnimInstance()->GetCurveValue(UAlsCameraConstants::LocationLagXCurveName())};
-	const auto LocationLagY{GetAnimInstance()->GetCurveValue(UAlsCameraConstants::LocationLagYCurveName())};
-	const auto LocationLagZ{GetAnimInstance()->GetCurveValue(UAlsCameraConstants::LocationLagZCurveName())};
+	const auto LocationLagX{CameraSkeletalMesh->GetAnimInstance()->GetCurveValue(UAlsCameraConstants::LocationLagXCurveName())};
+	const auto LocationLagY{CameraSkeletalMesh->GetAnimInstance()->GetCurveValue(UAlsCameraConstants::LocationLagYCurveName())};
+	const auto LocationLagZ{CameraSkeletalMesh->GetAnimInstance()->GetCurveValue(UAlsCameraConstants::LocationLagZCurveName())};
 
 	if (!Settings->bEnableCameraLagSubstepping ||
 	    DeltaTime <= Settings->CameraLagSubstepping.LagSubstepDeltaTime ||
@@ -595,9 +605,9 @@ FVector UAlsCameraComponent::CalculatePivotOffset() const
 {
 	return Character->GetMesh()->GetComponentQuat().RotateVector(
 		FVector{
-			GetAnimInstance()->GetCurveValue(UAlsCameraConstants::PivotOffsetXCurveName()),
-			GetAnimInstance()->GetCurveValue(UAlsCameraConstants::PivotOffsetYCurveName()),
-			GetAnimInstance()->GetCurveValue(UAlsCameraConstants::PivotOffsetZCurveName())
+			CameraSkeletalMesh->GetAnimInstance()->GetCurveValue(UAlsCameraConstants::PivotOffsetXCurveName()),
+			CameraSkeletalMesh->GetAnimInstance()->GetCurveValue(UAlsCameraConstants::PivotOffsetYCurveName()),
+			CameraSkeletalMesh->GetAnimInstance()->GetCurveValue(UAlsCameraConstants::PivotOffsetZCurveName())
 		} * Character->GetMesh()->GetComponentScale().Z);
 }
 
@@ -605,9 +615,9 @@ FVector UAlsCameraComponent::CalculateCameraOffset() const
 {
 	return CameraRotation.RotateVector(
 		FVector{
-			GetAnimInstance()->GetCurveValue(UAlsCameraConstants::CameraOffsetXCurveName()),
-			GetAnimInstance()->GetCurveValue(UAlsCameraConstants::CameraOffsetYCurveName()),
-			GetAnimInstance()->GetCurveValue(UAlsCameraConstants::CameraOffsetZCurveName())
+			CameraSkeletalMesh->GetAnimInstance()->GetCurveValue(UAlsCameraConstants::CameraOffsetXCurveName()),
+			CameraSkeletalMesh->GetAnimInstance()->GetCurveValue(UAlsCameraConstants::CameraOffsetYCurveName()),
+			CameraSkeletalMesh->GetAnimInstance()->GetCurveValue(UAlsCameraConstants::CameraOffsetZCurveName())
 		} * Character->GetMesh()->GetComponentScale().Z);
 }
 
@@ -627,7 +637,7 @@ FVector UAlsCameraComponent::CalculateCameraTrace(const FVector& CameraTargetLoc
 		FMath::Lerp(
 			GetThirdPersonTraceStartLocation(),
 			PivotTargetLocation + PivotOffset + FVector{Settings->ThirdPerson.TraceOverrideOffset},
-			UAlsMath::Clamp01(GetAnimInstance()->GetCurveValue(UAlsCameraConstants::TraceOverrideCurveName())))
+			UAlsMath::Clamp01(CameraSkeletalMesh->GetAnimInstance()->GetCurveValue(UAlsCameraConstants::TraceOverrideCurveName())))
 	};
 
 	const FVector TraceEnd{CameraTargetLocation};
@@ -869,6 +879,6 @@ void UAlsCameraComponent::UpdateADSCameraShake(float FirstPersonOverride, float 
 
 bool UAlsCameraComponent::IsFirstPerson() const
 {
-	return FAnimWeight::IsFullWeight(UAlsMath::Clamp01(GetAnimInstance()->GetCurveValue(UAlsCameraConstants::FirstPersonOverrideCurveName())))
+	return FAnimWeight::IsFullWeight(UAlsMath::Clamp01(CameraSkeletalMesh->GetAnimInstance()->GetCurveValue(UAlsCameraConstants::FirstPersonOverrideCurveName())))
 		|| bInAutoFPP;
 }

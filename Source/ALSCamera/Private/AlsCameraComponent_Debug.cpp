@@ -239,7 +239,7 @@ void UAlsCameraComponent::DisplayDebugShapes(const UCanvas* Canvas, const float 
 	VerticalLocation += RowOffset;
 
 	static const auto CameraFovText{
-		FText::AsCultureInvariant(FName::NameToDisplayString(GET_MEMBER_NAME_STRING_CHECKED(ThisClass, CameraFOV), false))
+		FText::AsCultureInvariant(FName::NameToDisplayString(GET_MEMBER_NAME_STRING_CHECKED(ThisClass, FieldOfView), false))
 	};
 
 	Color = FLinearColor::White;
@@ -248,7 +248,7 @@ void UAlsCameraComponent::DisplayDebugShapes(const UCanvas* Canvas, const float 
 	Text.Text = CameraFovText;
 	Text.Draw(Canvas->Canvas, {HorizontalLocation, VerticalLocation});
 
-	DebugStringBuilder.Appendf(TEXT("%.2f"), CameraFOV);
+	DebugStringBuilder.Appendf(TEXT("%.2f"), FieldOfView);
 
 	Text.Text = FText::AsCultureInvariant(FString{DebugStringBuilder});
 	Text.Draw(Canvas->Canvas, {HorizontalLocation + ColumnOffset, VerticalLocation});

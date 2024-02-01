@@ -1,17 +1,15 @@
 #pragma once
 
-#include "Components/SkeletalMeshComponent.h"
+#include "Camera/CameraComponent.h"
 #include "Utility/AlsMath.h"
 #include "AlsCameraComponent.generated.h"
 
+class USkeletalMeshComponent;
 class UAlsCameraSettings;
 class AAlsCharacter;
 
-UCLASS(HideCategories = (ComponentTick, Clothing, Physics, MasterPoseComponent, Collision, AnimationRig,
-	Lighting, Deformer, Rendering, PathTracing, HLOD, Navigation, VirtualTexture, SkeletalMesh,
-	LeaderPoseComponent, Optimization, LOD, MaterialParameters, TextureStreaming, Mobile, RayTracing),
-	ClassGroup = Camera, editinlinenew)
-class ALSCAMERA_API UAlsCameraComponent : public USkeletalMeshComponent
+UCLASS()
+class ALSCAMERA_API UAlsCameraComponent : public UCameraComponent
 {
 	GENERATED_BODY()
 
@@ -28,11 +26,11 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Settings", Meta = (ClampMin = 0, ClampMax = 1))
 	float PostProcessWeight{1.0f};
 
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Camera)
+	TObjectPtr<USkeletalMeshComponent> CameraSkeletalMesh;
+
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient)
 	TObjectPtr<AAlsCharacter> Character;
-
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient, Meta = (ShowInnerProperties))
-	TWeakObjectPtr<UAnimInstance> AnimationInstance;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient, Meta = (ForceUnits = "x"))
 	float PreviousGlobalTimeDilation{1.0f};
@@ -91,29 +89,11 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient)
 	uint8 bPreviousRightShoulder : 1 {true};
 
-	// If bPanoramic is true, renders panoramic with partial multi-view.
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient)
-	uint8 bPanoramic : 1 {false};
-
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient, Meta = (ClampMin = 5, ClampMax = 170, ForceUnits = "deg"))
-	float CameraFOV{90.0f};
-
-	// The horizontal field of view (in degrees) in panoramic rendering.
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient, Meta = (ClampMin = 180, ClampMax = 360, ForceUnits = "deg"))
-	float PanoramaFOV{180.0f};
-	
-	/**
-	 * This specifies the proportion of the side view within the range of 0 to 1.
-	 * A value of 0 means no side view, and a value of 1 means the side view takes up one third of the entire screen.
-	 */
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient, Meta = (ClampMin = 0, ClampMax = 1))
-	float PanoramaSideViewRate{0.5f};
-
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient)
 	TObjectPtr<UCameraShakeBase> CurrentADSCameraShake;
 
 public:
-	UAlsCameraComponent();
+	UAlsCameraComponent(const FObjectInitializer& ObjectInitializer = FObjectInitializer::Get());
 
 	virtual void OnRegister() override;
 
@@ -121,18 +101,22 @@ public:
 
 	virtual void Activate(bool bReset) override;
 
-	virtual void InitAnim(bool bForceReinitialize) override;
+	//virtual void InitAnim(bool bForceReinitialize) override;
 
 	virtual void BeginPlay() override;
 
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
-	virtual void CompleteParallelAnimationEvaluation(bool bDoPostAnimationEvaluation) override;
+	//virtual void CompleteParallelAnimationEvaluation(bool bDoPostAnimationEvaluation) override;
+
+	void SetCameraSkeletalMesh(USkeletalMeshComponent* NewCameraSkeletalMesh);
 
 public:
-	float GetPostProcessWeight() const;
+	//float GetPostProcessWeight() const;
 
-	void SetPostProcessWeight(float NewPostProcessWeight);
+	//void SetPostProcessWeight(float NewPostProcessWeight);
+	UFUNCTION(BlueprintPure, Category = "ALS|Camera", meta = (Keywords = "AnimBlueprint", UnsafeDuringActorConstruction = "true"))
+	class UAnimInstance* GetAnimInstance() const;
 
 	UFUNCTION(BlueprintPure, Category = "ALS|Camera")
 	bool IsRightShoulder() const;
@@ -155,8 +139,8 @@ public:
 	UFUNCTION(BlueprintPure, Category = "ALS|Camera", Meta = (ReturnDisplayName = "Trace Start"))
 	FVector GetThirdPersonTraceStartLocation() const;
 
-	UFUNCTION(BlueprintCallable, Category = "ALS|Camera")
-	void GetViewInfo(FMinimalViewInfo& ViewInfo) const;
+	//UFUNCTION(BlueprintCallable, Category = "ALS|Camera")
+	//void GetViewInfo(FMinimalViewInfo& ViewInfo) const;
 
 	UFUNCTION(BlueprintPure, Category = "ALS|Camera", Meta = (ReturnDisplayName = "Focus Location"))
 	FVector GetCurrentFocusLocation() const;
@@ -201,16 +185,16 @@ private:
 
 	void DisplayDebugTraces(const UCanvas* Canvas, float Scale, float HorizontalLocation, float& VerticalLocation) const;
 };
-
-inline float UAlsCameraComponent::GetPostProcessWeight() const
-{
-	return PostProcessWeight;
-}
-
-inline void UAlsCameraComponent::SetPostProcessWeight(const float NewPostProcessWeight)
-{
-	PostProcessWeight = UAlsMath::Clamp01(NewPostProcessWeight);
-}
+//
+//inline float UAlsCameraComponent::GetPostProcessWeight() const
+//{
+//	return PostProcessWeight;
+//}
+//
+//inline void UAlsCameraComponent::SetPostProcessWeight(const float NewPostProcessWeight)
+//{
+//	PostProcessWeight = UAlsMath::Clamp01(NewPostProcessWeight);
+//}
 
 inline bool UAlsCameraComponent::IsRightShoulder() const
 {

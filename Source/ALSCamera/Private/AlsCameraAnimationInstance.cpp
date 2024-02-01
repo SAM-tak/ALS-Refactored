@@ -11,7 +11,7 @@ void UAlsCameraAnimationInstance::NativeInitializeAnimation()
 	Super::NativeInitializeAnimation();
 
 	Character = Cast<AAlsCharacter>(GetOwningActor());
-	Camera = Cast<UAlsCameraComponent>(GetSkelMeshComponent());
+	Camera = Cast<UAlsCameraComponent>(GetSkelMeshComponent()->GetAttachParent());
 
 #if WITH_EDITOR
 	if (!GetWorld()->IsGameWorld())
