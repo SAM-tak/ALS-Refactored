@@ -38,6 +38,9 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings|Als Character")
 	TObjectPtr<UAlsMovementSettings> MovementSettings;
 
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings|Als Character|Desired State", Replicated)
+	FGameplayTag DesiredViewMode{AlsViewModeTags::ThirdPerson};
+
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings|Als Character|Desired State", ReplicatedUsing = "OnReplicated_DesiredAiming")
 	uint8 bDesiredAiming : 1{false};
 
@@ -85,6 +88,9 @@ protected:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State|Als Character", Transient)
 	FAlsViewState ViewState;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State|Als Character", Transient, Meta = (ClampMin = 0, ForceUnits = "s"))
+	float ViewModeChangeBlockTime{0.f};
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State|Als Character", Transient, Replicated)
 	FVector_NetQuantizeNormal InputDirection;
@@ -162,6 +168,23 @@ private:
 	void RefreshMeshProperties() const;
 
 	void RefreshMovementBase();
+
+	// Desired View Mode
+
+public:
+	const FGameplayTag& GetDesiredViewMode() const;
+
+	UFUNCTION(BlueprintCallable, Category = "Als Character", Meta = (AutoCreateRefTerm = "NewDesiredViewMode"))
+	void SetDesiredViewMode(const FGameplayTag& NewDesiredViewMode);
+
+private:
+	void SetDesiredViewMode(const FGameplayTag& NewDesiredViewMode, bool bSendRpc);
+
+	UFUNCTION(Client, Reliable)
+	void ClientSetDesiredViewMode(const FGameplayTag& NewDesiredViewMode);
+
+	UFUNCTION(Server, Reliable)
+	void ServerSetDesiredViewMode(const FGameplayTag& NewDesiredViewMode);
 
 	// View Mode
 
@@ -687,6 +710,11 @@ private:
 
 	void DisplayDebugPA(const UCanvas* Canvas, float Scale, float HorizontalLocation, float& VerticalLocation) const;
 };
+
+inline const FGameplayTag& AAlsCharacter::GetDesiredViewMode() const
+{
+	return DesiredViewMode;
+}
 
 inline const FGameplayTag& AAlsCharacter::GetViewMode() const
 {

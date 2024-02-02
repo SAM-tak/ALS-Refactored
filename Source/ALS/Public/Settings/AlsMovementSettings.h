@@ -62,6 +62,9 @@ public:
 		{AlsRotationModeTags::ViewDirection, {}},
 		{AlsRotationModeTags::Aiming, {}}
 	};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Settings", Meta = (ClampMin = 0, ForceUnits = "deg/s"))
+	float MaxRotationSpeed{720.0f};
 };
 
 inline float FAlsMovementGaitSettings::GetSpeedByGait(const FGameplayTag& Gait) const

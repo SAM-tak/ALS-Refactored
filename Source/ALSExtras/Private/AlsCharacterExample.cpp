@@ -193,7 +193,7 @@ void AAlsCharacterExample::Input_OnRotationMode()
 
 void AAlsCharacterExample::Input_OnViewMode()
 {
-	SetViewMode(GetViewMode() == AlsViewModeTags::ThirdPerson ? AlsViewModeTags::FirstPerson : AlsViewModeTags::ThirdPerson);
+	SetDesiredViewMode(GetDesiredViewMode() == AlsViewModeTags::ThirdPerson ? AlsViewModeTags::FirstPerson : AlsViewModeTags::ThirdPerson);
 }
 
 // ReSharper disable once CppMemberFunctionMayBeConst

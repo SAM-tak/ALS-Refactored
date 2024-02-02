@@ -434,6 +434,45 @@ void AAlsCharacter::RefreshMovementBase()
 		                             : FRotator::ZeroRotator;
 }
 
+void AAlsCharacter::SetDesiredViewMode(const FGameplayTag& NewDesiredViewMode)
+{
+	SetDesiredViewMode(NewDesiredViewMode, true);
+}
+
+void AAlsCharacter::SetDesiredViewMode(const FGameplayTag& NewDesiredViewMode, const bool bSendRpc)
+{
+	if (DesiredViewMode == NewDesiredViewMode || GetLocalRole() < ROLE_AutonomousProxy)
+	{
+		return;
+	}
+
+	DesiredViewMode = NewDesiredViewMode;
+
+	MARK_PROPERTY_DIRTY_FROM_NAME(ThisClass, DesiredViewMode, this)
+
+	if (bSendRpc)
+	{
+		if (GetLocalRole() >= ROLE_Authority)
+		{
+			ClientSetDesiredViewMode(DesiredViewMode);
+		}
+		else
+		{
+			ServerSetDesiredViewMode(DesiredViewMode);
+		}
+	}
+}
+
+void AAlsCharacter::ClientSetDesiredViewMode_Implementation(const FGameplayTag& NewDesiredViewMode)
+{
+	SetDesiredViewMode(NewDesiredViewMode, false);
+}
+
+void AAlsCharacter::ServerSetDesiredViewMode_Implementation(const FGameplayTag& NewDesiredViewMode)
+{
+	SetDesiredViewMode(NewDesiredViewMode, false);
+}
+
 void AAlsCharacter::SetViewMode(const FGameplayTag& NewViewMode)
 {
 	SetViewMode(NewViewMode, true);
@@ -1264,6 +1303,16 @@ void AAlsCharacter::TryAdjustControllRotation(float DeltaTime)
 
 void AAlsCharacter::RefreshView(const float DeltaTime)
 {
+	if (ViewModeChangeBlockTime > 0.f)
+	{
+		ViewModeChangeBlockTime -= DeltaTime;
+	}
+	else if (GetViewMode() != GetDesiredViewMode())
+	{
+		SetViewMode(GetDesiredViewMode());
+		ViewModeChangeBlockTime = Settings->View.ViewModeChangeBlockTime;
+	}
+
 	if (MovementBase.bHasRelativeRotation)
 	{
 		// Offset the rotations to keep them relative to the movement base.

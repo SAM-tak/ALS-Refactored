@@ -397,6 +397,7 @@ void UAlsCameraComponent::TickCamera(const float DeltaTime, bool bAllowLag)
 			// FPP -> TPP
 			auto TPPCameraLocation{FVector::PointPlaneProject(CameraResultLocation, PivotLocation, -CameraRotation.Vector())};
 			auto FocalRotation{(FocusLocation - TPPCameraLocation).Rotation()};
+			FocalRotation.Roll = Character->GetViewRotation().Roll;
 			if(Settings->HeuristicPitchMapping && IsValid(Settings->HeuristicPitchMapping))
 			{
 				FocalRotation.Normalize();
@@ -409,19 +410,21 @@ void UAlsCameraComponent::TickCamera(const float DeltaTime, bool bAllowLag)
 			if (bDisplayDebugCameraTraces)
 			{
 				DrawDebugLine(GetWorld(), TPPCameraLocation, FocusLocation, FLinearColor{0.0f, 0.75f, 1.0f}.ToFColor(true),
-								false, 3.0f, 0, UAlsUtility::DrawLineThickness);
+							  false, 3.0f, 0, UAlsUtility::DrawLineThickness);
 			}
 #endif
 		}
 		else if(PreviousViewMode == AlsViewModeTags::ThirdPerson)
 		{
 			// TPP -> FPP
-			Character->SetFocalRotation((FocusLocation - GetEyeCameraLocation()).Rotation());
+			auto FocalRotation{(FocusLocation - GetEyeCameraLocation()).Rotation()};
+			FocalRotation.Roll = Character->GetViewRotation().Roll;
+			Character->SetFocalRotation(FocalRotation);
 #if ENABLE_DRAW_DEBUG
 			if (bDisplayDebugCameraTraces)
 			{
 				DrawDebugLine(GetWorld(), GetEyeCameraLocation(), FocusLocation, FLinearColor{0.75f, 0.0f, 1.0f}.ToFColor(true),
-								false, 3.0f, 0, UAlsUtility::DrawLineThickness);
+							  false, 3.0f, 0, UAlsUtility::DrawLineThickness);
 			}
 #endif
 		}
@@ -436,7 +439,9 @@ void UAlsCameraComponent::TickCamera(const float DeltaTime, bool bAllowLag)
 			auto FocusLocation{GetCurrentFocusLocation()};
 			auto CounterpartCameraLocation{FVector::PointPlaneProject(CameraResultLocation, PivotLocation, -CameraRotation.Vector())
 				.MirrorByPlane(FPlane(Character->GetActorLocation(), CameraRotation.RotateVector(FVector::RightVector)))};
-			Character->SetFocalRotation((FocusLocation - CounterpartCameraLocation).Rotation());
+			auto FocalRotation{(FocusLocation - CounterpartCameraLocation).Rotation()};
+			FocalRotation.Roll = Character->GetViewRotation().Roll;
+			Character->SetFocalRotation(FocalRotation);
 #if ENABLE_DRAW_DEBUG
 			if (bDisplayDebugCameraTraces)
 			{
