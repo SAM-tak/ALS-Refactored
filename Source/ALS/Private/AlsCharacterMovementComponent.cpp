@@ -193,7 +193,7 @@ void UAlsCharacterMovementComponent::BeginPlay()
 void UAlsCharacterMovementComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
 {
 	auto* Controller{CharacterOwner->GetController()};
-	if (IsValid(Controller) && IsValid(MovementSettings))
+	if (IsValid(Controller) && IsValid(MovementSettings) && !PreviousControlRotation.ContainsNaN() && MovementSettings->MaxRotationSpeed > 0)
 	{
 		// Limit rotation speed
 		auto MaxDelta{MovementSettings->MaxRotationSpeed * DeltaTime};

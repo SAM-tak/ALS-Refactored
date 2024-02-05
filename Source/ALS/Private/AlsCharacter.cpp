@@ -1285,7 +1285,7 @@ void AAlsCharacter::SetFocalRotation(const FRotator& NewFocalRotation)
 
 void AAlsCharacter::TryAdjustControllRotation(float DeltaTime)
 {
-	if (!PendingFocalRotationRelativeAdjustment.IsNearlyZero(0.01))
+	if (IsValid(GetController()) && !PendingFocalRotationRelativeAdjustment.IsNearlyZero(0.01))
 	{
 		const auto ControlRotation{Controller->GetControlRotation()};
 		const auto PreviousPendingFocalRotationRelativeAdjustment{PendingFocalRotationRelativeAdjustment};
