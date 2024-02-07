@@ -90,6 +90,7 @@ void AAlsCharacterExample::SetupPlayerInputComponent(UInputComponent* Input)
 		EnhancedInput->BindAction(SprintAction, ETriggerEvent::Triggered, this, &ThisClass::Input_OnSprint);
 		EnhancedInput->BindAction(WalkAction, ETriggerEvent::Triggered, this, &ThisClass::Input_OnWalk);
 		EnhancedInput->BindAction(CrouchAction, ETriggerEvent::Triggered, this, &ThisClass::Input_OnCrouch);
+		EnhancedInput->BindAction(ProneAction, ETriggerEvent::Triggered, this, &ThisClass::Input_OnProne);
 		EnhancedInput->BindAction(JumpAction, ETriggerEvent::Triggered, this, &ThisClass::Input_OnJump);
 		EnhancedInput->BindAction(AimAction, ETriggerEvent::Triggered, this, &ThisClass::Input_OnAim);
 		EnhancedInput->BindAction(RagdollAction, ETriggerEvent::Triggered, this, &ThisClass::Input_OnRagdoll);
@@ -145,7 +146,7 @@ void AAlsCharacterExample::Input_OnWalk()
 
 void AAlsCharacterExample::Input_OnCrouch()
 {
-	if (GetDesiredStance() == AlsStanceTags::Standing)
+	if (GetDesiredStance() != AlsStanceTags::Crouching)
 	{
 		SetDesiredStance(AlsStanceTags::Crouching);
 	}
@@ -153,6 +154,11 @@ void AAlsCharacterExample::Input_OnCrouch()
 	{
 		SetDesiredStance(AlsStanceTags::Standing);
 	}
+}
+
+void AAlsCharacterExample::Input_OnProne()
+{
+	SetDesiredStance(AlsStanceTags::Lying);
 }
 
 void AAlsCharacterExample::Input_OnJump(const FInputActionValue& ActionValue)
@@ -212,7 +218,7 @@ void AAlsCharacterExample::Input_OnRotationMode()
 
 void AAlsCharacterExample::Input_OnViewMode()
 {
-	SetViewMode(GetViewMode() == AlsViewModeTags::ThirdPerson ? AlsViewModeTags::FirstPerson : AlsViewModeTags::ThirdPerson);
+	SetDesiredViewMode(GetDesiredViewMode() == AlsViewModeTags::ThirdPerson ? AlsViewModeTags::FirstPerson : AlsViewModeTags::ThirdPerson);
 }
 
 // ReSharper disable once CppMemberFunctionMayBeConst

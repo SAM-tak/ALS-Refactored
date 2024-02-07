@@ -190,6 +190,24 @@ void UAlsCharacterMovementComponent::BeginPlay()
 	Super::BeginPlay();
 }
 
+void UAlsCharacterMovementComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
+{
+	auto* Controller{CharacterOwner->GetController()};
+	if (IsValid(Controller) && IsValid(MovementSettings) && !PreviousControlRotation.ContainsNaN() && MovementSettings->MaxRotationSpeed > 0)
+	{
+		// Limit rotation speed
+		auto MaxDelta{MovementSettings->MaxRotationSpeed * DeltaTime};
+		auto CurrentControlRotation{Controller->GetControlRotation()};
+		auto ClampedPitch{FMath::Clamp(FMath::FindDeltaAngleDegrees(PreviousControlRotation.Pitch, CurrentControlRotation.Pitch), -MaxDelta, MaxDelta)};
+		auto ClampedYaw{FMath::Clamp(FMath::FindDeltaAngleDegrees(PreviousControlRotation.Yaw, CurrentControlRotation.Yaw), -MaxDelta, MaxDelta)};
+		Controller->SetControlRotation(FRotator{
+			(PreviousControlRotation.Pitch + ClampedPitch),
+			(PreviousControlRotation.Yaw + ClampedYaw),
+			CurrentControlRotation.Roll}.Clamp());
+	}
+	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
+}
+
 void UAlsCharacterMovementComponent::SetMovementMode(const EMovementMode NewMovementMode, const uint8 NewCustomMode)
 {
 	if (!bMovementModeLocked)

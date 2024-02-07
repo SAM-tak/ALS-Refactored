@@ -104,7 +104,7 @@ protected:
 
 	// Valid only on locally controlled characters.
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient)
-	FRotator PreviousControlRotation;
+	FRotator PreviousControlRotation{NAN, NAN, NAN};
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient)
 	FVector PendingPenetrationAdjustment;
@@ -139,6 +139,8 @@ public:
 	                                float BrakingDeceleration, FVector& RequestedAcceleration, float& RequestedSpeed) override;
 
 	virtual void CalcVelocity(float DeltaTime, float Friction, bool bFluid, float BrakingDeceleration) override;
+
+	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
 	virtual float GetMaxAcceleration() const override;
 

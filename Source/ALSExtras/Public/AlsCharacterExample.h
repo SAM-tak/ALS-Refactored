@@ -39,6 +39,9 @@ protected:
 	TObjectPtr<UInputAction> CrouchAction;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings|Als Character Example", Meta = (DisplayThumbnail = false))
+	TObjectPtr<UInputAction> ProneAction;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings|Als Character Example", Meta = (DisplayThumbnail = false))
 	TObjectPtr<UInputAction> JumpAction;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings|Als Character Example", Meta = (DisplayThumbnail = false))
@@ -100,6 +103,8 @@ private:
 	void Input_OnWalk();
 
 	void Input_OnCrouch();
+
+	void Input_OnProne();
 
 	void Input_OnJump(const FInputActionValue& ActionValue);
 
