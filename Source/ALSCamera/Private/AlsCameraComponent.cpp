@@ -3,7 +3,6 @@
 #include "AlsCameraSettings.h"
 #include "AlsCharacter.h"
 #include "AlsCharacterMovementComponent.h"
-#include "AlsCameraSkeletalMeshComponent.h"
 #include "DrawDebugHelpers.h"
 #include "Animation/AnimInstance.h"
 #include "GameFramework/WorldSettings.h"
