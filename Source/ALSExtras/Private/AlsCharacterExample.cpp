@@ -1,6 +1,7 @@
 #include "AlsCharacterExample.h"
 
 #include "AlsCameraComponent.h"
+#include "AlsCameraSkeletalMeshComponent.h"
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
 #include "Engine/LocalPlayer.h"
@@ -13,7 +14,9 @@ AAlsCharacterExample::AAlsCharacterExample()
 	Camera = CreateDefaultSubobject<UAlsCameraComponent>(FName{TEXTVIEW("Camera")});
 	Camera->SetupAttachment(GetMesh());
 	Camera->SetRelativeRotation_Direct({0.0f, 90.0f, 0.0f});
-	Camera->SetUpDefaultCameraSkeletalMesh(CreateDefaultSubobject<USkeletalMeshComponent>(FName{TEXTVIEW("CameraSkeletalMesh")}));
+
+	CameraSkeletalMesh = CreateDefaultSubobject<UAlsCameraSkeletalMeshComponent>(FName{TEXTVIEW("CameraSkeletalMesh")});
+	CameraSkeletalMesh->SetupAttachment(Camera);
 }
 
 void AAlsCharacterExample::NotifyControllerChanged()

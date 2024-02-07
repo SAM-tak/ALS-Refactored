@@ -5,6 +5,7 @@
 
 struct FInputActionValue;
 class UAlsCameraComponent;
+class UAlsCameraSkeletalMeshComponent;
 class UInputMappingContext;
 class UInputAction;
 
@@ -16,6 +17,9 @@ class ALSEXTRAS_API AAlsCharacterExample : public AAlsCharacter
 protected:
 	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category = "Als Character Example")
 	TObjectPtr<UAlsCameraComponent> Camera;
+
+	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category = "Als Character Example")
+	TObjectPtr<UAlsCameraSkeletalMeshComponent> CameraSkeletalMesh;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings|Als Character Example", Meta = (DisplayThumbnail = false))
 	TObjectPtr<UInputMappingContext> InputMappingContext;

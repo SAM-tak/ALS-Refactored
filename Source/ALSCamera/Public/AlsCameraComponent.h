@@ -4,11 +4,11 @@
 #include "Utility/AlsMath.h"
 #include "AlsCameraComponent.generated.h"
 
-class USkeletalMeshComponent;
+class UAlsCameraSkeletalMeshComponent;
 class UAlsCameraSettings;
 class AAlsCharacter;
 
-UCLASS()
+UCLASS(HideCategories = (ComponentTick, Physics, Navigation), ClassGroup = Camera)
 class ALSCAMERA_API UAlsCameraComponent : public UCameraComponent
 {
 	GENERATED_BODY()
@@ -23,11 +23,11 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Settings", Meta = (ClampMin = 0, ClampMax = 1))
 	float ADSCameraShakeScale{0.2f};
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Camera)
-	TObjectPtr<USkeletalMeshComponent> CameraSkeletalMesh;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient)
+	TWeakObjectPtr<UAlsCameraSkeletalMeshComponent> CameraSkeletalMesh;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient)
-	TObjectPtr<AAlsCharacter> Character;
+	TWeakObjectPtr<AAlsCharacter> Character;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient, Meta = (ForceUnits = "x"))
 	float PreviousGlobalTimeDilation{1.0f};
@@ -102,11 +102,10 @@ public:
 
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
-	// Needs call in Actor Constructor
-	// @see AAlsCharacterExample::AAlsCharacterExample
-	void SetUpDefaultCameraSkeletalMesh(USkeletalMeshComponent* NewSkeletalMesh);
-
 public:
+	UFUNCTION(BlueprintCallable, Category = "ALS|Camera")
+	void SetCameraSkeletalMesh(UAlsCameraSkeletalMeshComponent* NewSkeletalMesh);
+
 	UFUNCTION(BlueprintPure, Category = "ALS|Camera", meta = (Keywords = "AnimBlueprint", UnsafeDuringActorConstruction = "true"))
 	class UAnimInstance* GetAnimInstance() const;
 

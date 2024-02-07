@@ -1,6 +1,7 @@
 #include "AlsCameraComponent.h"
 
 #include "AlsCameraSettings.h"
+#include "AlsCameraSkeletalMeshComponent.h"
 #include "AlsCharacter.h"
 #include "AlsCharacterMovementComponent.h"
 #include "DrawDebugHelpers.h"
@@ -27,26 +28,6 @@ UAlsCameraComponent::UAlsCameraComponent()
 #endif
 }
 
-void UAlsCameraComponent::SetUpDefaultCameraSkeletalMesh(USkeletalMeshComponent* NewSkeletalMesh)
-{
-	CameraSkeletalMesh = NewSkeletalMesh;
-
-	CameraSkeletalMesh->SetupAttachment(this);
-	CameraSkeletalMesh->SetGenerateOverlapEvents(false);
-	CameraSkeletalMesh->SetCanEverAffectNavigation(false);
-	CameraSkeletalMesh->SetAllowClothActors(false);
-	CameraSkeletalMesh->SetTickGroup(TG_PostPhysics);
-	CameraSkeletalMesh->SetHiddenInGame(true);
-	CameraSkeletalMesh->bTickInEditor = false;
-
-#if WITH_EDITOR
-	static ConstructorHelpers::FObjectFinder<USkeletalMesh> SkeletalMesh(TEXT("/ALS/ALSCamera/SKM_Als_Camera"));
-	CameraSkeletalMesh->SetSkeletalMeshAsset(SkeletalMesh.Object);
-	static ConstructorHelpers::FObjectFinder<UAnimBlueprint> Animation(TEXT("/ALS/ALSCamera/AB_Als_Camera"));
-	CameraSkeletalMesh->SetAnimInstanceClass(Animation.Object->GetAnimBlueprintGeneratedClass());
-#endif
-}
-
 void UAlsCameraComponent::OnRegister()
 {
 	Character = Cast<AAlsCharacter>(GetOwner());
@@ -67,7 +48,7 @@ void UAlsCameraComponent::Activate(const bool bReset)
 {
 	Super::Activate(bReset);
 
-	if (!bReset && !ShouldActivate())
+	if (!bReset || !ShouldActivate())
 	{
 		return;
 	}
@@ -77,10 +58,23 @@ void UAlsCameraComponent::Activate(const bool bReset)
 
 void UAlsCameraComponent::BeginPlay()
 {
-	ALS_ENSURE(IsValid(CameraSkeletalMesh));
+	if (!CameraSkeletalMesh.IsValid())
+	{
+		for(auto& i : GetAttachChildren())
+		{
+			auto SkeletalMeshComponent = Cast<UAlsCameraSkeletalMeshComponent>(i);
+			if (SkeletalMeshComponent && IsValid(SkeletalMeshComponent))
+			{
+				CameraSkeletalMesh = SkeletalMeshComponent;
+				break;
+			}
+		}
+	}
+
+	ALS_ENSURE(CameraSkeletalMesh.IsValid());
+	ALS_ENSURE(Character.IsValid());
 	ALS_ENSURE(IsValid(CameraSkeletalMesh->GetAnimInstance()));
 	ALS_ENSURE(IsValid(Settings));
-	ALS_ENSURE(IsValid(Character));
 
 	Super::BeginPlay();
 
@@ -111,9 +105,14 @@ void UAlsCameraComponent::TickComponent(float DeltaTime, const ELevelTick TickTy
 	SetWorldLocationAndRotation(CameraLocation, CameraRotation);
 }
 
+void UAlsCameraComponent::SetCameraSkeletalMesh(UAlsCameraSkeletalMeshComponent* NewSkeletalMesh)
+{
+	CameraSkeletalMesh = NewSkeletalMesh;
+}
+
 UAnimInstance* UAlsCameraComponent::GetAnimInstance() const
 {
-	if (IsValid(CameraSkeletalMesh))
+	if (CameraSkeletalMesh.IsValid())
 	{
 		return CameraSkeletalMesh->GetAnimInstance();
 	}
@@ -202,7 +201,7 @@ void UAlsCameraComponent::TickCamera(const float DeltaTime, bool bAllowLag)
 {
 	DECLARE_SCOPE_CYCLE_COUNTER(TEXT("UAlsCameraComponent::TickCamera()"), STAT_UAlsCameraComponent_TickCamera, STATGROUP_Als)
 
-	if (!IsValid(GetAnimInstance()) || !IsValid(Settings) || !IsValid(Character))
+	if (!IsValid(GetAnimInstance()) || !IsValid(Settings) || !Character.IsValid())
 	{
 		return;
 	}
@@ -845,7 +844,7 @@ float UAlsCameraComponent::CalculateFocalLength() const
 void UAlsCameraComponent::UpdateADSCameraShake(float FirstPersonOverride, float AimingAmount)
 {
 	auto GetCameraManager = [this]() {
-		const auto* PlayerController{IsValid(Character) ? Cast<APlayerController>(Character->GetController()) : nullptr};
+		const auto* PlayerController{Character.IsValid() ? Cast<APlayerController>(Character->GetController()) : nullptr};
 		return PlayerController && IsValid(PlayerController) ? PlayerController->PlayerCameraManager.Get() : nullptr;
 	};
 
