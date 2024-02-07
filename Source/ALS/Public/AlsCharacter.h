@@ -53,9 +53,6 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings|Als Character|Desired State", Replicated)
 	FGameplayTag DesiredGait{AlsGaitTags::Running};
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings|Als Character|Desired State", Replicated)
-	FGameplayTag ViewMode{AlsViewModeTags::ThirdPerson};
-
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings|Als Character|Desired State", ReplicatedUsing = "OnReplicated_OverlayMode")
 	FGameplayTag OverlayMode{AlsOverlayModeTags::Default};
 
@@ -64,6 +61,9 @@ protected:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State|Als Character", Transient)
 	FGameplayTag LocomotionMode{AlsLocomotionModeTags::Grounded};
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State|Als Character", Transient)
+	FGameplayTag ViewMode{AlsViewModeTags::ThirdPerson};
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State|Als Character", Transient)
 	FGameplayTag RotationMode{AlsRotationModeTags::ViewDirection};
@@ -194,14 +194,8 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Als Character", Meta = (AutoCreateRefTerm = "NewViewMode"))
 	void SetViewMode(const FGameplayTag& NewViewMode);
 
-private:
-	void SetViewMode(const FGameplayTag& NewViewMode, bool bSendRpc);
-
-	UFUNCTION(Client, Reliable)
-	void ClientSetViewMode(const FGameplayTag& NewViewMode);
-
-	UFUNCTION(Server, Reliable)
-	void ServerSetViewMode(const FGameplayTag& NewViewMode);
+	UFUNCTION(BlueprintNativeEvent, Category = "Als Character")
+	void OnViewModeChanged(const FGameplayTag& PreviousViewMode);
 
 	// Locomotion Mode
 

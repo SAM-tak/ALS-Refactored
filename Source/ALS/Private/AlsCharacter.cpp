@@ -83,7 +83,7 @@ void AAlsCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLif
 	DOREPLIFETIME_WITH_PARAMS_FAST(ThisClass, DesiredGait, Parameters)
 	DOREPLIFETIME_WITH_PARAMS_FAST(ThisClass, bDesiredAiming, Parameters)
 	DOREPLIFETIME_WITH_PARAMS_FAST(ThisClass, DesiredRotationMode, Parameters)
-	DOREPLIFETIME_WITH_PARAMS_FAST(ThisClass, ViewMode, Parameters)
+	DOREPLIFETIME_WITH_PARAMS_FAST(ThisClass, DesiredViewMode, Parameters)
 	DOREPLIFETIME_WITH_PARAMS_FAST(ThisClass, OverlayMode, Parameters)
 
 	DOREPLIFETIME_WITH_PARAMS_FAST(ThisClass, ReplicatedViewRotation, Parameters)
@@ -430,8 +430,8 @@ void AAlsCharacter::RefreshMovementBase()
 	                                              MovementBase.Location, MovementBase.Rotation);
 
 	MovementBase.DeltaRotation = MovementBase.bHasRelativeLocation && !MovementBase.bBaseChanged
-		                             ? (MovementBase.Rotation * PreviousRotation.Inverse()).Rotator()
-		                             : FRotator::ZeroRotator;
+		                         ? (MovementBase.Rotation * PreviousRotation.Inverse()).Rotator()
+		                         : FRotator::ZeroRotator;
 }
 
 void AAlsCharacter::SetDesiredViewMode(const FGameplayTag& NewDesiredViewMode)
@@ -475,42 +475,17 @@ void AAlsCharacter::ServerSetDesiredViewMode_Implementation(const FGameplayTag& 
 
 void AAlsCharacter::SetViewMode(const FGameplayTag& NewViewMode)
 {
-	SetViewMode(NewViewMode, true);
-}
-
-void AAlsCharacter::SetViewMode(const FGameplayTag& NewViewMode, const bool bSendRpc)
-{
-	if (ViewMode == NewViewMode || GetLocalRole() < ROLE_AutonomousProxy)
+	if (ViewMode != NewViewMode)
 	{
-		return;
-	}
+		const auto PreviousRotationMode{ViewMode};
 
-	ViewMode = NewViewMode;
+		ViewMode = NewViewMode;
 
-	MARK_PROPERTY_DIRTY_FROM_NAME(ThisClass, ViewMode, this)
-
-	if (bSendRpc)
-	{
-		if (GetLocalRole() >= ROLE_Authority)
-		{
-			ClientSetViewMode(ViewMode);
-		}
-		else
-		{
-			ServerSetViewMode(ViewMode);
-		}
+		OnRotationModeChanged(PreviousRotationMode);
 	}
 }
 
-void AAlsCharacter::ClientSetViewMode_Implementation(const FGameplayTag& NewViewMode)
-{
-	SetViewMode(NewViewMode, false);
-}
-
-void AAlsCharacter::ServerSetViewMode_Implementation(const FGameplayTag& NewViewMode)
-{
-	SetViewMode(NewViewMode, false);
-}
+void AAlsCharacter::OnViewModeChanged_Implementation(const FGameplayTag& PreviousRotationMode) {}
 
 void AAlsCharacter::OnMovementModeChanged(const EMovementMode PreviousMovementMode, const uint8 PreviousCustomMode)
 {
