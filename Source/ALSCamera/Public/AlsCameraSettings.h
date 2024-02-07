@@ -189,12 +189,4 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Settings")
 	TObjectPtr<UCurveFloat> HeuristicPitchMapping{nullptr};
-
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings")
-	FPostProcessSettings PostProcess;
-
-public:
-#if WITH_EDITORONLY_DATA
-	virtual void Serialize(FArchive& Archive) override;
-#endif
 };

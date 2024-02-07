@@ -80,11 +80,6 @@ public:
 	AAlsCharacterExample();
 
 	virtual void NotifyControllerChanged() override;
-//
-//	// Camera
-//
-//protected:
-//	virtual void CalcCamera(float DeltaTime, FMinimalViewInfo& ViewInfo) override;
 
 	// Input
 

@@ -13,25 +13,7 @@ AAlsCharacterExample::AAlsCharacterExample()
 	Camera = CreateDefaultSubobject<UAlsCameraComponent>(FName{TEXTVIEW("Camera")});
 	Camera->SetupAttachment(GetMesh());
 	Camera->SetRelativeRotation_Direct({0.0f, 90.0f, 0.0f});
-
-	auto SkeletalMesh = CreateOptionalDefaultSubobject<USkeletalMeshComponent>(FName{TEXTVIEW("CameraSkeletalMesh")});
-	if (SkeletalMesh)
-	{
-		Camera->SetCameraSkeletalMesh(SkeletalMesh);
-
-		SkeletalMesh->SetupAttachment(Camera);
-		SkeletalMesh->SetGenerateOverlapEvents(false);
-		SkeletalMesh->SetCanEverAffectNavigation(false);
-		//SkeletalMesh->SetHiddenInGame(true);
-		SkeletalMesh->SetTickGroup(TG_PostPhysics);
-
-#if WITH_EDITOR
-		static ConstructorHelpers::FObjectFinder<USkeletalMesh> CameraSkeletalMesh(TEXT("/ALS/ALSCamera/SKM_Als_Camera"));
-		SkeletalMesh->SetSkeletalMeshAsset(CameraSkeletalMesh.Object);
-		static ConstructorHelpers::FObjectFinder<UAnimBlueprint> CameraAnimation(TEXT("/ALS/ALSCamera/AB_Als_Camera"));
-		SkeletalMesh->SetAnimInstanceClass(CameraAnimation.Object->GetAnimBlueprintGeneratedClass());
-#endif
-	}
+	Camera->SetUpDefaultCameraSkeletalMesh(CreateDefaultSubobject<USkeletalMeshComponent>(FName{TEXTVIEW("CameraSkeletalMesh")}));
 }
 
 void AAlsCharacterExample::NotifyControllerChanged()
@@ -65,17 +47,6 @@ void AAlsCharacterExample::NotifyControllerChanged()
 
 	Super::NotifyControllerChanged();
 }
-//
-//void AAlsCharacterExample::CalcCamera(const float DeltaTime, FMinimalViewInfo& ViewInfo)
-//{
-//	if (Camera->IsActive())
-//	{
-//		Camera->GetViewInfo(ViewInfo);
-//		return;
-//	}
-//
-//	Super::CalcCamera(DeltaTime, ViewInfo);
-//}
 
 void AAlsCharacterExample::SetupPlayerInputComponent(UInputComponent* Input)
 {

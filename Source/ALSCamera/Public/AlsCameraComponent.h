@@ -23,9 +23,6 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Settings", Meta = (ClampMin = 0, ClampMax = 1))
 	float ADSCameraShakeScale{0.2f};
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Settings", Meta = (ClampMin = 0, ClampMax = 1))
-	float PostProcessWeight{1.0f};
-
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Camera)
 	TObjectPtr<USkeletalMeshComponent> CameraSkeletalMesh;
 
@@ -93,7 +90,7 @@ protected:
 	TObjectPtr<UCameraShakeBase> CurrentADSCameraShake;
 
 public:
-	UAlsCameraComponent(const FObjectInitializer& ObjectInitializer = FObjectInitializer::Get());
+	UAlsCameraComponent();
 
 	virtual void OnRegister() override;
 
@@ -101,20 +98,15 @@ public:
 
 	virtual void Activate(bool bReset) override;
 
-	//virtual void InitAnim(bool bForceReinitialize) override;
-
 	virtual void BeginPlay() override;
 
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
-	//virtual void CompleteParallelAnimationEvaluation(bool bDoPostAnimationEvaluation) override;
-
-	void SetCameraSkeletalMesh(USkeletalMeshComponent* NewCameraSkeletalMesh);
+	// Needs call in Actor Constructor
+	// @see AAlsCharacterExample::AAlsCharacterExample
+	void SetUpDefaultCameraSkeletalMesh(USkeletalMeshComponent* NewSkeletalMesh);
 
 public:
-	//float GetPostProcessWeight() const;
-
-	//void SetPostProcessWeight(float NewPostProcessWeight);
 	UFUNCTION(BlueprintPure, Category = "ALS|Camera", meta = (Keywords = "AnimBlueprint", UnsafeDuringActorConstruction = "true"))
 	class UAnimInstance* GetAnimInstance() const;
 
@@ -138,9 +130,6 @@ public:
 
 	UFUNCTION(BlueprintPure, Category = "ALS|Camera", Meta = (ReturnDisplayName = "Trace Start"))
 	FVector GetThirdPersonTraceStartLocation() const;
-
-	//UFUNCTION(BlueprintCallable, Category = "ALS|Camera")
-	//void GetViewInfo(FMinimalViewInfo& ViewInfo) const;
 
 	UFUNCTION(BlueprintPure, Category = "ALS|Camera", Meta = (ReturnDisplayName = "Focus Location"))
 	FVector GetCurrentFocusLocation() const;
@@ -185,16 +174,6 @@ private:
 
 	void DisplayDebugTraces(const UCanvas* Canvas, float Scale, float HorizontalLocation, float& VerticalLocation) const;
 };
-//
-//inline float UAlsCameraComponent::GetPostProcessWeight() const
-//{
-//	return PostProcessWeight;
-//}
-//
-//inline void UAlsCameraComponent::SetPostProcessWeight(const float NewPostProcessWeight)
-//{
-//	PostProcessWeight = UAlsMath::Clamp01(NewPostProcessWeight);
-//}
 
 inline bool UAlsCameraComponent::IsRightShoulder() const
 {

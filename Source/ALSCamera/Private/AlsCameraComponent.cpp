@@ -13,8 +13,7 @@
 
 #include UE_INLINE_GENERATED_CPP_BY_NAME(AlsCameraComponent)
 
-UAlsCameraComponent::UAlsCameraComponent(const FObjectInitializer& ObjectInitializer)
-: Super(ObjectInitializer)
+UAlsCameraComponent::UAlsCameraComponent()
 {
 	PrimaryComponentTick.bStartWithTickEnabled = false;
 	PrimaryComponentTick.TickGroup = TG_PostPhysics;
@@ -25,6 +24,26 @@ UAlsCameraComponent::UAlsCameraComponent(const FObjectInitializer& ObjectInitial
 #if WITH_EDITOR
 	static ConstructorHelpers::FObjectFinder<UAlsCameraSettings> CameraSettings(TEXT("/ALS/ALSCamera/Data/CMS_Als_Default"));
 	Settings = CameraSettings.Object;
+#endif
+}
+
+void UAlsCameraComponent::SetUpDefaultCameraSkeletalMesh(USkeletalMeshComponent* NewSkeletalMesh)
+{
+	CameraSkeletalMesh = NewSkeletalMesh;
+
+	CameraSkeletalMesh->SetupAttachment(this);
+	CameraSkeletalMesh->SetGenerateOverlapEvents(false);
+	CameraSkeletalMesh->SetCanEverAffectNavigation(false);
+	CameraSkeletalMesh->SetAllowClothActors(false);
+	CameraSkeletalMesh->SetTickGroup(TG_PostPhysics);
+	CameraSkeletalMesh->SetHiddenInGame(true);
+	CameraSkeletalMesh->bTickInEditor = false;
+
+#if WITH_EDITOR
+	static ConstructorHelpers::FObjectFinder<USkeletalMesh> SkeletalMesh(TEXT("/ALS/ALSCamera/SKM_Als_Camera"));
+	CameraSkeletalMesh->SetSkeletalMeshAsset(SkeletalMesh.Object);
+	static ConstructorHelpers::FObjectFinder<UAnimBlueprint> Animation(TEXT("/ALS/ALSCamera/AB_Als_Camera"));
+	CameraSkeletalMesh->SetAnimInstanceClass(Animation.Object->GetAnimBlueprintGeneratedClass());
 #endif
 }
 
@@ -41,11 +60,6 @@ void UAlsCameraComponent::RegisterComponentTickFunctions(const bool bRegister)
 
 	// Tick after the owner to have access to the most up-to-date character state.
 
-	if (CameraSkeletalMesh)
-	{
-		AddTickPrerequisiteComponent(CameraSkeletalMesh);
-	}
-
 	AddTickPrerequisiteActor(GetOwner());
 }
 
@@ -60,19 +74,6 @@ void UAlsCameraComponent::Activate(const bool bReset)
 
 	TickCamera(0.0f, false);
 }
-
-void UAlsCameraComponent::SetCameraSkeletalMesh(USkeletalMeshComponent* NewCameraSkeletalMesh)
-{
-	CameraSkeletalMesh = NewCameraSkeletalMesh;
-}
-
-//
-//void UAlsCameraComponent::InitAnim(const bool bForceReinitialize)
-//{
-//	Super::InitAnim(bForceReinitialize);
-//
-//	AnimationInstance = GetAnimInstance();
-//}
 
 void UAlsCameraComponent::BeginPlay()
 {
@@ -105,22 +106,10 @@ void UAlsCameraComponent::TickComponent(float DeltaTime, const ELevelTick TickTy
 
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 
-	// Skip camera tick until parallel animation evaluation completes.
-
-	//if (!CameraSkeletalMesh->IsRunningParallelEvaluation())
-	//{
-		TickCamera(DeltaTime);
-	//}
+	TickCamera(DeltaTime);
 
 	SetWorldLocationAndRotation(CameraLocation, CameraRotation);
 }
-
-//void UAlsCameraComponent::CompleteParallelAnimationEvaluation(const bool bDoPostAnimationEvaluation)
-//{
-//	Super::CompleteParallelAnimationEvaluation(bDoPostAnimationEvaluation);
-//
-//	TickCamera(GetAnimInstance()->GetDeltaSeconds());
-//}
 
 UAnimInstance* UAlsCameraComponent::GetAnimInstance() const
 {
