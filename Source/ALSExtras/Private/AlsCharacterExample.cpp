@@ -11,12 +11,12 @@
 
 AAlsCharacterExample::AAlsCharacterExample()
 {
-	Camera = CreateDefaultSubobject<UAlsCameraComponent>(FName{TEXTVIEW("Camera")});
-	Camera->SetupAttachment(GetMesh());
-	Camera->SetRelativeRotation_Direct({0.0f, 90.0f, 0.0f});
-
 	CameraSkeletalMesh = CreateDefaultSubobject<UAlsCameraSkeletalMeshComponent>(FName{TEXTVIEW("CameraSkeletalMesh")});
-	CameraSkeletalMesh->SetupAttachment(Camera);
+	CameraSkeletalMesh->SetupAttachment(GetMesh());
+	CameraSkeletalMesh->SetRelativeRotation_Direct({0.0f, 90.0f, 0.0f});
+
+	Camera = CreateDefaultSubobject<UAlsCameraComponent>(FName{TEXTVIEW("Camera")});
+	Camera->SetupAttachment(CameraSkeletalMesh);
 	Camera->SetSkeletalMeshComponent(CameraSkeletalMesh);
 }
 

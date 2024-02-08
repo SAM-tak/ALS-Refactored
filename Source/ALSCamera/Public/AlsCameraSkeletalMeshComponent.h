@@ -31,4 +31,12 @@ public:
 public:
 	UFUNCTION(BlueprintCallable, Category = "ALS|Camera")
 	void SetCameraComponent(UAlsCameraComponent* NewCameraComponent);
+
+	UFUNCTION(BlueprintCallable, Category = "ALS|Camera")
+	UAlsCameraComponent* GetCameraComponent() const;
 };
+
+inline UAlsCameraComponent* UAlsCameraSkeletalMeshComponent::GetCameraComponent() const
+{
+	return Camera.Get();
+}

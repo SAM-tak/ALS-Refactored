@@ -1,5 +1,6 @@
 #include "AlsCameraAnimationInstance.h"
 
+#include "AlsCameraSkeletalMeshComponent.h"
 #include "AlsCameraComponent.h"
 #include "AlsCharacter.h"
 #include "Engine/World.h"
@@ -11,31 +12,14 @@ void UAlsCameraAnimationInstance::NativeInitializeAnimation()
 	Super::NativeInitializeAnimation();
 
 	Character = Cast<AAlsCharacter>(GetOwningActor());
-	Camera = Cast<UAlsCameraComponent>(GetSkelMeshComponent()->GetAttachParent());
-
-#if WITH_EDITOR
-	if (!GetWorld()->IsGameWorld())
-	{
-		// Use default objects for editor preview.
-
-		if (!IsValid(Character))
-		{
-			Character = GetMutableDefault<AAlsCharacter>();
-		}
-
-		if (!IsValid(Camera))
-		{
-			Camera = GetMutableDefault<UAlsCameraComponent>();
-		}
-	}
-#endif
+	Camera = Cast<UAlsCameraSkeletalMeshComponent>(GetSkelMeshComponent())->GetCameraComponent();
 }
 
 void UAlsCameraAnimationInstance::NativeUpdateAnimation(const float DeltaTime)
 {
 	Super::NativeUpdateAnimation(DeltaTime);
 
-	if (!IsValid(Character) || !IsValid(Camera))
+	if (!Character.IsValid() || !Camera.IsValid())
 	{
 		return;
 	}
