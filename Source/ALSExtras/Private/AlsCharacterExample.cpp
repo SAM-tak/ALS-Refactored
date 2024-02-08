@@ -17,6 +17,7 @@ AAlsCharacterExample::AAlsCharacterExample()
 
 	CameraSkeletalMesh = CreateDefaultSubobject<UAlsCameraSkeletalMeshComponent>(FName{TEXTVIEW("CameraSkeletalMesh")});
 	CameraSkeletalMesh->SetupAttachment(Camera);
+	Camera->SetSkeletalMeshComponent(CameraSkeletalMesh);
 }
 
 void AAlsCharacterExample::NotifyControllerChanged()

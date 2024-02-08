@@ -8,9 +8,11 @@ class UAlsCameraSkeletalMeshComponent;
 class UAlsCameraSettings;
 class AAlsCharacter;
 
-UCLASS(HideCategories = (ComponentTick, Physics, Navigation), ClassGroup = Camera)
+UCLASS()
 class ALSCAMERA_API UAlsCameraComponent : public UCameraComponent
 {
+	friend UAlsCameraSkeletalMeshComponent;
+
 	GENERATED_BODY()
 
 protected:
@@ -24,7 +26,7 @@ protected:
 	float ADSCameraShakeScale{0.2f};
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient)
-	TWeakObjectPtr<UAlsCameraSkeletalMeshComponent> CameraSkeletalMesh;
+	TWeakObjectPtr<UAlsCameraSkeletalMeshComponent> SkeletalMesh;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient)
 	TWeakObjectPtr<AAlsCharacter> Character;
@@ -94,17 +96,17 @@ public:
 
 	virtual void OnRegister() override;
 
-	virtual void RegisterComponentTickFunctions(bool bRegister) override;
-
 	virtual void Activate(bool bReset) override;
 
 	virtual void BeginPlay() override;
 
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
+	virtual void SetComponentTickEnabled(bool bEnabled) override;
+
 public:
 	UFUNCTION(BlueprintCallable, Category = "ALS|Camera")
-	void SetCameraSkeletalMesh(UAlsCameraSkeletalMeshComponent* NewSkeletalMesh);
+	void SetSkeletalMeshComponent(UAlsCameraSkeletalMeshComponent* NewSkeletalMeshComponent);
 
 	UFUNCTION(BlueprintPure, Category = "ALS|Camera", meta = (Keywords = "AnimBlueprint", UnsafeDuringActorConstruction = "true"))
 	class UAnimInstance* GetAnimInstance() const;
@@ -132,6 +134,10 @@ public:
 
 	UFUNCTION(BlueprintPure, Category = "ALS|Camera", Meta = (ReturnDisplayName = "Focus Location"))
 	FVector GetCurrentFocusLocation() const;
+
+protected:
+	// call by AlsCameraSkeletalMeshComponent
+	void TickByExtern(float DeltaTime);
 
 private:
 	void TickCamera(float DeltaTime, bool bAllowLag = true);
