@@ -4,10 +4,10 @@
 #include "AlsCharacterExample.generated.h"
 
 struct FInputActionValue;
-class UAlsCameraComponent;
-class UAlsCameraSkeletalMeshComponent;
+class UCameraComponent;
 class UInputMappingContext;
 class UInputAction;
+class UAlsCameraSkeletalMeshComponent;
 
 UCLASS(AutoExpandCategories = ("Settings|Als Character Example", "State|Als Character Example"))
 class ALSEXTRAS_API AAlsCharacterExample : public AAlsCharacter
@@ -16,7 +16,7 @@ class ALSEXTRAS_API AAlsCharacterExample : public AAlsCharacter
 
 protected:
 	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category = "Als Character Example")
-	TObjectPtr<UAlsCameraComponent> Camera;
+	TObjectPtr<UCameraComponent> Camera;
 
 	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category = "Als Character Example")
 	TObjectPtr<UAlsCameraSkeletalMeshComponent> CameraSkeletalMesh;

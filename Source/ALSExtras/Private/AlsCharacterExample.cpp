@@ -1,11 +1,12 @@
 #include "AlsCharacterExample.h"
 
-#include "AlsCameraComponent.h"
 #include "AlsCameraSkeletalMeshComponent.h"
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
 #include "Engine/LocalPlayer.h"
 #include "GameFramework/PlayerController.h"
+#include "Camera/CameraComponent.h"
+#include "Utility/AlsMath.h"
 
 #include UE_INLINE_GENERATED_CPP_BY_NAME(AlsCharacterExample)
 
@@ -15,9 +16,9 @@ AAlsCharacterExample::AAlsCharacterExample()
 	CameraSkeletalMesh->SetupAttachment(GetMesh());
 	CameraSkeletalMesh->SetRelativeRotation_Direct({0.0f, 90.0f, 0.0f});
 
-	Camera = CreateDefaultSubobject<UAlsCameraComponent>(FName{TEXTVIEW("Camera")});
+	Camera = CreateDefaultSubobject<UCameraComponent>(FName{TEXTVIEW("Camera")});
 	Camera->SetupAttachment(CameraSkeletalMesh);
-	Camera->SetSkeletalMeshComponent(CameraSkeletalMesh);
+	CameraSkeletalMesh->SetCameraComponent(Camera);
 }
 
 void AAlsCharacterExample::NotifyControllerChanged()
@@ -199,14 +200,14 @@ void AAlsCharacterExample::Input_OnViewMode()
 // ReSharper disable once CppMemberFunctionMayBeConst
 void AAlsCharacterExample::Input_OnSwitchShoulder()
 {
-	Camera->SetRightShoulder(!Camera->IsRightShoulder());
+	CameraSkeletalMesh->SetRightShoulder(!CameraSkeletalMesh->IsRightShoulder());
 }
 
 void AAlsCharacterExample::DisplayDebug(UCanvas* Canvas, const FDebugDisplayInfo& DisplayInfo, float& Unused, float& VerticalLocation)
 {
-	if (Camera->IsActive())
+	if (CameraSkeletalMesh->IsActive())
 	{
-		Camera->DisplayDebug(Canvas, DisplayInfo, VerticalLocation);
+		CameraSkeletalMesh->DisplayDebug(Canvas, DisplayInfo, VerticalLocation);
 	}
 
 	Super::DisplayDebug(Canvas, DisplayInfo, Unused, VerticalLocation);

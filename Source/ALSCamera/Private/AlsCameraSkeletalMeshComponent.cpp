@@ -40,7 +40,8 @@ void UAlsCameraSkeletalMeshComponent::Activate(const bool bReset)
 {
 	Super::Activate(bReset);
 
-	if(!bReset || !ShouldActivate()) {
+	if (!bReset || !ShouldActivate())
+	{
 		return;
 	}
 
@@ -294,7 +295,7 @@ void UAlsCameraSkeletalMeshComponent::TickCamera(const float DeltaTime, bool bAl
 		Character->SetLookRotation(Character->GetViewRotation());
 		Camera->SetWorldLocationAndRotation(CameraLocation, CameraRotation);
 
-		if(!bFPP)
+		if (!bFPP)
 		{
 			bFPP = true;
 			// call Begin FPP Event
@@ -306,7 +307,7 @@ void UAlsCameraSkeletalMeshComponent::TickCamera(const float DeltaTime, bool bAl
 	// Force disable camera lag if the character was teleported.
 
 	bAllowLag &= Settings->TeleportDistanceThreshold <= 0.0f ||
-		FVector::DistSquared(PreviousPivotTargetLocation, PivotTargetLocation) <= FMath::Square(Settings->TeleportDistanceThreshold);
+				 FVector::DistSquared(PreviousPivotTargetLocation, PivotTargetLocation) <= FMath::Square(Settings->TeleportDistanceThreshold);
 
 	// Calculate camera rotation.
 
@@ -393,7 +394,7 @@ void UAlsCameraSkeletalMeshComponent::TickCamera(const float DeltaTime, bool bAl
 			auto TPPCameraLocation{FVector::PointPlaneProject(CameraResultLocation, PivotLocation, -CameraRotation.Vector())};
 			auto FocalRotation{(FocusLocation - TPPCameraLocation).Rotation()};
 			FocalRotation.Roll = Character->GetViewRotation().Roll;
-			if(Settings->HeuristicPitchMapping && IsValid(Settings->HeuristicPitchMapping))
+			if (Settings->HeuristicPitchMapping && IsValid(Settings->HeuristicPitchMapping))
 			{
 				FocalRotation.Normalize();
 				auto Mapped = FMath::Lerp(-180.0, 180.0, Settings->HeuristicPitchMapping->GetFloatValue((FocalRotation.Pitch + 180.0) / 360.0));
@@ -409,7 +410,7 @@ void UAlsCameraSkeletalMeshComponent::TickCamera(const float DeltaTime, bool bAl
 			}
 #endif
 		}
-		else if(PreviousViewMode == AlsViewModeTags::ThirdPerson)
+		else if (PreviousViewMode == AlsViewModeTags::ThirdPerson)
 		{
 			// TPP -> FPP
 			auto FocalRotation{(FocusLocation - GetEyeCameraLocation()).Rotation()};
