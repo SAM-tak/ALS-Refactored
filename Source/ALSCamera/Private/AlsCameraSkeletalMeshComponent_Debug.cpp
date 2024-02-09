@@ -3,6 +3,7 @@
 
 #include "DisplayDebugHelpers.h"
 #include "Animation/AnimInstance.h"
+#include "Camera/CameraComponent.h"
 #include "Engine/Canvas.h"
 #include "Engine/Engine.h"
 #include "Utility/AlsCameraConstants.h"
@@ -85,7 +86,7 @@ void UAlsCameraSkeletalMeshComponent::DisplayDebug(const UCanvas* Canvas, const 
 }
 
 void UAlsCameraSkeletalMeshComponent::DisplayDebugHeader(const UCanvas* Canvas, const FText& HeaderText, const FLinearColor& HeaderColor,
-                                             const float Scale, const float HorizontalLocation, float& VerticalLocation)
+														 const float Scale, const float HorizontalLocation, float& VerticalLocation)
 {
 	FCanvasTextItem Text{
 		{HorizontalLocation, VerticalLocation},
@@ -103,7 +104,7 @@ void UAlsCameraSkeletalMeshComponent::DisplayDebugHeader(const UCanvas* Canvas, 
 }
 
 void UAlsCameraSkeletalMeshComponent::DisplayDebugCurves(const UCanvas* Canvas, const float Scale,
-                                             const float HorizontalLocation, float& VerticalLocation) const
+														 const float HorizontalLocation, float& VerticalLocation) const
 {
 	VerticalLocation += 4.0f * Scale;
 

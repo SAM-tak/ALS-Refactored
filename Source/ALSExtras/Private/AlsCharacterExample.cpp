@@ -17,6 +17,10 @@ AAlsCharacterExample::AAlsCharacterExample()
 	CameraSkeletalMesh->SetRelativeRotation_Direct({0.0f, 90.0f, 0.0f});
 
 	Camera = CreateDefaultSubobject<UCameraComponent>(FName{TEXTVIEW("Camera")});
+	Camera->PrimaryComponentTick.bStartWithTickEnabled = false;
+	Camera->PrimaryComponentTick.TickGroup = TG_PostPhysics;
+	Camera->bTickInEditor = false;
+	Camera->bHiddenInGame = true;
 	Camera->SetupAttachment(CameraSkeletalMesh);
 	CameraSkeletalMesh->SetCameraComponent(Camera);
 }
