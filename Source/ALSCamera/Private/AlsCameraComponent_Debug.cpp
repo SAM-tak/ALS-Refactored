@@ -1,4 +1,4 @@
-#include "AlsCameraComponent.h"
+#include "AlsCameraSkeletalMeshComponent.h"
 #include "AlsCharacter.h"
 
 #include "DisplayDebugHelpers.h"
@@ -6,11 +6,12 @@
 #include "Engine/Canvas.h"
 #include "Engine/Engine.h"
 #include "Utility/AlsCameraConstants.h"
+#include "Utility/AlsMath.h"
 #include "Utility/AlsUtility.h"
 
-#define LOCTEXT_NAMESPACE "AlsCameraComponentDebug"
+#define LOCTEXT_NAMESPACE "AlsCameraSkeletalMeshComponentDebug"
 
-void UAlsCameraComponent::DisplayDebug(const UCanvas* Canvas, const FDebugDisplayInfo& DisplayInfo, float& VerticalLocation) const
+void UAlsCameraSkeletalMeshComponent::DisplayDebug(const UCanvas* Canvas, const FDebugDisplayInfo& DisplayInfo, float& VerticalLocation) const
 {
 	const auto Scale{FMath::Min(Canvas->SizeX / (1280.0f * Canvas->GetDPIScale()), Canvas->SizeY / (720.0f * Canvas->GetDPIScale()))};
 
@@ -83,7 +84,7 @@ void UAlsCameraComponent::DisplayDebug(const UCanvas* Canvas, const FDebugDispla
 	VerticalLocation = MaxVerticalLocation;
 }
 
-void UAlsCameraComponent::DisplayDebugHeader(const UCanvas* Canvas, const FText& HeaderText, const FLinearColor& HeaderColor,
+void UAlsCameraSkeletalMeshComponent::DisplayDebugHeader(const UCanvas* Canvas, const FText& HeaderText, const FLinearColor& HeaderColor,
                                              const float Scale, const float HorizontalLocation, float& VerticalLocation)
 {
 	FCanvasTextItem Text{
@@ -101,7 +102,7 @@ void UAlsCameraComponent::DisplayDebugHeader(const UCanvas* Canvas, const FText&
 	VerticalLocation += 15.0f * Scale;
 }
 
-void UAlsCameraComponent::DisplayDebugCurves(const UCanvas* Canvas, const float Scale,
+void UAlsCameraSkeletalMeshComponent::DisplayDebugCurves(const UCanvas* Canvas, const float Scale,
                                              const float HorizontalLocation, float& VerticalLocation) const
 {
 	VerticalLocation += 4.0f * Scale;
@@ -146,8 +147,8 @@ void UAlsCameraComponent::DisplayDebugCurves(const UCanvas* Canvas, const float 
 	}
 }
 
-void UAlsCameraComponent::DisplayDebugShapes(const UCanvas* Canvas, const float Scale,
-                                             const float HorizontalLocation, float& VerticalLocation) const
+void UAlsCameraSkeletalMeshComponent::DisplayDebugShapes(const UCanvas* Canvas, const float Scale,
+														 const float HorizontalLocation, float& VerticalLocation) const
 {
 	VerticalLocation += 4.0f * Scale;
 
@@ -239,7 +240,7 @@ void UAlsCameraComponent::DisplayDebugShapes(const UCanvas* Canvas, const float 
 	VerticalLocation += RowOffset;
 
 	static const auto CameraFovText{
-		FText::AsCultureInvariant(FName::NameToDisplayString(GET_MEMBER_NAME_STRING_CHECKED(ThisClass, FieldOfView), false))
+		FText::AsCultureInvariant(FName::NameToDisplayString(GET_MEMBER_NAME_STRING_CHECKED(ThisClass, Camera->FieldOfView), false))
 	};
 
 	Color = FLinearColor::White;
@@ -248,7 +249,7 @@ void UAlsCameraComponent::DisplayDebugShapes(const UCanvas* Canvas, const float 
 	Text.Text = CameraFovText;
 	Text.Draw(Canvas->Canvas, {HorizontalLocation, VerticalLocation});
 
-	DebugStringBuilder.Appendf(TEXT("%.2f"), FieldOfView);
+	DebugStringBuilder.Appendf(TEXT("%.2f"), Camera->FieldOfView);
 
 	Text.Text = FText::AsCultureInvariant(FString{DebugStringBuilder});
 	Text.Draw(Canvas->Canvas, {HorizontalLocation + ColumnOffset, VerticalLocation});
@@ -270,8 +271,8 @@ void UAlsCameraComponent::DisplayDebugShapes(const UCanvas* Canvas, const float 
 	VerticalLocation += RowOffset;
 }
 
-void UAlsCameraComponent::DisplayDebugTraces(const UCanvas* Canvas, const float Scale,
-                                             const float HorizontalLocation, float& VerticalLocation) const
+void UAlsCameraSkeletalMeshComponent::DisplayDebugTraces(const UCanvas* Canvas, const float Scale,
+														 const float HorizontalLocation, float& VerticalLocation) const
 {
 	VerticalLocation += 4.0f * Scale;
 

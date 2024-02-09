@@ -1,18 +1,18 @@
 #pragma once
 
-#include "Camera/CameraComponent.h"
-#include "Utility/AlsMath.h"
-#include "AlsCameraComponent.generated.h"
+#include "Components/SkeletalMeshComponent.h"
+#include "AlsCameraSkeletalMeshComponent.generated.h"
 
-class UAlsCameraSkeletalMeshComponent;
+class UCameraComponent;
 class UAlsCameraSettings;
 class AAlsCharacter;
 
-UCLASS()
-class ALSCAMERA_API UAlsCameraComponent : public UCameraComponent
+UCLASS(HideCategories = (Clothing, Physics, MasterPoseComponent, Collision, AnimationRig, Lighting, Deformer,
+						 Rendering, PathTracing, HLOD, Navigation, VirtualTexture, Materials, LeaderPoseComponent,
+						 Optimization, LOD, MaterialParameters, TextureStreaming, Mobile, RayTracing),
+	   ClassGroup = Camera)
+class ALSCAMERA_API UAlsCameraSkeletalMeshComponent : public USkeletalMeshComponent
 {
-	friend UAlsCameraSkeletalMeshComponent;
-
 	GENERATED_BODY()
 
 protected:
@@ -26,7 +26,7 @@ protected:
 	float ADSCameraShakeScale{0.2f};
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient)
-	TWeakObjectPtr<UAlsCameraSkeletalMeshComponent> SkeletalMesh;
+	TWeakObjectPtr<UCameraComponent> Camera;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient)
 	TWeakObjectPtr<AAlsCharacter> Character;
@@ -92,7 +92,7 @@ protected:
 	TObjectPtr<UCameraShakeBase> CurrentADSCameraShake;
 
 public:
-	UAlsCameraComponent();
+	UAlsCameraSkeletalMeshComponent();
 
 	virtual void OnRegister() override;
 
@@ -100,16 +100,18 @@ public:
 
 	virtual void BeginPlay() override;
 
+	virtual void RegisterComponentTickFunctions(bool bRegister) override;
+
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
-	virtual void SetComponentTickEnabled(bool bEnabled) override;
+	virtual void CompleteParallelAnimationEvaluation(const bool bDoPostAnimationEvaluation) override;
 
 public:
 	UFUNCTION(BlueprintCallable, Category = "ALS|Camera")
-	void SetSkeletalMeshComponent(UAlsCameraSkeletalMeshComponent* NewSkeletalMeshComponent);
+	void SetCameraComponent(UCameraComponent* NewCameraComponent);
 
-	UFUNCTION(BlueprintPure, Category = "ALS|Camera", meta = (Keywords = "AnimBlueprint", UnsafeDuringActorConstruction = "true"))
-	class UAnimInstance* GetAnimInstance() const;
+	UFUNCTION(BlueprintCallable, Category = "ALS|Camera")
+	UCameraComponent* GetCameraComponent() const;
 
 	UFUNCTION(BlueprintPure, Category = "ALS|Camera")
 	bool IsRightShoulder() const;
@@ -134,10 +136,6 @@ public:
 
 	UFUNCTION(BlueprintPure, Category = "ALS|Camera", Meta = (ReturnDisplayName = "Focus Location"))
 	FVector GetCurrentFocusLocation() const;
-
-protected:
-	// call by AlsCameraSkeletalMeshComponent
-	void TickByExtern(float DeltaTime);
 
 private:
 	void TickCamera(float DeltaTime, bool bAllowLag = true);
@@ -171,7 +169,7 @@ public:
 
 private:
 	static void DisplayDebugHeader(const UCanvas* Canvas, const FText& HeaderText, const FLinearColor& HeaderColor,
-	                               float Scale, float HorizontalLocation, float& VerticalLocation);
+		float Scale, float HorizontalLocation, float& VerticalLocation);
 
 	void DisplayDebugCurves(const UCanvas* Canvas, float Scale, float HorizontalLocation, float& VerticalLocation) const;
 
@@ -180,17 +178,22 @@ private:
 	void DisplayDebugTraces(const UCanvas* Canvas, float Scale, float HorizontalLocation, float& VerticalLocation) const;
 };
 
-inline bool UAlsCameraComponent::IsRightShoulder() const
+inline bool UAlsCameraSkeletalMeshComponent::IsRightShoulder() const
 {
 	return bRightShoulder;
 }
 
-inline void UAlsCameraComponent::SetRightShoulder(const bool bNewRightShoulder)
+inline void UAlsCameraSkeletalMeshComponent::SetRightShoulder(const bool bNewRightShoulder)
 {
 	bRightShoulder = bNewRightShoulder;
 }
 
-inline FVector UAlsCameraComponent::GetCurrentFocusLocation() const
+inline FVector UAlsCameraSkeletalMeshComponent::GetCurrentFocusLocation() const
 {
 	return CameraLocation + CameraRotation.Vector() * FocalLength;
+}
+
+inline UCameraComponent* UAlsCameraSkeletalMeshComponent::GetCameraComponent() const
+{
+	return Camera.Get();
 }
