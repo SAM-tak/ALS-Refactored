@@ -19,6 +19,7 @@ AAlsCharacterExample::AAlsCharacterExample()
 	Camera = CreateDefaultSubobject<UCameraComponent>(FName{TEXTVIEW("Camera")});
 	Camera->PrimaryComponentTick.bStartWithTickEnabled = false;
 	Camera->PrimaryComponentTick.TickGroup = TG_PostPhysics;
+	Camera->bAutoActivate = false;
 	Camera->bTickInEditor = false;
 	Camera->bHiddenInGame = true;
 	Camera->SetupAttachment(CameraSkeletalMesh);
@@ -52,6 +53,12 @@ void AAlsCharacterExample::NotifyControllerChanged()
 
 			InputSubsystem->AddMappingContext(InputMappingContext, 0, Options);
 		}
+
+		CameraSkeletalMesh->Activate(true);
+	}
+	else
+	{
+		CameraSkeletalMesh->Deactivate();
 	}
 
 	Super::NotifyControllerChanged();

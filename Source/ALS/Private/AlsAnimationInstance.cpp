@@ -20,7 +20,7 @@ void UAlsAnimationInstance::NativeInitializeAnimation()
 	Character = Cast<AAlsCharacter>(GetOwningActor());
 
 #if WITH_EDITOR
-	if (!GetWorld()->IsGameWorld() && !IsValid(Character))
+	if (!GetWorld()->IsGameWorld() && !Character.IsValid())
 	{
 		// Use default objects for editor preview.
 
@@ -34,7 +34,7 @@ void UAlsAnimationInstance::NativeBeginPlay()
 	Super::NativeBeginPlay();
 
 	ALS_ENSURE(IsValid(Settings));
-	ALS_ENSURE(IsValid(Character));
+	ALS_ENSURE(Character.IsValid());
 }
 
 void UAlsAnimationInstance::NativeUpdateAnimation(const float DeltaTime)
@@ -44,7 +44,7 @@ void UAlsAnimationInstance::NativeUpdateAnimation(const float DeltaTime)
 
 	Super::NativeUpdateAnimation(DeltaTime);
 
-	if (!IsValid(Settings) || !IsValid(Character))
+	if (!IsValid(Settings) || !Character.IsValid())
 	{
 		return;
 	}
@@ -69,7 +69,7 @@ void UAlsAnimationInstance::NativeUpdateAnimation(const float DeltaTime)
 	}
 
 #if WITH_EDITORONLY_DATA && ENABLE_DRAW_DEBUG
-	bDisplayDebugTraces = UAlsUtility::ShouldDisplayDebugForActor(Character, UAlsConstants::TracesDebugDisplayName());
+	bDisplayDebugTraces = UAlsUtility::ShouldDisplayDebugForActor(Character.Get(), UAlsConstants::TracesDebugDisplayName());
 #endif
 
 	ViewMode = Character->GetViewMode();
@@ -110,7 +110,7 @@ void UAlsAnimationInstance::NativeThreadSafeUpdateAnimation(const float DeltaTim
 
 	Super::NativeThreadSafeUpdateAnimation(DeltaTime);
 
-	if (!IsValid(Settings) || !IsValid(Character))
+	if (!IsValid(Settings) || !Character.IsValid())
 	{
 		return;
 	}
@@ -137,7 +137,7 @@ void UAlsAnimationInstance::NativePostUpdateAnimation()
 	DECLARE_SCOPE_CYCLE_COUNTER(TEXT("UAlsAnimationInstance::NativePostUpdateAnimation()"),
 	                            STAT_UAlsAnimationInstance_NativePostUpdateAnimation, STATGROUP_Als)
 
-	if (!IsValid(Settings) || !IsValid(Character))
+	if (!IsValid(Settings) || !Character.IsValid())
 	{
 		return;
 	}
@@ -829,7 +829,7 @@ void UAlsAnimationInstance::RefreshGroundPredictionAmount()
 	GetWorld()->SweepSingleByChannel(Hit, SweepStartLocation, SweepStartLocation + SweepVector,
 	                                 FQuat::Identity, Settings->InAir.GroundPredictionSweepChannel,
 	                                 FCollisionShape::MakeCapsule(LocomotionState.CapsuleRadius, LocomotionState.CapsuleHalfHeight),
-	                                 {__FUNCTION__, false, Character}, Settings->InAir.GroundPredictionSweepResponses);
+	                                 {__FUNCTION__, false, Character.Get()}, Settings->InAir.GroundPredictionSweepResponses);
 
 	const auto bGroundValid{Hit.IsValidBlockingHit() && Hit.ImpactNormal.Z >= LocomotionState.WalkableFloorZ};
 
@@ -1194,7 +1194,7 @@ void UAlsAnimationInstance::RefreshFootOffset(FAlsFootState& FootState, const fl
 											TraceLocation - FVector{
 												0.0f, 0.0f, Settings->Feet.IkTraceDistanceDownward * LocomotionState.Scale
 											},
-											Settings->Feet.IkTraceChannel, {__FUNCTION__, true, Character},
+											Settings->Feet.IkTraceChannel, {__FUNCTION__, true, Character.Get()},
 											FCollisionResponseParams::DefaultResponseParam, &TraceDelegate);
 		Hit = FootState.Hit;
 	}
@@ -1207,7 +1207,7 @@ void UAlsAnimationInstance::RefreshFootOffset(FAlsFootState& FootState, const fl
 											 TraceLocation - FVector{
 												 0.0f, 0.0f, Settings->Feet.IkTraceDistanceDownward * LocomotionState.Scale
 											 },
-											 Settings->Feet.IkTraceChannel, {__FUNCTION__, true, Character});
+											 Settings->Feet.IkTraceChannel, {__FUNCTION__, true, Character.Get()});
 	}
 	const auto bGroundValid{Hit.IsValidBlockingHit() && Hit.ImpactNormal.Z >= LocomotionState.WalkableFloorZ};
 

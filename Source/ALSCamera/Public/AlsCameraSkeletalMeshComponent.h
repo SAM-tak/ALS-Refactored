@@ -49,8 +49,8 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient)
 	FRotator CameraRotation;
 
-	UPROPERTY(BlueprintReadOnly, Category = "State", Transient)
-	TObjectPtr<UPrimitiveComponent> MovementBasePrimitive;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient)
+	TWeakObjectPtr<UPrimitiveComponent> MovementBasePrimitive;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient)
 	FName MovementBaseBoneName;
@@ -96,7 +96,9 @@ public:
 
 	virtual void OnRegister() override;
 
-	virtual void Activate(bool bReset) override;
+	virtual void Activate(bool bReset = false) override;
+
+	virtual void Deactivate() override;
 
 	virtual void BeginPlay() override;
 

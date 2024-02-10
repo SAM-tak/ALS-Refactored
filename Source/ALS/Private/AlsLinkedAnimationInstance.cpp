@@ -29,7 +29,7 @@ void UAlsLinkedAnimationInstance::NativeInitializeAnimation()
 			Parent = GetMutableDefault<UAlsAnimationInstance>();
 		}
 
-		if (!IsValid(Character))
+		if (!Character.IsValid())
 		{
 			Character = GetMutableDefault<AAlsCharacter>();
 		}

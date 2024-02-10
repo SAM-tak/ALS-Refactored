@@ -16,10 +16,10 @@ class ALSEXTRAS_API AAlsCharacterExample : public AAlsCharacter
 
 protected:
 	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category = "Als Character Example")
-	TObjectPtr<UCameraComponent> Camera;
+	TObjectPtr<UAlsCameraSkeletalMeshComponent> CameraSkeletalMesh;
 
 	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category = "Als Character Example")
-	TObjectPtr<UAlsCameraSkeletalMeshComponent> CameraSkeletalMesh;
+	TObjectPtr<UCameraComponent> Camera;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings|Als Character Example", Meta = (DisplayThumbnail = false))
 	TObjectPtr<UInputMappingContext> InputMappingContext;

@@ -20,6 +20,7 @@ UAlsCameraSkeletalMeshComponent::UAlsCameraSkeletalMeshComponent()
 	PrimaryComponentTick.bStartWithTickEnabled = false;
 	PrimaryComponentTick.TickGroup = TG_PostPhysics;
 
+	bAutoActivate = false;
 	bTickInEditor = false;
 	bHiddenInGame = true;
 
@@ -40,12 +41,25 @@ void UAlsCameraSkeletalMeshComponent::Activate(const bool bReset)
 {
 	Super::Activate(bReset);
 
-	if (!bReset || !ShouldActivate())
+	SetComponentTickEnabled(true);
+
+	Camera->Activate();
+	Camera->SetComponentTickEnabled(true);
+
+	if (!bReset && !ShouldActivate())
 	{
 		return;
 	}
 
 	TickCamera(0.0f, false);
+}
+
+void UAlsCameraSkeletalMeshComponent::Deactivate()
+{
+	SetComponentTickEnabled(false);
+	Camera->SetComponentTickEnabled(false);
+	Camera->Deactivate();
+	Super::Deactivate();
 }
 
 void UAlsCameraSkeletalMeshComponent::RegisterComponentTickFunctions(const bool bRegister)

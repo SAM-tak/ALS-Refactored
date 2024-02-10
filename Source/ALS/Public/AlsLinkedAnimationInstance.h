@@ -15,7 +15,7 @@ protected:
 	TWeakObjectPtr<UAlsAnimationInstance> Parent;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient)
-	TObjectPtr<AAlsCharacter> Character;
+	TWeakObjectPtr<AAlsCharacter> Character;
 
 public:
 	UAlsLinkedAnimationInstance();
