@@ -9,8 +9,7 @@ class AAlsCharacter;
 
 UCLASS(HideCategories = (Clothing, Physics, MasterPoseComponent, Collision, AnimationRig, Lighting, Deformer,
 						 Rendering, PathTracing, HLOD, Navigation, VirtualTexture, Materials, LeaderPoseComponent,
-						 Optimization, LOD, MaterialParameters, TextureStreaming, Mobile, RayTracing),
-	   ClassGroup = Camera)
+						 Optimization, LOD, MaterialParameters, TextureStreaming, Mobile, RayTracing))
 class ALSCAMERA_API UAlsCameraSkeletalMeshComponent : public USkeletalMeshComponent
 {
 	GENERATED_BODY()
@@ -24,9 +23,6 @@ protected:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Settings", Meta = (ClampMin = 0, ClampMax = 1))
 	float ADSCameraShakeScale{0.2f};
-
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient)
-	TWeakObjectPtr<UCameraComponent> Camera;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient)
 	TWeakObjectPtr<AAlsCharacter> Character;
@@ -160,6 +156,9 @@ private:
 
 	void UpdateADSCameraShake(float FirstPersonOverride, float AimingAmount);
 
+	// Cache
+	UCameraComponent* Camera{nullptr};
+
 	// Overlap
 
 	mutable TArray<FOverlapResult> Overlaps;
@@ -197,5 +196,5 @@ inline FVector UAlsCameraSkeletalMeshComponent::GetCurrentFocusLocation() const
 
 inline UCameraComponent* UAlsCameraSkeletalMeshComponent::GetCameraComponent() const
 {
-	return Camera.Get();
+	return Camera;
 }
