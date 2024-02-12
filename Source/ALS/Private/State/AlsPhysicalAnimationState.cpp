@@ -100,7 +100,7 @@ bool FAlsPhysicalAnimationState::HasAnyProfile(const USkeletalBodySetup* BodySet
 
 bool FAlsPhysicalAnimationState::NeedsProfielChange(const FGameplayTag& NewLocomotionMode, const FGameplayTag& NewLocomotionAction,
 													const FGameplayTag& NewStance, const FGameplayTag& NewGait,
-													const FGameplayTag& NewOverlayMode, const TArray<FName>& NewMultiplyProfileNames)
+													const FGameplayTag& NewOverlayMode, const TArray<FName>& NewOverrideMultiplyProfileNames)
 {
 	bool RetVal = false;
 	if (LocomotionAction != NewLocomotionAction)
@@ -128,9 +128,9 @@ bool FAlsPhysicalAnimationState::NeedsProfielChange(const FGameplayTag& NewLocom
 	Stance = NewStance;
 	Gait = NewGait;
 	OverlayMode = NewOverlayMode;
-	if (MultiplyProfileNames != NewMultiplyProfileNames)
+	if (OverrideMultiplyProfileNames != NewOverrideMultiplyProfileNames)
 	{
-		MultiplyProfileNames = NewMultiplyProfileNames;
+		OverrideMultiplyProfileNames = NewOverrideMultiplyProfileNames;
 		RetVal = true;
 	}
 	return RetVal;

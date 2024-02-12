@@ -98,6 +98,7 @@ void AAlsCharacter::RefreshPhysicalAnimation(float DeltaTime)
 	else if(PhysicalAnimationState.NeedsProfielChange(LocomotionAction, LocomotionMode, Stance, Gait, OverlayMode, MultiplyPAProfileNames))
 	{
 		TArray<FName> CurrentProfileNames;
+		TArray<FName> CurrentMultiplyProfileNames;
 
 		auto ActionName = UAlsUtility::GetSimpleTagName(LocomotionAction);
 		auto ModeName = UAlsUtility::GetSimpleTagName(LocomotionMode);
@@ -460,31 +461,16 @@ void AAlsCharacter::RefreshPhysicalAnimation(float DeltaTime)
 			}
 		}
 
-		if (PhysicalAnimationState.ProfileNames != CurrentProfileNames)
-		{
-			bool first = true;
-			for (const auto& CurrentProfileName : CurrentProfileNames)
-			{
-				PhysicalAnimation->ApplyPhysicalAnimationProfileBelow(NAME_None, CurrentProfileName);
-				GetMesh()->SetConstraintProfileForAll(CurrentProfileName, first);
-				first = false;
-			}
-			PhysicalAnimation->Activate();
-			PhysicalAnimationState.ProfileNames = CurrentProfileNames;
-		}
-
 		if (CurrentProfileNames.Num() > 0)
 		{
 			// Process multiply profiles if exists.
-
-			TArray<FName> MultiplyProfileNames;
 
 			if (ActionName != NAME_None && ModeName != NAME_None && StanceName != NAME_None && GaitName != NAME_None && OverlayModeName != NAME_None)
 			{
 				auto ProfileName = FName{FString::Printf(TEXT("*%s:%s:%s:%s:%s"), *ActionNameStr, *ModeNameStr, *StanceNameStr, *GaitNameStr, *OverlayModeNameStr)};
 				if (IsProfileExist(GetMesh(), ProfileName))
 				{
-					MultiplyProfileNames.Add(ProfileName);
+					CurrentMultiplyProfileNames.Add(ProfileName);
 				}
 			}
 			if (ActionName != NAME_None && StanceName != NAME_None && GaitName != NAME_None && OverlayModeName != NAME_None)
@@ -492,7 +478,7 @@ void AAlsCharacter::RefreshPhysicalAnimation(float DeltaTime)
 				auto ProfileName = FName{FString::Printf(TEXT("*%s:%s:%s:%s"), *ActionNameStr, *StanceNameStr, *GaitNameStr, *OverlayModeNameStr)};
 				if (IsProfileExist(GetMesh(), ProfileName))
 				{
-					MultiplyProfileNames.Add(ProfileName);
+					CurrentMultiplyProfileNames.Add(ProfileName);
 				}
 			}
 			if (LocomotionAction != AlsLocomotionActionTags::Ragdolling && ModeName != NAME_None && StanceName != NAME_None && GaitName != NAME_None && OverlayModeName != NAME_None)
@@ -500,7 +486,7 @@ void AAlsCharacter::RefreshPhysicalAnimation(float DeltaTime)
 				auto ProfileName = FName{FString::Printf(TEXT("*%s:%s:%s:%s"), *ModeNameStr, *StanceNameStr, *GaitNameStr, *OverlayModeNameStr)};
 				if (IsProfileExist(GetMesh(), ProfileName))
 				{
-					MultiplyProfileNames.Add(ProfileName);
+					CurrentMultiplyProfileNames.Add(ProfileName);
 				}
 			}
 			if (ActionName != NAME_None && StanceName != NAME_None && GaitName != NAME_None)
@@ -508,7 +494,7 @@ void AAlsCharacter::RefreshPhysicalAnimation(float DeltaTime)
 				auto ProfileName = FName{FString::Printf(TEXT("*%s:%s:%s"), *ModeNameStr, *StanceNameStr, *GaitNameStr)};
 				if (IsProfileExist(GetMesh(), ProfileName))
 				{
-					MultiplyProfileNames.Add(ProfileName);
+					CurrentMultiplyProfileNames.Add(ProfileName);
 				}
 			}
 			if (ActionName != NAME_None && StanceName != NAME_None && OverlayModeName != NAME_None)
@@ -516,7 +502,7 @@ void AAlsCharacter::RefreshPhysicalAnimation(float DeltaTime)
 				auto ProfileName = FName{FString::Printf(TEXT("*%s:%s:%s"), *ActionNameStr, *StanceNameStr, *OverlayModeNameStr)};
 				if (IsProfileExist(GetMesh(), ProfileName))
 				{
-					MultiplyProfileNames.Add(ProfileName);
+					CurrentMultiplyProfileNames.Add(ProfileName);
 				}
 			}
 			if (ActionName != NAME_None && GaitName != NAME_None && OverlayModeName != NAME_None)
@@ -524,7 +510,7 @@ void AAlsCharacter::RefreshPhysicalAnimation(float DeltaTime)
 				auto ProfileName = FName{FString::Printf(TEXT("*%s:%s:%s"), *ActionNameStr, *GaitNameStr, *OverlayModeNameStr)};
 				if (IsProfileExist(GetMesh(), ProfileName))
 				{
-					MultiplyProfileNames.Add(ProfileName);
+					CurrentMultiplyProfileNames.Add(ProfileName);
 				}
 			}
 			if (LocomotionAction != AlsLocomotionActionTags::Ragdolling && ModeName != NAME_None && StanceName != NAME_None && GaitName != NAME_None)
@@ -532,7 +518,7 @@ void AAlsCharacter::RefreshPhysicalAnimation(float DeltaTime)
 				auto ProfileName = FName{FString::Printf(TEXT("*%s:%s:%s"), *ModeNameStr, *StanceNameStr, *GaitNameStr)};
 				if (IsProfileExist(GetMesh(), ProfileName))
 				{
-					MultiplyProfileNames.Add(ProfileName);
+					CurrentMultiplyProfileNames.Add(ProfileName);
 				}
 			}
 			if (LocomotionAction != AlsLocomotionActionTags::Ragdolling && ModeName != NAME_None && StanceName != NAME_None && OverlayModeName != NAME_None)
@@ -540,7 +526,7 @@ void AAlsCharacter::RefreshPhysicalAnimation(float DeltaTime)
 				auto ProfileName = FName{FString::Printf(TEXT("*%s:%s:%s"), *ModeNameStr, *StanceNameStr, *OverlayModeNameStr)};
 				if (IsProfileExist(GetMesh(), ProfileName))
 				{
-					MultiplyProfileNames.Add(ProfileName);
+					CurrentMultiplyProfileNames.Add(ProfileName);
 				}
 			}
 			if (LocomotionAction != AlsLocomotionActionTags::Ragdolling && ModeName != NAME_None && GaitName != NAME_None && OverlayModeName != NAME_None)
@@ -548,7 +534,7 @@ void AAlsCharacter::RefreshPhysicalAnimation(float DeltaTime)
 				auto ProfileName = FName{FString::Printf(TEXT("*%s:%s:%s"), *ModeNameStr, *GaitNameStr, *OverlayModeNameStr)};
 				if (IsProfileExist(GetMesh(), ProfileName))
 				{
-					MultiplyProfileNames.Add(ProfileName);
+					CurrentMultiplyProfileNames.Add(ProfileName);
 				}
 			}
 			if (ActionName != NAME_None && StanceName != NAME_None)
@@ -556,7 +542,7 @@ void AAlsCharacter::RefreshPhysicalAnimation(float DeltaTime)
 				auto ProfileName = FName{FString::Printf(TEXT("*%s:%s"), *ActionNameStr, *StanceNameStr)};
 				if (IsProfileExist(GetMesh(), ProfileName))
 				{
-					MultiplyProfileNames.Add(ProfileName);
+					CurrentMultiplyProfileNames.Add(ProfileName);
 				}
 			}
 			if (ActionName != NAME_None && GaitName != NAME_None)
@@ -564,7 +550,7 @@ void AAlsCharacter::RefreshPhysicalAnimation(float DeltaTime)
 				auto ProfileName = FName{FString::Printf(TEXT("*%s:%s"), *ActionNameStr, *GaitNameStr)};
 				if (IsProfileExist(GetMesh(), ProfileName))
 				{
-					MultiplyProfileNames.Add(ProfileName);
+					CurrentMultiplyProfileNames.Add(ProfileName);
 				}
 			}
 			if (ActionName != NAME_None && OverlayModeName != NAME_None)
@@ -572,7 +558,7 @@ void AAlsCharacter::RefreshPhysicalAnimation(float DeltaTime)
 				auto ProfileName = FName{FString::Printf(TEXT("*%s:%s"), *ActionNameStr, *OverlayModeNameStr)};
 				if (IsProfileExist(GetMesh(), ProfileName))
 				{
-					MultiplyProfileNames.Add(ProfileName);
+					CurrentMultiplyProfileNames.Add(ProfileName);
 				}
 			}
 			if (LocomotionAction != AlsLocomotionActionTags::Ragdolling && ModeName != NAME_None && StanceName != NAME_None)
@@ -580,7 +566,7 @@ void AAlsCharacter::RefreshPhysicalAnimation(float DeltaTime)
 				auto ProfileName = FName{FString::Printf(TEXT("*%s:%s"), *ModeNameStr, *StanceNameStr)};
 				if (IsProfileExist(GetMesh(), ProfileName))
 				{
-					MultiplyProfileNames.Add(ProfileName);
+					CurrentMultiplyProfileNames.Add(ProfileName);
 				}
 			}
 			if (LocomotionAction != AlsLocomotionActionTags::Ragdolling && ModeName != NAME_None && GaitName != NAME_None)
@@ -588,7 +574,7 @@ void AAlsCharacter::RefreshPhysicalAnimation(float DeltaTime)
 				auto ProfileName = FName{FString::Printf(TEXT("*%s:%s"), *ModeNameStr, *GaitNameStr)};
 				if (IsProfileExist(GetMesh(), ProfileName))
 				{
-					MultiplyProfileNames.Add(ProfileName);
+					CurrentMultiplyProfileNames.Add(ProfileName);
 				}
 			}
 			if (LocomotionAction != AlsLocomotionActionTags::Ragdolling && ModeName != NAME_None && OverlayModeName != NAME_None)
@@ -596,7 +582,7 @@ void AAlsCharacter::RefreshPhysicalAnimation(float DeltaTime)
 				auto ProfileName = FName{FString::Printf(TEXT("*%s:%s"), *ModeNameStr, *OverlayModeNameStr)};
 				if (IsProfileExist(GetMesh(), ProfileName))
 				{
-					MultiplyProfileNames.Add(ProfileName);
+					CurrentMultiplyProfileNames.Add(ProfileName);
 				}
 			}
 			if (LocomotionAction != AlsLocomotionActionTags::Ragdolling && StanceName != NAME_None && OverlayModeName != NAME_None)
@@ -604,7 +590,7 @@ void AAlsCharacter::RefreshPhysicalAnimation(float DeltaTime)
 				auto ProfileName = FName{FString::Printf(TEXT("*%s:%s"), *StanceNameStr, *OverlayModeNameStr)};
 				if (IsProfileExist(GetMesh(), ProfileName))
 				{
-					MultiplyProfileNames.Add(ProfileName);
+					CurrentMultiplyProfileNames.Add(ProfileName);
 				}
 			}
 			if (LocomotionAction != AlsLocomotionActionTags::Ragdolling && GaitName != NAME_None && OverlayModeName != NAME_None)
@@ -612,7 +598,7 @@ void AAlsCharacter::RefreshPhysicalAnimation(float DeltaTime)
 				auto ProfileName = FName{FString::Printf(TEXT("*%s:%s"), *GaitNameStr, *OverlayModeNameStr)};
 				if (IsProfileExist(GetMesh(), ProfileName))
 				{
-					MultiplyProfileNames.Add(ProfileName);
+					CurrentMultiplyProfileNames.Add(ProfileName);
 				}
 			}
 			if (ActionName != NAME_None)
@@ -620,7 +606,7 @@ void AAlsCharacter::RefreshPhysicalAnimation(float DeltaTime)
 				auto ProfileName = FName{FString::Printf(TEXT("*%s"), *ActionNameStr)};
 				if (IsProfileExist(GetMesh(), ProfileName))
 				{
-					MultiplyProfileNames.Add(ProfileName);
+					CurrentMultiplyProfileNames.Add(ProfileName);
 				}
 			}
 			if (LocomotionAction != AlsLocomotionActionTags::Ragdolling && ModeName != NAME_None)
@@ -628,7 +614,7 @@ void AAlsCharacter::RefreshPhysicalAnimation(float DeltaTime)
 				auto ProfileName = FName{FString::Printf(TEXT("*%s"), *ModeNameStr)};
 				if (IsProfileExist(GetMesh(), ProfileName))
 				{
-					MultiplyProfileNames.Add(ProfileName);
+					CurrentMultiplyProfileNames.Add(ProfileName);
 				}
 			}
 			if (LocomotionAction != AlsLocomotionActionTags::Ragdolling && StanceName != NAME_None)
@@ -636,7 +622,7 @@ void AAlsCharacter::RefreshPhysicalAnimation(float DeltaTime)
 				auto ProfileName = FName{FString::Printf(TEXT("*%s"), *StanceNameStr)};
 				if (IsProfileExist(GetMesh(), ProfileName))
 				{
-					MultiplyProfileNames.Add(ProfileName);
+					CurrentMultiplyProfileNames.Add(ProfileName);
 				}
 			}
 			if (LocomotionAction != AlsLocomotionActionTags::Ragdolling && GaitName != NAME_None)
@@ -644,7 +630,7 @@ void AAlsCharacter::RefreshPhysicalAnimation(float DeltaTime)
 				auto ProfileName = FName{FString::Printf(TEXT("*%s"), *GaitNameStr)};
 				if (IsProfileExist(GetMesh(), ProfileName))
 				{
-					MultiplyProfileNames.Add(ProfileName);
+					CurrentMultiplyProfileNames.Add(ProfileName);
 				}
 			}
 			if (LocomotionAction != AlsLocomotionActionTags::Ragdolling && OverlayModeName != NAME_None)
@@ -652,17 +638,31 @@ void AAlsCharacter::RefreshPhysicalAnimation(float DeltaTime)
 				auto ProfileName = FName{FString::Printf(TEXT("*%s"), *OverlayModeNameStr)};
 				if (IsProfileExist(GetMesh(), ProfileName))
 				{
-					MultiplyProfileNames.Add(ProfileName);
+					CurrentMultiplyProfileNames.Add(ProfileName);
 				}
 			}
 
-			MultiplyProfileNames.Append(MultiplyPAProfileNames);
+			CurrentMultiplyProfileNames.Append(MultiplyPAProfileNames);
+		}
 
-			for (const auto& MultiplyProfileName : MultiplyProfileNames)
+		if (PhysicalAnimationState.ProfileNames != CurrentProfileNames || PhysicalAnimationState.MultiplyProfileNames != CurrentMultiplyProfileNames)
+		{
+			bool First = true;
+			for (const auto& CurrentProfileName : CurrentProfileNames)
+			{
+				PhysicalAnimation->ApplyPhysicalAnimationProfileBelow(NAME_None, CurrentProfileName);
+				GetMesh()->SetConstraintProfileForAll(CurrentProfileName, First);
+				First = false;
+			}
+			PhysicalAnimation->Activate();
+			PhysicalAnimationState.ProfileNames = CurrentProfileNames;
+
+			for (const auto& MultiplyProfileName : CurrentMultiplyProfileNames)
 			{
 				PhysicalAnimation->ApplyPhysicalAnimationProfileBelow(NAME_None, MultiplyProfileName);
 				GetMesh()->SetConstraintProfileForAll(MultiplyProfileName);
 			}
+			PhysicalAnimationState.MultiplyProfileNames = CurrentMultiplyProfileNames;
 		}
 	}
 

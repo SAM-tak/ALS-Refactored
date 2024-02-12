@@ -768,6 +768,23 @@ void AAlsCharacter::DisplayDebugPA(const UCanvas* Canvas, const float Scale, con
 
 	const auto RowOffset{12.0f * Scale};
 	const auto ColumnOffset{145.0f * Scale};
+	
+	TStringBuilder<256> DebugStringBuilder;
+
+	for (const auto& ProfileName : PhysicalAnimationState.ProfileNames)
+	{
+		DebugStringBuilder.Appendf(TEXT("%s "), *ProfileName.ToString());
+	}
+
+	for (const auto& ProfileName : PhysicalAnimationState.MultiplyProfileNames)
+	{
+		DebugStringBuilder.Appendf(TEXT("%s "), *ProfileName.ToString());
+	}
+
+	Text.Text = FText::AsCultureInvariant(DebugStringBuilder.ToString());
+	Text.Draw(Canvas->Canvas, {HorizontalLocation, VerticalLocation});
+
+	VerticalLocation += RowOffset;
 
 	for (auto BI : GetMesh()->Bodies)
 	{
