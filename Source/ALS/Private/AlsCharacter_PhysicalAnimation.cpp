@@ -72,7 +72,7 @@ void AAlsCharacter::RefreshPhysicalAnimation(float DeltaTime)
 
 	if (OverridePAProfileNames.Num() > 0)
 	{
-		if (PhysicalAnimationState.ProfileNames != OverridePAProfileNames)
+		if (PhysicalAnimationState.ProfileNames != OverridePAProfileNames || PhysicalAnimationState.MultiplyProfileNames != MultiplyPAProfileNames)
 		{
 			bool first = true;
 			for (const auto& CurrentProfileName : OverridePAProfileNames)
@@ -84,9 +84,7 @@ void AAlsCharacter::RefreshPhysicalAnimation(float DeltaTime)
 			PhysicalAnimation->Activate();
 			PhysicalAnimationState.ProfileNames = OverridePAProfileNames;
 			PhysicalAnimationState.ClearAlsTags();
-		}
-		if (PhysicalAnimationState.MultiplyProfileNames != MultiplyPAProfileNames)
-		{
+
 			for (const auto& MultiplyProfileName : MultiplyPAProfileNames)
 			{
 				PhysicalAnimation->ApplyPhysicalAnimationProfileBelow(NAME_None, MultiplyProfileName);
