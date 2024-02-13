@@ -856,8 +856,8 @@ void UAlsAnimationInstance::RefreshGroundPredictionAmount()
 #endif
 
 	InAirState.GroundPredictionAmount = bGroundValid
-		                                    ? Settings->InAir.GroundPredictionAmountCurve->GetFloatValue(Hit.Time) * AllowanceAmount
-		                                    : 0.0f;
+		                                ? Settings->InAir.GroundPredictionAmountCurve->GetFloatValue(Hit.Time) * AllowanceAmount
+		                                : 0.0f;
 }
 
 void UAlsAnimationInstance::RefreshInAirLeanAmount(const float DeltaTime)
