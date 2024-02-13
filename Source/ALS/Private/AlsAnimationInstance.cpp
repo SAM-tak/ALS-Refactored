@@ -146,6 +146,16 @@ void UAlsAnimationInstance::NativePostUpdateAnimation()
 	PlayQueuedTurnInPlaceAnimation();
 	StopQueuedTransitionAndTurnInPlaceAnimations();
 
+	if (!bPendingUpdate)
+	{
+		for (const auto& RequestFunction : RequestQueue)
+		{
+			RequestFunction();
+		}
+	}
+
+	RequestQueue.Reset();
+
 #if WITH_EDITORONLY_DATA && ENABLE_DRAW_DEBUG
 	if (!bPendingUpdate)
 	{
@@ -1179,14 +1189,18 @@ void UAlsAnimationInstance::RefreshFootOffset(FAlsFootState& FootState, const fl
 	};
 
 	FHitResult Hit;
-	if(IsInGameThread())
+	FTraceDelegate TraceDelegate = FTraceDelegate::CreateWeakLambda(this, [FootState](const FTraceHandle& Handle, FTraceDatum& Data) mutable {
+		if (Data.OutHits.Num() > 0)
+		{
+			FootState.Hit = Data.OutHits[0];
+		}
+		else
+		{
+			FootState.Hit.Init();
+		}
+	});
+	if (IsInGameThread())
 	{
-		FTraceDelegate TraceDelegate = FTraceDelegate::CreateWeakLambda(this, [FootState](const FTraceHandle& Handle, FTraceDatum& Data) mutable {
-			if (Data.OutHits.Num() > 0)
-			{
-				FootState.Hit = Data.OutHits[0];
-			}
-		});
 		GetWorld()->AsyncLineTraceByChannel(EAsyncTraceType::Single,
 											TraceLocation + FVector{
 												0.0f, 0.0f, Settings->Feet.IkTraceDistanceUpward * LocomotionState.Scale
@@ -1196,19 +1210,23 @@ void UAlsAnimationInstance::RefreshFootOffset(FAlsFootState& FootState, const fl
 											},
 											Settings->Feet.IkTraceChannel, {__FUNCTION__, true, Character.Get()},
 											FCollisionResponseParams::DefaultResponseParam, &TraceDelegate);
-		Hit = FootState.Hit;
 	}
 	else
 	{
-		GetWorld()->LineTraceSingleByChannel(Hit,
-											 TraceLocation + FVector{
-												 0.0f, 0.0f, Settings->Feet.IkTraceDistanceUpward * LocomotionState.Scale
-											 },
-											 TraceLocation - FVector{
-												 0.0f, 0.0f, Settings->Feet.IkTraceDistanceDownward * LocomotionState.Scale
-											 },
-											 Settings->Feet.IkTraceChannel, {__FUNCTION__, true, Character.Get()});
+		RequestQueue.Emplace([this, &TraceDelegate, TraceLocation]{
+			GetWorld()->AsyncLineTraceByChannel(EAsyncTraceType::Single,
+												TraceLocation + FVector{
+													0.0f, 0.0f, Settings->Feet.IkTraceDistanceUpward * LocomotionState.Scale
+												},
+												TraceLocation - FVector{
+													0.0f, 0.0f, Settings->Feet.IkTraceDistanceDownward * LocomotionState.Scale
+												},
+												Settings->Feet.IkTraceChannel, {__FUNCTION__, true, Character.Get()},
+												FCollisionResponseParams::DefaultResponseParam, &TraceDelegate);
+
+		});
 	}
+	Hit = FootState.Hit;
 	const auto bGroundValid{Hit.IsValidBlockingHit() && Hit.ImpactNormal.Z >= LocomotionState.WalkableFloorZ};
 
 #if WITH_EDITORONLY_DATA && ENABLE_DRAW_DEBUG

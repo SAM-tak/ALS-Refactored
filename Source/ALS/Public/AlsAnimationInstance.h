@@ -149,6 +149,8 @@ protected:
 		Meta = (BlueprintProtected, BlueprintThreadSafe, ReturnDisplayName = "Rig Input"))
 	FAlsControlRigInput GetControlRigInput() const;
 
+	mutable TArray<TFunction<void()>> RequestQueue;
+
 public:
 	void MarkPendingUpdate();
 
