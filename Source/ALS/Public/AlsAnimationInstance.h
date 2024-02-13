@@ -124,6 +124,9 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient)
 	FAlsPhysicalAnimationCurveState PhysicalAnimationCurveState;
 
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient)
+	FHitResult GroundHit;
+
 public:
 	virtual void NativeInitializeAnimation() override;
 

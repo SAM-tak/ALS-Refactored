@@ -59,7 +59,7 @@ struct ALS_API FAlsFootState
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS")
 	FQuat IkRotation{ForceInit};
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS")
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "ALS", Transient)
 	FHitResult Hit;
 };
 
