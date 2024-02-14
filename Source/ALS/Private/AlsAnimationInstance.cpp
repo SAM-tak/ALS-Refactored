@@ -146,17 +146,12 @@ void UAlsAnimationInstance::NativePostUpdateAnimation()
 	PlayQueuedTurnInPlaceAnimation();
 	StopQueuedTransitionAndTurnInPlaceAnimations();
 
-#if WITH_EDITORONLY_DATA && ENABLE_DRAW_DEBUG
-	if (!bPendingUpdate)
+	for (const auto& RequestFunction : RequestQueue)
 	{
-		for (const auto& DisplayDebugTraceFunction : DisplayDebugTracesQueue)
-		{
-			DisplayDebugTraceFunction();
-		}
+		RequestFunction();
 	}
 
-	DisplayDebugTracesQueue.Reset();
-#endif
+	RequestQueue.Reset();
 
 	bPendingUpdate = false;
 }
@@ -797,6 +792,7 @@ void UAlsAnimationInstance::RefreshGroundPredictionAmount()
 	if (InAirState.VerticalVelocity > VerticalVelocityThreshold)
 	{
 		InAirState.GroundPredictionAmount = 0.0f;
+		GroundHit.Init();
 		return;
 	}
 
@@ -804,6 +800,7 @@ void UAlsAnimationInstance::RefreshGroundPredictionAmount()
 	if (AllowanceAmount <= UE_KINDA_SMALL_NUMBER)
 	{
 		InAirState.GroundPredictionAmount = 0.0f;
+		GroundHit.Init();
 		return;
 	}
 
@@ -824,36 +821,58 @@ void UAlsAnimationInstance::RefreshGroundPredictionAmount()
 		                                                      {MinSweepDistance, MaxSweepDistance},
 		                                                      InAirState.VerticalVelocity) * LocomotionState.Scale
 	};
-
-	FHitResult Hit;
-	GetWorld()->SweepSingleByChannel(Hit, SweepStartLocation, SweepStartLocation + SweepVector,
-	                                 FQuat::Identity, Settings->InAir.GroundPredictionSweepChannel,
-	                                 FCollisionShape::MakeCapsule(LocomotionState.CapsuleRadius, LocomotionState.CapsuleHalfHeight),
-	                                 {__FUNCTION__, false, Character.Get()}, Settings->InAir.GroundPredictionSweepResponses);
-
+	
+	FHitResult Hit{GroundHit};
 	const auto bGroundValid{Hit.IsValidBlockingHit() && Hit.ImpactNormal.Z >= LocomotionState.WalkableFloorZ};
 
-#if WITH_EDITORONLY_DATA && ENABLE_DRAW_DEBUG
-	if (bDisplayDebugTraces)
+	FTraceDelegate TraceDelegate = FTraceDelegate::CreateWeakLambda(this, [this](const FTraceHandle& Handle, FTraceDatum& Data) mutable
 	{
-		if (IsInGameThread())
+		if (Data.OutHits.Num() > 0)
 		{
-			UAlsUtility::DrawDebugSweepSingleCapsule(GetWorld(), Hit.TraceStart, Hit.TraceEnd, FRotator::ZeroRotator,
-			                                         LocomotionState.CapsuleRadius, LocomotionState.CapsuleHalfHeight,
-			                                         bGroundValid, Hit, {0.25f, 0.0f, 1.0f}, {0.75f, 0.0f, 1.0f});
+			GroundHit = Data.OutHits[0];
 		}
 		else
 		{
-			DisplayDebugTracesQueue.Emplace([this, Hit, bGroundValid]
-				{
-					UAlsUtility::DrawDebugSweepSingleCapsule(GetWorld(), Hit.TraceStart, Hit.TraceEnd, FRotator::ZeroRotator,
-					                                         LocomotionState.CapsuleRadius, LocomotionState.CapsuleHalfHeight,
-					                                         bGroundValid, Hit, {0.25f, 0.0f, 1.0f}, {0.75f, 0.0f, 1.0f});
-				}
-			);
+			GroundHit.Init();
 		}
-	}
+	});
+	if (IsInGameThread())
+	{
+		GetWorld()->AsyncSweepByChannel(EAsyncTraceType::Single, SweepStartLocation, SweepStartLocation + SweepVector,
+										FQuat::Identity, Settings->InAir.GroundPredictionSweepChannel,
+										FCollisionShape::MakeCapsule(LocomotionState.CapsuleRadius, LocomotionState.CapsuleHalfHeight),
+										{__FUNCTION__, false, Character.Get()}, Settings->InAir.GroundPredictionSweepResponses, &TraceDelegate);
+#if WITH_EDITORONLY_DATA && ENABLE_DRAW_DEBUG
+		if (bDisplayDebugTraces)
+		{
+			UAlsUtility::DrawDebugSweepSingleCapsule(GetWorld(), Hit.TraceStart, Hit.TraceEnd, FRotator::ZeroRotator,
+													 LocomotionState.CapsuleRadius, LocomotionState.CapsuleHalfHeight,
+													 bGroundValid, Hit, {0.25f, 0.0f, 1.0f}, {0.75f, 0.0f, 1.0f});
+		}
 #endif
+	}
+	else
+	{
+		RequestQueue.Emplace([this, TraceDelegate, SweepStartLocation, SweepVector
+#if WITH_EDITORONLY_DATA && ENABLE_DRAW_DEBUG
+							, Hit, bGroundValid
+#endif
+		]
+		{
+			GetWorld()->AsyncSweepByChannel(EAsyncTraceType::Single, SweepStartLocation, SweepStartLocation + SweepVector,
+											FQuat::Identity, Settings->InAir.GroundPredictionSweepChannel,
+											FCollisionShape::MakeCapsule(LocomotionState.CapsuleRadius, LocomotionState.CapsuleHalfHeight),
+											{__FUNCTION__, false, Character.Get()}, Settings->InAir.GroundPredictionSweepResponses, &TraceDelegate);
+#if WITH_EDITORONLY_DATA && ENABLE_DRAW_DEBUG
+			if (bDisplayDebugTraces)
+			{
+				UAlsUtility::DrawDebugSweepSingleCapsule(GetWorld(), Hit.TraceStart, Hit.TraceEnd, FRotator::ZeroRotator,
+														 LocomotionState.CapsuleRadius, LocomotionState.CapsuleHalfHeight,
+														 bGroundValid, Hit, {0.25f, 0.0f, 1.0f}, {0.75f, 0.0f, 1.0f});
+			}
+#endif
+		});
+	}
 
 	InAirState.GroundPredictionAmount = bGroundValid
 		                                ? Settings->InAir.GroundPredictionAmountCurve->GetFloatValue(Hit.Time) * AllowanceAmount
@@ -1144,6 +1163,7 @@ void UAlsAnimationInstance::RefreshFootOffset(FAlsFootState& FootState, const fl
 		FootState.OffsetTargetLocationZ = 0.0f;
 		FootState.OffsetTargetRotation = FQuat::Identity;
 		FootState.OffsetSpringState.Reset();
+		FootState.Hit.Init();
 		return;
 	}
 
@@ -1168,7 +1188,7 @@ void UAlsAnimationInstance::RefreshFootOffset(FAlsFootState& FootState, const fl
 			FinalLocation.Z += FootState.OffsetLocationZ;
 			FinalRotation = FootState.OffsetRotation * FinalRotation;
 		}
-
+		FootState.Hit.Init();
 		return;
 	}
 
@@ -1177,38 +1197,65 @@ void UAlsAnimationInstance::RefreshFootOffset(FAlsFootState& FootState, const fl
 	const FVector TraceLocation{
 		FinalLocation.X, FinalLocation.Y, GetProxyOnAnyThread<FAnimInstanceProxy>().GetComponentTransform().GetLocation().Z
 	};
-
-	FHitResult Hit;
-	GetWorld()->LineTraceSingleByChannel(Hit,
-										 TraceLocation + FVector{
-											0.0f, 0.0f, Settings->Feet.IkTraceDistanceUpward * LocomotionState.Scale
-										 },
-										 TraceLocation - FVector{
-											0.0f, 0.0f, Settings->Feet.IkTraceDistanceDownward * LocomotionState.Scale
-										 },
-										 Settings->Feet.IkTraceChannel, {__FUNCTION__, true, Character.Get()});
-
+	
+	FHitResult Hit{FootState.Hit};
 	const auto bGroundValid{Hit.IsValidBlockingHit() && Hit.ImpactNormal.Z >= LocomotionState.WalkableFloorZ};
 
-#if WITH_EDITORONLY_DATA && ENABLE_DRAW_DEBUG
-	if (bDisplayDebugTraces)
+	FTraceDelegate TraceDelegate = FTraceDelegate::CreateWeakLambda(this, [&FootState](const FTraceHandle& Handle, FTraceDatum& Data) mutable
 	{
-		if (IsInGameThread())
+		if (Data.OutHits.Num() > 0)
 		{
-			UAlsUtility::DrawDebugLineTraceSingle(GetWorld(), Hit.TraceStart, Hit.TraceEnd, bGroundValid,
-			                                      Hit, {0.0f, 0.25f, 1.0f}, {0.0f, 0.75f, 1.0f});
+			FootState.Hit = Data.OutHits[0];
 		}
 		else
 		{
-			DisplayDebugTracesQueue.Emplace([this, Hit, bGroundValid]
-				{
-					UAlsUtility::DrawDebugLineTraceSingle(GetWorld(), Hit.TraceStart, Hit.TraceEnd, bGroundValid,
-					                                      Hit, {0.0f, 0.25f, 1.0f}, {0.0f, 0.75f, 1.0f});
-				}
-			);
+			FootState.Hit.Init();
 		}
-	}
+	});
+	if (IsInGameThread())
+	{
+		GetWorld()->AsyncLineTraceByChannel(EAsyncTraceType::Single,
+											TraceLocation + FVector{
+												0.0f, 0.0f, Settings->Feet.IkTraceDistanceUpward * LocomotionState.Scale
+											},
+											TraceLocation - FVector{
+												0.0f, 0.0f, Settings->Feet.IkTraceDistanceDownward * LocomotionState.Scale
+											},
+											Settings->Feet.IkTraceChannel, {__FUNCTION__, true, Character.Get()},
+											FCollisionResponseParams::DefaultResponseParam, &TraceDelegate);
+
+#if WITH_EDITORONLY_DATA && ENABLE_DRAW_DEBUG
+		if (bDisplayDebugTraces)
+		{
+			UAlsUtility::DrawDebugLineTraceSingle(GetWorld(), Hit.TraceStart, Hit.TraceEnd, bGroundValid, Hit, {0.0f, 0.25f, 1.0f}, {0.0f, 0.75f, 1.0f});
+		}
 #endif
+	}
+	else
+	{
+		RequestQueue.Emplace([this, TraceDelegate, TraceLocation
+#if WITH_EDITORONLY_DATA && ENABLE_DRAW_DEBUG
+							, Hit, bGroundValid
+#endif
+		]
+		{
+			GetWorld()->AsyncLineTraceByChannel(EAsyncTraceType::Single,
+												TraceLocation + FVector{
+													0.0f, 0.0f, Settings->Feet.IkTraceDistanceUpward * LocomotionState.Scale
+												},
+												TraceLocation - FVector{
+													0.0f, 0.0f, Settings->Feet.IkTraceDistanceDownward * LocomotionState.Scale
+												},
+												Settings->Feet.IkTraceChannel, {__FUNCTION__, true, Character.Get()},
+												FCollisionResponseParams::DefaultResponseParam, &TraceDelegate);
+#if WITH_EDITORONLY_DATA && ENABLE_DRAW_DEBUG
+			if (bDisplayDebugTraces)
+			{
+				UAlsUtility::DrawDebugLineTraceSingle(GetWorld(), Hit.TraceStart, Hit.TraceEnd, bGroundValid, Hit, {0.0f, 0.25f, 1.0f}, {0.0f, 0.75f, 1.0f});
+			}
+#endif
+		});
+	}
 
 	if (bGroundValid)
 	{

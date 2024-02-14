@@ -51,8 +51,6 @@ protected:
 #if WITH_EDITORONLY_DATA
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient)
 	uint8 bDisplayDebugTraces : 1;
-
-	mutable TArray<TFunction<void()>> DisplayDebugTracesQueue;
 #endif
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient)
@@ -124,6 +122,9 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient)
 	FAlsPhysicalAnimationCurveState PhysicalAnimationCurveState;
 
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient)
+	FHitResult GroundHit;
+
 public:
 	virtual void NativeInitializeAnimation() override;
 
@@ -148,6 +149,8 @@ protected:
 	UFUNCTION(BlueprintPure, Category = "ALS|Animation Instance",
 		Meta = (BlueprintProtected, BlueprintThreadSafe, ReturnDisplayName = "Rig Input"))
 	FAlsControlRigInput GetControlRigInput() const;
+
+	mutable TArray<TFunction<void()>> RequestQueue;
 
 public:
 	void MarkPendingUpdate();
