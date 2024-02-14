@@ -155,39 +155,6 @@ FVector UAlsCameraSkeletalMeshComponent::GetEyeCameraLocation() const
 												   : Settings->FirstPerson.RightEyeCameraSocketName);
 }
 
-void UAlsCameraSkeletalMeshComponent::CalculateAimingFirstPersonCamera(float AimingAmount, const FRotator& TargetRotation)
-{
-	if (AimingAmount > 0.0f && Character->HasSight())
-	{
-		const auto EyeCameraLocation{GetEyeCameraLocation()};
-		FVector SightLoc;
-		FRotator SightRot;
-		Character->GetSightLocAndRot(SightLoc, SightRot);
-		SightLoc = FVector::PointPlaneProject(SightLoc, EyeCameraLocation, SightRot.Vector());
-		if (AimingAmount >= 1.0f)
-		{
-			CameraLocation = SightLoc - SightRot.Vector() * Settings->FirstPerson.RetreatDistance;
-			CameraRotation = SightRot;
-			return;
-		}
-		else
-		{
-			auto EyeAlpha = UAlsMath::Clamp01(AimingAmount / Settings->FirstPerson.ADSThreshold);
-			auto SightAlpha = UAlsMath::Clamp01((AimingAmount - Settings->FirstPerson.ADSThreshold) /
-				(1.0f - Settings->FirstPerson.ADSThreshold));
-			CameraRotation = FRotator(FQuat::Slerp(TargetRotation.Quaternion(), SightRot.Quaternion(), SightAlpha));
-			auto Offset = CameraRotation.Vector() * Settings->FirstPerson.RetreatDistance;
-			auto EyeLoc = FMath::Lerp(GetFirstPersonCameraLocation(), EyeCameraLocation, EyeAlpha);
-			CameraLocation = FMath::Lerp(EyeLoc, SightLoc, SightAlpha) - Offset;
-			return;
-		}
-	}
-
-	auto Offset = TargetRotation.Vector() * Settings->FirstPerson.RetreatDistance;
-	CameraLocation = GetFirstPersonCameraLocation() - Offset;
-	CameraRotation = TargetRotation;
-}
-
 FVector UAlsCameraSkeletalMeshComponent::GetThirdPersonPivotLocation() const
 {
 	const auto* Mesh{Character->GetMesh()};
@@ -311,9 +278,8 @@ void UAlsCameraSkeletalMeshComponent::TickCamera(const float DeltaTime, bool bAl
 		PivotLocation = PivotTargetLocation;
 		bInAutoFPP = false;
 
-		CalculateAimingFirstPersonCamera(AimingAmount, CameraTargetRotation);
-
-		FocalLength = CalculateFocalLength();
+		UpdateAimingFirstPersonCamera(AimingAmount, CameraTargetRotation);
+		UpdateFocalLength();
 		Character->SetLookRotation(Character->GetViewRotation());
 
 		if (IsValid(Camera))
@@ -459,7 +425,8 @@ void UAlsCameraSkeletalMeshComponent::TickCamera(const float DeltaTime, bool bAl
 
 	if (bPreviousRightShoulder != bRightShoulder)
 	{
-		if (Character->GetViewMode() == AlsViewModeTags::ThirdPerson && Character->GetRotationMode() != AlsRotationModeTags::VelocityDirection)
+		if (Character->GetViewMode() == AlsViewModeTags::ThirdPerson && Character->GetRotationMode() != AlsRotationModeTags::VelocityDirection &&
+			bIsFocusPawn)
 		{
 			// Set aim point correction during change shoulder
 			auto FocusLocation{GetCurrentFocusLocation()};
@@ -481,9 +448,8 @@ void UAlsCameraSkeletalMeshComponent::TickCamera(const float DeltaTime, bool bAl
 
 	if (bInAutoFPP)
 	{
-		CalculateAimingFirstPersonCamera(AimingAmount, CameraRotation);
-
-		FocalLength = CalculateFocalLength();
+		UpdateAimingFirstPersonCamera(AimingAmount, CameraRotation);
+		UpdateFocalLength();
 		Character->SetLookRotation(Character->GetViewRotation());
 
 		if (IsValid(Camera))
@@ -499,7 +465,7 @@ void UAlsCameraSkeletalMeshComponent::TickCamera(const float DeltaTime, bool bAl
 	{
 		CameraLocation = CameraResultLocation;
 
-		FocalLength = CalculateFocalLength();
+		UpdateFocalLength();
 		Character->SetLookRotation((GetCurrentFocusLocation() - GetEyeCameraLocation()).Rotation());
 
 		if (IsValid(Camera))
@@ -846,7 +812,40 @@ bool UAlsCameraSkeletalMeshComponent::TryAdjustLocationBlockedByGeometry(FVector
 	                                                 {FreeSpaceTraceTag, false, GetOwner()});
 }
 
-float UAlsCameraSkeletalMeshComponent::CalculateFocalLength() const
+void UAlsCameraSkeletalMeshComponent::UpdateAimingFirstPersonCamera(float AimingAmount, const FRotator& TargetRotation)
+{
+	if (AimingAmount > 0.0f && Character->HasSight())
+	{
+		const auto EyeCameraLocation{GetEyeCameraLocation()};
+		FVector SightLoc;
+		FRotator SightRot;
+		Character->GetSightLocAndRot(SightLoc, SightRot);
+		SightLoc = FVector::PointPlaneProject(SightLoc, EyeCameraLocation, SightRot.Vector());
+		if (AimingAmount >= 1.0f)
+		{
+			CameraLocation = SightLoc - SightRot.Vector() * Settings->FirstPerson.RetreatDistance;
+			CameraRotation = SightRot;
+			return;
+		}
+		else
+		{
+			auto EyeAlpha = UAlsMath::Clamp01(AimingAmount / Settings->FirstPerson.ADSThreshold);
+			auto SightAlpha = UAlsMath::Clamp01((AimingAmount - Settings->FirstPerson.ADSThreshold) /
+				(1.0f - Settings->FirstPerson.ADSThreshold));
+			CameraRotation = FRotator(FQuat::Slerp(TargetRotation.Quaternion(), SightRot.Quaternion(), SightAlpha));
+			auto Offset = CameraRotation.Vector() * Settings->FirstPerson.RetreatDistance;
+			auto EyeLoc = FMath::Lerp(GetFirstPersonCameraLocation(), EyeCameraLocation, EyeAlpha);
+			CameraLocation = FMath::Lerp(EyeLoc, SightLoc, SightAlpha) - Offset;
+			return;
+		}
+	}
+
+	auto Offset = TargetRotation.Vector() * Settings->FirstPerson.RetreatDistance;
+	CameraLocation = GetFirstPersonCameraLocation() - Offset;
+	CameraRotation = TargetRotation;
+}
+
+void UAlsCameraSkeletalMeshComponent::UpdateFocalLength()
 {
 #if ENABLE_DRAW_DEBUG
 	const auto bDisplayDebugTraces{
@@ -869,9 +868,17 @@ float UAlsCameraSkeletalMeshComponent::CalculateFocalLength() const
 
 	FHitResult Hit;
 	if (GetWorld()->SweepSingleByChannel(Hit, TraceStart, TraceEnd, FQuat::Identity, Settings->FocusTraceChannel,
-	                                     CollisionShape, {MainTraceTag, false, GetOwner()}))
+										 CollisionShape, {MainTraceTag, false, GetOwner()}))
 	{
 		TraceResult = Hit.Location;
+		if (Hit.HasValidHitObjectHandle())
+		{
+			bIsFocusPawn = IsValid(Cast<APawn>(Hit.GetActor()));
+		}
+	}
+	else
+	{
+		bIsFocusPawn = false;
 	}
 
 #if ENABLE_DRAW_DEBUG
@@ -882,7 +889,7 @@ float UAlsCameraSkeletalMeshComponent::CalculateFocalLength() const
 	}
 #endif
 
-	return FMath::Max(Settings->MinFocalLength, FVector::Distance(TraceResult, CameraLocation));
+	FocalLength = FMath::Max(Settings->MinFocalLength, FVector::Distance(TraceResult, CameraLocation));
 }
 
 void UAlsCameraSkeletalMeshComponent::UpdateADSCameraShake(float FirstPersonOverride, float AimingAmount)

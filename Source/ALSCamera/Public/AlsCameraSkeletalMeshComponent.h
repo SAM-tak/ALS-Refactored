@@ -70,6 +70,9 @@ protected:
 	float FocalLength{500.0f};
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient)
+	uint8 bIsFocusPawn : 1 {false};
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient)
 	FGameplayTag PreviousViewMode{AlsViewModeTags::ThirdPerson};
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient)
@@ -150,13 +153,14 @@ private:
 
 	bool TryAdjustLocationBlockedByGeometry(FVector& Location, bool bDisplayDebugCameraTraces) const;
 
-	void CalculateAimingFirstPersonCamera(float AimingAmount, const FRotator& TargetRotation);
+	void UpdateAimingFirstPersonCamera(float AimingAmount, const FRotator& TargetRotation);
 
-	float CalculateFocalLength() const;
+	void UpdateFocalLength();
 
 	void UpdateADSCameraShake(float FirstPersonOverride, float AimingAmount);
 
 	// Cache
+	
 	UCameraComponent* Camera{nullptr};
 
 	// Overlap
