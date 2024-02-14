@@ -51,8 +51,6 @@ protected:
 #if WITH_EDITORONLY_DATA
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient)
 	uint8 bDisplayDebugTraces : 1;
-
-	mutable TArray<TFunction<void()>> DisplayDebugTracesQueue;
 #endif
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient)
