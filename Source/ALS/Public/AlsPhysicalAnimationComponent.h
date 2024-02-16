@@ -101,4 +101,6 @@ private:
 	bool IsProfileExist(const FName& ProfileName);
 
 	bool HasAnyProfile(const class USkeletalBodySetup* BodySetup);
+
+	void SelectProfile(const AAlsCharacter* Character);
 };

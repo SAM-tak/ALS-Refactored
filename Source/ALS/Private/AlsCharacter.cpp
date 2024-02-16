@@ -25,6 +25,9 @@ namespace AlsCharacterConstants
 	constexpr auto TeleportDistanceThresholdSquared{FMath::Square(50.0f)};
 }
 
+FName AAlsCharacter::PhysicalAnimationComponentName(TEXT("PhysicalAnimComp"));
+FName AAlsCharacter::AbilitySystemComponentName(TEXT("AbilitySystemComp"));
+
 AAlsCharacter::AAlsCharacter(const FObjectInitializer& ObjectInitializer) : Super{
 	ObjectInitializer.SetDefaultSubobjectClass<UAlsCharacterMovementComponent>(CharacterMovementComponentName)
 }
@@ -73,10 +76,6 @@ bool AAlsCharacter::CanEditChange(const FProperty* Property) const
 		   Property->GetFName() != GET_MEMBER_NAME_CHECKED(ThisClass, bUseControllerRotationRoll);
 }
 #endif
-
-FName AAlsCharacter::PhysicalAnimationComponentName(TEXT("PhysicalAnimComp"));
-
-FName AAlsCharacter::AbilitySystemComponentName(TEXT("AbilitySystemComp"));
 
 bool AAlsCharacter::HasMatchingGameplayTagToAlsState(FGameplayTag TagToCheck) const
 {
@@ -278,10 +277,7 @@ void AAlsCharacter::PostInitializeComponents()
 
 	AnimationInstance = Cast<UAlsAnimationInstance>(GetMesh()->GetAnimInstance());
 
-	if (PhysicalAnimation)
-	{
-		PhysicalAnimation->SetSkeletalMeshComponent(GetMesh());
-	}
+	PhysicalAnimation->SetSkeletalMeshComponent(GetMesh());
 
 	AbilitySystem->InitAbilityActorInfo(this, this);
 

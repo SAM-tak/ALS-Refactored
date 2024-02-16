@@ -30,10 +30,10 @@ class ALS_API AAlsCharacter : public ACharacter, public IAbilitySystemInterface,
 	GENERATED_BODY()
 
 protected:
-	UPROPERTY(BlueprintReadOnly, Category = "Als Character")
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Als Character")
 	TObjectPtr<UAlsPhysicalAnimationComponent> PhysicalAnimation;
 
-	UPROPERTY(BlueprintReadOnly, Category = "Als Character")
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Als Character")
 	TObjectPtr<UAbilitySystemComponent> AbilitySystem;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings|Als Character")
