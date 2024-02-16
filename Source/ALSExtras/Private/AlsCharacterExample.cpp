@@ -12,8 +12,9 @@
 
 AAlsCharacterExample::AAlsCharacterExample()
 {
+	//CameraMovement = CreateDefaultSubobject<UAlsCameraMovementComponent>(FName{TEXTVIEW("CameraMovement")});
+
 	CameraSkeletalMesh = CreateDefaultSubobject<UAlsCameraSkeletalMeshComponent>(FName{TEXTVIEW("CameraSkeletalMesh")});
-	CameraSkeletalMesh->SetupAttachment(GetMesh());
 	CameraSkeletalMesh->SetRelativeRotation_Direct({0.0f, 90.0f, 0.0f});
 
 	Camera = CreateDefaultSubobject<UCameraComponent>(FName{TEXTVIEW("Camera")});
@@ -22,7 +23,6 @@ AAlsCharacterExample::AAlsCharacterExample()
 	Camera->bAutoActivate = false;
 	Camera->bTickInEditor = false;
 	Camera->bHiddenInGame = true;
-	Camera->SetupAttachment(CameraSkeletalMesh);
 	CameraSkeletalMesh->SetCameraComponent(Camera);
 }
 

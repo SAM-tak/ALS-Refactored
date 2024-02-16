@@ -12,40 +12,40 @@ struct ALS_API FAlsPhysicalAnimationState
 {
 	GENERATED_BODY()
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS", Transient)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS")
 	TEnumAsByte<ECollisionChannel> PrevCollisionObjectType{ECC_Pawn};
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS", Transient)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS")
 	TEnumAsByte<ECollisionEnabled::Type> PrevCollisionEnabled{ECollisionEnabled::QueryOnly};
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "ALS", Transient)
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "ALS")
 	TArray<FName> ProfileNames;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "ALS", Transient)
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "ALS")
 	TArray<FName> MultiplyProfileNames;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "ALS", Transient)
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "ALS")
 	FGameplayTag LocomotionAction;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "ALS", Transient)
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "ALS")
 	FGameplayTag LocomotionMode;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "ALS", Transient)
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "ALS")
 	FGameplayTag Stance;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "ALS", Transient)
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "ALS")
 	FGameplayTag Gait;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "ALS", Transient)
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "ALS")
 	FGameplayTag OverlayMode;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "ALS", Transient)
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "ALS")
 	TArray<FName> OverrideMultiplyProfileNames;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "ALS", Transient)
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "ALS")
 	uint8 bActive : 1 {false};
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "ALS", Transient)
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "ALS")
 	uint8 bRagdolling : 1 {false};
 
 	bool NeedsProfielChange(const FGameplayTag& NewLocomotionMode, const FGameplayTag& NewLocomotionAction, const FGameplayTag& NewStance,

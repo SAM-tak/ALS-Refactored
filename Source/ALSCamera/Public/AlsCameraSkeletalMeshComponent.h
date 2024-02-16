@@ -7,7 +7,7 @@ class UCameraComponent;
 class UAlsCameraSettings;
 class AAlsCharacter;
 
-UCLASS(HideCategories = (Clothing, Physics, MasterPoseComponent, Collision, AnimationRig, Lighting, Deformer,
+UCLASS(HideCategories = (Object, Mobility, Clothing, Physics, MasterPoseComponent, Collision, AnimationRig, Lighting, Deformer,
 						 Rendering, PathTracing, HLOD, Navigation, VirtualTexture, Materials, LeaderPoseComponent,
 						 Optimization, LOD, MaterialParameters, TextureStreaming, Mobile, RayTracing))
 class ALSCAMERA_API UAlsCameraSkeletalMeshComponent : public USkeletalMeshComponent
@@ -170,7 +170,7 @@ private:
 	// Debug
 
 public:
-	void DisplayDebug(const UCanvas* Canvas, const FDebugDisplayInfo& DisplayInfo, float& VerticalLocation) const;
+	virtual void DisplayDebug(const UCanvas* Canvas, const FDebugDisplayInfo& DisplayInfo, float& VerticalLocation) const;
 
 private:
 	static void DisplayDebugHeader(const UCanvas* Canvas, const FText& HeaderText, const FLinearColor& HeaderColor,

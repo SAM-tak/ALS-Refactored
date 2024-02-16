@@ -9,6 +9,10 @@
 #include "State/AlsViewState.h"
 #include "State/AlsPhysicalAnimationState.h"
 #include "Utility/AlsGameplayTags.h"
+#include "AbilitySystemInterface.h"
+#include "GameplayCueInterface.h"
+#include "GameplayTagAssetInterface.h"
+#include "GameplayAbilitySpec.h"
 #include "AlsCharacter.generated.h"
 
 struct FAlsMantlingParameters;
@@ -19,24 +23,29 @@ class UAlsMovementSettings;
 class UAlsAnimationInstance;
 class UAlsMantlingSettings;
 class UPhysicalAnimationComponent;
+class UAbilitySystemComponent;
 
 UCLASS(AutoExpandCategories = ("Settings|Als Character", "Settings|Als Character|Desired State", "State|Als Character"))
-class ALS_API AAlsCharacter : public ACharacter
+class ALS_API AAlsCharacter : public ACharacter, public IAbilitySystemInterface, public IGameplayCueInterface, public IGameplayTagAssetInterface
 {
 	GENERATED_BODY()
 
 protected:
 	UPROPERTY(BlueprintReadOnly, Category = "Als Character")
-	TObjectPtr<UAlsCharacterMovementComponent> AlsCharacterMovement;
+	TObjectPtr<UPhysicalAnimationComponent> PhysicalAnimation;
 
 	UPROPERTY(BlueprintReadOnly, Category = "Als Character")
-	TObjectPtr<UPhysicalAnimationComponent> PhysicalAnimation;
+	TObjectPtr<UAbilitySystemComponent> AbilitySystem;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings|Als Character")
 	TObjectPtr<UAlsCharacterSettings> Settings;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings|Als Character")
 	TObjectPtr<UAlsMovementSettings> MovementSettings;
+
+	/** ability list */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Settings|Als Character")
+	FGameplayAbilitySpecContainer AbilitySpecs;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings|Als Character|Desired State", Replicated)
 	FGameplayTag DesiredViewMode{AlsViewModeTags::ThirdPerson};
@@ -55,9 +64,6 @@ protected:
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings|Als Character|Desired State", ReplicatedUsing = "OnReplicated_OverlayMode")
 	FGameplayTag OverlayMode{AlsOverlayModeTags::Default};
-
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State|Als Character", Transient, Meta = (ShowInnerProperties))
-	TWeakObjectPtr<UAlsAnimationInstance> AnimationInstance;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State|Als Character", Transient)
 	FGameplayTag LocomotionMode{AlsLocomotionModeTags::Grounded};
@@ -120,6 +126,12 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State|Als Character", Transient)
 	FRotator PendingFocalRotationRelativeAdjustment{ForceInit};
 
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State|Als Character", Transient)
+	UAlsCharacterMovementComponent *AlsCharacterMovement{nullptr};
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State|Als Character", Transient)
+	UAlsAnimationInstance *AnimationInstance{nullptr};
+
 	FTimerHandle BrakingFrictionFactorResetTimer;
 
 public:
@@ -150,6 +162,17 @@ public:
 	}
 	FORCEINLINE UPhysicalAnimationComponent* GetPhysicalAnimation() const { return PhysicalAnimation; }
 
+	/** Name of the PhysicalAnimationComponent. */
+	static FName AbilitySystemComponentName;
+
+	/** Returns PhysicalAnimation subobject **/
+	template <class T>
+	FORCEINLINE_DEBUGGABLE T* GetAbilitySystem() const
+	{
+		return CastChecked<T>(AbilitySystem, ECastCheckedType::NullAllowed);
+	}
+	FORCEINLINE UAbilitySystemComponent* GetAbilitySystem() const { return AbilitySystem; }
+
 protected:
 	virtual void BeginPlay() override;
 
@@ -164,7 +187,20 @@ public:
 
 	virtual void Restart() override;
 
+	// IAbilitySystemInterface
+
+	virtual UAbilitySystemComponent* GetAbilitySystemComponent() const override;
+
+	// IGameplayTagAssetInterface
+
+	virtual void GetOwnedGameplayTags(FGameplayTagContainer& TagContainer) const override;
+	virtual bool HasMatchingGameplayTag(FGameplayTag TagToCheck) const override;
+	virtual bool HasAllMatchingGameplayTags(const FGameplayTagContainer& TagContainer) const override;
+	virtual bool HasAnyMatchingGameplayTags(const FGameplayTagContainer& TagContainer) const override;
+
 private:
+	bool HasMatchingGameplayTagToAlsState(FGameplayTag TagToCheck) const;
+
 	void RefreshMeshProperties() const;
 
 	void RefreshMovementBase();

@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Kismet/BlueprintFunctionLibrary.h"
+#include "AlsGameplayTags.h"
 #include "AlsConstants.generated.h"
 
 UCLASS(Meta = (BlueprintThreadSafe))
@@ -239,6 +240,30 @@ public:
 
 	UFUNCTION(BlueprintPure, Category = "ALS|Constants", Meta = (ReturnDisplayName = "Display Name"))
 	static const FName& PADebugDisplayName();
+
+	UFUNCTION(BlueprintPure, Category = "ALS|Constants", Meta = (ReturnDisplayName = "Display Name"))
+	static const FGameplayTagContainer& ViewModeRoot();
+
+	UFUNCTION(BlueprintPure, Category = "ALS|Constants", Meta = (ReturnDisplayName = "Display Name"))
+	static const FGameplayTagContainer& AimingModeRoot();
+
+	UFUNCTION(BlueprintPure, Category = "ALS|Constants", Meta = (ReturnDisplayName = "Display Name"))
+	static const FGameplayTagContainer& LocomotionModeRoot();
+
+	UFUNCTION(BlueprintPure, Category = "ALS|Constants", Meta = (ReturnDisplayName = "Display Name"))
+	static const FGameplayTagContainer& RotationModeRoot();
+
+	UFUNCTION(BlueprintPure, Category = "ALS|Constants", Meta = (ReturnDisplayName = "Display Name"))
+	static const FGameplayTagContainer& StanceRoot();
+
+	UFUNCTION(BlueprintPure, Category = "ALS|Constants", Meta = (ReturnDisplayName = "Display Name"))
+	static const FGameplayTagContainer& GaitRoot();
+
+	UFUNCTION(BlueprintPure, Category = "ALS|Constants", Meta = (ReturnDisplayName = "Display Name"))
+	static const FGameplayTagContainer& OverlayModeRoot();
+
+	UFUNCTION(BlueprintPure, Category = "ALS|Constants", Meta = (ReturnDisplayName = "Display Name"))
+	static const FGameplayTagContainer& LocomotionActionRoot();
 };
 
 inline const FName& UAlsConstants::RootBoneName()
@@ -665,4 +690,52 @@ inline const FName& UAlsConstants::PADebugDisplayName()
 {
 	static const FName Name{TEXTVIEW("ALS.PhysicalAnimation")};
 	return Name;
+}
+
+inline const FGameplayTagContainer& UAlsConstants::ViewModeRoot()
+{
+	static const FGameplayTagContainer Container{AlsViewModeTags::ViewMode};
+	return Container;
+}
+
+inline const FGameplayTagContainer& UAlsConstants::AimingModeRoot()
+{
+	static const FGameplayTagContainer Container{AlsAimingModeTags::AimingMode};
+	return Container;
+}
+
+inline const FGameplayTagContainer& UAlsConstants::LocomotionModeRoot()
+{
+	static const FGameplayTagContainer Container{AlsLocomotionModeTags::LocomotionMode};
+	return Container;
+}
+
+inline const FGameplayTagContainer& UAlsConstants::RotationModeRoot()
+{
+	static const FGameplayTagContainer Container{AlsRotationModeTags::RotationMode};
+	return Container;
+}
+
+inline const FGameplayTagContainer& UAlsConstants::StanceRoot()
+{
+	static const FGameplayTagContainer Container{AlsStanceTags::Stance};
+	return Container;
+}
+
+inline const FGameplayTagContainer& UAlsConstants::GaitRoot()
+{
+	static const FGameplayTagContainer Container{AlsGaitTags::Gait};
+	return Container;
+}
+
+inline const FGameplayTagContainer& UAlsConstants::OverlayModeRoot()
+{
+	static const FGameplayTagContainer Container{AlsOverlayModeTags::OverlayMode};
+	return Container;
+}
+
+inline const FGameplayTagContainer& UAlsConstants::LocomotionActionRoot()
+{
+	static const FGameplayTagContainer Container{AlsLocomotionActionTags::LocomotionAction};
+	return Container;
 }
