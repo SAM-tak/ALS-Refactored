@@ -29,8 +29,6 @@ namespace
 	}
 }
 
-FName AAlsCharacter::PhysicalAnimationComponentName(TEXT("PhysicalAnimComp"));
-
 void AAlsCharacter::RefreshPhysicalAnimation(float DeltaTime)
 {
 	// Apply special behaviour when changed Ragdolling state
