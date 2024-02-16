@@ -5,7 +5,6 @@
 #include "AlsRagdollingSettings.h"
 #include "AlsRollingSettings.h"
 #include "AlsViewSettings.h"
-#include "AlsPhysicalAnimationSettings.h"
 #include "AlsCharacterSettings.generated.h"
 
 UCLASS(Blueprintable, BlueprintType)
@@ -57,9 +56,6 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings")
 	FAlsRollingSettings Rolling;
-
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings")
-	FAlsPhysicalAnimationSettings PhysicalAnimation;
 
 public:
 	UAlsCharacterSettings();

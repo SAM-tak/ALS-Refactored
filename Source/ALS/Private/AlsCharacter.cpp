@@ -2,10 +2,10 @@
 
 #include "AlsAnimationInstance.h"
 #include "AlsCharacterMovementComponent.h"
+#include "AlsPhysicalAnimationComponent.h"
 #include "TimerManager.h"
 #include "Components/CapsuleComponent.h"
 #include "Components/SkeletalMeshComponent.h"
-#include "PhysicsEngine/PhysicalAnimationComponent.h"
 #include "AbilitySystemComponent.h"
 #include "Curves/CurveFloat.h"
 #include "GameFramework/GameNetworkManager.h"
@@ -50,7 +50,7 @@ AAlsCharacter::AAlsCharacter(const FObjectInitializer& ObjectInitializer) : Supe
 
 	AlsCharacterMovement = Cast<UAlsCharacterMovementComponent>(GetCharacterMovement());
 
-	PhysicalAnimation = CreateDefaultSubobject<UPhysicalAnimationComponent>(PhysicalAnimationComponentName);
+	PhysicalAnimation = CreateDefaultSubobject<UAlsPhysicalAnimationComponent>(PhysicalAnimationComponentName);
 
 	AbilitySystem = CreateDefaultSubobject<UAbilitySystemComponent>(AbilitySystemComponentName);
 
@@ -73,6 +73,8 @@ bool AAlsCharacter::CanEditChange(const FProperty* Property) const
 		   Property->GetFName() != GET_MEMBER_NAME_CHECKED(ThisClass, bUseControllerRotationRoll);
 }
 #endif
+
+FName AAlsCharacter::PhysicalAnimationComponentName(TEXT("PhysicalAnimComp"));
 
 FName AAlsCharacter::AbilitySystemComponentName(TEXT("AbilitySystemComp"));
 
@@ -125,7 +127,6 @@ bool AAlsCharacter::HasMatchingGameplayTagToAlsState(FGameplayTag TagToCheck) co
 
 	return false;
 }
-
 
 // IAbilitySystemInterface
 
@@ -277,7 +278,10 @@ void AAlsCharacter::PostInitializeComponents()
 
 	AnimationInstance = Cast<UAlsAnimationInstance>(GetMesh()->GetAnimInstance());
 
-	PhysicalAnimation->SetSkeletalMeshComponent(GetMesh());
+	if (PhysicalAnimation)
+	{
+		PhysicalAnimation->SetSkeletalMeshComponent(GetMesh());
+	}
 
 	AbilitySystem->InitAbilityActorInfo(this, this);
 
@@ -442,7 +446,6 @@ void AAlsCharacter::Tick(const float DeltaTime)
 	RefreshMantling();
 	RefreshRagdolling(DeltaTime);
 	RefreshRolling(DeltaTime);
-	RefreshPhysicalAnimation(DeltaTime);
 
 	Super::Tick(DeltaTime);
 
