@@ -2,10 +2,10 @@
 
 #include "AlsAnimationInstance.h"
 #include "AlsCharacterMovementComponent.h"
+#include "AlsPhysicalAnimationComponent.h"
 #include "TimerManager.h"
 #include "Components/CapsuleComponent.h"
 #include "Components/SkeletalMeshComponent.h"
-#include "PhysicsEngine/PhysicalAnimationComponent.h"
 #include "AbilitySystemComponent.h"
 #include "Curves/CurveFloat.h"
 #include "GameFramework/GameNetworkManager.h"
@@ -25,8 +25,8 @@ namespace AlsCharacterConstants
 	constexpr auto TeleportDistanceThresholdSquared{FMath::Square(50.0f)};
 }
 
-FName AAlsCharacter::AbilitySystemComponentName(TEXT("AbilitySystemComp"));
 FName AAlsCharacter::PhysicalAnimationComponentName(TEXT("PhysicalAnimComp"));
+FName AAlsCharacter::AbilitySystemComponentName(TEXT("AbilitySystemComp"));
 
 AAlsCharacter::AAlsCharacter(const FObjectInitializer& ObjectInitializer) : Super{
 	ObjectInitializer.SetDefaultSubobjectClass<UAlsCharacterMovementComponent>(CharacterMovementComponentName)
@@ -53,7 +53,7 @@ AAlsCharacter::AAlsCharacter(const FObjectInitializer& ObjectInitializer) : Supe
 
 	AlsCharacterMovement = Cast<UAlsCharacterMovementComponent>(GetCharacterMovement());
 
-	PhysicalAnimation = CreateDefaultSubobject<UPhysicalAnimationComponent>(PhysicalAnimationComponentName);
+	PhysicalAnimation = CreateDefaultSubobject<UAlsPhysicalAnimationComponent>(PhysicalAnimationComponentName);
 
 	AbilitySystem = CreateDefaultSubobject<UAbilitySystemComponent>(AbilitySystemComponentName);
 
@@ -126,7 +126,6 @@ bool AAlsCharacter::HasMatchingGameplayTagToAlsState(FGameplayTag TagToCheck) co
 
 	return false;
 }
-
 
 // IAbilitySystemInterface
 
@@ -443,7 +442,7 @@ void AAlsCharacter::Tick(const float DeltaTime)
 	RefreshMantling();
 	RefreshRagdolling(DeltaTime);
 	RefreshRolling(DeltaTime);
-	RefreshPhysicalAnimation(DeltaTime);
+	PhysicalAnimation->Refresh(DeltaTime);
 
 	Super::Tick(DeltaTime);
 
