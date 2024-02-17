@@ -85,7 +85,7 @@ protected:
 	uint8 bRagdolling : 1 {false};
 
 public:
-	virtual void TickComponent(float DeltaTime, enum ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
+	virtual void Refresh(float DeltaTime);
 
 	virtual void DisplayDebug(UCanvas* Canvas, const FDebugDisplayInfo& DisplayInfo, float& Unused, float& VerticalLocation);
 
@@ -94,13 +94,13 @@ private:
 
 	void ClearGameplayTags();
 
-	void Refresh(float DelaTime);
+	void RefreshBodyState(float DelaTime);
 
-	float GetLockedValue(const FAlsPhysicalAnimationCurveState& Curves, const FName& BoneName);
+	static float GetLockedValue(const FAlsPhysicalAnimationCurveState& Curves, const FName& BoneName);
 
-	bool IsProfileExist(const FName& ProfileName);
+	bool IsProfileExist(const FName& ProfileName) const;
 
-	bool HasAnyProfile(const class USkeletalBodySetup* BodySetup);
+	bool HasAnyProfile(const class USkeletalBodySetup* BodySetup) const;
 
 	void SelectProfile(const AAlsCharacter* Character);
 };

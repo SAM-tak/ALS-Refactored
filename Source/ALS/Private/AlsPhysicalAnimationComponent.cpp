@@ -87,7 +87,7 @@ float UAlsPhysicalAnimationComponent::GetLockedValue(const FAlsPhysicalAnimation
 	return 0.0f;
 }
 
-bool UAlsPhysicalAnimationComponent::IsProfileExist(const FName& ProfileName)
+bool UAlsPhysicalAnimationComponent::IsProfileExist(const FName& ProfileName) const
 {
 	for (auto i : GetSkeletalMesh()->Bodies)
 	{
@@ -102,7 +102,7 @@ bool UAlsPhysicalAnimationComponent::IsProfileExist(const FName& ProfileName)
 	return false;
 }
 
-bool UAlsPhysicalAnimationComponent::HasAnyProfile(const USkeletalBodySetup* BodySetup)
+bool UAlsPhysicalAnimationComponent::HasAnyProfile(const USkeletalBodySetup* BodySetup) const
 {
 	for (const auto& ProfileName : CurrentProfileNames)
 	{
@@ -159,7 +159,7 @@ void UAlsPhysicalAnimationComponent::ClearGameplayTags()
 	OverlayMode = FGameplayTag::EmptyTag;
 }
 
-void UAlsPhysicalAnimationComponent::Refresh(float DeltaTime)
+void UAlsPhysicalAnimationComponent::RefreshBodyState(float DeltaTime)
 {
 	USkeletalMeshComponent* Mesh{GetSkeletalMesh()};
 	const FAlsPhysicalAnimationCurveState& Curves{Cast<UAlsAnimationInstance>(GetSkeletalMesh()->GetAnimInstance())->GetPhysicalAnimationCurveState()};
@@ -833,9 +833,12 @@ void UAlsPhysicalAnimationComponent::SelectProfile(const AAlsCharacter* Characte
 	}
 }
 
-void UAlsPhysicalAnimationComponent::TickComponent(float DeltaTime, enum ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
+void UAlsPhysicalAnimationComponent::Refresh(float DeltaTime)
 {
-	// TODO : Cache
+	// I wanted to override TickComponent and do the following process,
+	// but I couldn’t fix the stuttering when returning from ragdoll,
+	// so I made this function to be called from AlsCharacter’s Tick.
+
 	auto* Character{Cast<AAlsCharacter>(GetSkeletalMesh()->GetOwner())};
 
 	// Apply special behaviour when changed Ragdolling state
@@ -869,10 +872,7 @@ void UAlsPhysicalAnimationComponent::TickComponent(float DeltaTime, enum ELevelT
 				bActive = false;
 			}
 
-			// skip to next frame
-
-			Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
-			return;
+			return; // skip to next frame
 		}
 	}
 
@@ -910,10 +910,8 @@ void UAlsPhysicalAnimationComponent::TickComponent(float DeltaTime, enum ELevelT
 
 	if (!Character->HasMatchingGameplayTag(AlsLocomotionActionTags::Ragdolling) || !Character->GetRagdollingState().bFreezing)
 	{
-		Refresh(DeltaTime);
+		RefreshBodyState(DeltaTime);
 	}
-
-	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 }
 
 void UAlsPhysicalAnimationComponent::DisplayDebug(UCanvas* Canvas, const FDebugDisplayInfo& DisplayInfo, float& HorizontalLocation, float& VerticalLocation)
