@@ -212,7 +212,7 @@ void AAlsCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLif
 	Parameters.Condition = COND_SkipOwner;
 	DOREPLIFETIME_WITH_PARAMS_FAST(ThisClass, DesiredStance, Parameters)
 	DOREPLIFETIME_WITH_PARAMS_FAST(ThisClass, DesiredGait, Parameters)
-	DOREPLIFETIME_WITH_PARAMS_FAST(ThisClass, bDesiredAiming, Parameters)
+	DOREPLIFETIME_WITH_PARAMS_FAST(ThisClass, DesiredAiming, Parameters)
 	DOREPLIFETIME_WITH_PARAMS_FAST(ThisClass, DesiredRotationMode, Parameters)
 	DOREPLIFETIME_WITH_PARAMS_FAST(ThisClass, DesiredViewMode, Parameters)
 	DOREPLIFETIME_WITH_PARAMS_FAST(ThisClass, OverlayMode, Parameters)
@@ -231,7 +231,7 @@ void AAlsCharacter::PreRegisterAllComponents()
 	// Set some default values here so that the animation instance and the
 	// camera component can read the most up-to-date values during initialization.
 
-	RotationMode = bDesiredAiming ? AlsRotationModeTags::Aiming : DesiredRotationMode;
+	RotationMode = DesiredAiming.IsValid() ? AlsRotationModeTags::Aiming : DesiredRotationMode;
 	Stance = DesiredStance;
 	Gait = DesiredGait;
 
@@ -725,53 +725,55 @@ void AAlsCharacter::NotifyLocomotionModeChanged(const FGameplayTag& PreviousLoco
 
 void AAlsCharacter::OnLocomotionModeChanged_Implementation(const FGameplayTag& PreviousLocomotionMode) {}
 
-void AAlsCharacter::SetDesiredAiming(const bool bNewDesiredAiming)
+void AAlsCharacter::SetDesiredAiming(const FGameplayTag& NewDesiredAiming)
 {
-	SetDesiredAiming(bNewDesiredAiming, true);
+	SetDesiredAiming(NewDesiredAiming, true);
 }
 
-void AAlsCharacter::SetDesiredAiming(const bool bNewDesiredAiming, const bool bSendRpc)
+void AAlsCharacter::SetDesiredAiming(const FGameplayTag& NewDesiredAiming, const bool bSendRpc)
 {
-	if (bDesiredAiming == bNewDesiredAiming || GetLocalRole() < ROLE_AutonomousProxy)
+	if (DesiredAiming == NewDesiredAiming || GetLocalRole() < ROLE_AutonomousProxy)
 	{
 		return;
 	}
 
-	bDesiredAiming = bNewDesiredAiming;
+	const auto PreviousDesiredAiming{DesiredAiming};
 
-	MARK_PROPERTY_DIRTY_FROM_NAME(ThisClass, bDesiredAiming, this)
+	DesiredAiming = NewDesiredAiming;
 
-	OnDesiredAimingChanged(!bDesiredAiming);
+	MARK_PROPERTY_DIRTY_FROM_NAME(ThisClass, DesiredAiming, this)
+
+	OnDesiredAimingChanged(PreviousDesiredAiming);
 
 	if (bSendRpc)
 	{
 		if (GetLocalRole() >= ROLE_Authority)
 		{
-			ClientSetDesiredAiming(bDesiredAiming);
+			ClientSetDesiredAiming(DesiredAiming);
 		}
 		else
 		{
-			ServerSetDesiredAiming(bDesiredAiming);
+			ServerSetDesiredAiming(DesiredAiming);
 		}
 	}
 }
 
-void AAlsCharacter::ClientSetDesiredAiming_Implementation(const bool bNewDesiredAiming)
+void AAlsCharacter::ClientSetDesiredAiming_Implementation(const FGameplayTag& NewDesiredAiming)
 {
-	SetDesiredAiming(bNewDesiredAiming, false);
+	SetDesiredAiming(NewDesiredAiming, false);
 }
 
-void AAlsCharacter::ServerSetDesiredAiming_Implementation(const bool bNewDesiredAiming)
+void AAlsCharacter::ServerSetDesiredAiming_Implementation(const FGameplayTag& NewDesiredAiming)
 {
-	SetDesiredAiming(bNewDesiredAiming, false);
+	SetDesiredAiming(NewDesiredAiming, false);
 }
 
-void AAlsCharacter::OnReplicated_DesiredAiming(const bool bPreviousDesiredAiming)
+void AAlsCharacter::OnReplicated_DesiredAiming(const FGameplayTag& PreviousDesiredAiming)
 {
-	OnDesiredAimingChanged(bPreviousDesiredAiming);
+	OnDesiredAimingChanged(PreviousDesiredAiming);
 }
 
-void AAlsCharacter::OnDesiredAimingChanged_Implementation(const bool bPreviousDesiredAiming) {}
+void AAlsCharacter::OnDesiredAimingChanged_Implementation(const FGameplayTag& PreviousDesiredAiming) {}
 
 float AAlsCharacter::GetAimAmount() const
 {
@@ -847,7 +849,7 @@ void AAlsCharacter::OnRotationModeChanged_Implementation(const FGameplayTag& Pre
 void AAlsCharacter::RefreshRotationMode()
 {
 	const auto bSprinting{Gait == AlsGaitTags::Sprinting};
-	const auto bAiming{bDesiredAiming || DesiredRotationMode == AlsRotationModeTags::Aiming};
+	const auto bAiming{DesiredAiming.IsValid() || DesiredRotationMode == AlsRotationModeTags::Aiming};
 
 	if (ViewMode == AlsViewModeTags::FirstPerson)
 	{

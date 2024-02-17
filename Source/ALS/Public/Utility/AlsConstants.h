@@ -694,48 +694,48 @@ inline const FName& UAlsConstants::PADebugDisplayName()
 
 inline const FGameplayTagContainer& UAlsConstants::ViewModeRoot()
 {
-	static const FGameplayTagContainer Container{AlsViewModeTags::ViewMode};
+	static const FGameplayTagContainer Container{AlsViewModeTags::Root};
 	return Container;
 }
 
 inline const FGameplayTagContainer& UAlsConstants::AimingModeRoot()
 {
-	static const FGameplayTagContainer Container{AlsAimingModeTags::AimingMode};
+	static const FGameplayTagContainer Container{AlsAimingModeTags::Root};
 	return Container;
 }
 
 inline const FGameplayTagContainer& UAlsConstants::LocomotionModeRoot()
 {
-	static const FGameplayTagContainer Container{AlsLocomotionModeTags::LocomotionMode};
+	static const FGameplayTagContainer Container{AlsLocomotionModeTags::Root};
 	return Container;
 }
 
 inline const FGameplayTagContainer& UAlsConstants::RotationModeRoot()
 {
-	static const FGameplayTagContainer Container{AlsRotationModeTags::RotationMode};
+	static const FGameplayTagContainer Container{AlsRotationModeTags::Root};
 	return Container;
 }
 
 inline const FGameplayTagContainer& UAlsConstants::StanceRoot()
 {
-	static const FGameplayTagContainer Container{AlsStanceTags::Stance};
+	static const FGameplayTagContainer Container{AlsStanceTags::Root};
 	return Container;
 }
 
 inline const FGameplayTagContainer& UAlsConstants::GaitRoot()
 {
-	static const FGameplayTagContainer Container{AlsGaitTags::Gait};
+	static const FGameplayTagContainer Container{AlsGaitTags::Root};
 	return Container;
 }
 
 inline const FGameplayTagContainer& UAlsConstants::OverlayModeRoot()
 {
-	static const FGameplayTagContainer Container{AlsOverlayModeTags::OverlayMode};
+	static const FGameplayTagContainer Container{AlsOverlayModeTags::Root};
 	return Container;
 }
 
 inline const FGameplayTagContainer& UAlsConstants::LocomotionActionRoot()
 {
-	static const FGameplayTagContainer Container{AlsLocomotionActionTags::LocomotionAction};
+	static const FGameplayTagContainer Container{AlsLocomotionActionTags::Root};
 	return Container;
 }

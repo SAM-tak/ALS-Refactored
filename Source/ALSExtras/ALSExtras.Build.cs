@@ -16,7 +16,7 @@ public class ALSExtras : ModuleRules
 
 		PrivateDependencyModuleNames.AddRange(new[]
 		{
-			"EnhancedInput", "ALSCamera", "GameplayAbilities"
+			"EnhancedInput", "ALSCamera", "GameplayTags", "GameplayAbilities"
 		});
 	}
 }

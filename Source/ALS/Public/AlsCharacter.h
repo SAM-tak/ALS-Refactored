@@ -51,7 +51,7 @@ protected:
 	FGameplayTag DesiredViewMode{AlsViewModeTags::ThirdPerson};
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings|Als Character|Desired State", ReplicatedUsing = "OnReplicated_DesiredAiming")
-	uint8 bDesiredAiming : 1{false};
+	FGameplayTag DesiredAiming{FGameplayTag::EmptyTag};
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings|Als Character|Desired State", Replicated)
 	FGameplayTag DesiredRotationMode{AlsRotationModeTags::ViewDirection};
@@ -126,11 +126,11 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State|Als Character", Transient)
 	FRotator PendingFocalRotationRelativeAdjustment{ForceInit};
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State|Als Character", Transient)
-	UAlsCharacterMovementComponent *AlsCharacterMovement{nullptr};
+	UPROPERTY(BlueprintReadOnly, Category = "State|Als Character", Transient)
+	TObjectPtr<UAlsCharacterMovementComponent> AlsCharacterMovement;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State|Als Character", Transient)
-	UAlsAnimationInstance *AnimationInstance{nullptr};
+	UPROPERTY(BlueprintReadOnly, Category = "State|Als Character", Transient)
+	TObjectPtr<UAlsAnimationInstance> AnimationInstance;
 
 	FTimerHandle BrakingFrictionFactorResetTimer;
 
@@ -252,10 +252,10 @@ protected:
 	// Desired Aiming
 
 public:
-	bool IsDesiredAiming() const;
+	const FGameplayTag& GetDesiredAiming() const;
 
 	UFUNCTION(BlueprintCallable, Category = "Als Character")
-	void SetDesiredAiming(bool bNewDesiredAiming);
+	void SetDesiredAiming(const FGameplayTag& NewDesiredAiming);
 
 	UFUNCTION(BlueprintPure, Category = "Als Character")
 	float GetAimAmount() const;
@@ -267,20 +267,20 @@ public:
 	void GetSightLocAndRot(FVector& Loc, FRotator& Rot) const;
 
 private:
-	void SetDesiredAiming(bool bNewDesiredAiming, bool bSendRpc);
+	void SetDesiredAiming(const FGameplayTag& NewDesiredAiming, bool bSendRpc);
 
 	UFUNCTION(Client, Reliable)
-	void ClientSetDesiredAiming(bool bNewDesiredAiming);
+	void ClientSetDesiredAiming(const FGameplayTag& NewDesiredAiming);
 
 	UFUNCTION(Server, Reliable)
-	void ServerSetDesiredAiming(bool bNewDesiredAiming);
+	void ServerSetDesiredAiming(const FGameplayTag& NewDesiredAiming);
 
 	UFUNCTION()
-	void OnReplicated_DesiredAiming(bool bPreviousDesiredAiming);
+	void OnReplicated_DesiredAiming(const FGameplayTag& PreviousDesiredAiming);
 
 protected:
 	UFUNCTION(BlueprintNativeEvent, Category = "Als Character")
-	void OnDesiredAimingChanged(bool bPreviousDesiredAiming);
+	void OnDesiredAimingChanged(const FGameplayTag& PreviousDesiredAiming);
 
 	// Desired Rotation Mode
 
@@ -693,6 +693,8 @@ public:
 private:
 	void RefreshPhysicalAnimation(float DeltaTime);
 
+	bool IsPAProfileExist(const FName& ProfileName) const;
+
 	// Others
 
 public:
@@ -756,9 +758,9 @@ inline const FGameplayTag& AAlsCharacter::GetLocomotionMode() const
 	return LocomotionMode;
 }
 
-inline bool AAlsCharacter::IsDesiredAiming() const
+inline const FGameplayTag& AAlsCharacter::GetDesiredAiming() const
 {
-	return bDesiredAiming;
+	return DesiredAiming;
 }
 
 inline const FGameplayTag& AAlsCharacter::GetDesiredRotationMode() const

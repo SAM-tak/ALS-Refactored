@@ -178,7 +178,7 @@ void AAlsCharacterExample::Input_OnJump(const FInputActionValue& ActionValue)
 
 void AAlsCharacterExample::Input_OnAim(const FInputActionValue& ActionValue)
 {
-	SetDesiredAiming(ActionValue.Get<bool>());
+	SetDesiredAiming(ActionValue.Get<bool>() ? AlsAimingModeTags::AimDownSight : FGameplayTag::EmptyTag);
 }
 
 void AAlsCharacterExample::Input_OnRagdoll()

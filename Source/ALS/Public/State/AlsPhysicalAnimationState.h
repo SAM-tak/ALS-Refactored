@@ -56,5 +56,7 @@ struct ALS_API FAlsPhysicalAnimationState
 	void Refresh(float DelaTime, USkeletalMeshComponent* Mesh, const FAlsPhysicalAnimationSettings& Settings, const FAlsPhysicalAnimationCurveState& Curves);
 
 private:
-	bool HasAnyProfile(const class USkeletalBodySetup* BodySetup);
+	bool HasAnyProfile(const class USkeletalBodySetup* BodySetup) const;
+
+	static float GetLockedValue(const FAlsPhysicalAnimationCurveState& Curves, const FName& BoneName);
 };
