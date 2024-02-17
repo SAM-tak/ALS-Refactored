@@ -868,6 +868,11 @@ void UAlsPhysicalAnimationComponent::TickComponent(float DeltaTime, enum ELevelT
 				GetSkeletalMesh()->SetCollisionEnabled(PrevCollisionEnabled);
 				bActive = false;
 			}
+
+			// skip to next frame
+
+			Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
+			return;
 		}
 	}
 
