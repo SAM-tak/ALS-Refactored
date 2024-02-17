@@ -12,7 +12,7 @@ class AAlsCharacter;
 class USkeletalBodySetup;
 
 /**
- * 
+ * PhysicalAnimationComponent for ALS Refactored
  */
 UCLASS()
 class ALS_API UAlsPhysicalAnimationComponent : public UPhysicalAnimationComponent
