@@ -30,6 +30,12 @@ class ALS_API AAlsCharacter : public ACharacter, public IAbilitySystemInterface,
 	GENERATED_BODY()
 
 protected:
+	UPROPERTY(BlueprintReadOnly, Category = "State|Als Character", Transient)
+	TObjectPtr<UAlsCharacterMovementComponent> AlsCharacterMovement;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State|Als Character", Transient)
+	TWeakObjectPtr<UAlsAnimationInstance> AnimationInstance;
+
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Als Character")
 	TObjectPtr<UAlsPhysicalAnimationComponent> PhysicalAnimation;
 
@@ -122,12 +128,6 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State|Als Character", Transient)
 	FRotator PendingFocalRotationRelativeAdjustment{ForceInit};
 
-	UPROPERTY(BlueprintReadOnly, Category = "State|Als Character", Transient)
-	TObjectPtr<UAlsCharacterMovementComponent> AlsCharacterMovement;
-
-	UPROPERTY(BlueprintReadOnly, Category = "State|Als Character", Transient)
-	TObjectPtr<UAlsAnimationInstance> AnimationInstance;
-
 	FTimerHandle BrakingFrictionFactorResetTimer;
 
 public:
@@ -147,7 +147,7 @@ public:
 
 	FORCEINLINE UAlsCharacterMovementComponent* GetAlsCharacterMovement() const { return AlsCharacterMovement; }
 
-	FORCEINLINE UAlsAnimationInstance* GetAlsAnimationInstace() const { return AnimationInstance; }
+	FORCEINLINE UAlsAnimationInstance* GetAlsAnimationInstace() const { return AnimationInstance.Get(); }
 
 	/** Name of the PhysicalAnimationComponent. */
 	static FName PhysicalAnimationComponentName;
@@ -197,6 +197,8 @@ public:
 	virtual bool HasAnyMatchingGameplayTags(const FGameplayTagContainer& TagContainer) const override;
 
 private:
+	mutable FGameplayTagContainer TempTagContainer;
+
 	bool HasMatchingGameplayTagToAlsState(FGameplayTag TagToCheck) const;
 
 	void RefreshMeshProperties() const;

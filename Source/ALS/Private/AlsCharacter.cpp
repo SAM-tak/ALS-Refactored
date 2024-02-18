@@ -175,7 +175,6 @@ bool AAlsCharacter::HasMatchingGameplayTag(FGameplayTag TagToCheck) const
 
 bool AAlsCharacter::HasAllMatchingGameplayTags(const FGameplayTagContainer& TagContainer) const
 {
-	FGameplayTagContainer TempTagContainer;
 	GetOwnedGameplayTags(TempTagContainer);
 	return TempTagContainer.HasAll(TagContainer);
 
@@ -189,7 +188,6 @@ bool AAlsCharacter::HasAllMatchingGameplayTags(const FGameplayTagContainer& TagC
 
 bool AAlsCharacter::HasAnyMatchingGameplayTags(const FGameplayTagContainer& TagContainer) const
 {
-	FGameplayTagContainer TempTagContainer;
 	GetOwnedGameplayTags(TempTagContainer);
 	return TempTagContainer.HasAny(TagContainer);
 
@@ -288,7 +286,7 @@ void AAlsCharacter::BeginPlay()
 {
 	ALS_ENSURE(IsValid(Settings));
 	ALS_ENSURE(IsValid(MovementSettings));
-	ALS_ENSURE(IsValid(AnimationInstance));
+	ALS_ENSURE(AnimationInstance.IsValid());
 
 	ALS_ENSURE_MESSAGE(!bUseControllerRotationPitch && !bUseControllerRotationYaw && !bUseControllerRotationRoll,
 					   TEXT("These settings are not allowed and must be turned off!"));
@@ -303,7 +301,7 @@ void AAlsCharacter::BeginPlay()
 		GetCapsuleComponent()->TransformUpdated.AddWeakLambda(
 			this, [this](USceneComponent*, const EUpdateTransformFlags, const ETeleportType TeleportType)
 			{
-				if (TeleportType != ETeleportType::None && IsValid(AnimationInstance))
+				if (TeleportType != ETeleportType::None && AnimationInstance.IsValid())
 				{
 					AnimationInstance->MarkTeleported();
 				}
@@ -358,7 +356,7 @@ void AAlsCharacter::PostNetReceiveLocationAndRotation()
 		bTeleported |= FVector::DistSquared(PreviousLocation, NewLocation) > AlsCharacterConstants::TeleportDistanceThresholdSquared;
 	}
 
-	if (bTeleported && IsValid(AnimationInstance))
+	if (bTeleported && AnimationInstance.IsValid())
 	{
 		AnimationInstance->MarkTeleported();
 	}
@@ -402,7 +400,7 @@ void AAlsCharacter::OnRep_ReplicatedBasedMovement()
 		bTeleported |= FVector::DistSquared(PreviousLocation, NewLocation) > AlsCharacterConstants::TeleportDistanceThresholdSquared;
 	}
 
-	if (bTeleported && IsValid(AnimationInstance))
+	if (bTeleported && AnimationInstance.IsValid())
 	{
 		AnimationInstance->MarkTeleported();
 	}
@@ -412,7 +410,7 @@ void AAlsCharacter::Tick(const float DeltaTime)
 {
 	DECLARE_SCOPE_CYCLE_COUNTER(TEXT("AAlsCharacter::Tick()"), STAT_AAlsCharacter_Tick, STATGROUP_Als)
 
-	if (!IsValid(Settings) || !IsValid(AnimationInstance))
+	if (!IsValid(Settings) || !AnimationInstance.IsValid())
 	{
 		Super::Tick(DeltaTime);
 		return;
@@ -776,7 +774,7 @@ void AAlsCharacter::OnDesiredAimingChanged_Implementation(const FGameplayTag& Pr
 
 float AAlsCharacter::GetAimAmount() const
 {
-	return IsValid(AnimationInstance) ? AnimationInstance->GetCurveValueClamped01(UAlsConstants::AllowAimingCurveName()) : 0.0f;
+	return AnimationInstance.IsValid() ? AnimationInstance->GetCurveValueClamped01(UAlsConstants::AllowAimingCurveName()) : 0.0f;
 }
 
 bool AAlsCharacter::HasSight_Implementation() const
@@ -1725,7 +1723,7 @@ void AAlsCharacter::MulticastOnJumpedNetworked_Implementation()
 
 void AAlsCharacter::OnJumpedNetworked()
 {
-	if (IsValid(AnimationInstance))
+	if (AnimationInstance.IsValid())
 	{
 		AnimationInstance->Jump();
 	}

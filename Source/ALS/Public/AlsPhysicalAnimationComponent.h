@@ -51,37 +51,37 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "State|PhysicalAnimation", Transient)
 	TEnumAsByte<ECollisionEnabled::Type> PrevCollisionEnabled{ECollisionEnabled::QueryOnly};
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State|PhysicalAnimation", Transient)
+	UPROPERTY(VisibleAnywhere, Category = "State|PhysicalAnimation", Transient)
 	TArray<FName> CurrentProfileNames;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State|PhysicalAnimation", Transient)
+	UPROPERTY(VisibleAnywhere, Category = "State|PhysicalAnimation", Transient)
 	TArray<FName> CurrentMultiplyProfileNames;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State|PhysicalAnimation", Transient)
+	UPROPERTY(VisibleAnywhere, Category = "State|PhysicalAnimation", Transient)
 	TArray<FName> CurrentOverrideMultiplyProfileNames;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State|PhysicalAnimation", Transient)
+	UPROPERTY(VisibleAnywhere, Category = "State|PhysicalAnimation", Transient)
 	FGameplayTag LocomotionAction;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State|PhysicalAnimation", Transient)
+	UPROPERTY(VisibleAnywhere, Category = "State|PhysicalAnimation", Transient)
 	FGameplayTag LocomotionMode;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State|PhysicalAnimation", Transient)
+	UPROPERTY(VisibleAnywhere, Category = "State|PhysicalAnimation", Transient)
 	FGameplayTag Stance;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State|PhysicalAnimation", Transient)
+	UPROPERTY(VisibleAnywhere, Category = "State|PhysicalAnimation", Transient)
 	FGameplayTag Gait;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State|PhysicalAnimation", Transient)
+	UPROPERTY(VisibleAnywhere, Category = "State|PhysicalAnimation", Transient)
 	FGameplayTag OverlayMode;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State|PhysicalAnimation", Transient)
+	UPROPERTY(VisibleAnywhere, Category = "State|PhysicalAnimation", Transient)
 	TArray<FName> OverrideMultiplyProfileNames;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State|PhysicalAnimation", Transient)
+	UPROPERTY(VisibleAnywhere, Category = "State|PhysicalAnimation", Transient)
 	uint8 bActive : 1 {false};
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State|PhysicalAnimation", Transient)
+	UPROPERTY(VisibleAnywhere, Category = "State|PhysicalAnimation", Transient)
 	uint8 bRagdolling : 1 {false};
 
 public:
