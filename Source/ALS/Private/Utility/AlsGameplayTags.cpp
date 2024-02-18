@@ -2,7 +2,43 @@
 
 namespace AlsTags
 {
-	UE_DEFINE_GAMEPLAY_TAG(Als, FName{TEXTVIEW("Als")})
+	UE_DEFINE_GAMEPLAY_TAG(Root, FName{TEXTVIEW("Als")})
+}
+
+namespace AlsDesiredStateTags
+{
+	UE_DEFINE_GAMEPLAY_TAG(Root, FName{ TEXTVIEW("Als.Desired") })
+}
+
+namespace AlsDesiredViewModeTags
+{
+	UE_DEFINE_GAMEPLAY_TAG(Root, FName{TEXTVIEW("Als.Desired.ViewMode")})
+	UE_DEFINE_GAMEPLAY_TAG(FirstPerson, FName{TEXTVIEW("Als.Desired.ViewMode.FirstPerson")})
+	UE_DEFINE_GAMEPLAY_TAG(ThirdPerson, FName{TEXTVIEW("Als.Desired.ViewMode.ThirdPerson")})
+}
+
+namespace AlsDesiredRotationModeTags
+{
+	UE_DEFINE_GAMEPLAY_TAG(Root, FName{TEXTVIEW("Als.Desired.RotationMode")})
+	UE_DEFINE_GAMEPLAY_TAG(VelocityDirection, FName{TEXTVIEW("Als.Desired.RotationMode.VelocityDirection")})
+	UE_DEFINE_GAMEPLAY_TAG(ViewDirection, FName{TEXTVIEW("Als.Desired.RotationMode.ViewDirection")})
+	UE_DEFINE_GAMEPLAY_TAG(Aiming, FName{TEXTVIEW("Als.Desired.RotationMode.Aiming")})
+}
+
+namespace AlsDesiredStanceTags
+{
+	UE_DEFINE_GAMEPLAY_TAG(Root, FName{TEXTVIEW("Als.Desired.Stance")})
+	UE_DEFINE_GAMEPLAY_TAG(Standing, FName{TEXTVIEW("Als.Desired.Stance.Standing")})
+	UE_DEFINE_GAMEPLAY_TAG(Crouching, FName{TEXTVIEW("Als.Desired.Stance.Crouching")})
+	UE_DEFINE_GAMEPLAY_TAG(Lying, FName{TEXTVIEW("Als.Desired.Stance.Lying")})
+}
+
+namespace AlsDesiredGaitTags
+{
+	UE_DEFINE_GAMEPLAY_TAG(Root, FName{TEXTVIEW("Als.Desired.Gait")})
+	UE_DEFINE_GAMEPLAY_TAG(Walking, FName{TEXTVIEW("Als.Desired.Gait.Walking")})
+	UE_DEFINE_GAMEPLAY_TAG(Running, FName{TEXTVIEW("Als.Desired.Gait.Running")})
+	UE_DEFINE_GAMEPLAY_TAG(Sprinting, FName{TEXTVIEW("Als.Desired.Gait.Sprinting")})
 }
 
 namespace AlsViewModeTags

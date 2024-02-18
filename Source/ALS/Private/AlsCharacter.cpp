@@ -32,6 +32,13 @@ AAlsCharacter::AAlsCharacter(const FObjectInitializer& ObjectInitializer) : Supe
 	ObjectInitializer.SetDefaultSubobjectClass<UAlsCharacterMovementComponent>(CharacterMovementComponentName)
 }
 {
+	InitialGameplayTags.AddTag(AlsDesiredViewModeTags::ThirdPerson);
+	InitialGameplayTags.AddTag(AlsDesiredRotationModeTags::ViewDirection);
+	InitialGameplayTags.AddTag(AlsDesiredStanceTags::Standing);
+	InitialGameplayTags.AddTag(AlsDesiredGaitTags::Running);
+	InitialGameplayTags.AddTag(AlsOverlayModeTags::Default);
+	InitialGameplayTags.AddTag(AlsLocomotionModeTags::Grounded);
+
 	PrimaryActorTick.bCanEverTick = true;
 
 	bUseControllerRotationYaw = false;
@@ -77,56 +84,6 @@ bool AAlsCharacter::CanEditChange(const FProperty* Property) const
 }
 #endif
 
-bool AAlsCharacter::HasMatchingGameplayTagToAlsState(FGameplayTag TagToCheck) const
-{
-	if (TagToCheck == DesiredViewMode)
-	{
-		return true;
-	}
-	if (TagToCheck == DesiredRotationMode)
-	{
-		return true;
-	}
-	if (TagToCheck == DesiredStance)
-	{
-		return true;
-	}
-	if (TagToCheck == DesiredGait)
-	{
-		return true;
-	}
-	if (TagToCheck == DesiredStance)
-	{
-		return true;
-	}
-	if (TagToCheck == OverlayMode)
-	{
-		return true;
-	}
-	if (TagToCheck == LocomotionMode)
-	{
-		return true;
-	}
-	if (TagToCheck == ViewMode)
-	{
-		return true;
-	}
-	if (TagToCheck == RotationMode)
-	{
-		return true;
-	}
-	if (TagToCheck == Stance)
-	{
-		return true;
-	}
-	if (TagToCheck == Gait)
-	{
-		return true;
-	}
-
-	return false;
-}
-
 // IAbilitySystemInterface
 
 UAbilitySystemComponent* AAlsCharacter::GetAbilitySystemComponent() const
@@ -146,25 +103,10 @@ void AAlsCharacter::GetOwnedGameplayTags(FGameplayTagContainer& TagContainer) co
 	{
 		TagContainer.Reset();
 	}
-	TagContainer.AddTag(DesiredViewMode);
-	TagContainer.AddTag(DesiredRotationMode);
-	TagContainer.AddTag(DesiredStance);
-	TagContainer.AddTag(DesiredGait);
-	TagContainer.AddTag(DesiredStance);
-	TagContainer.AddTag(OverlayMode);
-	TagContainer.AddTag(LocomotionMode);
-	TagContainer.AddTag(ViewMode);
-	TagContainer.AddTag(RotationMode);
-	TagContainer.AddTag(Stance);
-	TagContainer.AddTag(Gait);
 }
 
 bool AAlsCharacter::HasMatchingGameplayTag(FGameplayTag TagToCheck) const
 {
-	if (HasMatchingGameplayTagToAlsState(TagToCheck))
-	{
-		return true;
-	}
 	if (AbilitySystem)
 	{
 		return AbilitySystem->HasMatchingGameplayTag(TagToCheck);
@@ -175,28 +117,22 @@ bool AAlsCharacter::HasMatchingGameplayTag(FGameplayTag TagToCheck) const
 
 bool AAlsCharacter::HasAllMatchingGameplayTags(const FGameplayTagContainer& TagContainer) const
 {
-	GetOwnedGameplayTags(TempTagContainer);
-	return TempTagContainer.HasAll(TagContainer);
+	if (AbilitySystem)
+	{
+		return AbilitySystem->HasAllMatchingGameplayTags(TagContainer);
+	}
 
-	//if (AbilitySystem)
-	//{
-	//	return AbilitySystem->HasAllMatchingGameplayTags(TagContainer);
-	//}
-
-	//return false;
+	return false;
 }
 
 bool AAlsCharacter::HasAnyMatchingGameplayTags(const FGameplayTagContainer& TagContainer) const
 {
-	GetOwnedGameplayTags(TempTagContainer);
-	return TempTagContainer.HasAny(TagContainer);
+	if (AbilitySystem)
+	{
+		return AbilitySystem->HasAnyMatchingGameplayTags(TagContainer);
+	}
 
-	//if (AbilitySystem)
-	//{
-	//	return AbilitySystem->HasAnyMatchingGameplayTags(TagContainer);
-	//}
-
-	//return false;
+	return false;
 }
 
 void AAlsCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
@@ -207,13 +143,6 @@ void AAlsCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLif
 	Parameters.bIsPushBased = true;
 
 	Parameters.Condition = COND_SkipOwner;
-	DOREPLIFETIME_WITH_PARAMS_FAST(ThisClass, DesiredStance, Parameters)
-	DOREPLIFETIME_WITH_PARAMS_FAST(ThisClass, DesiredGait, Parameters)
-	DOREPLIFETIME_WITH_PARAMS_FAST(ThisClass, DesiredAiming, Parameters)
-	DOREPLIFETIME_WITH_PARAMS_FAST(ThisClass, DesiredRotationMode, Parameters)
-	DOREPLIFETIME_WITH_PARAMS_FAST(ThisClass, DesiredViewMode, Parameters)
-	DOREPLIFETIME_WITH_PARAMS_FAST(ThisClass, OverlayMode, Parameters)
-
 	DOREPLIFETIME_WITH_PARAMS_FAST(ThisClass, ReplicatedViewRotation, Parameters)
 	DOREPLIFETIME_WITH_PARAMS_FAST(ThisClass, InputDirection, Parameters)
 	DOREPLIFETIME_WITH_PARAMS_FAST(ThisClass, DesiredVelocityYawAngle, Parameters)
@@ -228,9 +157,32 @@ void AAlsCharacter::PreRegisterAllComponents()
 	// Set some default values here so that the animation instance and the
 	// camera component can read the most up-to-date values during initialization.
 
-	RotationMode = DesiredAiming.IsValid() ? AlsRotationModeTags::Aiming : DesiredRotationMode;
-	Stance = DesiredStance;
-	Gait = DesiredGait;
+	if (AbilitySystem)
+	{
+		for(auto& Tag : InitialGameplayTags)
+		{
+			AbilitySystem->SetLooseGameplayTagCount(Tag, 1);
+		}
+
+		GetOwnedGameplayTags(TempTagContainer);
+		for(auto& Tag : TempTagContainer.Filter(Settings->GameplayTagCaterogy.RotationModes))
+		{
+			AbilitySystem->SetLooseGameplayTagCount(Tag, 0);
+		}
+		AbilitySystem->SetLooseGameplayTagCount(GetAimingMode().IsValid() ? AlsRotationModeTags::Aiming : Settings->DesiredToActual(GetDesiredRotationMode()), 1);
+
+		for(auto& Tag : TempTagContainer.Filter(Settings->GameplayTagCaterogy.Stances))
+		{
+			AbilitySystem->SetLooseGameplayTagCount(Tag, 0);
+		}
+		AbilitySystem->SetLooseGameplayTagCount(Settings->DesiredToActual(GetDesiredStance()), 1);
+
+		for(auto& Tag : TempTagContainer.Filter(Settings->GameplayTagCaterogy.Gaits))
+		{
+			AbilitySystem->SetLooseGameplayTagCount(Tag, 0);
+		}
+		AbilitySystem->SetLooseGameplayTagCount(Settings->DesiredToActual(GetDesiredGait()), 1);
+	}
 
 	Super::PreRegisterAllComponents();
 }
@@ -317,11 +269,11 @@ void AAlsCharacter::BeginPlay()
 
 	RefreshRotationMode();
 
-	AlsCharacterMovement->SetRotationMode(RotationMode);
+	AlsCharacterMovement->SetRotationMode(GetRotationMode());
 
 	ApplyDesiredStance();
 
-	AlsCharacterMovement->SetStance(Stance);
+	AlsCharacterMovement->SetStance(GetStance());
 
 	RefreshGait();
 
@@ -330,7 +282,7 @@ void AAlsCharacter::BeginPlay()
 		AbilitySpecs.RegisterWithOwner(AbilitySystem);
 	}
 
-	OnOverlayModeChanged(OverlayMode);
+	OnOverlayModeChanged(GetOverlayMode());
 }
 
 void AAlsCharacter::PostNetReceiveLocationAndRotation()
@@ -571,57 +523,110 @@ void AAlsCharacter::RefreshMovementBase()
 								 : FRotator::ZeroRotator;
 }
 
-void AAlsCharacter::SetDesiredViewMode(const FGameplayTag& NewDesiredViewMode)
+FGameplayTag AAlsCharacter::GetDesiredViewMode() const
 {
-	SetDesiredViewMode(NewDesiredViewMode, true);
+	GetOwnedGameplayTags(TempTagContainer);
+	return TempTagContainer.Filter(Settings->GameplayTagCaterogy.DesiredViewModes).First();
 }
 
-void AAlsCharacter::SetDesiredViewMode(const FGameplayTag& NewDesiredViewMode, const bool bSendRpc)
+FGameplayTag AAlsCharacter::GetDesiredRotationMode() const
 {
-	if (DesiredViewMode == NewDesiredViewMode || GetLocalRole() < ROLE_AutonomousProxy)
+	GetOwnedGameplayTags(TempTagContainer);
+	return TempTagContainer.Filter(Settings->GameplayTagCaterogy.DesiredRotationModes).First();
+}
+
+FGameplayTag AAlsCharacter::GetDesiredStance() const
+{
+	GetOwnedGameplayTags(TempTagContainer);
+	return TempTagContainer.Filter(Settings->GameplayTagCaterogy.DesiredStances).First();
+}
+
+FGameplayTag AAlsCharacter::GetDesiredGait() const
+{
+	GetOwnedGameplayTags(TempTagContainer);
+	return TempTagContainer.Filter(Settings->GameplayTagCaterogy.DesiredGaits).First();
+}
+
+FGameplayTag AAlsCharacter::GetOverlayMode() const
+{
+	GetOwnedGameplayTags(TempTagContainer);
+	return TempTagContainer.Filter(Settings->GameplayTagCaterogy.OverlayModes).First();
+}
+
+FGameplayTag AAlsCharacter::GetLocomotionMode() const
+{
+	GetOwnedGameplayTags(TempTagContainer);
+	return TempTagContainer.Filter(Settings->GameplayTagCaterogy.LocomotionModes).First();
+}
+
+FGameplayTag AAlsCharacter::GetViewMode() const
+{
+	GetOwnedGameplayTags(TempTagContainer);
+	return TempTagContainer.Filter(Settings->GameplayTagCaterogy.ViewModes).First();
+}
+
+FGameplayTag AAlsCharacter::GetRotationMode() const
+{
+	GetOwnedGameplayTags(TempTagContainer);
+	return TempTagContainer.Filter(Settings->GameplayTagCaterogy.RotationModes).First();
+}
+
+FGameplayTag AAlsCharacter::GetAimingMode() const
+{
+	GetOwnedGameplayTags(TempTagContainer);
+	return TempTagContainer.Filter(Settings->GameplayTagCaterogy.AimingModes).First();
+}
+
+FGameplayTag AAlsCharacter::GetStance() const
+{
+	GetOwnedGameplayTags(TempTagContainer);
+	return TempTagContainer.Filter(Settings->GameplayTagCaterogy.Stances).First();
+}
+
+FGameplayTag AAlsCharacter::GetGait() const
+{
+	GetOwnedGameplayTags(TempTagContainer);
+	return TempTagContainer.Filter(Settings->GameplayTagCaterogy.Gaits).First();
+}
+
+FGameplayTag AAlsCharacter::GetLocomotionAction() const
+{
+	GetOwnedGameplayTags(TempTagContainer);
+	return TempTagContainer.Filter(Settings->GameplayTagCaterogy.Actions).First();
+}
+
+void AAlsCharacter::SetDesiredViewMode(const FGameplayTag& NewDesiredViewMode)
+{
+	if (GetDesiredViewMode() == NewDesiredViewMode || GetLocalRole() < ROLE_AutonomousProxy)
 	{
 		return;
 	}
 
-	DesiredViewMode = NewDesiredViewMode;
-
-	MARK_PROPERTY_DIRTY_FROM_NAME(ThisClass, DesiredViewMode, this)
-
-	if (bSendRpc)
+	GetOwnedGameplayTags(TempTagContainer);
+	for(auto& Tag : TempTagContainer.Filter(Settings->GameplayTagCaterogy.DesiredViewModes))
 	{
-		if (GetLocalRole() >= ROLE_Authority)
-		{
-			ClientSetDesiredViewMode(DesiredViewMode);
-		}
-		else
-		{
-			ServerSetDesiredViewMode(DesiredViewMode);
-		}
+		AbilitySystem->SetLooseGameplayTagCount(Tag, 0);
 	}
-}
-
-void AAlsCharacter::ClientSetDesiredViewMode_Implementation(const FGameplayTag& NewDesiredViewMode)
-{
-	SetDesiredViewMode(NewDesiredViewMode, false);
-}
-
-void AAlsCharacter::ServerSetDesiredViewMode_Implementation(const FGameplayTag& NewDesiredViewMode)
-{
-	SetDesiredViewMode(NewDesiredViewMode, false);
+	AbilitySystem->SetLooseGameplayTagCount(NewDesiredViewMode, 1);
 }
 
 void AAlsCharacter::SetViewMode(const FGameplayTag& NewViewMode)
 {
-	if (ViewMode == NewViewMode)
+	const auto PreviousViewMode{GetViewMode()};
+
+	if (PreviousViewMode == NewViewMode)
 	{
 		return;
 	}
-	
-	const auto PreviousRotationMode{ViewMode};
 
-	ViewMode = NewViewMode;
+	GetOwnedGameplayTags(TempTagContainer);
+	for(auto& Tag : TempTagContainer.Filter(Settings->GameplayTagCaterogy.ViewModes))
+	{
+		AbilitySystem->SetLooseGameplayTagCount(Tag, 0);
+	}
+	AbilitySystem->SetLooseGameplayTagCount(NewViewMode, 1);
 
-	OnRotationModeChanged(PreviousRotationMode);
+	OnViewModeChanged(PreviousViewMode);
 }
 
 void AAlsCharacter::OnViewModeChanged_Implementation(const FGameplayTag& PreviousRotationMode) {}
@@ -651,15 +656,20 @@ void AAlsCharacter::OnMovementModeChanged(const EMovementMode PreviousMovementMo
 }
 
 void AAlsCharacter::SetLocomotionMode(const FGameplayTag& NewLocomotionMode)
-{
-	if (LocomotionMode == NewLocomotionMode)
+{	
+	const auto PreviousLocomotionMode{GetLocomotionMode()};
+
+	if (PreviousLocomotionMode == NewLocomotionMode)
 	{
 		return;
 	}
-	
-	const auto PreviousLocomotionMode{LocomotionMode};
 
-	LocomotionMode = NewLocomotionMode;
+	GetOwnedGameplayTags(TempTagContainer);
+	for(auto& Tag : TempTagContainer.Filter(Settings->GameplayTagCaterogy.LocomotionModes))
+	{
+		AbilitySystem->SetLooseGameplayTagCount(Tag, 0);
+	}
+	AbilitySystem->SetLooseGameplayTagCount(NewLocomotionMode, 1);
 
 	NotifyLocomotionModeChanged(PreviousLocomotionMode);
 }
@@ -708,8 +718,8 @@ void AAlsCharacter::NotifyLocomotionModeChanged(const FGameplayTag& PreviousLoco
 			LocomotionState.bRotationTowardsLastInputDirectionBlocked = true;
 		}
 	}
-	else if (LocomotionMode == AlsLocomotionModeTags::InAir &&
-	         LocomotionAction == AlsLocomotionActionTags::Rolling &&
+	else if (GetLocomotionMode() == AlsLocomotionModeTags::InAir &&
+	         GetLocomotionAction() == AlsLocomotionActionTags::Rolling &&
 	         Settings->Rolling.bInterruptRollingWhenInAir)
 	{
 		// If the character is currently rolling, then enable ragdolling.
@@ -722,55 +732,26 @@ void AAlsCharacter::NotifyLocomotionModeChanged(const FGameplayTag& PreviousLoco
 
 void AAlsCharacter::OnLocomotionModeChanged_Implementation(const FGameplayTag& PreviousLocomotionMode) {}
 
-void AAlsCharacter::SetDesiredAiming(const FGameplayTag& NewDesiredAiming)
+void AAlsCharacter::SetAimingMode(const FGameplayTag& NewAimingMode)
 {
-	SetDesiredAiming(NewDesiredAiming, true);
-}
+	const auto PreviousAimingMode{GetAimingMode()};
 
-void AAlsCharacter::SetDesiredAiming(const FGameplayTag& NewDesiredAiming, const bool bSendRpc)
-{
-	if (DesiredAiming == NewDesiredAiming || GetLocalRole() < ROLE_AutonomousProxy)
+	if (PreviousAimingMode == NewAimingMode || GetLocalRole() < ROLE_AutonomousProxy)
 	{
 		return;
 	}
 
-	const auto PreviousDesiredAiming{DesiredAiming};
-
-	DesiredAiming = NewDesiredAiming;
-
-	MARK_PROPERTY_DIRTY_FROM_NAME(ThisClass, DesiredAiming, this)
-
-	OnDesiredAimingChanged(PreviousDesiredAiming);
-
-	if (bSendRpc)
+	GetOwnedGameplayTags(TempTagContainer);
+	for(auto& Tag : TempTagContainer.Filter(Settings->GameplayTagCaterogy.AimingModes))
 	{
-		if (GetLocalRole() >= ROLE_Authority)
-		{
-			ClientSetDesiredAiming(DesiredAiming);
-		}
-		else
-		{
-			ServerSetDesiredAiming(DesiredAiming);
-		}
+		AbilitySystem->SetLooseGameplayTagCount(Tag, 0);
 	}
+	AbilitySystem->SetLooseGameplayTagCount(NewAimingMode, 1);
+
+	OnAimingModeChanged(PreviousAimingMode);
 }
 
-void AAlsCharacter::ClientSetDesiredAiming_Implementation(const FGameplayTag& NewDesiredAiming)
-{
-	SetDesiredAiming(NewDesiredAiming, false);
-}
-
-void AAlsCharacter::ServerSetDesiredAiming_Implementation(const FGameplayTag& NewDesiredAiming)
-{
-	SetDesiredAiming(NewDesiredAiming, false);
-}
-
-void AAlsCharacter::OnReplicated_DesiredAiming(const FGameplayTag& PreviousDesiredAiming)
-{
-	OnDesiredAimingChanged(PreviousDesiredAiming);
-}
-
-void AAlsCharacter::OnDesiredAimingChanged_Implementation(const FGameplayTag& PreviousDesiredAiming) {}
+void AAlsCharacter::OnAimingModeChanged_Implementation(const FGameplayTag& PreviousAimingMode) {}
 
 float AAlsCharacter::GetAimAmount() const
 {
@@ -788,55 +769,36 @@ void AAlsCharacter::GetSightLocAndRot_Implementation(FVector& Loc, FRotator& Rot
 
 void AAlsCharacter::SetDesiredRotationMode(const FGameplayTag& NewDesiredRotationMode)
 {
-	SetDesiredRotationMode(NewDesiredRotationMode, true);
-}
-
-void AAlsCharacter::SetDesiredRotationMode(const FGameplayTag& NewDesiredRotationMode, const bool bSendRpc)
-{
-	if (DesiredRotationMode == NewDesiredRotationMode || GetLocalRole() < ROLE_AutonomousProxy)
+	if (GetDesiredRotationMode() == NewDesiredRotationMode || GetLocalRole() < ROLE_AutonomousProxy)
 	{
 		return;
 	}
 
-	DesiredRotationMode = NewDesiredRotationMode;
-
-	MARK_PROPERTY_DIRTY_FROM_NAME(ThisClass, DesiredRotationMode, this)
-
-	if (bSendRpc)
+	GetOwnedGameplayTags(TempTagContainer);
+	for(auto& Tag : TempTagContainer.Filter(Settings->GameplayTagCaterogy.DesiredRotationModes))
 	{
-		if (GetLocalRole() >= ROLE_Authority)
-		{
-			ClientSetDesiredRotationMode(DesiredRotationMode);
-		}
-		else
-		{
-			ServerSetDesiredRotationMode(DesiredRotationMode);
-		}
+		AbilitySystem->SetLooseGameplayTagCount(Tag, 0);
 	}
-}
-
-void AAlsCharacter::ClientSetDesiredRotationMode_Implementation(const FGameplayTag& NewDesiredRotationMode)
-{
-	SetDesiredRotationMode(NewDesiredRotationMode, false);
-}
-
-void AAlsCharacter::ServerSetDesiredRotationMode_Implementation(const FGameplayTag& NewDesiredRotationMode)
-{
-	SetDesiredRotationMode(NewDesiredRotationMode, false);
+	AbilitySystem->SetLooseGameplayTagCount(NewDesiredRotationMode, 1);
 }
 
 void AAlsCharacter::SetRotationMode(const FGameplayTag& NewRotationMode)
 {
+	const auto PreviousRotationMode{GetRotationMode()};
+
 	AlsCharacterMovement->SetRotationMode(NewRotationMode);
 
-	if (RotationMode == NewRotationMode)
+	if (PreviousRotationMode == NewRotationMode)
 	{
 		return;
 	}
 
-	const auto PreviousRotationMode{RotationMode};
-
-	RotationMode = NewRotationMode;
+	GetOwnedGameplayTags(TempTagContainer);
+	for(auto& Tag : TempTagContainer.Filter(Settings->GameplayTagCaterogy.RotationModes))
+	{
+		AbilitySystem->SetLooseGameplayTagCount(Tag, 0);
+	}
+	AbilitySystem->SetLooseGameplayTagCount(NewRotationMode, 1);
 
 	OnRotationModeChanged(PreviousRotationMode);
 }
@@ -845,12 +807,12 @@ void AAlsCharacter::OnRotationModeChanged_Implementation(const FGameplayTag& Pre
 
 void AAlsCharacter::RefreshRotationMode()
 {
-	const auto bSprinting{Gait == AlsGaitTags::Sprinting};
-	const auto bAiming{DesiredAiming.IsValid() || DesiredRotationMode == AlsRotationModeTags::Aiming};
+	const auto bSprinting{GetGait() == AlsGaitTags::Sprinting};
+	const auto bAiming{GetAimingMode().IsValid() || GetDesiredRotationMode() == AlsDesiredRotationModeTags::Aiming};
 
-	if (ViewMode == AlsViewModeTags::FirstPerson)
+	if (GetViewMode() == AlsViewModeTags::FirstPerson)
 	{
-		if (LocomotionMode == AlsLocomotionModeTags::InAir)
+		if (GetLocomotionMode() == AlsLocomotionModeTags::InAir)
 		{
 			if (bAiming && Settings->bAllowAimingWhenInAir)
 			{
@@ -880,7 +842,7 @@ void AAlsCharacter::RefreshRotationMode()
 
 	// Third person and other view modes.
 
-	if (LocomotionMode == AlsLocomotionModeTags::InAir)
+	if (GetLocomotionMode() == AlsLocomotionModeTags::InAir)
 	{
 		if (bAiming && Settings->bAllowAimingWhenInAir)
 		{
@@ -892,7 +854,7 @@ void AAlsCharacter::RefreshRotationMode()
 		}
 		else
 		{
-			SetRotationMode(DesiredRotationMode);
+			SetRotationMode(Settings->DesiredToActual(GetDesiredRotationMode()));
 		}
 
 		return;
@@ -916,7 +878,7 @@ void AAlsCharacter::RefreshRotationMode()
 		}
 		else
 		{
-			SetRotationMode(DesiredRotationMode);
+			SetRotationMode(Settings->DesiredToActual(GetDesiredRotationMode()));
 		}
 	}
 	else // Not sprinting.
@@ -927,73 +889,49 @@ void AAlsCharacter::RefreshRotationMode()
 		}
 		else
 		{
-			SetRotationMode(DesiredRotationMode);
+			SetRotationMode(Settings->DesiredToActual(GetDesiredRotationMode()));
 		}
 	}
 }
 
 void AAlsCharacter::SetDesiredStance(const FGameplayTag& NewDesiredStance)
 {
-	SetDesiredStance(NewDesiredStance, true);
-}
-
-void AAlsCharacter::SetDesiredStance(const FGameplayTag& NewDesiredStance, const bool bSendRpc)
-{
-	if (DesiredStance == NewDesiredStance || GetLocalRole() < ROLE_AutonomousProxy)
+	if (GetDesiredStance() == NewDesiredStance || GetLocalRole() < ROLE_AutonomousProxy)
 	{
 		return;
 	}
 
-	DesiredStance = NewDesiredStance;
-
-	MARK_PROPERTY_DIRTY_FROM_NAME(ThisClass, DesiredStance, this)
-
-	if (bSendRpc)
+	GetOwnedGameplayTags(TempTagContainer);
+	for(auto& Tag : TempTagContainer.Filter(Settings->GameplayTagCaterogy.DesiredStances))
 	{
-		if (GetLocalRole() >= ROLE_Authority)
-		{
-			ClientSetDesiredStance(DesiredStance);
-		}
-		else
-		{
-			ServerSetDesiredStance(DesiredStance);
-		}
+		AbilitySystem->SetLooseGameplayTagCount(Tag, 0);
 	}
+	AbilitySystem->SetLooseGameplayTagCount(NewDesiredStance, 1);
 
 	ApplyDesiredStance();
 }
 
-void AAlsCharacter::ClientSetDesiredStance_Implementation(const FGameplayTag& NewDesiredStance)
-{
-	SetDesiredStance(NewDesiredStance, false);
-}
-
-void AAlsCharacter::ServerSetDesiredStance_Implementation(const FGameplayTag& NewDesiredStance)
-{
-	SetDesiredStance(NewDesiredStance, false);
-}
-
 void AAlsCharacter::ApplyDesiredStance()
 {
-	if (!LocomotionAction.IsValid())
+	if (!GetLocomotionAction().IsValid())
 	{
-		if (LocomotionMode == AlsLocomotionModeTags::Grounded)
+		if (GetLocomotionMode() == AlsLocomotionModeTags::Grounded)
 		{
-			if (DesiredStance == AlsStanceTags::Standing)
+			if (GetDesiredStance() == AlsDesiredStanceTags::Standing)
 			{
 				UnCrouch();
 			}
-			else if (DesiredStance == AlsStanceTags::Crouching)
+			else if (GetDesiredStance() == AlsDesiredStanceTags::Crouching)
 			{
 				Crouch();
 			}
 		}
-		else if (LocomotionMode == AlsLocomotionModeTags::InAir)
+		else if (GetLocomotionMode() == AlsLocomotionModeTags::InAir)
 		{
 			UnCrouch();
 		}
 	}
-	else if (LocomotionAction == AlsLocomotionActionTags::Rolling && Settings->Rolling.bCrouchOnStart)
+	else if (GetLocomotionAction() == AlsLocomotionActionTags::Rolling && Settings->Rolling.bCrouchOnStart)
 	{
 		Crouch();
 	}
@@ -1049,16 +987,21 @@ void AAlsCharacter::OnEndCrouch(const float HalfHeightAdjust, const float Scaled
 
 void AAlsCharacter::SetStance(const FGameplayTag& NewStance)
 {
+	const auto PreviousStance{GetStance()};
+
 	AlsCharacterMovement->SetStance(NewStance);
 
-	if (Stance == NewStance)
+	if (PreviousStance == NewStance)
 	{
 		return;
 	}
 
-	const auto PreviousStance{Stance};
-
-	Stance = NewStance;
+	GetOwnedGameplayTags(TempTagContainer);
+	for(auto& Tag : TempTagContainer.Filter(Settings->GameplayTagCaterogy.Stances))
+	{
+		AbilitySystem->SetLooseGameplayTagCount(Tag, 0);
+	}
+	AbilitySystem->SetLooseGameplayTagCount(NewStance, 1);
 
 	OnStanceChanged(PreviousStance);
 }
@@ -1067,53 +1010,34 @@ void AAlsCharacter::OnStanceChanged_Implementation(const FGameplayTag& PreviousS
 
 void AAlsCharacter::SetDesiredGait(const FGameplayTag& NewDesiredGait)
 {
-	SetDesiredGait(NewDesiredGait, true);
-}
-
-void AAlsCharacter::SetDesiredGait(const FGameplayTag& NewDesiredGait, const bool bSendRpc)
-{
-	if (DesiredGait == NewDesiredGait || GetLocalRole() < ROLE_AutonomousProxy)
+	if (GetDesiredGait() == NewDesiredGait || GetLocalRole() < ROLE_AutonomousProxy)
 	{
 		return;
 	}
 
-	DesiredGait = NewDesiredGait;
-
-	MARK_PROPERTY_DIRTY_FROM_NAME(ThisClass, DesiredGait, this)
-
-	if (bSendRpc)
+	GetOwnedGameplayTags(TempTagContainer);
+	for(auto& Tag : TempTagContainer.Filter(Settings->GameplayTagCaterogy.DesiredGaits))
 	{
-		if (GetLocalRole() >= ROLE_Authority)
-		{
-			ClientSetDesiredGait(DesiredGait);
-		}
-		else
-		{
-			ServerSetDesiredGait(DesiredGait);
-		}
+		AbilitySystem->SetLooseGameplayTagCount(Tag, 0);
 	}
-}
-
-void AAlsCharacter::ClientSetDesiredGait_Implementation(const FGameplayTag& NewDesiredGait)
-{
-	SetDesiredGait(NewDesiredGait, false);
-}
-
-void AAlsCharacter::ServerSetDesiredGait_Implementation(const FGameplayTag& NewDesiredGait)
-{
-	SetDesiredGait(NewDesiredGait, false);
+	AbilitySystem->SetLooseGameplayTagCount(NewDesiredGait, 1);
 }
 
 void AAlsCharacter::SetGait(const FGameplayTag& NewGait)
 {
-	if (Gait == NewGait)
+	const auto PreviousGait{GetGait()};
+
+	if (PreviousGait == NewGait)
 	{
 		return;
 	}
 
-	const auto PreviousGait{Gait};
-
-	Gait = NewGait;
+	GetOwnedGameplayTags(TempTagContainer);
+	for(auto& Tag : TempTagContainer.Filter(Settings->GameplayTagCaterogy.Gaits))
+	{
+		AbilitySystem->SetLooseGameplayTagCount(Tag, 0);
+	}
+	AbilitySystem->SetLooseGameplayTagCount(NewGait, 1);
 
 	OnGaitChanged(PreviousGait);
 }
@@ -1122,7 +1046,7 @@ void AAlsCharacter::OnGaitChanged_Implementation(const FGameplayTag& PreviousGai
 
 void AAlsCharacter::RefreshGait()
 {
-	if (LocomotionMode != AlsLocomotionModeTags::Grounded)
+	if (GetLocomotionMode() != AlsLocomotionModeTags::Grounded)
 	{
 		return;
 	}
@@ -1142,9 +1066,10 @@ FGameplayTag AAlsCharacter::CalculateMaxAllowedGait() const
 	// to be in and can be determined by the desired gait, the rotation mode, the stance, etc. For example,
 	// if you wanted to force the character into a walking state while indoors, this could be done here.
 
-	if (DesiredGait != AlsGaitTags::Sprinting)
+	const auto DesiredGait{GetDesiredGait()};
+	if (DesiredGait != AlsDesiredGaitTags::Sprinting)
 	{
-		return DesiredGait;
+		return Settings->DesiredToActual(DesiredGait);
 	}
 
 	if (CanSprint())
@@ -1180,14 +1105,14 @@ bool AAlsCharacter::CanSprint() const
 	// If the character is in view direction rotation mode, only allow sprinting if there is
 	// input and if the input direction is aligned with the view direction within 50 degrees.
 
-	if (!LocomotionState.bHasInput || Stance != AlsStanceTags::Standing ||
-		(RotationMode == AlsRotationModeTags::Aiming && !Settings->bSprintHasPriorityOverAiming))
+	if (!LocomotionState.bHasInput || GetStance() != AlsStanceTags::Standing ||
+		(GetRotationMode() == AlsRotationModeTags::Aiming && !Settings->bSprintHasPriorityOverAiming))
 	{
 		return false;
 	}
 
-	if (ViewMode != AlsViewModeTags::FirstPerson &&
-		(DesiredRotationMode == AlsRotationModeTags::VelocityDirection || Settings->bRotateToVelocityWhenSprinting))
+	if (GetViewMode() != AlsViewModeTags::FirstPerson &&
+		(GetDesiredRotationMode() == AlsDesiredRotationModeTags::VelocityDirection || Settings->bRotateToVelocityWhenSprinting))
 	{
 		return true;
 	}
@@ -1203,49 +1128,20 @@ bool AAlsCharacter::CanSprint() const
 
 void AAlsCharacter::SetOverlayMode(const FGameplayTag& NewOverlayMode)
 {
-	SetOverlayMode(NewOverlayMode, true);
-}
+	const auto PreviousOverlayMode{GetOverlayMode()};
 
-void AAlsCharacter::SetOverlayMode(const FGameplayTag& NewOverlayMode, const bool bSendRpc)
-{
-	if (OverlayMode == NewOverlayMode || GetLocalRole() <= ROLE_SimulatedProxy)
+	if (PreviousOverlayMode == NewOverlayMode || GetLocalRole() <= ROLE_SimulatedProxy)
 	{
 		return;
 	}
 
-	const auto PreviousOverlayMode{OverlayMode};
-
-	OverlayMode = NewOverlayMode;
-
-	MARK_PROPERTY_DIRTY_FROM_NAME(ThisClass, OverlayMode, this)
-
-	OnOverlayModeChanged(PreviousOverlayMode);
-
-	if (bSendRpc)
+	GetOwnedGameplayTags(TempTagContainer);
+	for(auto& Tag : TempTagContainer.Filter(Settings->GameplayTagCaterogy.OverlayModes))
 	{
-		if (GetLocalRole() >= ROLE_Authority)
-		{
-			ClientSetOverlayMode(OverlayMode);
-		}
-		else
-		{
-			ServerSetOverlayMode(OverlayMode);
-		}
+		AbilitySystem->SetLooseGameplayTagCount(Tag, 0);
 	}
-}
+	AbilitySystem->SetLooseGameplayTagCount(NewOverlayMode, 1);
 
-void AAlsCharacter::ClientSetOverlayMode_Implementation(const FGameplayTag& NewOverlayMode)
-{
-	SetOverlayMode(NewOverlayMode, false);
-}
-
-void AAlsCharacter::ServerSetOverlayMode_Implementation(const FGameplayTag& NewOverlayMode)
-{
-	SetOverlayMode(NewOverlayMode, false);
-}
-
-void AAlsCharacter::OnReplicated_OverlayMode(const FGameplayTag& PreviousOverlayMode)
-{
 	OnOverlayModeChanged(PreviousOverlayMode);
 }
 
@@ -1253,20 +1149,26 @@ void AAlsCharacter::OnOverlayModeChanged_Implementation(const FGameplayTag& Prev
 
 void AAlsCharacter::SetLocomotionAction(const FGameplayTag& NewLocomotionAction)
 {
-	if (LocomotionAction == NewLocomotionAction)
+	const auto PreviousLocomotionAction{GetLocomotionAction()};
+
+	if (PreviousLocomotionAction == NewLocomotionAction)
 	{
 		return;
 	}
-	const auto PreviousLocomotionAction{LocomotionAction};
 
-	LocomotionAction = NewLocomotionAction;
+	GetOwnedGameplayTags(TempTagContainer);
+	for(auto& Tag : TempTagContainer.Filter(Settings->GameplayTagCaterogy.Actions))
+	{
+		AbilitySystem->SetLooseGameplayTagCount(Tag, 0);
+	}
+	AbilitySystem->SetLooseGameplayTagCount(NewLocomotionAction, 1);
 
 	NotifyLocomotionActionChanged(PreviousLocomotionAction);
 }
 
 void AAlsCharacter::NotifyLocomotionActionChanged(const FGameplayTag& PreviousLocomotionAction)
 {
-	if (!LocomotionAction.IsValid())
+	if (!GetLocomotionAction().IsValid())
 	{
 		AlsCharacterMovement->SetInputBlocked(false);
 	}
@@ -1432,10 +1334,14 @@ void AAlsCharacter::RefreshView(const float DeltaTime)
 	{
 		ViewModeChangeBlockTime -= DeltaTime;
 	}
-	else if (GetViewMode() != GetDesiredViewMode())
+	else
 	{
-		SetViewMode(GetDesiredViewMode());
-		ViewModeChangeBlockTime = Settings->View.ViewModeChangeBlockTime;
+		const auto& NewViewMode{Settings->DesiredToActual(GetDesiredViewMode())};
+		if (GetViewMode() != NewViewMode)
+		{
+			SetViewMode(NewViewMode);
+			ViewModeChangeBlockTime = Settings->View.ViewModeChangeBlockTime;
+		}
 	}
 
 	if (MovementBase.bHasRelativeRotation)
@@ -1668,16 +1574,16 @@ void AAlsCharacter::RefreshLocomotion(const float DeltaTime)
 							  LocomotionState.Speed > Settings->MovingSpeedThreshold;
 
 	if (Settings->bAutoTurnOffSprint
-		&& (LocomotionAction.IsValid() || LocomotionMode == AlsLocomotionModeTags::Grounded)
-		&& LocomotionState.Speed < AlsCharacterMovement->GetGaitSettings().WalkSpeed && GetDesiredGait() == AlsGaitTags::Sprinting)
+		&& (GetLocomotionAction().IsValid() || GetLocomotionMode() == AlsLocomotionModeTags::Grounded)
+		&& LocomotionState.Speed < AlsCharacterMovement->GetGaitSettings().WalkSpeed && GetDesiredGait() == AlsDesiredGaitTags::Sprinting)
 	{
-		SetDesiredGait(AlsGaitTags::Running);
+		SetDesiredGait(AlsDesiredGaitTags::Running);
 	}
 }
 
 void AAlsCharacter::RefreshLocomotionLate(const float DeltaTime)
 {
-	if (!LocomotionMode.IsValid() || LocomotionAction.IsValid())
+	if (!GetLocomotionMode().IsValid() || GetLocomotionAction().IsValid())
 	{
 		RefreshLocomotionLocationAndRotation();
 		RefreshTargetYawAngleUsingLocomotionRotation();
@@ -1692,8 +1598,8 @@ void AAlsCharacter::RefreshLocomotionLate(const float DeltaTime)
 
 void AAlsCharacter::Jump()
 {
-	if (Stance == AlsStanceTags::Standing && !LocomotionAction.IsValid() &&
-	    LocomotionMode == AlsLocomotionModeTags::Grounded)
+	if (GetStance() == AlsStanceTags::Standing && !GetLocomotionAction().IsValid() &&
+	    GetLocomotionMode() == AlsLocomotionModeTags::Grounded)
 	{
 		Super::Jump();
 	}
@@ -1742,7 +1648,7 @@ void AAlsCharacter::CharacterMovement_OnPhysicsRotation(const float DeltaTime)
 
 void AAlsCharacter::RefreshGroundedRotation(const float DeltaTime)
 {
-	if (LocomotionAction.IsValid() || LocomotionMode != AlsLocomotionModeTags::Grounded)
+	if (GetLocomotionAction().IsValid() || GetLocomotionMode() != AlsLocomotionModeTags::Grounded)
 	{
 		return;
 	}
@@ -1764,7 +1670,7 @@ void AAlsCharacter::RefreshGroundedRotation(const float DeltaTime)
 			return;
 		}
 
-		if (RotationMode == AlsRotationModeTags::VelocityDirection)
+		if (GetRotationMode() == AlsRotationModeTags::VelocityDirection)
 		{
 			// Rotate to the last target yaw angle when not moving (relative to the movement base or not).
 
@@ -1782,7 +1688,7 @@ void AAlsCharacter::RefreshGroundedRotation(const float DeltaTime)
 			return;
 		}
 
-		if (RotationMode == AlsRotationModeTags::Aiming || ViewMode == AlsViewModeTags::FirstPerson)
+		if (GetRotationMode() == AlsRotationModeTags::Aiming || GetViewMode() == AlsViewModeTags::FirstPerson)
 		{
 			RefreshGroundedAimingRotation(DeltaTime);
 			return;
@@ -1799,7 +1705,7 @@ void AAlsCharacter::RefreshGroundedRotation(const float DeltaTime)
 		return;
 	}
 
-	if (RotationMode == AlsRotationModeTags::VelocityDirection &&
+	if (GetRotationMode() == AlsRotationModeTags::VelocityDirection &&
 	    (LocomotionState.bHasInput || !LocomotionState.bRotationTowardsLastInputDirectionBlocked))
 	{
 		LocomotionState.bRotationTowardsLastInputDirectionBlocked = false;
@@ -1814,10 +1720,10 @@ void AAlsCharacter::RefreshGroundedRotation(const float DeltaTime)
 		return;
 	}
 
-	if (RotationMode == AlsRotationModeTags::ViewDirection)
+	if (GetRotationMode() == AlsRotationModeTags::ViewDirection)
 	{
 		const auto TargetYawAngle{
-			Gait == AlsGaitTags::Sprinting
+			GetGait() == AlsGaitTags::Sprinting
 				? LocomotionState.VelocityYawAngle
 				: UE_REAL_TO_FLOAT(ViewState.Rotation.Yaw +
 					GetMesh()->GetAnimInstance()->GetCurveValue(UAlsConstants::RotationYawOffsetCurveName()))
@@ -1830,7 +1736,7 @@ void AAlsCharacter::RefreshGroundedRotation(const float DeltaTime)
 		return;
 	}
 
-	if (RotationMode == AlsRotationModeTags::Aiming)
+	if (GetRotationMode() == AlsRotationModeTags::Aiming)
 	{
 		RefreshGroundedAimingRotation(DeltaTime);
 		return;
@@ -1967,7 +1873,7 @@ void AAlsCharacter::ApplyRotationYawSpeedAnimationCurve(const float DeltaTime)
 
 void AAlsCharacter::RefreshInAirRotation(const float DeltaTime)
 {
-	if (LocomotionAction.IsValid() || LocomotionMode != AlsLocomotionModeTags::InAir)
+	if (GetLocomotionAction().IsValid() || GetLocomotionMode() != AlsLocomotionModeTags::InAir)
 	{
 		return;
 	}
@@ -1979,6 +1885,7 @@ void AAlsCharacter::RefreshInAirRotation(const float DeltaTime)
 
 	static constexpr auto RotationInterpolationSpeed{5.0f};
 
+	const auto RotationMode{GetRotationMode()};
 	if (RotationMode == AlsRotationModeTags::VelocityDirection || RotationMode == AlsRotationModeTags::ViewDirection)
 	{
 		switch (Settings->InAirRotationMode)

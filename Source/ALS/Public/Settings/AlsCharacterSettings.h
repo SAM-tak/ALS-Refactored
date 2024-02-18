@@ -1,5 +1,6 @@
 ﻿#pragma once
 
+#include "AlsGameplayTagSettings.h"
 #include "AlsInAirRotationMode.h"
 #include "AlsMantlingSettings.h"
 #include "AlsRagdollingSettings.h"
@@ -25,25 +26,28 @@ public:
 	EAlsInAirRotationMode InAirRotationMode{EAlsInAirRotationMode::KeepRelativeRotation};
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings")
-	uint8 bAllowAimingWhenInAir : 1 {true};
+	uint8 bAllowAimingWhenInAir : 1{true};
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings")
-	uint8 bSprintHasPriorityOverAiming : 1 {false};
+	uint8 bSprintHasPriorityOverAiming : 1{false};
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings")
-	uint8 bRotateToVelocityWhenSprinting : 1 {true};
+	uint8 bRotateToVelocityWhenSprinting : 1{true};
 
 	// If checked, the character will rotate relative to the object it is standing on in the velocity
 	// direction rotation mode, otherwise the character will ignore that object and keep its world rotation.
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings")
-	uint8 bInheritMovementBaseRotationInVelocityDirectionRotationMode : 1 {false};
+	uint8 bInheritMovementBaseRotationInVelocityDirectionRotationMode : 1{false};
 
 	// If checked, the character will rotate towards the direction they want to move, but is not always able to due to obstacles.
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings")
-	uint8 bRotateTowardsDesiredVelocityInVelocityDirectionRotationMode : 1 {true};
+	uint8 bRotateTowardsDesiredVelocityInVelocityDirectionRotationMode : 1{true};
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings")
-	bool bAutoTurnOffSprint{false};
+	uint8 bAutoTurnOffSprint : 1{false};
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings")
+	FAlsGameplayTagSettings GameplayTagCaterogy;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings")
 	FAlsViewSettings View;
@@ -59,6 +63,9 @@ public:
 
 public:
 	UAlsCharacterSettings();
+
+	UFUNCTION(BlueprintPure, Category = "Als Character")
+	const FGameplayTag& DesiredToActual(const FGameplayTag& SourceTag) const;
 
 #if WITH_EDITOR
 	virtual void PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent) override;

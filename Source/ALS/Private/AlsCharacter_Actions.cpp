@@ -18,7 +18,7 @@
 
 void AAlsCharacter::StartRolling(const float PlayRate)
 {
-	if (LocomotionMode == AlsLocomotionModeTags::Grounded)
+	if (GetLocomotionMode() == AlsLocomotionModeTags::Grounded)
 	{
 		StartRolling(PlayRate, Settings->Rolling.bRotateToInputOnStart && LocomotionState.bHasInput
 			                       ? LocomotionState.InputYawAngle
@@ -28,8 +28,8 @@ void AAlsCharacter::StartRolling(const float PlayRate)
 
 bool AAlsCharacter::IsRollingAllowedToStart(const UAnimMontage* Montage) const
 {
-	return !LocomotionAction.IsValid() ||
-	       (LocomotionAction == AlsLocomotionActionTags::Rolling &&
+	return !GetLocomotionAction().IsValid() ||
+	       (GetLocomotionAction() == AlsLocomotionActionTags::Rolling &&
 	        !GetMesh()->GetAnimInstance()->Montage_IsPlaying(Montage));
 }
 
@@ -111,7 +111,7 @@ void AAlsCharacter::RefreshRolling(const float DeltaTime)
 // ReSharper disable once CppMemberFunctionMayBeConst
 void AAlsCharacter::RefreshRollingPhysics(const float DeltaTime)
 {
-	if (LocomotionAction != AlsLocomotionActionTags::Rolling)
+	if (GetLocomotionAction() != AlsLocomotionActionTags::Rolling)
 	{
 		return;
 	}
@@ -136,19 +136,19 @@ void AAlsCharacter::RefreshRollingPhysics(const float DeltaTime)
 
 bool AAlsCharacter::StartMantlingGrounded()
 {
-	return LocomotionMode == AlsLocomotionModeTags::Grounded &&
+	return GetLocomotionMode() == AlsLocomotionModeTags::Grounded &&
 	       StartMantling(Settings->Mantling.GroundedTrace);
 }
 
 bool AAlsCharacter::StartMantlingInAir()
 {
-	return LocomotionMode == AlsLocomotionModeTags::InAir && IsLocallyControlled() &&
+	return GetLocomotionMode() == AlsLocomotionModeTags::InAir && IsLocallyControlled() &&
 	       StartMantling(Settings->Mantling.InAirTrace);
 }
 
 bool AAlsCharacter::IsMantlingAllowedToStart_Implementation() const
 {
-	return !LocomotionAction.IsValid();
+	return !GetLocomotionAction().IsValid();
 }
 
 bool AAlsCharacter::StartMantling(const FAlsMantlingTraceSettings& TraceSettings)
@@ -393,7 +393,7 @@ bool AAlsCharacter::StartMantling(const FAlsMantlingTraceSettings& TraceSettings
 
 	// Determine the mantling type by checking the movement mode and mantling height.
 
-	Parameters.MantlingType = LocomotionMode != AlsLocomotionModeTags::Grounded
+	Parameters.MantlingType = GetLocomotionMode() != AlsLocomotionModeTags::Grounded
 		                          ? EAlsMantlingType::InAir
 		                          : Parameters.MantlingHeight > Settings->Mantling.MantlingHighHeightThreshold
 		                          ? EAlsMantlingType::High
@@ -609,7 +609,7 @@ void AAlsCharacter::RefreshMantling()
 		return;
 	}
 
-	if (LocomotionAction != AlsLocomotionActionTags::Mantling)
+	if (GetLocomotionAction() != AlsLocomotionActionTags::Mantling)
 	{
 		StopMantling();
 		return;
@@ -675,7 +675,7 @@ void AAlsCharacter::OnMantlingEnded_Implementation() {}
 
 bool AAlsCharacter::IsRagdollingAllowedToStart() const
 {
-	return LocomotionAction != AlsLocomotionActionTags::Ragdolling;
+	return GetLocomotionAction() != AlsLocomotionActionTags::Ragdolling;
 }
 
 void AAlsCharacter::StartRagdolling()
@@ -790,7 +790,7 @@ void AAlsCharacter::ServerSetRagdollTargetLocation_Implementation(const FVector_
 
 void AAlsCharacter::RefreshRagdolling(const float DeltaTime)
 {
-	if (LocomotionAction != AlsLocomotionActionTags::Ragdolling)
+	if (GetLocomotionAction() != AlsLocomotionActionTags::Ragdolling)
 	{
 		return;
 	}
@@ -934,7 +934,7 @@ FVector AAlsCharacter::RagdollTraceGround(bool& bGrounded) const
 
 bool AAlsCharacter::IsRagdollingAllowedToStop() const
 {
-	return LocomotionAction == AlsLocomotionActionTags::Ragdolling;
+	return GetLocomotionAction() == AlsLocomotionActionTags::Ragdolling;
 }
 
 bool AAlsCharacter::StopRagdolling()

@@ -116,36 +116,36 @@ void AAlsCharacterExample::Input_OnMove(const FInputActionValue& ActionValue)
 
 void AAlsCharacterExample::Input_OnSprint(const FInputActionValue& ActionValue)
 {
-	SetDesiredGait(ActionValue.Get<bool>() ? AlsGaitTags::Sprinting : AlsGaitTags::Running);
+	SetDesiredGait(ActionValue.Get<bool>() ? AlsDesiredGaitTags::Sprinting : AlsDesiredGaitTags::Running);
 }
 
 void AAlsCharacterExample::Input_OnWalk()
 {
-	if (GetDesiredGait() == AlsGaitTags::Walking)
+	if (GetDesiredGait() == AlsDesiredGaitTags::Walking)
 	{
-		SetDesiredGait(AlsGaitTags::Running);
+		SetDesiredGait(AlsDesiredGaitTags::Running);
 	}
-	else if (GetDesiredGait() == AlsGaitTags::Running)
+	else if (GetDesiredGait() == AlsDesiredGaitTags::Running)
 	{
-		SetDesiredGait(AlsGaitTags::Walking);
+		SetDesiredGait(AlsDesiredGaitTags::Walking);
 	}
 }
 
 void AAlsCharacterExample::Input_OnCrouch()
 {
-	if (GetDesiredStance() != AlsStanceTags::Crouching)
+	if (GetDesiredStance() != AlsDesiredStanceTags::Crouching)
 	{
-		SetDesiredStance(AlsStanceTags::Crouching);
+		SetDesiredStance(AlsDesiredStanceTags::Crouching);
 	}
-	else if (GetDesiredStance() == AlsStanceTags::Crouching)
+	else if (GetDesiredStance() == AlsDesiredStanceTags::Crouching)
 	{
-		SetDesiredStance(AlsStanceTags::Standing);
+		SetDesiredStance(AlsDesiredStanceTags::Standing);
 	}
 }
 
 void AAlsCharacterExample::Input_OnProne()
 {
-	SetDesiredStance(AlsStanceTags::Lying);
+	SetDesiredStance(AlsDesiredStanceTags::Lying);
 }
 
 void AAlsCharacterExample::Input_OnJump(const FInputActionValue& ActionValue)
@@ -162,9 +162,9 @@ void AAlsCharacterExample::Input_OnJump(const FInputActionValue& ActionValue)
 			return;
 		}
 
-		if (GetStance() == AlsStanceTags::Crouching)
+		if (GetDesiredStance() != AlsDesiredStanceTags::Standing)
 		{
-			SetDesiredStance(AlsStanceTags::Standing);
+			SetDesiredStance(AlsDesiredStanceTags::Standing);
 			return;
 		}
 
@@ -178,7 +178,7 @@ void AAlsCharacterExample::Input_OnJump(const FInputActionValue& ActionValue)
 
 void AAlsCharacterExample::Input_OnAim(const FInputActionValue& ActionValue)
 {
-	SetDesiredAiming(ActionValue.Get<bool>() ? AlsAimingModeTags::AimDownSight : FGameplayTag::EmptyTag);
+	SetAimingMode(ActionValue.Get<bool>() ? AlsAimingModeTags::AimDownSight : FGameplayTag::EmptyTag);
 }
 
 void AAlsCharacterExample::Input_OnRagdoll()
@@ -198,14 +198,14 @@ void AAlsCharacterExample::Input_OnRoll()
 
 void AAlsCharacterExample::Input_OnRotationMode()
 {
-	SetDesiredRotationMode(GetDesiredRotationMode() == AlsRotationModeTags::VelocityDirection
-						   ? AlsRotationModeTags::ViewDirection
-						   : AlsRotationModeTags::VelocityDirection);
+	SetDesiredRotationMode(GetDesiredRotationMode() == AlsDesiredRotationModeTags::VelocityDirection
+						   ? AlsDesiredRotationModeTags::ViewDirection
+						   : AlsDesiredRotationModeTags::VelocityDirection);
 }
 
 void AAlsCharacterExample::Input_OnViewMode()
 {
-	SetDesiredViewMode(GetDesiredViewMode() == AlsViewModeTags::ThirdPerson ? AlsViewModeTags::FirstPerson : AlsViewModeTags::ThirdPerson);
+	SetDesiredViewMode(GetDesiredViewMode() == AlsDesiredViewModeTags::ThirdPerson ? AlsDesiredViewModeTags::FirstPerson : AlsDesiredViewModeTags::ThirdPerson);
 }
 
 // ReSharper disable once CppMemberFunctionMayBeConst
