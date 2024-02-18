@@ -1,6 +1,6 @@
 #include "AlsCameraAnimationInstance.h"
 
-#include "AlsCameraSkeletalMeshComponent.h"
+#include "AlsCameraMovementComponent.h"
 #include "AlsCharacter.h"
 #include "Engine/World.h"
 
@@ -11,14 +11,14 @@ void UAlsCameraAnimationInstance::NativeInitializeAnimation()
 	Super::NativeInitializeAnimation();
 
 	Character = Cast<AAlsCharacter>(GetOwningActor());
-	CameraSkeletalMesh = Cast<UAlsCameraSkeletalMeshComponent>(GetSkelMeshComponent());
+	CameraMovement = Cast<UAlsCameraMovementComponent>(GetSkelMeshComponent());
 }
 
 void UAlsCameraAnimationInstance::NativeUpdateAnimation(const float DeltaTime)
 {
 	Super::NativeUpdateAnimation(DeltaTime);
 
-	if (!Character.IsValid() || !CameraSkeletalMesh.IsValid())
+	if (!Character.IsValid() || !CameraMovement.IsValid())
 	{
 		return;
 	}
@@ -30,5 +30,5 @@ void UAlsCameraAnimationInstance::NativeUpdateAnimation(const float DeltaTime)
 	Gait = Character->GetGait();
 	LocomotionAction = Character->GetLocomotionAction();
 
-	bRightShoulder = CameraSkeletalMesh->IsRightShoulder();
+	bRightShoulder = CameraMovement->IsRightShoulder();
 }

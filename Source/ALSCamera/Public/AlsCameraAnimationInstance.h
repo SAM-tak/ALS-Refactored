@@ -5,7 +5,7 @@
 #include "AlsCameraAnimationInstance.generated.h"
 
 class AAlsCharacter;
-class UAlsCameraSkeletalMeshComponent;
+class UAlsCameraMovementComponent;
 
 UCLASS()
 class ALSCAMERA_API UAlsCameraAnimationInstance : public UAnimInstance
@@ -17,7 +17,7 @@ protected:
 	TWeakObjectPtr<AAlsCharacter> Character;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient)
-	TWeakObjectPtr<UAlsCameraSkeletalMeshComponent> CameraSkeletalMesh;
+	TWeakObjectPtr<UAlsCameraMovementComponent> CameraMovement;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient)
 	FGameplayTag ViewMode{AlsViewModeTags::ThirdPerson};

@@ -1,6 +1,6 @@
 #include "AlsCharacterExample.h"
 
-#include "AlsCameraSkeletalMeshComponent.h"
+#include "AlsCameraMovementComponent.h"
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
 #include "Engine/LocalPlayer.h"
@@ -12,10 +12,8 @@
 
 AAlsCharacterExample::AAlsCharacterExample()
 {
-	//CameraMovement = CreateDefaultSubobject<UAlsCameraMovementComponent>(FName{TEXTVIEW("CameraMovement")});
-
-	CameraSkeletalMesh = CreateDefaultSubobject<UAlsCameraSkeletalMeshComponent>(FName{TEXTVIEW("CameraSkeletalMesh")});
-	CameraSkeletalMesh->SetRelativeRotation_Direct({0.0f, 90.0f, 0.0f});
+	CameraMovement = CreateDefaultSubobject<UAlsCameraMovementComponent>(FName{TEXTVIEW("CameraMovement")});
+	CameraMovement->SetRelativeRotation_Direct({0.0f, 90.0f, 0.0f});
 
 	Camera = CreateDefaultSubobject<UCameraComponent>(FName{TEXTVIEW("Camera")});
 	Camera->PrimaryComponentTick.bStartWithTickEnabled = false;
@@ -23,7 +21,7 @@ AAlsCharacterExample::AAlsCharacterExample()
 	Camera->bAutoActivate = false;
 	Camera->bTickInEditor = false;
 	Camera->bHiddenInGame = true;
-	CameraSkeletalMesh->SetCameraComponent(Camera);
+	CameraMovement->SetCameraComponent(Camera);
 }
 
 void AAlsCharacterExample::NotifyControllerChanged()
@@ -54,11 +52,11 @@ void AAlsCharacterExample::NotifyControllerChanged()
 			InputSubsystem->AddMappingContext(InputMappingContext, 0, Options);
 		}
 
-		CameraSkeletalMesh->Activate(true);
+		CameraMovement->Activate(true);
 	}
 	else
 	{
-		CameraSkeletalMesh->Deactivate();
+		CameraMovement->Deactivate();
 	}
 
 	Super::NotifyControllerChanged();
@@ -211,14 +209,14 @@ void AAlsCharacterExample::Input_OnViewMode()
 // ReSharper disable once CppMemberFunctionMayBeConst
 void AAlsCharacterExample::Input_OnSwitchShoulder()
 {
-	CameraSkeletalMesh->SetRightShoulder(!CameraSkeletalMesh->IsRightShoulder());
+	CameraMovement->SetRightShoulder(!CameraMovement->IsRightShoulder());
 }
 
 void AAlsCharacterExample::DisplayDebug(UCanvas* Canvas, const FDebugDisplayInfo& DisplayInfo, float& Unused, float& VerticalLocation)
 {
-	if (CameraSkeletalMesh->IsActive())
+	if (CameraMovement->IsActive())
 	{
-		CameraSkeletalMesh->DisplayDebug(Canvas, DisplayInfo, VerticalLocation);
+		CameraMovement->DisplayDebug(Canvas, DisplayInfo, VerticalLocation);
 	}
 
 	Super::DisplayDebug(Canvas, DisplayInfo, Unused, VerticalLocation);

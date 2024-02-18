@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Components/SkeletalMeshComponent.h"
-#include "AlsCameraSkeletalMeshComponent.generated.h"
+#include "AlsCameraMovementComponent.generated.h"
 
 class UCameraComponent;
 class UAlsCameraSettings;
@@ -10,7 +10,7 @@ class AAlsCharacter;
 UCLASS(HideCategories = (Object, Mobility, Clothing, Physics, MasterPoseComponent, Collision, AnimationRig, Lighting, Deformer,
 						 Rendering, PathTracing, HLOD, Navigation, VirtualTexture, Materials, LeaderPoseComponent,
 						 Optimization, LOD, MaterialParameters, TextureStreaming, Mobile, RayTracing))
-class ALSCAMERA_API UAlsCameraSkeletalMeshComponent : public USkeletalMeshComponent
+class ALSCAMERA_API UAlsCameraMovementComponent : public USkeletalMeshComponent
 {
 	GENERATED_BODY()
 
@@ -91,7 +91,7 @@ protected:
 	TObjectPtr<UCameraShakeBase> CurrentADSCameraShake;
 
 public:
-	UAlsCameraSkeletalMeshComponent();
+	UAlsCameraMovementComponent();
 
 	virtual void OnRegister() override;
 
@@ -183,22 +183,22 @@ private:
 	void DisplayDebugTraces(const UCanvas* Canvas, float Scale, float HorizontalLocation, float& VerticalLocation) const;
 };
 
-inline bool UAlsCameraSkeletalMeshComponent::IsRightShoulder() const
+inline bool UAlsCameraMovementComponent::IsRightShoulder() const
 {
 	return bRightShoulder;
 }
 
-inline void UAlsCameraSkeletalMeshComponent::SetRightShoulder(const bool bNewRightShoulder)
+inline void UAlsCameraMovementComponent::SetRightShoulder(const bool bNewRightShoulder)
 {
 	bRightShoulder = bNewRightShoulder;
 }
 
-inline FVector UAlsCameraSkeletalMeshComponent::GetCurrentFocusLocation() const
+inline FVector UAlsCameraMovementComponent::GetCurrentFocusLocation() const
 {
 	return CameraLocation + CameraRotation.Vector() * FocalLength;
 }
 
-inline UCameraComponent* UAlsCameraSkeletalMeshComponent::GetCameraComponent() const
+inline UCameraComponent* UAlsCameraMovementComponent::GetCameraComponent() const
 {
 	return Camera;
 }

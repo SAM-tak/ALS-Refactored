@@ -1,4 +1,4 @@
-#include "AlsCameraSkeletalMeshComponent.h"
+#include "AlsCameraMovementComponent.h"
 #include "AlsCharacter.h"
 
 #include "DisplayDebugHelpers.h"
@@ -10,9 +10,9 @@
 #include "Utility/AlsMath.h"
 #include "Utility/AlsUtility.h"
 
-#define LOCTEXT_NAMESPACE "AlsCameraSkeletalMeshComponentDebug"
+#define LOCTEXT_NAMESPACE "AlsCameraMovementComponentDebug"
 
-void UAlsCameraSkeletalMeshComponent::DisplayDebug(const UCanvas* Canvas, const FDebugDisplayInfo& DisplayInfo, float& VerticalLocation) const
+void UAlsCameraMovementComponent::DisplayDebug(const UCanvas* Canvas, const FDebugDisplayInfo& DisplayInfo, float& VerticalLocation) const
 {
 	const auto Scale{FMath::Min(Canvas->SizeX / (1280.0f * Canvas->GetDPIScale()), Canvas->SizeY / (720.0f * Canvas->GetDPIScale()))};
 
@@ -85,7 +85,7 @@ void UAlsCameraSkeletalMeshComponent::DisplayDebug(const UCanvas* Canvas, const 
 	VerticalLocation = MaxVerticalLocation;
 }
 
-void UAlsCameraSkeletalMeshComponent::DisplayDebugHeader(const UCanvas* Canvas, const FText& HeaderText, const FLinearColor& HeaderColor,
+void UAlsCameraMovementComponent::DisplayDebugHeader(const UCanvas* Canvas, const FText& HeaderText, const FLinearColor& HeaderColor,
 														 const float Scale, const float HorizontalLocation, float& VerticalLocation)
 {
 	FCanvasTextItem Text{
@@ -103,7 +103,7 @@ void UAlsCameraSkeletalMeshComponent::DisplayDebugHeader(const UCanvas* Canvas, 
 	VerticalLocation += 15.0f * Scale;
 }
 
-void UAlsCameraSkeletalMeshComponent::DisplayDebugCurves(const UCanvas* Canvas, const float Scale,
+void UAlsCameraMovementComponent::DisplayDebugCurves(const UCanvas* Canvas, const float Scale,
 														 const float HorizontalLocation, float& VerticalLocation) const
 {
 	VerticalLocation += 4.0f * Scale;
@@ -148,7 +148,7 @@ void UAlsCameraSkeletalMeshComponent::DisplayDebugCurves(const UCanvas* Canvas, 
 	}
 }
 
-void UAlsCameraSkeletalMeshComponent::DisplayDebugShapes(const UCanvas* Canvas, const float Scale,
+void UAlsCameraMovementComponent::DisplayDebugShapes(const UCanvas* Canvas, const float Scale,
 														 const float HorizontalLocation, float& VerticalLocation) const
 {
 	VerticalLocation += 4.0f * Scale;
@@ -272,7 +272,7 @@ void UAlsCameraSkeletalMeshComponent::DisplayDebugShapes(const UCanvas* Canvas, 
 	VerticalLocation += RowOffset;
 }
 
-void UAlsCameraSkeletalMeshComponent::DisplayDebugTraces(const UCanvas* Canvas, const float Scale,
+void UAlsCameraMovementComponent::DisplayDebugTraces(const UCanvas* Canvas, const float Scale,
 														 const float HorizontalLocation, float& VerticalLocation) const
 {
 	VerticalLocation += 4.0f * Scale;
