@@ -266,6 +266,7 @@ void UAlsPhysicalAnimationComponent::SelectProfile(const AAlsCharacter* Characte
 {
 	TArray<FName> NextProfileNames;
 	TArray<FName> NextMultiplyProfileNames;
+	TStringBuilder<256> StringBuilder;
 
 	auto ActionName = UAlsUtility::GetSimpleTagName(Character->GetLocomotionAction());
 	auto ModeName = UAlsUtility::GetSimpleTagName(Character->GetLocomotionMode());
@@ -280,7 +281,9 @@ void UAlsPhysicalAnimationComponent::SelectProfile(const AAlsCharacter* Characte
 
 	if (ActionName != NAME_None && ModeName != NAME_None && StanceName != NAME_None && GaitName != NAME_None && OverlayModeName != NAME_None)
 	{
-		auto ProfileName = FName{FString::Printf(TEXT("%s:%s:%s:%s:%s"), *ActionNameStr, *ModeNameStr, *StanceNameStr, *GaitNameStr, *OverlayModeNameStr)};
+		StringBuilder.Appendf(TEXT("%s:%s:%s:%s:%s"), *ActionNameStr, *ModeNameStr, *StanceNameStr, *GaitNameStr, *OverlayModeNameStr);
+		FName ProfileName(StringBuilder, FNAME_Find);
+		StringBuilder.Reset();
 		if (IsProfileExist(ProfileName))
 		{
 			NextProfileNames.Add(ProfileName);
@@ -288,7 +291,9 @@ void UAlsPhysicalAnimationComponent::SelectProfile(const AAlsCharacter* Characte
 	}
 	if (NextProfileNames.Num() == 0 && ActionName != NAME_None && StanceName != NAME_None && GaitName != NAME_None && OverlayModeName != NAME_None)
 	{
-		auto ProfileName = FName{FString::Printf(TEXT("%s:%s:%s:%s"), *ActionNameStr, *StanceNameStr, *GaitNameStr, *OverlayModeNameStr)};
+		StringBuilder.Appendf(TEXT("%s:%s:%s:%s"), *ActionNameStr, *StanceNameStr, *GaitNameStr, *OverlayModeNameStr);
+		FName ProfileName(StringBuilder, FNAME_Find);
+		StringBuilder.Reset();
 		if (IsProfileExist(ProfileName))
 		{
 			NextProfileNames.Add(ProfileName);
@@ -296,7 +301,9 @@ void UAlsPhysicalAnimationComponent::SelectProfile(const AAlsCharacter* Characte
 	}
 	if (NextProfileNames.Num() == 0 && ModeName != NAME_None && StanceName != NAME_None && GaitName != NAME_None && OverlayModeName != NAME_None)
 	{
-		auto ProfileName = FName{FString::Printf(TEXT("%s:%s:%s:%s"), *ModeNameStr, *StanceNameStr, *GaitNameStr, *OverlayModeNameStr)};
+		StringBuilder.Appendf(TEXT("%s:%s:%s:%s"), *ModeNameStr, *StanceNameStr, *GaitNameStr, *OverlayModeNameStr);
+		FName ProfileName(StringBuilder, FNAME_Find);
+		StringBuilder.Reset();
 		if (IsProfileExist(ProfileName))
 		{
 			NextProfileNames.Add(ProfileName);
@@ -304,7 +311,9 @@ void UAlsPhysicalAnimationComponent::SelectProfile(const AAlsCharacter* Characte
 	}
 	if (NextProfileNames.Num() == 0 && ActionName != NAME_None && StanceName != NAME_None && GaitName != NAME_None)
 	{
-		auto ProfileName = FName{FString::Printf(TEXT("%s:%s:%s"), *ActionNameStr, *StanceNameStr, *GaitNameStr)};
+		StringBuilder.Appendf(TEXT("%s:%s:%s"), *ActionNameStr, *StanceNameStr, *GaitNameStr);
+		FName ProfileName(StringBuilder, FNAME_Find);
+		StringBuilder.Reset();
 		if (IsProfileExist(ProfileName))
 		{
 			NextProfileNames.Add(ProfileName);
@@ -312,7 +321,9 @@ void UAlsPhysicalAnimationComponent::SelectProfile(const AAlsCharacter* Characte
 	}
 	if (NextProfileNames.Num() == 0 && ActionName != NAME_None && StanceName != NAME_None && OverlayModeName != NAME_None)
 	{
-		auto ProfileName = FName{FString::Printf(TEXT("%s:%s:%s"), *ActionNameStr, *StanceNameStr, *OverlayModeNameStr)};
+		StringBuilder.Appendf(TEXT("%s:%s:%s"), *ActionNameStr, *StanceNameStr, *OverlayModeNameStr);
+		FName ProfileName(StringBuilder, FNAME_Find);
+		StringBuilder.Reset();
 		if (IsProfileExist(ProfileName))
 		{
 			NextProfileNames.Add(ProfileName);
@@ -320,7 +331,9 @@ void UAlsPhysicalAnimationComponent::SelectProfile(const AAlsCharacter* Characte
 	}
 	if (NextProfileNames.Num() == 0 && ActionName != NAME_None && GaitName != NAME_None && OverlayModeName != NAME_None)
 	{
-		auto ProfileName = FName{FString::Printf(TEXT("%s:%s:%s"), *ActionNameStr, *GaitNameStr, *OverlayModeNameStr)};
+		StringBuilder.Appendf(TEXT("%s:%s:%s"), *ActionNameStr, *GaitNameStr, *OverlayModeNameStr);
+		FName ProfileName(StringBuilder, FNAME_Find);
+		StringBuilder.Reset();
 		if (IsProfileExist(ProfileName))
 		{
 			NextProfileNames.Add(ProfileName);
@@ -328,7 +341,9 @@ void UAlsPhysicalAnimationComponent::SelectProfile(const AAlsCharacter* Characte
 	}
 	if (NextProfileNames.Num() == 0 && ModeName != NAME_None && StanceName != NAME_None && GaitName != NAME_None)
 	{
-		auto ProfileName = FName{FString::Printf(TEXT("%s:%s:%s"), *ModeNameStr, *StanceNameStr, *GaitNameStr)};
+		StringBuilder.Appendf(TEXT("%s:%s:%s"), *ModeNameStr, *StanceNameStr, *GaitNameStr);
+		FName ProfileName(StringBuilder, FNAME_Find);
+		StringBuilder.Reset();
 		if (IsProfileExist(ProfileName))
 		{
 			NextProfileNames.Add(ProfileName);
@@ -336,7 +351,9 @@ void UAlsPhysicalAnimationComponent::SelectProfile(const AAlsCharacter* Characte
 	}
 	if (NextProfileNames.Num() == 0 && ModeName != NAME_None && StanceName != NAME_None && OverlayModeName != NAME_None)
 	{
-		auto ProfileName = FName{FString::Printf(TEXT("%s:%s:%s"), *ModeNameStr, *StanceNameStr, *OverlayModeNameStr)};
+		StringBuilder.Appendf(TEXT("%s:%s:%s"), *ModeNameStr, *StanceNameStr, *OverlayModeNameStr);
+		FName ProfileName(StringBuilder, FNAME_Find);
+		StringBuilder.Reset();
 		if (IsProfileExist(ProfileName))
 		{
 			NextProfileNames.Add(ProfileName);
@@ -344,7 +361,9 @@ void UAlsPhysicalAnimationComponent::SelectProfile(const AAlsCharacter* Characte
 	}
 	if (NextProfileNames.Num() == 0 && ModeName != NAME_None && GaitName != NAME_None && OverlayModeName != NAME_None)
 	{
-		auto ProfileName = FName{FString::Printf(TEXT("%s:%s:%s"), *ModeNameStr, *GaitNameStr, *OverlayModeNameStr)};
+		StringBuilder.Appendf(TEXT("%s:%s:%s"), *ModeNameStr, *GaitNameStr, *OverlayModeNameStr);
+		FName ProfileName(StringBuilder, FNAME_Find);
+		StringBuilder.Reset();
 		if (IsProfileExist(ProfileName))
 		{
 			NextProfileNames.Add(ProfileName);
@@ -352,7 +371,9 @@ void UAlsPhysicalAnimationComponent::SelectProfile(const AAlsCharacter* Characte
 	}
 	if (NextProfileNames.Num() == 0 && ActionName != NAME_None && StanceName != NAME_None)
 	{
-		auto ProfileName = FName{FString::Printf(TEXT("%s:%s"), *ActionNameStr, *StanceNameStr)};
+		StringBuilder.Appendf(TEXT("%s:%s"), *ActionNameStr, *StanceNameStr);
+		FName ProfileName(StringBuilder, FNAME_Find);
+		StringBuilder.Reset();
 		if (IsProfileExist(ProfileName))
 		{
 			NextProfileNames.Add(ProfileName);
@@ -360,7 +381,9 @@ void UAlsPhysicalAnimationComponent::SelectProfile(const AAlsCharacter* Characte
 	}
 	if (NextProfileNames.Num() == 0 && ActionName != NAME_None && GaitName != NAME_None)
 	{
-		auto ProfileName = FName{FString::Printf(TEXT("%s:%s"), *ActionNameStr, *GaitNameStr)};
+		StringBuilder.Appendf(TEXT("%s:%s"), *ActionNameStr, *GaitNameStr);
+		FName ProfileName(StringBuilder, FNAME_Find);
+		StringBuilder.Reset();
 		if (IsProfileExist(ProfileName))
 		{
 			NextProfileNames.Add(ProfileName);
@@ -368,7 +391,9 @@ void UAlsPhysicalAnimationComponent::SelectProfile(const AAlsCharacter* Characte
 	}
 	if (NextProfileNames.Num() == 0 && ModeName != NAME_None && StanceName != NAME_None)
 	{
-		auto ProfileName = FName{FString::Printf(TEXT("%s:%s"), *ModeNameStr, *StanceNameStr)};
+		StringBuilder.Appendf(TEXT("%s:%s"), *ModeNameStr, *StanceNameStr);
+		FName ProfileName(StringBuilder, FNAME_Find);
+		StringBuilder.Reset();
 		if (IsProfileExist(ProfileName))
 		{
 			NextProfileNames.Add(ProfileName);
@@ -376,7 +401,9 @@ void UAlsPhysicalAnimationComponent::SelectProfile(const AAlsCharacter* Characte
 	}
 	if (NextProfileNames.Num() == 0 && ModeName != NAME_None && GaitName != NAME_None)
 	{
-		auto ProfileName = FName{FString::Printf(TEXT("%s:%s"), *ModeNameStr, *GaitNameStr)};
+		StringBuilder.Appendf(TEXT("%s:%s"), *ModeNameStr, *GaitNameStr);
+		FName ProfileName(StringBuilder, FNAME_Find);
+		StringBuilder.Reset();
 		if (IsProfileExist(ProfileName))
 		{
 			NextProfileNames.Add(ProfileName);
@@ -384,7 +411,9 @@ void UAlsPhysicalAnimationComponent::SelectProfile(const AAlsCharacter* Characte
 	}
 	if (NextProfileNames.Num() == 0 && ModeName != NAME_None && OverlayModeName != NAME_None)
 	{
-		auto ProfileName = FName{FString::Printf(TEXT("%s:%s"), *ModeNameStr, *OverlayModeNameStr)};
+		StringBuilder.Appendf(TEXT("%s:%s"), *ModeNameStr, *OverlayModeNameStr);
+		FName ProfileName(StringBuilder, FNAME_Find);
+		StringBuilder.Reset();
 		if (IsProfileExist(ProfileName))
 		{
 			NextProfileNames.Add(ProfileName);
@@ -392,7 +421,9 @@ void UAlsPhysicalAnimationComponent::SelectProfile(const AAlsCharacter* Characte
 	}
 	if (NextProfileNames.Num() == 0 && StanceName != NAME_None && OverlayModeName != NAME_None)
 	{
-		auto ProfileName = FName{FString::Printf(TEXT("%s:%s"), *StanceNameStr, *OverlayModeNameStr)};
+		StringBuilder.Appendf(TEXT("%s:%s"), *StanceNameStr, *OverlayModeNameStr);
+		FName ProfileName(StringBuilder, FNAME_Find);
+		StringBuilder.Reset();
 		if (IsProfileExist(ProfileName))
 		{
 			NextProfileNames.Add(ProfileName);
@@ -400,7 +431,9 @@ void UAlsPhysicalAnimationComponent::SelectProfile(const AAlsCharacter* Characte
 	}
 	if (NextProfileNames.Num() == 0 && GaitName != NAME_None && OverlayModeName != NAME_None)
 	{
-		auto ProfileName = FName{FString::Printf(TEXT("%s:%s"), *GaitNameStr, *OverlayModeNameStr)};
+		StringBuilder.Appendf(TEXT("%s:%s"), *GaitNameStr, *OverlayModeNameStr);
+		FName ProfileName(StringBuilder, FNAME_Find);
+		StringBuilder.Reset();
 		if (IsProfileExist(ProfileName))
 		{
 			NextProfileNames.Add(ProfileName);
@@ -448,366 +481,240 @@ void UAlsPhysicalAnimationComponent::SelectProfile(const AAlsCharacter* Characte
 
 	// add additional profiles if exists.
 
-	if (NextProfileNames.Num() > 0)
+	auto AppedProfileNames = [&](const TCHAR* Prefix, TArray<FName>& NameBuffer)
 	{
 		if (ActionName != NAME_None && ModeName != NAME_None && StanceName != NAME_None && GaitName != NAME_None && OverlayModeName != NAME_None)
 		{
-			auto ProfileName = FName{FString::Printf(TEXT("+%s:%s:%s:%s:%s"), *ActionNameStr, *ModeNameStr, *StanceNameStr, *GaitNameStr, *OverlayModeNameStr)};
+			StringBuilder.Appendf(TEXT("%s%s:%s:%s:%s:%s"), Prefix, *ActionNameStr, *ModeNameStr, *StanceNameStr, *GaitNameStr, *OverlayModeNameStr);
+			FName ProfileName(StringBuilder, FNAME_Find);
+			StringBuilder.Reset();
 			if (IsProfileExist(ProfileName))
 			{
-				NextProfileNames.Add(ProfileName);
+				NameBuffer.Add(ProfileName);
 			}
 		}
 		if (ActionName != NAME_None && StanceName != NAME_None && GaitName != NAME_None && OverlayModeName != NAME_None)
 		{
-			auto ProfileName = FName{FString::Printf(TEXT("+%s:%s:%s:%s"), *ActionNameStr, *StanceNameStr, *GaitNameStr, *OverlayModeNameStr)};
+			StringBuilder.Appendf(TEXT("%s%s:%s:%s:%s"), Prefix, *ActionNameStr, *StanceNameStr, *GaitNameStr, *OverlayModeNameStr);
+			FName ProfileName(StringBuilder, FNAME_Find);
+			StringBuilder.Reset();
 			if (IsProfileExist(ProfileName))
 			{
-				NextProfileNames.Add(ProfileName);
+				NameBuffer.Add(ProfileName);
 			}
 		}
 		if (ModeName != NAME_None && StanceName != NAME_None && GaitName != NAME_None && OverlayModeName != NAME_None)
 		{
-			auto ProfileName = FName{FString::Printf(TEXT("+%s:%s:%s:%s"), *ModeNameStr, *StanceNameStr, *GaitNameStr, *OverlayModeNameStr)};
+			StringBuilder.Appendf(TEXT("%s%s:%s:%s:%s"), Prefix, *ModeNameStr, *StanceNameStr, *GaitNameStr, *OverlayModeNameStr);
+			FName ProfileName(StringBuilder, FNAME_Find);
+			StringBuilder.Reset();
 			if (IsProfileExist(ProfileName))
 			{
-				NextProfileNames.Add(ProfileName);
+				NameBuffer.Add(ProfileName);
 			}
 		}
 		if (ActionName != NAME_None && StanceName != NAME_None && GaitName != NAME_None)
 		{
-			auto ProfileName = FName{FString::Printf(TEXT("+%s:%s:%s"), *ActionNameStr, *StanceNameStr, *GaitNameStr)};
+			StringBuilder.Appendf(TEXT("%s%s:%s:%s"), Prefix, *ActionNameStr, *StanceNameStr, *GaitNameStr);
+			FName ProfileName(StringBuilder, FNAME_Find);
+			StringBuilder.Reset();
 			if (IsProfileExist(ProfileName))
 			{
-				NextProfileNames.Add(ProfileName);
+				NameBuffer.Add(ProfileName);
 			}
 		}
 		if (ActionName != NAME_None && StanceName != NAME_None && OverlayModeName != NAME_None)
 		{
-			auto ProfileName = FName{FString::Printf(TEXT("+%s:%s:%s"), *ActionNameStr, *StanceNameStr, *OverlayModeNameStr)};
+			StringBuilder.Appendf(TEXT("%s%s:%s:%s"), Prefix, *ActionNameStr, *StanceNameStr, *OverlayModeNameStr);
+			FName ProfileName(StringBuilder, FNAME_Find);
+			StringBuilder.Reset();
 			if (IsProfileExist(ProfileName))
 			{
-				NextProfileNames.Add(ProfileName);
+				NameBuffer.Add(ProfileName);
 			}
 		}
 		if (ActionName != NAME_None && GaitName != NAME_None && OverlayModeName != NAME_None)
 		{
-			auto ProfileName = FName{FString::Printf(TEXT("+%s:%s:%s"), *ActionNameStr, *GaitNameStr, *OverlayModeNameStr)};
+			StringBuilder.Appendf(TEXT("%s%s:%s:%s"), Prefix, *ActionNameStr, *GaitNameStr, *OverlayModeNameStr);
+			FName ProfileName(StringBuilder, FNAME_Find);
+			StringBuilder.Reset();
 			if (IsProfileExist(ProfileName))
 			{
-				NextProfileNames.Add(ProfileName);
+				NameBuffer.Add(ProfileName);
 			}
 		}
 		if (!Character->HasMatchingGameplayTag(AlsLocomotionActionTags::Ragdolling) && ModeName != NAME_None && StanceName != NAME_None && GaitName != NAME_None)
 		{
-			auto ProfileName = FName{FString::Printf(TEXT("+%s:%s:%s"), *ModeNameStr, *StanceNameStr, *GaitNameStr)};
+			StringBuilder.Appendf(TEXT("%s%s:%s:%s"), Prefix, *ModeNameStr, *StanceNameStr, *GaitNameStr);
+			FName ProfileName(StringBuilder, FNAME_Find);
+			StringBuilder.Reset();
 			if (IsProfileExist(ProfileName))
 			{
-				NextProfileNames.Add(ProfileName);
+				NameBuffer.Add(ProfileName);
 			}
 		}
 		if (!Character->HasMatchingGameplayTag(AlsLocomotionActionTags::Ragdolling) && ModeName != NAME_None && StanceName != NAME_None && OverlayModeName != NAME_None)
 		{
-			auto ProfileName = FName{FString::Printf(TEXT("+%s:%s:%s"), *ModeNameStr, *StanceNameStr, *OverlayModeNameStr)};
+			StringBuilder.Appendf(TEXT("%s%s:%s:%s"), Prefix, *ModeNameStr, *StanceNameStr, *OverlayModeNameStr);
+			FName ProfileName(StringBuilder, FNAME_Find);
+			StringBuilder.Reset();
 			if (IsProfileExist(ProfileName))
 			{
-				NextProfileNames.Add(ProfileName);
+				NameBuffer.Add(ProfileName);
 			}
 		}
 		if (!Character->HasMatchingGameplayTag(AlsLocomotionActionTags::Ragdolling) && ModeName != NAME_None && GaitName != NAME_None && OverlayModeName != NAME_None)
 		{
-			auto ProfileName = FName{FString::Printf(TEXT("+%s:%s:%s"), *ModeNameStr, *GaitNameStr, *OverlayModeNameStr)};
+			StringBuilder.Appendf(TEXT("%s%s:%s:%s"), Prefix, *ModeNameStr, *GaitNameStr, *OverlayModeNameStr);
+			FName ProfileName(StringBuilder, FNAME_Find);
+			StringBuilder.Reset();
 			if (IsProfileExist(ProfileName))
 			{
-				NextProfileNames.Add(ProfileName);
+				NameBuffer.Add(ProfileName);
 			}
 		}
 		if (ActionName != NAME_None && StanceName != NAME_None)
 		{
-			auto ProfileName = FName{FString::Printf(TEXT("+%s:%s"), *ActionNameStr, *StanceNameStr)};
+			StringBuilder.Appendf(TEXT("%s%s:%s"), Prefix, *ActionNameStr, *StanceNameStr);
+			FName ProfileName(StringBuilder, FNAME_Find);
+			StringBuilder.Reset();
 			if (IsProfileExist(ProfileName))
 			{
-				NextProfileNames.Add(ProfileName);
+				NameBuffer.Add(ProfileName);
 			}
 		}
 		if (ActionName != NAME_None && GaitName != NAME_None)
 		{
-			auto ProfileName = FName{FString::Printf(TEXT("+%s:%s"), *ActionNameStr, *GaitNameStr)};
+			StringBuilder.Appendf(TEXT("%s%s:%s"), Prefix, *ActionNameStr, *GaitNameStr);
+			FName ProfileName(StringBuilder, FNAME_Find);
+			StringBuilder.Reset();
 			if (IsProfileExist(ProfileName))
 			{
-				NextProfileNames.Add(ProfileName);
+				NameBuffer.Add(ProfileName);
 			}
 		}
 		if (ActionName != NAME_None && OverlayModeName != NAME_None)
 		{
-			auto ProfileName = FName{FString::Printf(TEXT("+%s:%s"), *ActionNameStr, *OverlayModeNameStr)};
+			StringBuilder.Appendf(TEXT("%s%s:%s"), Prefix, *ActionNameStr, *OverlayModeNameStr);
+			FName ProfileName(StringBuilder, FNAME_Find);
+			StringBuilder.Reset();
 			if (IsProfileExist(ProfileName))
 			{
-				NextProfileNames.Add(ProfileName);
+				NameBuffer.Add(ProfileName);
 			}
 		}
 		if (!Character->HasMatchingGameplayTag(AlsLocomotionActionTags::Ragdolling) && ModeName != NAME_None && StanceName != NAME_None)
 		{
-			auto ProfileName = FName{FString::Printf(TEXT("+%s:%s"), *ModeNameStr, *StanceNameStr)};
+			StringBuilder.Appendf(TEXT("%s%s:%s"), Prefix, *ModeNameStr, *StanceNameStr);
+			FName ProfileName(StringBuilder, FNAME_Find);
+			StringBuilder.Reset();
 			if (IsProfileExist(ProfileName))
 			{
-				NextProfileNames.Add(ProfileName);
+				NameBuffer.Add(ProfileName);
 			}
 		}
 		if (!Character->HasMatchingGameplayTag(AlsLocomotionActionTags::Ragdolling) && ModeName != NAME_None && GaitName != NAME_None)
 		{
-			auto ProfileName = FName{FString::Printf(TEXT("+%s:%s"), *ModeNameStr, *GaitNameStr)};
+			StringBuilder.Appendf(TEXT("%s%s:%s"), Prefix, *ModeNameStr, *GaitNameStr);
+			FName ProfileName(StringBuilder, FNAME_Find);
+			StringBuilder.Reset();
 			if (IsProfileExist(ProfileName))
 			{
-				NextProfileNames.Add(ProfileName);
+				NameBuffer.Add(ProfileName);
 			}
 		}
 		if (!Character->HasMatchingGameplayTag(AlsLocomotionActionTags::Ragdolling) && ModeName != NAME_None && OverlayModeName != NAME_None)
 		{
-			auto ProfileName = FName{FString::Printf(TEXT("+%s:%s"), *ModeNameStr, *OverlayModeNameStr)};
+			StringBuilder.Appendf(TEXT("%s%s:%s"), Prefix, *ModeNameStr, *OverlayModeNameStr);
+			FName ProfileName(StringBuilder, FNAME_Find);
+			StringBuilder.Reset();
 			if (IsProfileExist(ProfileName))
 			{
-				NextProfileNames.Add(ProfileName);
+				NameBuffer.Add(ProfileName);
 			}
 		}
 		if (!Character->HasMatchingGameplayTag(AlsLocomotionActionTags::Ragdolling) && StanceName != NAME_None && OverlayModeName != NAME_None)
 		{
-			auto ProfileName = FName{FString::Printf(TEXT("+%s:%s"), *StanceNameStr, *OverlayModeNameStr)};
+			StringBuilder.Appendf(TEXT("%s%s:%s"), Prefix, *StanceNameStr, *OverlayModeNameStr);
+			FName ProfileName(StringBuilder, FNAME_Find);
+			StringBuilder.Reset();
 			if (IsProfileExist(ProfileName))
 			{
-				NextProfileNames.Add(ProfileName);
+				NameBuffer.Add(ProfileName);
 			}
 		}
 		if (!Character->HasMatchingGameplayTag(AlsLocomotionActionTags::Ragdolling) && GaitName != NAME_None && OverlayModeName != NAME_None)
 		{
-			auto ProfileName = FName{FString::Printf(TEXT("+%s:%s"), *GaitNameStr, *OverlayModeNameStr)};
+			StringBuilder.Appendf(TEXT("%s%s:%s"), Prefix, *GaitNameStr, *OverlayModeNameStr);
+			FName ProfileName(StringBuilder, FNAME_Find);
+			StringBuilder.Reset();
 			if (IsProfileExist(ProfileName))
 			{
-				NextProfileNames.Add(ProfileName);
+				NameBuffer.Add(ProfileName);
 			}
 		}
 		if (ActionName != NAME_None)
 		{
-			auto ProfileName = FName{FString::Printf(TEXT("+%s"), *ActionNameStr)};
+			StringBuilder.Appendf(TEXT("%s%s"), Prefix, *ActionNameStr);
+			FName ProfileName(StringBuilder, FNAME_Find);
+			StringBuilder.Reset();
 			if (IsProfileExist(ProfileName))
 			{
-				NextProfileNames.Add(ProfileName);
+				NameBuffer.Add(ProfileName);
 			}
 		}
 		if (!Character->HasMatchingGameplayTag(AlsLocomotionActionTags::Ragdolling) && ModeName != NAME_None)
 		{
-			auto ProfileName = FName{FString::Printf(TEXT("+%s"), *ModeNameStr)};
+			StringBuilder.Appendf(TEXT("%s%s"), Prefix, *ModeNameStr);
+			FName ProfileName(StringBuilder, FNAME_Find);
+			StringBuilder.Reset();
 			if (IsProfileExist(ProfileName))
 			{
-				NextProfileNames.Add(ProfileName);
+				NameBuffer.Add(ProfileName);
 			}
 		}
 		if (!Character->HasMatchingGameplayTag(AlsLocomotionActionTags::Ragdolling) && StanceName != NAME_None)
 		{
-			auto ProfileName = FName{FString::Printf(TEXT("+%s"), *StanceNameStr)};
+			StringBuilder.Appendf(TEXT("%s%s"), Prefix, *StanceNameStr);
+			FName ProfileName(StringBuilder, FNAME_Find);
+			StringBuilder.Reset();
 			if (IsProfileExist(ProfileName))
 			{
-				NextProfileNames.Add(ProfileName);
+				NameBuffer.Add(ProfileName);
 			}
 		}
 		if (!Character->HasMatchingGameplayTag(AlsLocomotionActionTags::Ragdolling) && GaitName != NAME_None)
 		{
-			auto ProfileName = FName{FString::Printf(TEXT("+%s"), *GaitNameStr)};
+			StringBuilder.Appendf(TEXT("%s%s"), Prefix, *GaitNameStr);
+			FName ProfileName(StringBuilder, FNAME_Find);
+			StringBuilder.Reset();
 			if (IsProfileExist(ProfileName))
 			{
-				NextProfileNames.Add(ProfileName);
+				NameBuffer.Add(ProfileName);
 			}
 		}
 		if (!Character->HasMatchingGameplayTag(AlsLocomotionActionTags::Ragdolling) && OverlayModeName != NAME_None)
 		{
-			auto ProfileName = FName{FString::Printf(TEXT("+%s"), *OverlayModeNameStr)};
+			StringBuilder.Appendf(TEXT("%s%s"), Prefix, *OverlayModeNameStr);
+			FName ProfileName(StringBuilder, FNAME_Find);
+			StringBuilder.Reset();
 			if (IsProfileExist(ProfileName))
 			{
-				NextProfileNames.Add(ProfileName);
+				NameBuffer.Add(ProfileName);
 			}
 		}
+	};
+
+	if (NextProfileNames.Num() > 0)
+	{
+		AppedProfileNames(TEXT("+"), NextProfileNames);
 	}
 
 	if (NextProfileNames.Num() > 0)
 	{
 		// Process multiply profiles if exists.
 
-		if (ActionName != NAME_None && ModeName != NAME_None && StanceName != NAME_None && GaitName != NAME_None && OverlayModeName != NAME_None)
-		{
-			auto ProfileName = FName{FString::Printf(TEXT("*%s:%s:%s:%s:%s"), *ActionNameStr, *ModeNameStr, *StanceNameStr, *GaitNameStr, *OverlayModeNameStr)};
-			if (IsProfileExist(ProfileName))
-			{
-				NextMultiplyProfileNames.Add(ProfileName);
-			}
-		}
-		if (ActionName != NAME_None && StanceName != NAME_None && GaitName != NAME_None && OverlayModeName != NAME_None)
-		{
-			auto ProfileName = FName{FString::Printf(TEXT("*%s:%s:%s:%s"), *ActionNameStr, *StanceNameStr, *GaitNameStr, *OverlayModeNameStr)};
-			if (IsProfileExist(ProfileName))
-			{
-				NextMultiplyProfileNames.Add(ProfileName);
-			}
-		}
-		if (!Character->HasMatchingGameplayTag(AlsLocomotionActionTags::Ragdolling) && ModeName != NAME_None && StanceName != NAME_None && GaitName != NAME_None && OverlayModeName != NAME_None)
-		{
-			auto ProfileName = FName{FString::Printf(TEXT("*%s:%s:%s:%s"), *ModeNameStr, *StanceNameStr, *GaitNameStr, *OverlayModeNameStr)};
-			if (IsProfileExist(ProfileName))
-			{
-				NextMultiplyProfileNames.Add(ProfileName);
-			}
-		}
-		if (ActionName != NAME_None && StanceName != NAME_None && GaitName != NAME_None)
-		{
-			auto ProfileName = FName{FString::Printf(TEXT("*%s:%s:%s"), *ModeNameStr, *StanceNameStr, *GaitNameStr)};
-			if (IsProfileExist(ProfileName))
-			{
-				NextMultiplyProfileNames.Add(ProfileName);
-			}
-		}
-		if (ActionName != NAME_None && StanceName != NAME_None && OverlayModeName != NAME_None)
-		{
-			auto ProfileName = FName{FString::Printf(TEXT("*%s:%s:%s"), *ActionNameStr, *StanceNameStr, *OverlayModeNameStr)};
-			if (IsProfileExist(ProfileName))
-			{
-				NextMultiplyProfileNames.Add(ProfileName);
-			}
-		}
-		if (ActionName != NAME_None && GaitName != NAME_None && OverlayModeName != NAME_None)
-		{
-			auto ProfileName = FName{FString::Printf(TEXT("*%s:%s:%s"), *ActionNameStr, *GaitNameStr, *OverlayModeNameStr)};
-			if (IsProfileExist(ProfileName))
-			{
-				NextMultiplyProfileNames.Add(ProfileName);
-			}
-		}
-		if (!Character->HasMatchingGameplayTag(AlsLocomotionActionTags::Ragdolling) && ModeName != NAME_None && StanceName != NAME_None && GaitName != NAME_None)
-		{
-			auto ProfileName = FName{FString::Printf(TEXT("*%s:%s:%s"), *ModeNameStr, *StanceNameStr, *GaitNameStr)};
-			if (IsProfileExist(ProfileName))
-			{
-				NextMultiplyProfileNames.Add(ProfileName);
-			}
-		}
-		if (!Character->HasMatchingGameplayTag(AlsLocomotionActionTags::Ragdolling) && ModeName != NAME_None && StanceName != NAME_None && OverlayModeName != NAME_None)
-		{
-			auto ProfileName = FName{FString::Printf(TEXT("*%s:%s:%s"), *ModeNameStr, *StanceNameStr, *OverlayModeNameStr)};
-			if (IsProfileExist(ProfileName))
-			{
-				NextMultiplyProfileNames.Add(ProfileName);
-			}
-		}
-		if (!Character->HasMatchingGameplayTag(AlsLocomotionActionTags::Ragdolling) && ModeName != NAME_None && GaitName != NAME_None && OverlayModeName != NAME_None)
-		{
-			auto ProfileName = FName{FString::Printf(TEXT("*%s:%s:%s"), *ModeNameStr, *GaitNameStr, *OverlayModeNameStr)};
-			if (IsProfileExist(ProfileName))
-			{
-				NextMultiplyProfileNames.Add(ProfileName);
-			}
-		}
-		if (ActionName != NAME_None && StanceName != NAME_None)
-		{
-			auto ProfileName = FName{FString::Printf(TEXT("*%s:%s"), *ActionNameStr, *StanceNameStr)};
-			if (IsProfileExist(ProfileName))
-			{
-				NextMultiplyProfileNames.Add(ProfileName);
-			}
-		}
-		if (ActionName != NAME_None && GaitName != NAME_None)
-		{
-			auto ProfileName = FName{FString::Printf(TEXT("*%s:%s"), *ActionNameStr, *GaitNameStr)};
-			if (IsProfileExist(ProfileName))
-			{
-				NextMultiplyProfileNames.Add(ProfileName);
-			}
-		}
-		if (ActionName != NAME_None && OverlayModeName != NAME_None)
-		{
-			auto ProfileName = FName{FString::Printf(TEXT("*%s:%s"), *ActionNameStr, *OverlayModeNameStr)};
-			if (IsProfileExist(ProfileName))
-			{
-				NextMultiplyProfileNames.Add(ProfileName);
-			}
-		}
-		if (!Character->HasMatchingGameplayTag(AlsLocomotionActionTags::Ragdolling) && ModeName != NAME_None && StanceName != NAME_None)
-		{
-			auto ProfileName = FName{FString::Printf(TEXT("*%s:%s"), *ModeNameStr, *StanceNameStr)};
-			if (IsProfileExist(ProfileName))
-			{
-				NextMultiplyProfileNames.Add(ProfileName);
-			}
-		}
-		if (!Character->HasMatchingGameplayTag(AlsLocomotionActionTags::Ragdolling) && ModeName != NAME_None && GaitName != NAME_None)
-		{
-			auto ProfileName = FName{FString::Printf(TEXT("*%s:%s"), *ModeNameStr, *GaitNameStr)};
-			if (IsProfileExist(ProfileName))
-			{
-				NextMultiplyProfileNames.Add(ProfileName);
-			}
-		}
-		if (!Character->HasMatchingGameplayTag(AlsLocomotionActionTags::Ragdolling) && ModeName != NAME_None && OverlayModeName != NAME_None)
-		{
-			auto ProfileName = FName{FString::Printf(TEXT("*%s:%s"), *ModeNameStr, *OverlayModeNameStr)};
-			if (IsProfileExist(ProfileName))
-			{
-				NextMultiplyProfileNames.Add(ProfileName);
-			}
-		}
-		if (!Character->HasMatchingGameplayTag(AlsLocomotionActionTags::Ragdolling) && StanceName != NAME_None && OverlayModeName != NAME_None)
-		{
-			auto ProfileName = FName{FString::Printf(TEXT("*%s:%s"), *StanceNameStr, *OverlayModeNameStr)};
-			if (IsProfileExist(ProfileName))
-			{
-				NextMultiplyProfileNames.Add(ProfileName);
-			}
-		}
-		if (!Character->HasMatchingGameplayTag(AlsLocomotionActionTags::Ragdolling) && GaitName != NAME_None && OverlayModeName != NAME_None)
-		{
-			auto ProfileName = FName{FString::Printf(TEXT("*%s:%s"), *GaitNameStr, *OverlayModeNameStr)};
-			if (IsProfileExist(ProfileName))
-			{
-				NextMultiplyProfileNames.Add(ProfileName);
-			}
-		}
-		if (ActionName != NAME_None)
-		{
-			auto ProfileName = FName{FString::Printf(TEXT("*%s"), *ActionNameStr)};
-			if (IsProfileExist(ProfileName))
-			{
-				NextMultiplyProfileNames.Add(ProfileName);
-			}
-		}
-		if (!Character->HasMatchingGameplayTag(AlsLocomotionActionTags::Ragdolling) && ModeName != NAME_None)
-		{
-			auto ProfileName = FName{FString::Printf(TEXT("*%s"), *ModeNameStr)};
-			if (IsProfileExist(ProfileName))
-			{
-				NextMultiplyProfileNames.Add(ProfileName);
-			}
-		}
-		if (!Character->HasMatchingGameplayTag(AlsLocomotionActionTags::Ragdolling) && StanceName != NAME_None)
-		{
-			auto ProfileName = FName{FString::Printf(TEXT("*%s"), *StanceNameStr)};
-			if (IsProfileExist(ProfileName))
-			{
-				NextMultiplyProfileNames.Add(ProfileName);
-			}
-		}
-		if (!Character->HasMatchingGameplayTag(AlsLocomotionActionTags::Ragdolling) && GaitName != NAME_None)
-		{
-			auto ProfileName = FName{FString::Printf(TEXT("*%s"), *GaitNameStr)};
-			if (IsProfileExist(ProfileName))
-			{
-				NextMultiplyProfileNames.Add(ProfileName);
-			}
-		}
-		if (!Character->HasMatchingGameplayTag(AlsLocomotionActionTags::Ragdolling) && OverlayModeName != NAME_None)
-		{
-			auto ProfileName = FName{FString::Printf(TEXT("*%s"), *OverlayModeNameStr)};
-			if (IsProfileExist(ProfileName))
-			{
-				NextMultiplyProfileNames.Add(ProfileName);
-			}
-		}
+		AppedProfileNames(TEXT("*"), NextMultiplyProfileNames);
 
 		NextMultiplyProfileNames.Append(MultiplyProfileNames);
 	}
