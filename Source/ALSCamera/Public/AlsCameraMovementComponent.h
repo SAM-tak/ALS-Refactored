@@ -82,9 +82,6 @@ protected:
 	uint8 bInAutoFPP : 1 {false};
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient)
-	uint8 bRightShoulder : 1 {true};
-
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient)
 	uint8 bPreviousRightShoulder : 1 {true};
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient)
@@ -182,16 +179,6 @@ private:
 
 	void DisplayDebugTraces(const UCanvas* Canvas, float Scale, float HorizontalLocation, float& VerticalLocation) const;
 };
-
-inline bool UAlsCameraMovementComponent::IsRightShoulder() const
-{
-	return bRightShoulder;
-}
-
-inline void UAlsCameraMovementComponent::SetRightShoulder(const bool bNewRightShoulder)
-{
-	bRightShoulder = bNewRightShoulder;
-}
 
 inline FVector UAlsCameraMovementComponent::GetCurrentFocusLocation() const
 {

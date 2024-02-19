@@ -260,13 +260,13 @@ void UAlsCameraMovementComponent::DisplayDebugShapes(const UCanvas* Canvas, cons
 	VerticalLocation += RowOffset;
 
 	static const auto RightShoulderText{
-		FText::AsCultureInvariant(FName::NameToDisplayString(GET_MEMBER_NAME_STRING_CHECKED(ThisClass, bRightShoulder), true))
+		FText::AsCultureInvariant(FName::NameToDisplayString(GET_MEMBER_NAME_STRING_CHECKED(ThisClass, IsRightShoulder()), true))
 	};
 
 	Text.Text = RightShoulderText;
 	Text.Draw(Canvas->Canvas, {HorizontalLocation, VerticalLocation});
 
-	Text.Text = FText::AsCultureInvariant(FName::NameToDisplayString(FString{UAlsUtility::BoolToString(bRightShoulder)}, false));
+	Text.Text = FText::AsCultureInvariant(FName::NameToDisplayString(FString{UAlsUtility::BoolToString(IsRightShoulder())}, false));
 	Text.Draw(Canvas->Canvas, {HorizontalLocation + ColumnOffset, VerticalLocation});
 
 	VerticalLocation += RowOffset;

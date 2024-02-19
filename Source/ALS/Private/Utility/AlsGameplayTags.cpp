@@ -118,3 +118,9 @@ namespace AlsGroundedEntryModeTags
 	UE_DEFINE_GAMEPLAY_TAG(Root, FName{TEXTVIEW("Als.GroundedEntryMode")})
 	UE_DEFINE_GAMEPLAY_TAG(FromRoll, FName{TEXTVIEW("Als.GroundedEntryMode.FromRoll")})
 }
+
+namespace AlsCameraTags
+{
+	UE_DEFINE_GAMEPLAY_TAG(Root, FName{TEXTVIEW("Als.Camera")})
+	UE_DEFINE_GAMEPLAY_TAG(LeftShoulder, FName{TEXTVIEW("Als.Camera.LeftShoulder")})
+}

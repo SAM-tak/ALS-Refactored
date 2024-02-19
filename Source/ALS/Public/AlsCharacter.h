@@ -130,13 +130,13 @@ public:
 	/** Name of the PhysicalAnimationComponent. */
 	static FName AbilitySystemComponentName;
 
-	/** Returns PhysicalAnimation subobject **/
-	template <class T>
-	FORCEINLINE_DEBUGGABLE T* GetAbilitySystem() const
-	{
-		return CastChecked<T>(AbilitySystem, ECastCheckedType::NullAllowed);
-	}
-	FORCEINLINE UAbilitySystemComponent* GetAbilitySystem() const { return AbilitySystem; }
+	///** Returns PhysicalAnimation subobject **/
+	//template <class T>
+	//FORCEINLINE_DEBUGGABLE T* GetAbilitySystem() const
+	//{
+	//	return CastChecked<T>(AbilitySystem, ECastCheckedType::NullAllowed);
+	//}
+	//FORCEINLINE UAbilitySystemComponent* GetAbilitySystem() const { return AbilitySystem; }
 
 protected:
 	virtual void BeginPlay() override;

@@ -165,6 +165,13 @@ void AAlsCharacter::PreRegisterAllComponents()
 		}
 
 		GetOwnedGameplayTags(TempTagContainer);
+
+		for(auto& Tag : TempTagContainer.Filter(Settings->GameplayTagCaterogy.ViewModes))
+		{
+			AbilitySystem->SetLooseGameplayTagCount(Tag, 0);
+		}
+		AbilitySystem->SetLooseGameplayTagCount(Settings->DesiredToActual(GetDesiredViewMode()), 1);
+
 		for(auto& Tag : TempTagContainer.Filter(Settings->GameplayTagCaterogy.RotationModes))
 		{
 			AbilitySystem->SetLooseGameplayTagCount(Tag, 0);
@@ -1307,7 +1314,7 @@ void AAlsCharacter::SetFocalRotation(const FRotator& NewFocalRotation)
 	PendingFocalRotationRelativeAdjustment.Yaw = FMath::Clamp(PendingFocalRotationRelativeAdjustment.Yaw, -90.0, 90.0);
 	PendingFocalRotationRelativeAdjustment.Pitch = FMath::Clamp(PendingFocalRotationRelativeAdjustment.Pitch, -45.0, 45.0);
 	PendingFocalRotationRelativeAdjustment.Roll = 0.0;
-	UE_LOG(LogAls, VeryVerbose, TEXT("SetFocalRotation PendingFocalRotationRelativeAdjustment %s"), *PendingFocalRotationRelativeAdjustment.ToString());
+	UE_LOG(LogAls, Verbose, TEXT("SetFocalRotation PendingFocalRotationRelativeAdjustment %s"), *PendingFocalRotationRelativeAdjustment.ToString());
 }
 
 void AAlsCharacter::TryAdjustControllRotation(float DeltaTime)
@@ -1322,7 +1329,7 @@ void AAlsCharacter::TryAdjustControllRotation(float DeltaTime)
 														Settings->View.AdjustControllRotationSpeed));
 		PendingFocalRotationRelativeAdjustment -= Controller->GetControlRotation() - ControlRotation;
 		PendingFocalRotationRelativeAdjustment.Normalize();
-		UE_LOG(LogAls, VeryVerbose, TEXT("Applay PendingFocalRotationRelativeAdjustment %s %s"),
+		UE_LOG(LogAls, Verbose, TEXT("Applay PendingFocalRotationRelativeAdjustment %s %s"),
 			   *(PendingFocalRotationRelativeAdjustment - PreviousPendingFocalRotationRelativeAdjustment).ToString(),
 			   *PendingFocalRotationRelativeAdjustment.ToString());
 	}

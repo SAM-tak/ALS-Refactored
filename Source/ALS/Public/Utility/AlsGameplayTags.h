@@ -120,3 +120,9 @@ namespace AlsGroundedEntryModeTags
 	ALS_API UE_DECLARE_GAMEPLAY_TAG_EXTERN(GroundedEntryMode)
 	ALS_API UE_DECLARE_GAMEPLAY_TAG_EXTERN(FromRoll)
 }
+
+namespace AlsCameraTags
+{
+	ALS_API UE_DECLARE_GAMEPLAY_TAG_EXTERN(Root)
+	ALS_API UE_DECLARE_GAMEPLAY_TAG_EXTERN(LeftShoulder)
+}
