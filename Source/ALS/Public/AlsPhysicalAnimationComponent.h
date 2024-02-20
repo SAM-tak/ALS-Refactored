@@ -58,12 +58,6 @@ protected:
 	TArray<FName> CurrentMultiplyProfileNames;
 
 	UPROPERTY(VisibleAnywhere, Category = "State|PhysicalAnimation", Transient)
-	TArray<FName> CurrentOverrideMultiplyProfileNames;
-
-	UPROPERTY(VisibleAnywhere, Category = "State|PhysicalAnimation", Transient)
-	TArray<FName> OverrideMultiplyProfileNames;
-
-	UPROPERTY(VisibleAnywhere, Category = "State|PhysicalAnimation", Transient)
 	FGameplayTag LocomotionAction;
 
 	UPROPERTY(VisibleAnywhere, Category = "State|PhysicalAnimation", Transient)
@@ -103,7 +97,7 @@ protected:
 	uint8 bRagdollingFreezed : 1 {false};
 
 public:
-	virtual void Refresh(const AAlsCharacter* Character, float DeltaTime);
+	virtual void Refresh(const AAlsCharacter* Character);
 
 	virtual void TickComponent(float DeltaTime, enum ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 

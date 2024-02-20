@@ -399,7 +399,7 @@ void AAlsCharacter::Tick(const float DeltaTime)
 	RefreshMantling();
 	RefreshRagdolling(DeltaTime);
 	RefreshRolling(DeltaTime);
-	PhysicalAnimation->Refresh(this, DeltaTime);
+	PhysicalAnimation->Refresh(this);
 
 	Super::Tick(DeltaTime);
 

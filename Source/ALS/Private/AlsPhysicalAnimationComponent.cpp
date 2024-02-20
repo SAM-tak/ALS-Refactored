@@ -142,9 +142,9 @@ bool UAlsPhysicalAnimationComponent::NeedsProfileChange()
 	PreviousStance = Stance;
 	PreviousGait = Gait;
 	PreviousOverlayMode = OverlayMode;
-	if (CurrentOverrideMultiplyProfileNames != OverrideMultiplyProfileNames)
+	if (CurrentMultiplyProfileNames != MultiplyProfileNames)
 	{
-		CurrentOverrideMultiplyProfileNames = OverrideMultiplyProfileNames;
+		CurrentMultiplyProfileNames = MultiplyProfileNames;
 		RetVal = true;
 	}
 	return RetVal;
@@ -744,7 +744,7 @@ void UAlsPhysicalAnimationComponent::SelectProfile()
 	}
 }
 
-void UAlsPhysicalAnimationComponent::Refresh(const AAlsCharacter* Character, float DeltaTime)
+void UAlsPhysicalAnimationComponent::Refresh(const AAlsCharacter* Character)
 {
 	// Apply special behaviour when changed Ragdolling state
 
