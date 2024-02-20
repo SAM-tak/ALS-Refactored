@@ -284,9 +284,9 @@ void AAlsCharacter::BeginPlay()
 
 	RefreshGait();
 
-	if (HasAuthority())
+	if (/* resonable? *//*HasAuthority() &&*/ Abilities)
 	{
-		AbilitySpecs.RegisterWithOwner(AbilitySystem);
+		Abilities->GiveToAbilitySystem(AbilitySystem, nullptr);
 	}
 
 	OnOverlayModeChanged(GetOverlayMode());
@@ -399,7 +399,7 @@ void AAlsCharacter::Tick(const float DeltaTime)
 	RefreshMantling();
 	RefreshRagdolling(DeltaTime);
 	RefreshRolling(DeltaTime);
-	PhysicalAnimation->Refresh(DeltaTime);
+	PhysicalAnimation->Refresh(this, DeltaTime);
 
 	Super::Tick(DeltaTime);
 

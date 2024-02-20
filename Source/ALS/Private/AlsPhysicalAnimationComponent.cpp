@@ -114,34 +114,34 @@ bool UAlsPhysicalAnimationComponent::HasAnyProfile(const USkeletalBodySetup* Bod
 	return false;
 }
 
-bool UAlsPhysicalAnimationComponent::NeedsProfileChange(const AAlsCharacter* Character)
+bool UAlsPhysicalAnimationComponent::NeedsProfileChange()
 {
 	bool RetVal = false;
-	if (LocomotionAction != Character->GetLocomotionAction())
+	if (LocomotionAction != PreviousLocomotionAction)
 	{
 		RetVal = true;
 	}
-	else if (LocomotionMode != Character->GetLocomotionMode())
+	else if (LocomotionMode != PreviousLocomotionMode)
 	{
 		RetVal = true;
 	}
-	else if (Stance != Character->GetStance())
+	else if (Stance != PreviousStance)
 	{
 		RetVal = true;
 	}
-	else if (Gait != Character->GetGait())
+	else if (Gait != PreviousGait)
 	{
 		RetVal = true;
 	}
-	else if (OverlayMode != Character->GetOverlayMode())
+	else if (OverlayMode != PreviousOverlayMode)
 	{
 		RetVal = true;
 	}
-	LocomotionAction = Character->GetLocomotionAction();
-	LocomotionMode = Character->GetLocomotionMode();
-	Stance = Character->GetStance();
-	Gait = Character->GetGait();
-	OverlayMode = Character->GetOverlayMode();
+	PreviousLocomotionAction = LocomotionAction;
+	PreviousLocomotionMode = LocomotionMode;
+	PreviousStance = Stance;
+	PreviousGait = Gait;
+	PreviousOverlayMode = OverlayMode;
 	if (CurrentOverrideMultiplyProfileNames != OverrideMultiplyProfileNames)
 	{
 		CurrentOverrideMultiplyProfileNames = OverrideMultiplyProfileNames;
@@ -157,6 +157,11 @@ void UAlsPhysicalAnimationComponent::ClearGameplayTags()
 	Stance = FGameplayTag::EmptyTag;
 	Gait = FGameplayTag::EmptyTag;
 	OverlayMode = FGameplayTag::EmptyTag;
+	PreviousLocomotionAction = FGameplayTag::EmptyTag;
+	PreviousLocomotionMode = FGameplayTag::EmptyTag;
+	PreviousStance = FGameplayTag::EmptyTag;
+	PreviousGait = FGameplayTag::EmptyTag;
+	PreviousOverlayMode = FGameplayTag::EmptyTag;
 }
 
 void UAlsPhysicalAnimationComponent::RefreshBodyState(float DeltaTime)
@@ -262,17 +267,17 @@ void UAlsPhysicalAnimationComponent::RefreshBodyState(float DeltaTime)
 	}
 }
 
-void UAlsPhysicalAnimationComponent::SelectProfile(const AAlsCharacter* Character)
+void UAlsPhysicalAnimationComponent::SelectProfile()
 {
 	TArray<FName> NextProfileNames;
 	TArray<FName> NextMultiplyProfileNames;
 	TStringBuilder<256> StringBuilder;
 
-	auto ActionName = UAlsUtility::GetSimpleTagName(Character->GetLocomotionAction());
-	auto ModeName = UAlsUtility::GetSimpleTagName(Character->GetLocomotionMode());
-	auto StanceName = UAlsUtility::GetSimpleTagName(Character->GetStance());
-	auto GaitName = UAlsUtility::GetSimpleTagName(Character->GetGait());
-	auto OverlayModeName = UAlsUtility::GetSimpleTagName(Character->GetOverlayMode());
+	auto ActionName = UAlsUtility::GetSimpleTagName(LocomotionAction);
+	auto ModeName = UAlsUtility::GetSimpleTagName(LocomotionMode);
+	auto StanceName = UAlsUtility::GetSimpleTagName(Stance);
+	auto GaitName = UAlsUtility::GetSimpleTagName(Gait);
+	auto OverlayModeName = UAlsUtility::GetSimpleTagName(OverlayMode);
 	auto ActionNameStr = ActionName.ToString();
 	auto ModeNameStr = ActionName.ToString();
 	auto StanceNameStr = StanceName.ToString();
@@ -481,7 +486,7 @@ void UAlsPhysicalAnimationComponent::SelectProfile(const AAlsCharacter* Characte
 
 	// add additional profiles if exists.
 
-	auto AppedProfileNames = [&](const TCHAR* Prefix, TArray<FName>& NameBuffer)
+	auto AppendProfileNames = [&](const TCHAR* Prefix, TArray<FName>& NameBuffer)
 	{
 		if (ActionName != NAME_None && ModeName != NAME_None && StanceName != NAME_None && GaitName != NAME_None && OverlayModeName != NAME_None)
 		{
@@ -543,7 +548,7 @@ void UAlsPhysicalAnimationComponent::SelectProfile(const AAlsCharacter* Characte
 				NameBuffer.Add(ProfileName);
 			}
 		}
-		if (!Character->HasMatchingGameplayTag(AlsLocomotionActionTags::Ragdolling) && ModeName != NAME_None && StanceName != NAME_None && GaitName != NAME_None)
+		if (!bRagdolling && ModeName != NAME_None && StanceName != NAME_None && GaitName != NAME_None)
 		{
 			StringBuilder.Appendf(TEXT("%s%s:%s:%s"), Prefix, *ModeNameStr, *StanceNameStr, *GaitNameStr);
 			FName ProfileName(StringBuilder, FNAME_Find);
@@ -553,7 +558,7 @@ void UAlsPhysicalAnimationComponent::SelectProfile(const AAlsCharacter* Characte
 				NameBuffer.Add(ProfileName);
 			}
 		}
-		if (!Character->HasMatchingGameplayTag(AlsLocomotionActionTags::Ragdolling) && ModeName != NAME_None && StanceName != NAME_None && OverlayModeName != NAME_None)
+		if (!bRagdolling && ModeName != NAME_None && StanceName != NAME_None && OverlayModeName != NAME_None)
 		{
 			StringBuilder.Appendf(TEXT("%s%s:%s:%s"), Prefix, *ModeNameStr, *StanceNameStr, *OverlayModeNameStr);
 			FName ProfileName(StringBuilder, FNAME_Find);
@@ -563,7 +568,7 @@ void UAlsPhysicalAnimationComponent::SelectProfile(const AAlsCharacter* Characte
 				NameBuffer.Add(ProfileName);
 			}
 		}
-		if (!Character->HasMatchingGameplayTag(AlsLocomotionActionTags::Ragdolling) && ModeName != NAME_None && GaitName != NAME_None && OverlayModeName != NAME_None)
+		if (!bRagdolling && ModeName != NAME_None && GaitName != NAME_None && OverlayModeName != NAME_None)
 		{
 			StringBuilder.Appendf(TEXT("%s%s:%s:%s"), Prefix, *ModeNameStr, *GaitNameStr, *OverlayModeNameStr);
 			FName ProfileName(StringBuilder, FNAME_Find);
@@ -603,7 +608,7 @@ void UAlsPhysicalAnimationComponent::SelectProfile(const AAlsCharacter* Characte
 				NameBuffer.Add(ProfileName);
 			}
 		}
-		if (!Character->HasMatchingGameplayTag(AlsLocomotionActionTags::Ragdolling) && ModeName != NAME_None && StanceName != NAME_None)
+		if (!bRagdolling && ModeName != NAME_None && StanceName != NAME_None)
 		{
 			StringBuilder.Appendf(TEXT("%s%s:%s"), Prefix, *ModeNameStr, *StanceNameStr);
 			FName ProfileName(StringBuilder, FNAME_Find);
@@ -613,7 +618,7 @@ void UAlsPhysicalAnimationComponent::SelectProfile(const AAlsCharacter* Characte
 				NameBuffer.Add(ProfileName);
 			}
 		}
-		if (!Character->HasMatchingGameplayTag(AlsLocomotionActionTags::Ragdolling) && ModeName != NAME_None && GaitName != NAME_None)
+		if (!bRagdolling && ModeName != NAME_None && GaitName != NAME_None)
 		{
 			StringBuilder.Appendf(TEXT("%s%s:%s"), Prefix, *ModeNameStr, *GaitNameStr);
 			FName ProfileName(StringBuilder, FNAME_Find);
@@ -623,7 +628,7 @@ void UAlsPhysicalAnimationComponent::SelectProfile(const AAlsCharacter* Characte
 				NameBuffer.Add(ProfileName);
 			}
 		}
-		if (!Character->HasMatchingGameplayTag(AlsLocomotionActionTags::Ragdolling) && ModeName != NAME_None && OverlayModeName != NAME_None)
+		if (!bRagdolling && ModeName != NAME_None && OverlayModeName != NAME_None)
 		{
 			StringBuilder.Appendf(TEXT("%s%s:%s"), Prefix, *ModeNameStr, *OverlayModeNameStr);
 			FName ProfileName(StringBuilder, FNAME_Find);
@@ -633,7 +638,7 @@ void UAlsPhysicalAnimationComponent::SelectProfile(const AAlsCharacter* Characte
 				NameBuffer.Add(ProfileName);
 			}
 		}
-		if (!Character->HasMatchingGameplayTag(AlsLocomotionActionTags::Ragdolling) && StanceName != NAME_None && OverlayModeName != NAME_None)
+		if (!bRagdolling && StanceName != NAME_None && OverlayModeName != NAME_None)
 		{
 			StringBuilder.Appendf(TEXT("%s%s:%s"), Prefix, *StanceNameStr, *OverlayModeNameStr);
 			FName ProfileName(StringBuilder, FNAME_Find);
@@ -643,7 +648,7 @@ void UAlsPhysicalAnimationComponent::SelectProfile(const AAlsCharacter* Characte
 				NameBuffer.Add(ProfileName);
 			}
 		}
-		if (!Character->HasMatchingGameplayTag(AlsLocomotionActionTags::Ragdolling) && GaitName != NAME_None && OverlayModeName != NAME_None)
+		if (!bRagdolling && GaitName != NAME_None && OverlayModeName != NAME_None)
 		{
 			StringBuilder.Appendf(TEXT("%s%s:%s"), Prefix, *GaitNameStr, *OverlayModeNameStr);
 			FName ProfileName(StringBuilder, FNAME_Find);
@@ -663,7 +668,7 @@ void UAlsPhysicalAnimationComponent::SelectProfile(const AAlsCharacter* Characte
 				NameBuffer.Add(ProfileName);
 			}
 		}
-		if (!Character->HasMatchingGameplayTag(AlsLocomotionActionTags::Ragdolling) && ModeName != NAME_None)
+		if (!bRagdolling && ModeName != NAME_None)
 		{
 			StringBuilder.Appendf(TEXT("%s%s"), Prefix, *ModeNameStr);
 			FName ProfileName(StringBuilder, FNAME_Find);
@@ -673,7 +678,7 @@ void UAlsPhysicalAnimationComponent::SelectProfile(const AAlsCharacter* Characte
 				NameBuffer.Add(ProfileName);
 			}
 		}
-		if (!Character->HasMatchingGameplayTag(AlsLocomotionActionTags::Ragdolling) && StanceName != NAME_None)
+		if (!bRagdolling && StanceName != NAME_None)
 		{
 			StringBuilder.Appendf(TEXT("%s%s"), Prefix, *StanceNameStr);
 			FName ProfileName(StringBuilder, FNAME_Find);
@@ -683,7 +688,7 @@ void UAlsPhysicalAnimationComponent::SelectProfile(const AAlsCharacter* Characte
 				NameBuffer.Add(ProfileName);
 			}
 		}
-		if (!Character->HasMatchingGameplayTag(AlsLocomotionActionTags::Ragdolling) && GaitName != NAME_None)
+		if (!bRagdolling && GaitName != NAME_None)
 		{
 			StringBuilder.Appendf(TEXT("%s%s"), Prefix, *GaitNameStr);
 			FName ProfileName(StringBuilder, FNAME_Find);
@@ -693,7 +698,7 @@ void UAlsPhysicalAnimationComponent::SelectProfile(const AAlsCharacter* Characte
 				NameBuffer.Add(ProfileName);
 			}
 		}
-		if (!Character->HasMatchingGameplayTag(AlsLocomotionActionTags::Ragdolling) && OverlayModeName != NAME_None)
+		if (!bRagdolling && OverlayModeName != NAME_None)
 		{
 			StringBuilder.Appendf(TEXT("%s%s"), Prefix, *OverlayModeNameStr);
 			FName ProfileName(StringBuilder, FNAME_Find);
@@ -707,14 +712,14 @@ void UAlsPhysicalAnimationComponent::SelectProfile(const AAlsCharacter* Characte
 
 	if (NextProfileNames.Num() > 0)
 	{
-		AppedProfileNames(TEXT("+"), NextProfileNames);
+		AppendProfileNames(TEXT("+"), NextProfileNames);
 	}
 
 	if (NextProfileNames.Num() > 0)
 	{
 		// Process multiply profiles if exists.
 
-		AppedProfileNames(TEXT("*"), NextMultiplyProfileNames);
+		AppendProfileNames(TEXT("*"), NextMultiplyProfileNames);
 
 		NextMultiplyProfileNames.Append(MultiplyProfileNames);
 	}
@@ -728,7 +733,6 @@ void UAlsPhysicalAnimationComponent::SelectProfile(const AAlsCharacter* Characte
 			GetSkeletalMesh()->SetConstraintProfileForAll(NextProfileName, First);
 			First = false;
 		}
-		Activate();
 		CurrentProfileNames = NextProfileNames;
 
 		for (const auto& NextMultiplyProfileName : NextMultiplyProfileNames)
@@ -740,14 +744,8 @@ void UAlsPhysicalAnimationComponent::SelectProfile(const AAlsCharacter* Characte
 	}
 }
 
-void UAlsPhysicalAnimationComponent::Refresh(float DeltaTime)
+void UAlsPhysicalAnimationComponent::Refresh(const AAlsCharacter* Character, float DeltaTime)
 {
-	// I wanted to override TickComponent and do the following process,
-	// but I couldn’t fix the stuttering when returning from ragdoll,
-	// so I made this function to be called from AlsCharacter’s Tick.
-
-	auto* Character{Cast<AAlsCharacter>(GetSkeletalMesh()->GetOwner())};
-
 	// Apply special behaviour when changed Ragdolling state
 
 	if (Character->GetLocomotionAction() == AlsLocomotionActionTags::Ragdolling)
@@ -759,6 +757,7 @@ void UAlsPhysicalAnimationComponent::Refresh(float DeltaTime)
 			GetSkeletalMesh()->SetAllBodiesPhysicsBlendWeight(1.0f);
 			ApplyPhysicalAnimationProfileBelow(NAME_None, NAME_None, true, true);
 		}
+		bRagdollingFreezed = Character->GetRagdollingState().bFreezing;
 	}
 	else
 	{
@@ -778,11 +777,19 @@ void UAlsPhysicalAnimationComponent::Refresh(float DeltaTime)
 				GetSkeletalMesh()->SetCollisionEnabled(PrevCollisionEnabled);
 				bActive = false;
 			}
-
-			return; // skip to next frame
+			bRagdollingFreezed = false;
 		}
 	}
 
+	LocomotionAction = Character->GetLocomotionAction();
+	LocomotionMode = Character->GetLocomotionMode();
+	Stance = Character->GetStance();
+	Gait = Character->GetGait();
+	OverlayMode = Character->GetOverlayMode();
+}
+
+void UAlsPhysicalAnimationComponent::TickComponent(float DeltaTime, enum ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
+{
 	// Choose Physical Animation Profile
 
 	if (OverrideProfileNames.Num() > 0)
@@ -796,7 +803,6 @@ void UAlsPhysicalAnimationComponent::Refresh(float DeltaTime)
 				GetSkeletalMesh()->SetConstraintProfileForAll(CurrentProfileName, first);
 				first = false;
 			}
-			Activate();
 			CurrentProfileNames = OverrideProfileNames;
 			ClearGameplayTags();
 
@@ -808,17 +814,19 @@ void UAlsPhysicalAnimationComponent::Refresh(float DeltaTime)
 			CurrentMultiplyProfileNames = MultiplyProfileNames;
 		}
 	}
-	else if(NeedsProfileChange(Character))
+	else if(NeedsProfileChange())
 	{
-		SelectProfile(Character);
+		SelectProfile();
 	}
 
 	// Update PhysicsBlendWeight and Collision settings
 
-	if (!Character->HasMatchingGameplayTag(AlsLocomotionActionTags::Ragdolling) || !Character->GetRagdollingState().bFreezing)
+	if (!bRagdolling || !bRagdollingFreezed)
 	{
 		RefreshBodyState(DeltaTime);
 	}
+
+	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 }
 
 void UAlsPhysicalAnimationComponent::DisplayDebug(UCanvas* Canvas, const FDebugDisplayInfo& DisplayInfo, float& HorizontalLocation, float& VerticalLocation)

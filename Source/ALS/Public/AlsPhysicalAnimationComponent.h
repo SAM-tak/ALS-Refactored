@@ -61,6 +61,9 @@ protected:
 	TArray<FName> CurrentOverrideMultiplyProfileNames;
 
 	UPROPERTY(VisibleAnywhere, Category = "State|PhysicalAnimation", Transient)
+	TArray<FName> OverrideMultiplyProfileNames;
+
+	UPROPERTY(VisibleAnywhere, Category = "State|PhysicalAnimation", Transient)
 	FGameplayTag LocomotionAction;
 
 	UPROPERTY(VisibleAnywhere, Category = "State|PhysicalAnimation", Transient)
@@ -76,7 +79,19 @@ protected:
 	FGameplayTag OverlayMode;
 
 	UPROPERTY(VisibleAnywhere, Category = "State|PhysicalAnimation", Transient)
-	TArray<FName> OverrideMultiplyProfileNames;
+	FGameplayTag PreviousLocomotionAction;
+
+	UPROPERTY(VisibleAnywhere, Category = "State|PhysicalAnimation", Transient)
+	FGameplayTag PreviousLocomotionMode;
+
+	UPROPERTY(VisibleAnywhere, Category = "State|PhysicalAnimation", Transient)
+	FGameplayTag PreviousStance;
+
+	UPROPERTY(VisibleAnywhere, Category = "State|PhysicalAnimation", Transient)
+	FGameplayTag PreviousGait;
+
+	UPROPERTY(VisibleAnywhere, Category = "State|PhysicalAnimation", Transient)
+	FGameplayTag PreviousOverlayMode;
 
 	UPROPERTY(VisibleAnywhere, Category = "State|PhysicalAnimation", Transient)
 	uint8 bActive : 1 {false};
@@ -84,14 +99,17 @@ protected:
 	UPROPERTY(VisibleAnywhere, Category = "State|PhysicalAnimation", Transient)
 	uint8 bRagdolling : 1 {false};
 
+	UPROPERTY(VisibleAnywhere, Category = "State|PhysicalAnimation", Transient)
+	uint8 bRagdollingFreezed : 1 {false};
+
 public:
-	virtual void Refresh(float DeltaTime);
+	virtual void Refresh(const AAlsCharacter* Character, float DeltaTime);
+
+	virtual void TickComponent(float DeltaTime, enum ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
 	virtual void DisplayDebug(UCanvas* Canvas, const FDebugDisplayInfo& DisplayInfo, float& Unused, float& VerticalLocation);
 
 private:
-	bool NeedsProfileChange(const AAlsCharacter* Character);
-
 	void ClearGameplayTags();
 
 	void RefreshBodyState(float DelaTime);
@@ -102,5 +120,7 @@ private:
 
 	bool HasAnyProfile(const class USkeletalBodySetup* BodySetup) const;
 
-	void SelectProfile(const AAlsCharacter* Character);
+	bool NeedsProfileChange();
+
+	void SelectProfile();
 };

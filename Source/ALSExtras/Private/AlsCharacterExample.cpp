@@ -3,6 +3,7 @@
 #include "AlsCameraMovementComponent.h"
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
+#include "AbilitySystemComponent.h"
 #include "Engine/LocalPlayer.h"
 #include "GameFramework/PlayerController.h"
 #include "Camera/CameraComponent.h"
@@ -189,9 +190,10 @@ void AAlsCharacterExample::Input_OnRagdoll()
 
 void AAlsCharacterExample::Input_OnRoll()
 {
-	static constexpr auto PlayRate{1.3f};
+	//static constexpr auto PlayRate{1.3f};
 
-	StartRolling(PlayRate);
+	//StartRolling(PlayRate);
+	AbilitySystem->TryActivateAbilitiesByTag(FGameplayTagContainer{AlsLocomotionActionTags::Rolling});
 }
 
 void AAlsCharacterExample::Input_OnRotationMode()

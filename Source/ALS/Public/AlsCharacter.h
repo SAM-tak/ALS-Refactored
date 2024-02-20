@@ -11,7 +11,7 @@
 #include "AbilitySystemInterface.h"
 #include "GameplayCueInterface.h"
 #include "GameplayTagAssetInterface.h"
-#include "GameplayAbilitySpec.h"
+#include "Abilities/AlsAbilitySet.h"
 #include "AlsCharacter.generated.h"
 
 struct FAlsMantlingParameters;
@@ -50,7 +50,7 @@ protected:
 
 	/** ability list */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Settings|Als Character")
-	FGameplayAbilitySpecContainer AbilitySpecs;
+	TObjectPtr<UAlsAbilitySet> Abilities;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings|Als Character|Desired State")
 	FGameplayTagContainer InitialGameplayTags;
