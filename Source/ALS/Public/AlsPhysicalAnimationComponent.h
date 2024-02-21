@@ -30,18 +30,28 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = PhysicalAnimation, Meta = (ClampMin = 0, ForceUnits = "s"))
 	float BlendTimeOfBlendWeightOnDeactivate{0.1f};
 
-	/** Name list of PhysicalAnimationProfile Name for override.
-	  Only bodies with physical animation parameters set in any of the profiles in the list will be subject to physical simulation,
-	  and the simulation for other bodies will be turned off.
-	  Physical animation parameters are applied in order from the beginning of the list,
-	  and if multiple parameters are set for the same body in different profiles,
-	  they are overwritten by the later parameters in the list. */
+	// A mask of GameplayTags used to determine the Profile. The order in the list is used as a priority.
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = PhysicalAnimation)
+	TArray<FGameplayTagContainer> GameplayTagMasks{
+		FGameplayTagContainer{AlsLocomotionActionTags::Root},
+		FGameplayTagContainer{AlsLocomotionModeTags::Root},
+		FGameplayTagContainer{AlsStanceTags::Root},
+		FGameplayTagContainer{AlsGaitTags::Root},
+		FGameplayTagContainer{AlsOverlayModeTags::Root},
+	};
+
+	// Name list of PhysicalAnimationProfile Name for override.
+	// Only bodies with physical animation parameters set in any of the profiles in the list will be subject to physical simulation,
+	// and the simulation for other bodies will be turned off.
+	// Physical animation parameters are applied in order from the beginning of the list,
+	// and if multiple parameters are set for the same body in different profiles,
+	// they are overwritten by the later parameters in the list.
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = PhysicalAnimation)
 	TArray<FName> OverrideProfileNames;
 
-	/** Name list of PhysicalAnimationProfile Name for multiply.
-	  'Multiply' means only overwriting the physical animation parameters,
-	  without affecting the on/off state of the physical simulation.*/
+	// Name list of PhysicalAnimationProfile Name for multiply.
+	// 'Multiply' means only overwriting the physical animation parameters,
+	// without affecting the on/off state of the physical simulation.
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = PhysicalAnimation)
 	TArray<FName> MultiplyProfileNames;
 
@@ -58,34 +68,10 @@ protected:
 	TArray<FName> CurrentMultiplyProfileNames;
 
 	UPROPERTY(VisibleAnywhere, Category = "State|PhysicalAnimation", Transient)
-	FGameplayTag LocomotionAction;
+	FGameplayTagContainer CurrentGameplayTags;
 
 	UPROPERTY(VisibleAnywhere, Category = "State|PhysicalAnimation", Transient)
-	FGameplayTag LocomotionMode;
-
-	UPROPERTY(VisibleAnywhere, Category = "State|PhysicalAnimation", Transient)
-	FGameplayTag Stance;
-
-	UPROPERTY(VisibleAnywhere, Category = "State|PhysicalAnimation", Transient)
-	FGameplayTag Gait;
-
-	UPROPERTY(VisibleAnywhere, Category = "State|PhysicalAnimation", Transient)
-	FGameplayTag OverlayMode;
-
-	UPROPERTY(VisibleAnywhere, Category = "State|PhysicalAnimation", Transient)
-	FGameplayTag PreviousLocomotionAction;
-
-	UPROPERTY(VisibleAnywhere, Category = "State|PhysicalAnimation", Transient)
-	FGameplayTag PreviousLocomotionMode;
-
-	UPROPERTY(VisibleAnywhere, Category = "State|PhysicalAnimation", Transient)
-	FGameplayTag PreviousStance;
-
-	UPROPERTY(VisibleAnywhere, Category = "State|PhysicalAnimation", Transient)
-	FGameplayTag PreviousGait;
-
-	UPROPERTY(VisibleAnywhere, Category = "State|PhysicalAnimation", Transient)
-	FGameplayTag PreviousOverlayMode;
+	FGameplayTagContainer PreviousGameplayTags;
 
 	UPROPERTY(VisibleAnywhere, Category = "State|PhysicalAnimation", Transient)
 	uint8 bActive : 1 {false};
