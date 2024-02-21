@@ -96,6 +96,11 @@ void AAlsCharacter::StartRollingImplementation(UAnimMontage* Montage, const floa
 	}
 }
 
+void AAlsCharacter::RefreshRotationInstantOnRolling(float TargetYawAngle)
+{
+	RefreshRotationInstant(TargetYawAngle);
+}
+
 void AAlsCharacter::RefreshRolling(const float DeltaTime)
 {
 	if (GetLocalRole() <= ROLE_SimulatedProxy ||

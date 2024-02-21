@@ -23,12 +23,24 @@ bool UAlsGameplayAbilityRoll::CanActivateAbility(const FGameplayAbilitySpecHandl
 	if (Super::CanActivateAbility(Handle, ActorInfo, SourceTags, TargetTags, OptionalRelevantTags))
 	{
 		const auto* Character{Cast<AAlsCharacter>(ActorInfo->OwnerActor)};
-		return IsValid(Character) && Character->GetLocomotionMode() == AlsLocomotionModeTags::Grounded;
+		return IsValid(Character) && Character->HasMatchingGameplayTag(AlsLocomotionModeTags::Grounded);
 	}
 	return false;
 }
 
 void UAlsGameplayAbilityRoll::ActivateAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilityActivationInfo ActivationInfo, const FGameplayEventData* TriggerEventData)
 {
+	auto* Character{GetAlsCharacterFromActorInfo()};
+	TargetYawAngle = bRotateToInputOnStart && Character->GetLocomotionState().bHasInput
+		? Character->GetLocomotionState().InputYawAngle
+		: UE_REAL_TO_FLOAT(FRotator::NormalizeAxis(Character->GetActorRotation().Yaw));
+
+	Character->RefreshRotationInstantOnRolling(TargetYawAngle);
+
 	Super::ActivateAbility(Handle, ActorInfo, ActivationInfo, TriggerEventData);
+}
+
+void UAlsGameplayAbilityRoll::OnMontageEnded_Implementation(UAnimMontage* Montage, bool bInterrupted)
+{
+	Super::OnMontageEnded_Implementation(Montage, bInterrupted);
 }

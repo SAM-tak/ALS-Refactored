@@ -477,6 +477,8 @@ public:
 
 	bool IsRollingAllowedToStart(const UAnimMontage* Montage) const;
 
+	void RefreshRotationInstantOnRolling(float TargetYawAngle);
+
 private:
 	void StartRolling(float PlayRate, float TargetYawAngle);
 

@@ -284,7 +284,7 @@ void AAlsCharacter::BeginPlay()
 
 	RefreshGait();
 
-	if (/* resonable? *//*HasAuthority() &&*/ Abilities)
+	if (HasAuthority() && Abilities)
 	{
 		Abilities->GiveToAbilitySystem(AbilitySystem, nullptr);
 	}
@@ -398,7 +398,7 @@ void AAlsCharacter::Tick(const float DeltaTime)
 	StartMantlingInAir();
 	RefreshMantling();
 	RefreshRagdolling(DeltaTime);
-	RefreshRolling(DeltaTime);
+	//RefreshRolling(DeltaTime);
 	PhysicalAnimation->Refresh(this);
 
 	Super::Tick(DeltaTime);

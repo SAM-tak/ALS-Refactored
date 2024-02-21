@@ -19,29 +19,34 @@ class UAnimMontage;
 UCLASS()
 class ALS_API UAlsGameplayAbility_Montage : public UAlsGameplayAbility
 {
-    GENERATED_UCLASS_BODY()
+	GENERATED_UCLASS_BODY()
+
+protected:
+	UPROPERTY(EditDefaultsOnly, Category = AlsMontageAbility)
+	TObjectPtr<UAnimMontage> MontageToPlay;
+
+	UPROPERTY(EditDefaultsOnly, Category = AlsMontageAbility)
+	float PlayRate{1.0f};
+
+	UPROPERTY(EditDefaultsOnly, Category = AlsMontageAbility)
+	FName SectionName;
+
+	/** GameplayEffects to apply and then remove while the animation is playing */
+	UPROPERTY(EditDefaultsOnly, Category = AlsMontageAbility)
+	TArray<TSubclassOf<UGameplayEffect>> GameplayEffectClassesWhileAnimating;
+
+	UPROPERTY(EditDefaultsOnly, Category = AlsMontageAbility)
+	uint8 EndsAbilityOnMontageEnded : 1{true};
+
+private:
+	TArray<struct FActiveGameplayEffectHandle> AppliedEffects;
 
 public:
-    virtual void ActivateAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo *OwnerInfo, const FGameplayAbilityActivationInfo ActivationInfo, const FGameplayEventData *TriggerEventData) override;
+	virtual void ActivateAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* OwnerInfo,
+		const FGameplayAbilityActivationInfo ActivationInfo, const FGameplayEventData* TriggerEventData) override;
 
-    UPROPERTY(EditDefaultsOnly, Category = MontageAbility)
-    TObjectPtr<UAnimMontage> MontageToPlay;
+	UFUNCTION(BlueprintNativeEvent, Category = AlsMontageAbility)
+	void OnMontageEnded(UAnimMontage *Montage, bool bInterrupted);
 
-    UPROPERTY(EditDefaultsOnly, Category = MontageAbility)
-    float PlayRate{1.0f};
-
-    UPROPERTY(EditDefaultsOnly, Category = MontageAbility)
-    FName SectionName;
-
-    /** GameplayEffects to apply and then remove while the animation is playing */
-    UPROPERTY(EditDefaultsOnly, Category = MontageAbility)
-    TArray<TSubclassOf<UGameplayEffect>> GameplayEffectClassesWhileAnimating;
-
-    /** Deprecated. Use GameplayEffectClassesWhileAnimating instead. */
-    UPROPERTY(VisibleDefaultsOnly, Category = Deprecated)
-    TArray<TObjectPtr<const UGameplayEffect>> GameplayEffectsWhileAnimating;
-
-    void OnMontageEnded(UAnimMontage *Montage, bool bInterrupted, TWeakObjectPtr<UAbilitySystemComponent> AbilitySystemComponent, TArray<struct FActiveGameplayEffectHandle> AppliedEffects);
-
-    void GetGameplayEffectsWhileAnimating(TArray<const UGameplayEffect *> &OutEffects) const;
+	void GetGameplayEffectsWhileAnimating(TArray<const UGameplayEffect *> &OutEffects) const;
 };
