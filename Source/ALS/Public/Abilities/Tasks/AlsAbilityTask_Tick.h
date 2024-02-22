@@ -2,7 +2,7 @@
 
 #include "CoreMinimal.h"
 #include "Abilities/Tasks/AbilityTask.h"
-#include "AlsAbilityTask_OnTick.generated.h"
+#include "AlsAbilityTask_Tick.generated.h"
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FAlsAbilityTask_OnTickDelegate, float, DeltaTime);
 
@@ -12,15 +12,13 @@ DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FAlsAbilityTask_OnTickDelegate, floa
 UCLASS()
 class ALS_API UAlsAbilityTask_Tick : public UAbilityTask
 {
-    GENERATED_BODY()
+    GENERATED_UCLASS_BODY()
 
 public:
-    UAlsAbilityTask_Tick(const FObjectInitializer& ObjectInitializer);
-
     UPROPERTY(BlueprintAssignable)
     FAlsAbilityTask_OnTickDelegate OnTick;
 
-    UFUNCTION(BlueprintCallable, Category = "Ability|Tasks", meta = (DisplayName = "New Tick Ability Task", HidePin = "OwningAbility", DefaultToSelf = "OwningAbility", BlueprintInternalUseOnly = "TRUE"))
+    UFUNCTION(BlueprintCallable, Category = "Als|Ability|Tasks", meta = (DisplayName = "New Tick Ability Task", HidePin = "OwningAbility", DefaultToSelf = "OwningAbility", BlueprintInternalUseOnly = "TRUE"))
     static UAlsAbilityTask_Tick* New(UGameplayAbility* OwningAbility, const FName TaskInstanceName);
 
     virtual void TickTask(float DeltaTime) override;

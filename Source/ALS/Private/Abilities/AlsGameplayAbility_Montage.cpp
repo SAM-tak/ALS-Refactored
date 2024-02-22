@@ -130,10 +130,10 @@ void UAlsGameplayAbility_Montage::PlayMontage(UAnimMontage* Montage, const FGame
 		if (CurrentMotangeDuration > 0.0f)
 		{
 			FOnMontageEnded EndDelegate;
-			EndDelegate.BindUObject(this, &UAlsGameplayAbility_Montage::OnEndMontage);
+			EndDelegate.BindUObject(this, &ThisClass::OnEndMontage);
 			AnimInstance->Montage_SetEndDelegate(EndDelegate, Montage);
 
-			if (FAnimMontageInstance* MontageInstance = AnimInstance->GetActiveInstanceForMontage(Montage))
+			if (auto* MontageInstance = AnimInstance->GetActiveInstanceForMontage(Montage))
 			{
 				// AnimInstance's OnPlayMontageNotifyBegin/End fire for all notify. Then stores Montage's InstanceID
 				CurrentMontageInstanceID = MontageInstance->GetInstanceID();
@@ -145,12 +145,12 @@ void UAlsGameplayAbility_Montage::PlayMontage(UAnimMontage* Montage, const FGame
 	}
 }
 
-bool UAlsGameplayAbility_Montage::IsNotifyValid( FName NotifyName, const FBranchingPointNotifyPayload& BPNPayload ) const
+bool UAlsGameplayAbility_Montage::IsNotifyValid(FName NotifyName, const FBranchingPointNotifyPayload& BPNPayload) const
 {
     return CurrentMontageInstanceID != INDEX_NONE && BPNPayload.MontageInstanceID == CurrentMontageInstanceID;
 }
 
-void UAlsGameplayAbility_Montage::OnNotifyBeginReceived( FName NotifyName, const FBranchingPointNotifyPayload& BPNPayload )
+void UAlsGameplayAbility_Montage::OnNotifyBeginReceived(FName NotifyName, const FBranchingPointNotifyPayload& BPNPayload)
 {
     if (IsNotifyValid(NotifyName, BPNPayload))
     {
@@ -162,16 +162,16 @@ void UAlsGameplayAbility_Montage::OnNotifyBeginReceived( FName NotifyName, const
 
         float TriggerTime = BPNPayload.NotifyEvent ? BPNPayload.NotifyEvent->GetTriggerTime() : 0.f;
         float Duration = BPNPayload.NotifyEvent ? BPNPayload.NotifyEvent->GetDuration() : 0.f;
-        OnNotifyBegin.Broadcast( NotifyName, TriggerTime, Duration );
+        OnNotifyBegin.Broadcast(NotifyName, TriggerTime, Duration);
     }
 }
 
-void UAlsGameplayAbility_Montage::OnNotifyEndReceived( FName NotifyName, const FBranchingPointNotifyPayload& BPNPayload )
+void UAlsGameplayAbility_Montage::OnNotifyEndReceived(FName NotifyName, const FBranchingPointNotifyPayload& BPNPayload)
 {
     if (IsNotifyValid(NotifyName, BPNPayload))
     {
         float TriggerTime = BPNPayload.NotifyEvent ? BPNPayload.NotifyEvent->GetTriggerTime() : 0.f;
         float Duration = BPNPayload.NotifyEvent ? BPNPayload.NotifyEvent->GetDuration() : 0.f;
-        OnNotifyEnd.Broadcast( NotifyName, TriggerTime, Duration );
+        OnNotifyEnd.Broadcast(NotifyName, TriggerTime, Duration);
     }
 }

@@ -540,9 +540,6 @@ private:
 
 protected:
 	UFUNCTION(BlueprintNativeEvent, Category = "Als Character")
-	UAnimMontage* SelectGetUpMontage(bool bRagdollFacingUpward);
-
-	UFUNCTION(BlueprintNativeEvent, Category = "Als Character")
 	void OnRagdollingEnded();
 
 private:

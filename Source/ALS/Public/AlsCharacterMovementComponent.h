@@ -203,8 +203,10 @@ private:
 public:
 	float CalculateGaitAmount() const;
 
+	UFUNCTION(BlueprintCallable, Category = "ALS|Character Movement")
 	void SetMovementModeLocked(bool bNewMovementModeLocked);
 
+	UFUNCTION(BlueprintCallable, Category = "ALS|Character Movement")
 	void SetInputBlocked(bool bNewInputBlocked);
 
 	bool TryConsumePrePenetrationAdjustmentVelocity(FVector& OutVelocity);

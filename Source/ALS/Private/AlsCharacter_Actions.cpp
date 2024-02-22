@@ -7,6 +7,7 @@
 #include "Components/SkeletalMeshComponent.h"
 #include "Engine/NetConnection.h"
 #include "Engine/SkeletalMesh.h"
+#include "AbilitySystemComponent.h"
 #include "Net/Core/PushModel/PushModel.h"
 #include "RootMotionSources/AlsRootMotionSource_Mantling.h"
 #include "Settings/AlsCharacterSettings.h"
@@ -908,19 +909,10 @@ void AAlsCharacter::StopRagdollingImplementation()
 
 	OnRagdollingEnded();
 
-	if (IsRagdollingGroundedAndAged() &&
-	    GetMesh()->GetAnimInstance()->Montage_Play(SelectGetUpMontage(RagdollingState.bFacingUpward), 1.0f,
-	                                               EMontagePlayReturnType::MontageLength, 0.0f, true))
+	if (IsRagdollingGroundedAndAged())
 	{
-		AlsCharacterMovement->SetInputBlocked(true);
-
-		SetLocomotionAction(AlsLocomotionActionTags::GettingUp);
+		AbilitySystem->TryActivateAbilitiesByTag(FGameplayTagContainer{AlsLocomotionActionTags::GettingUp});
 	}
-}
-
-UAnimMontage* AAlsCharacter::SelectGetUpMontage_Implementation(const bool bRagdollFacingUpward)
-{
-	return RagdollingState.bFacingUpward ? Settings->Ragdolling.GetUpBackMontage : Settings->Ragdolling.GetUpFrontMontage;
 }
 
 void AAlsCharacter::OnRagdollingEnded_Implementation() {}

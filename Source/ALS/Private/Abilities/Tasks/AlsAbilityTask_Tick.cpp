@@ -1,6 +1,6 @@
-#include "Abilities/Tasks/AlsAbilityTask_OnTick.h"
+#include "Abilities/Tasks/AlsAbilityTask_Tick.h"
 
-#include UE_INLINE_GENERATED_CPP_BY_NAME(AlsAbilityTask_OnTick)
+#include UE_INLINE_GENERATED_CPP_BY_NAME(AlsAbilityTask_Tick)
 
 UAlsAbilityTask_Tick::UAlsAbilityTask_Tick(const FObjectInitializer& ObjectInitializer)
     : Super(ObjectInitializer)
