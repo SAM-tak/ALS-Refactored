@@ -190,9 +190,6 @@ void AAlsCharacterExample::Input_OnRagdoll()
 
 void AAlsCharacterExample::Input_OnRoll()
 {
-	//static constexpr auto PlayRate{1.3f};
-
-	//StartRolling(PlayRate);
 	AbilitySystem->TryActivateAbilitiesByTag(FGameplayTagContainer{AlsLocomotionActionTags::Rolling});
 }
 

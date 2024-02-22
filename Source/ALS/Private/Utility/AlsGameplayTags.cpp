@@ -111,6 +111,7 @@ namespace AlsLocomotionActionTags
 	UE_DEFINE_GAMEPLAY_TAG(Ragdolling, FName{TEXTVIEW("Als.LocomotionAction.Ragdolling")})
 	UE_DEFINE_GAMEPLAY_TAG(GettingUp, FName{TEXTVIEW("Als.LocomotionAction.GettingUp")})
 	UE_DEFINE_GAMEPLAY_TAG(Rolling, FName{TEXTVIEW("Als.LocomotionAction.Rolling")})
+	UE_DEFINE_GAMEPLAY_TAG(Landing, FName{TEXTVIEW("Als.LocomotionAction.Landing")})
 }
 
 namespace AlsGroundedEntryModeTags

@@ -226,8 +226,6 @@ void AAlsCharacter::PostInitializeComponents()
 
 	GetMesh()->AddTickPrerequisiteActor(this);
 
-	AlsCharacterMovement->OnPhysicsRotation.AddUObject(this, &ThisClass::CharacterMovement_OnPhysicsRotation);
-
 	// Pass current movement settings to the movement component.
 
 	AlsCharacterMovement->SetMovementSettings(MovementSettings);
@@ -688,21 +686,7 @@ void AAlsCharacter::NotifyLocomotionModeChanged(const FGameplayTag& PreviousLoco
 	if (GetLocomotionMode() == AlsLocomotionModeTags::Grounded &&
 		PreviousLocomotionMode == AlsLocomotionModeTags::InAir)
 	{
-		if (Settings->Ragdolling.bStartRagdollingOnLand &&
-			LocomotionState.Velocity.Z <= -Settings->Ragdolling.RagdollingOnLandSpeedThreshold)
-		{
-			StartRagdolling();
-		}
-		else if (Settings->Rolling.bStartRollingOnLand &&
-				 LocomotionState.Velocity.Z <= -Settings->Rolling.RollingOnLandSpeedThreshold)
-		{
-			static constexpr auto PlayRate{1.3f};
-
-			StartRolling(PlayRate, LocomotionState.bHasSpeed
-								   ? LocomotionState.VelocityYawAngle
-								   : UE_REAL_TO_FLOAT(FRotator::NormalizeAxis(GetActorRotation().Yaw)));
-		}
-		else
+		if (!AbilitySystem->TryActivateAbilitiesByTag(FGameplayTagContainer{AlsLocomotionActionTags::Landing}))
 		{
 			static constexpr auto HasInputBrakingFrictionFactor{0.5f};
 			static constexpr auto NoInputBrakingFrictionFactor{3.0f};
@@ -724,14 +708,6 @@ void AAlsCharacter::NotifyLocomotionModeChanged(const FGameplayTag& PreviousLoco
 
 			LocomotionState.bRotationTowardsLastInputDirectionBlocked = true;
 		}
-	}
-	else if (GetLocomotionMode() == AlsLocomotionModeTags::InAir &&
-	         GetLocomotionAction() == AlsLocomotionActionTags::Rolling &&
-	         Settings->Rolling.bInterruptRollingWhenInAir)
-	{
-		// If the character is currently rolling, then enable ragdolling.
-
-		StartRagdolling();
 	}
 
 	OnLocomotionModeChanged(PreviousLocomotionMode);
@@ -937,10 +913,6 @@ void AAlsCharacter::ApplyDesiredStance()
 		{
 			UnCrouch();
 		}
-	}
-	else if (GetLocomotionAction() == AlsLocomotionActionTags::Rolling && Settings->Rolling.bCrouchOnStart)
-	{
-		Crouch();
 	}
 }
 
@@ -1646,11 +1618,6 @@ void AAlsCharacter::FaceRotation(const FRotator Rotation, const float DeltaTime)
 {
 	// Left empty intentionally. We are ignoring rotation changes from external
 	// sources because ALS itself has full control over character rotation.
-}
-
-void AAlsCharacter::CharacterMovement_OnPhysicsRotation(const float DeltaTime)
-{
-	RefreshRollingPhysics(DeltaTime);
 }
 
 void AAlsCharacter::RefreshGroundedRotation(const float DeltaTime)

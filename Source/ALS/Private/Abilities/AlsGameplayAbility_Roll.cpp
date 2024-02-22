@@ -1,13 +1,16 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 
-#include "Abilities/AlsGameplayAbilityRoll.h"
-#include "Utility/AlsGameplayTags.h"
+#include "Abilities/AlsGameplayAbility_Roll.h"
+#include "Abilities/Tasks/AlsAbilityTask_OnTick.h"
 #include "AlsCharacter.h"
+#include "AlsCharacterMovementComponent.h"
+#include "Utility/AlsGameplayTags.h"
+#include "Utility/AlsMath.h"
 
-#include UE_INLINE_GENERATED_CPP_BY_NAME(AlsGameplayAbilityRoll)
+#include UE_INLINE_GENERATED_CPP_BY_NAME(AlsGameplayAbility_Roll)
 
-UAlsGameplayAbilityRoll::UAlsGameplayAbilityRoll(const FObjectInitializer& ObjectInitializer)
+UAlsGameplayAbility_Roll::UAlsGameplayAbility_Roll(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer)
 {
 	AbilityTags.AddTag(AlsLocomotionActionTags::Rolling);
@@ -18,7 +21,17 @@ UAlsGameplayAbilityRoll::UAlsGameplayAbilityRoll(const FObjectInitializer& Objec
 	BlockAbilitiesWithTag.AddTag(AlsLocomotionActionTags::Rolling);
 }
 
-bool UAlsGameplayAbilityRoll::CanActivateAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, const FGameplayTagContainer* SourceTags, const FGameplayTagContainer* TargetTags, OUT FGameplayTagContainer* OptionalRelevantTags) const
+float UAlsGameplayAbility_Roll::CalcTargetYawAngle_Implementation() const
+{
+	auto* Character{GetAlsCharacterFromActorInfo()};
+	return bRotateToInputOnStart && Character->GetLocomotionState().bHasInput
+		   ? Character->GetLocomotionState().InputYawAngle
+		   : UE_REAL_TO_FLOAT(FRotator::NormalizeAxis(Character->GetActorRotation().Yaw));
+}
+
+bool UAlsGameplayAbility_Roll::CanActivateAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo,
+												  const FGameplayTagContainer* SourceTags, const FGameplayTagContainer* TargetTags,
+												  OUT FGameplayTagContainer* OptionalRelevantTags) const
 {
 	if (Super::CanActivateAbility(Handle, ActorInfo, SourceTags, TargetTags, OptionalRelevantTags))
 	{
@@ -28,19 +41,114 @@ bool UAlsGameplayAbilityRoll::CanActivateAbility(const FGameplayAbilitySpecHandl
 	return false;
 }
 
-void UAlsGameplayAbilityRoll::ActivateAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilityActivationInfo ActivationInfo, const FGameplayEventData* TriggerEventData)
+void UAlsGameplayAbility_Roll::ActivateAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo,
+											   const FGameplayAbilityActivationInfo ActivationInfo, const FGameplayEventData* TriggerEventData)
 {
 	auto* Character{GetAlsCharacterFromActorInfo()};
-	TargetYawAngle = bRotateToInputOnStart && Character->GetLocomotionState().bHasInput
-		? Character->GetLocomotionState().InputYawAngle
-		: UE_REAL_TO_FLOAT(FRotator::NormalizeAxis(Character->GetActorRotation().Yaw));
+	
+	if (Character->GetLocalRole() < ROLE_Authority)
+	{
+		Character->GetCharacterMovement()->FlushServerMoves();
 
-	Character->RefreshRotationInstantOnRolling(TargetYawAngle);
+		const auto InitialYawAngle{UE_REAL_TO_FLOAT(FRotator::NormalizeAxis(Character->GetActorRotation().Yaw))};
+		Character->RefreshRotationInstant(InitialYawAngle);
+	}
+
+	TargetYawAngle = CalcTargetYawAngle();
 
 	Super::ActivateAbility(Handle, ActorInfo, ActivationInfo, TriggerEventData);
+
+	if (IsActive())
+	{
+		TickTask = UAlsAbilityTask_Tick::New(this, FName(TEXT("UAlsGameplayAbility_Roll")));
+		if (TickTask.IsValid())
+		{
+			TickTask->OnTick.AddDynamic(this, &UAlsGameplayAbility_Roll::ProcessTick);
+			TickTask->ReadyForActivation();
+		}
+
+		if (Character->GetLocalRole() <= ROLE_SimulatedProxy ||
+			Character->GetMesh()->GetAnimInstance()->RootMotionMode <= ERootMotionMode::IgnoreRootMotion)
+		{
+			PhysicsRotationHandle.Reset();
+		}
+		else
+		{
+			PhysicsRotationHandle = Character->GetAlsCharacterMovement()->OnPhysicsRotation.AddUObject(this, &ThisClass::RefreshRolling);
+		}
+	}
 }
 
-void UAlsGameplayAbilityRoll::OnMontageEnded_Implementation(UAnimMontage* Montage, bool bInterrupted)
+void UAlsGameplayAbility_Roll::EndAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo,
+										  const FGameplayAbilityActivationInfo ActivationInfo, bool bReplicateEndAbility, bool bWasCancelled)
 {
-	Super::OnMontageEnded_Implementation(Montage, bInterrupted);
+	auto* Character{GetAlsCharacterFromActorInfo()};
+
+	if (PhysicsRotationHandle.IsValid())
+	{
+		Character->GetAlsCharacterMovement()->OnPhysicsRotation.Remove(PhysicsRotationHandle);
+		PhysicsRotationHandle.Reset();
+	}
+
+	if (bCrouchOnStart)
+	{
+		if (Character->GetDesiredStance() != AlsDesiredStanceTags::Crouching)
+		{
+			Character->UnCrouch();
+		}
+	}
+
+	Super::EndAbility(Handle, ActorInfo, ActivationInfo, bReplicateEndAbility, bWasCancelled);
+}
+
+void UAlsGameplayAbility_Roll::TickOnRoll_Implementation(const float DeltaTime)
+{
+	auto* Character{GetAlsCharacterFromActorInfo()};
+	auto* AnimInstance{Character->GetMesh()->GetAnimInstance()};
+	if (!PhysicsRotationHandle.IsValid())
+	{
+		// Refresh rolling physics here because AAlsCharacter::PhysicsRotation()
+		// won't be called on simulated proxies or with ignored root motion.
+
+		RefreshRolling(DeltaTime);
+	}
+
+	if (bCrouchOnStart)
+	{
+		Character->Crouch();
+	}
+
+	if (bInterruptRollingWhenInAir && Character->HasMatchingGameplayTag(AlsLocomotionModeTags::InAir))
+	{
+		EndAbility(CurrentSpecHandle, GetCurrentActorInfo(), GetCurrentActivationInfo(),
+				   ReplicationPolicy != EGameplayAbilityReplicationPolicy::ReplicateNo, true);
+		Character->StartRagdolling();
+	}
+}
+
+void UAlsGameplayAbility_Roll::ProcessTick(const float DeltaTime)
+{
+	TickOnRoll(DeltaTime);
+}
+
+// ReSharper disable once CppMemberFunctionMayBeConst
+void UAlsGameplayAbility_Roll::RefreshRolling(const float DeltaTime)
+{
+	auto* Character{GetAlsCharacterFromActorInfo()};
+	auto TargetRotation{Character->GetCharacterMovement()->UpdatedComponent->GetComponentRotation()};
+
+	if (RotationInterpolationSpeed <= 0.0f)
+	{
+		TargetRotation.Yaw = TargetYawAngle;
+
+		Character->GetCharacterMovement()->MoveUpdatedComponent(FVector::ZeroVector, TargetRotation, false, nullptr, ETeleportType::TeleportPhysics);
+	}
+	else
+	{
+		TargetRotation.Yaw = UAlsMath::ExponentialDecayAngle(UE_REAL_TO_FLOAT(FRotator::NormalizeAxis(TargetRotation.Yaw)),
+		                                                     TargetYawAngle, DeltaTime,
+		                                                     RotationInterpolationSpeed);
+
+		Character->GetCharacterMovement()->MoveUpdatedComponent(FVector::ZeroVector, TargetRotation, false);
+	}
 }

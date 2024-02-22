@@ -5,7 +5,6 @@
 #include "State/AlsMantlingState.h"
 #include "State/AlsMovementBaseState.h"
 #include "State/AlsRagdollingState.h"
-#include "State/AlsRollingState.h"
 #include "State/AlsViewState.h"
 #include "Utility/AlsGameplayTags.h"
 #include "AbilitySystemInterface.h"
@@ -88,9 +87,6 @@ protected:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State|Als Character", Transient)
 	FAlsRagdollingState RagdollingState;
-
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State|Als Character", Transient)
-	FAlsRollingState RollingState;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State|Als Character", Transient)
 	FRotator PendingFocalRotationRelativeAdjustment{ForceInit};
@@ -427,7 +423,7 @@ private:
 public:
 	virtual void FaceRotation(FRotator Rotation, float DeltaTime) override final;
 
-	void CharacterMovement_OnPhysicsRotation(float DeltaTime);
+	void RefreshRotationInstant(float TargetYawAngle, ETeleportType Teleport = ETeleportType::None);
 
 private:
 	void RefreshGroundedRotation(float DeltaTime);
@@ -458,41 +454,11 @@ protected:
 	void RefreshRotationExtraSmooth(float TargetYawAngle, float DeltaTime,
 	                                float RotationInterpolationSpeed, float TargetYawAngleRotationSpeed);
 
-	void RefreshRotationInstant(float TargetYawAngle, ETeleportType Teleport = ETeleportType::None);
-
 	void RefreshTargetYawAngleUsingLocomotionRotation();
 
 	void RefreshTargetYawAngle(float TargetYawAngle);
 
 	void RefreshViewRelativeTargetYawAngle();
-
-	// Rolling
-
-public:
-	UFUNCTION(BlueprintCallable, Category = "Als Character")
-	void StartRolling(float PlayRate = 1.0f);
-
-	UFUNCTION(BlueprintNativeEvent, Category = "Als Character")
-	UAnimMontage* SelectRollMontage();
-
-	bool IsRollingAllowedToStart(const UAnimMontage* Montage) const;
-
-	void RefreshRotationInstantOnRolling(float TargetYawAngle);
-
-private:
-	void StartRolling(float PlayRate, float TargetYawAngle);
-
-	UFUNCTION(Server, Reliable)
-	void ServerStartRolling(UAnimMontage* Montage, float PlayRate, float InitialYawAngle, float TargetYawAngle);
-
-	UFUNCTION(NetMulticast, Reliable)
-	void MulticastStartRolling(UAnimMontage* Montage, float PlayRate, float InitialYawAngle, float TargetYawAngle);
-
-	void StartRollingImplementation(UAnimMontage* Montage, float PlayRate, float InitialYawAngle, float TargetYawAngle);
-
-	void RefreshRolling(float DeltaTime);
-
-	void RefreshRollingPhysics(float DeltaTime);
 
 	// Mantling
 

@@ -4,7 +4,6 @@
 #include "AlsInAirRotationMode.h"
 #include "AlsMantlingSettings.h"
 #include "AlsRagdollingSettings.h"
-#include "AlsRollingSettings.h"
 #include "AlsViewSettings.h"
 #include "AlsCharacterSettings.generated.h"
 
@@ -57,9 +56,6 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings")
 	FAlsRagdollingSettings Ragdolling;
-
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings")
-	FAlsRollingSettings Rolling;
 
 public:
 	UAlsCharacterSettings();

@@ -11,7 +11,7 @@ class AAlsCharacter;
 /**
  *
  */
-UCLASS()
+UCLASS(Abstract)
 class ALS_API UAlsGameplayAbility : public UGameplayAbility
 {
     GENERATED_BODY()
