@@ -15,12 +15,8 @@ UAlsGameplayAbility_Landing::UAlsGameplayAbility_Landing(const FObjectInitialize
 	AbilityTags.AddTag(AlsLocomotionActionTags::Landing);
 	ActivationOwnedTags.Reset();
 	ActivationOwnedTags.AddTag(AlsLocomotionActionTags::Landing);
-	CancelAbilitiesWithTag.Reset();
-	CancelAbilitiesWithTag.AddTag(AlsLocomotionActionTags::GettingUp);
-	CancelAbilitiesWithTag.AddTag(AlsLocomotionActionTags::Mantling);
 	BlockAbilitiesWithTag.Reset();
 	BlockAbilitiesWithTag.AddTag(AlsLocomotionActionTags::Landing);
-	BlockAbilitiesWithTag.AddTag(AlsLocomotionActionTags::Rolling);
 }
 
 float UAlsGameplayAbility_Landing::CalcTargetYawAngle_Implementation() const

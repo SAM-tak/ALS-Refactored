@@ -56,9 +56,9 @@ void UAlsGameplayAbility_Montage::EndAbility(const FGameplayAbilitySpecHandle Ha
 
 		// Remove any GameplayEffects that we applied
 
-		for (auto& Handle : AppliedEffects)
+		for (auto& EffectHandle : AppliedEffects)
 		{
-			AbilitySystemComponent->RemoveActiveGameplayEffect(Handle);
+			AbilitySystemComponent->RemoveActiveGameplayEffect(EffectHandle);
 		}
 		AppliedEffects.Reset();
 	}

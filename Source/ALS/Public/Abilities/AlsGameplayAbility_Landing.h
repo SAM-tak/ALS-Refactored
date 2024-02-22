@@ -3,14 +3,14 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Abilities/AlsGameplayAbility_Roll.h"
+#include "Abilities/AlsGameplayAbility_Rolling.h"
 #include "AlsGameplayAbility_Landing.generated.h"
 
 /**
  * 
  */
 UCLASS(Abstract)
-class ALS_API UAlsGameplayAbility_Landing : public UAlsGameplayAbility_Roll
+class ALS_API UAlsGameplayAbility_Landing : public UAlsGameplayAbility_Rolling
 {
 	GENERATED_UCLASS_BODY()
 

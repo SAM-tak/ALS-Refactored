@@ -1,27 +1,25 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 
-#include "Abilities/AlsGameplayAbility_Roll.h"
+#include "Abilities/AlsGameplayAbility_Rolling.h"
 #include "Abilities/Tasks/AlsAbilityTask_OnTick.h"
 #include "AlsCharacter.h"
 #include "AlsCharacterMovementComponent.h"
 #include "Utility/AlsGameplayTags.h"
 #include "Utility/AlsMath.h"
 
-#include UE_INLINE_GENERATED_CPP_BY_NAME(AlsGameplayAbility_Roll)
+#include UE_INLINE_GENERATED_CPP_BY_NAME(AlsGameplayAbility_Rolling)
 
-UAlsGameplayAbility_Roll::UAlsGameplayAbility_Roll(const FObjectInitializer& ObjectInitializer)
+UAlsGameplayAbility_Rolling::UAlsGameplayAbility_Rolling(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer)
 {
 	AbilityTags.AddTag(AlsLocomotionActionTags::Rolling);
 	ActivationOwnedTags.AddTag(AlsLocomotionActionTags::Rolling);
-	CancelAbilitiesWithTag.AddTag(AlsLocomotionActionTags::GettingUp);
-	CancelAbilitiesWithTag.AddTag(AlsLocomotionActionTags::Mantling);
-	BlockAbilitiesWithTag.AddTag(AlsLocomotionActionTags::Ragdolling);
+	CancelAbilitiesWithTag.AddTag(AlsLocomotionActionTags::Root);
 	BlockAbilitiesWithTag.AddTag(AlsLocomotionActionTags::Rolling);
 }
 
-float UAlsGameplayAbility_Roll::CalcTargetYawAngle_Implementation() const
+float UAlsGameplayAbility_Rolling::CalcTargetYawAngle_Implementation() const
 {
 	auto* Character{GetAlsCharacterFromActorInfo()};
 	return bRotateToInputOnStart && Character->GetLocomotionState().bHasInput
@@ -29,7 +27,7 @@ float UAlsGameplayAbility_Roll::CalcTargetYawAngle_Implementation() const
 		   : UE_REAL_TO_FLOAT(FRotator::NormalizeAxis(Character->GetActorRotation().Yaw));
 }
 
-bool UAlsGameplayAbility_Roll::CanActivateAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo,
+bool UAlsGameplayAbility_Rolling::CanActivateAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo,
 												  const FGameplayTagContainer* SourceTags, const FGameplayTagContainer* TargetTags,
 												  OUT FGameplayTagContainer* OptionalRelevantTags) const
 {
@@ -41,7 +39,7 @@ bool UAlsGameplayAbility_Roll::CanActivateAbility(const FGameplayAbilitySpecHand
 	return false;
 }
 
-void UAlsGameplayAbility_Roll::ActivateAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo,
+void UAlsGameplayAbility_Rolling::ActivateAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo,
 											   const FGameplayAbilityActivationInfo ActivationInfo, const FGameplayEventData* TriggerEventData)
 {
 	auto* Character{GetAlsCharacterFromActorInfo()};
@@ -63,7 +61,7 @@ void UAlsGameplayAbility_Roll::ActivateAbility(const FGameplayAbilitySpecHandle 
 		TickTask = UAlsAbilityTask_Tick::New(this, FName(TEXT("UAlsGameplayAbility_Roll")));
 		if (TickTask.IsValid())
 		{
-			TickTask->OnTick.AddDynamic(this, &UAlsGameplayAbility_Roll::ProcessTick);
+			TickTask->OnTick.AddDynamic(this, &UAlsGameplayAbility_Rolling::ProcessTick);
 			TickTask->ReadyForActivation();
 		}
 
@@ -79,7 +77,7 @@ void UAlsGameplayAbility_Roll::ActivateAbility(const FGameplayAbilitySpecHandle 
 	}
 }
 
-void UAlsGameplayAbility_Roll::EndAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo,
+void UAlsGameplayAbility_Rolling::EndAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo,
 										  const FGameplayAbilityActivationInfo ActivationInfo, bool bReplicateEndAbility, bool bWasCancelled)
 {
 	auto* Character{GetAlsCharacterFromActorInfo()};
@@ -101,7 +99,7 @@ void UAlsGameplayAbility_Roll::EndAbility(const FGameplayAbilitySpecHandle Handl
 	Super::EndAbility(Handle, ActorInfo, ActivationInfo, bReplicateEndAbility, bWasCancelled);
 }
 
-void UAlsGameplayAbility_Roll::TickOnRoll_Implementation(const float DeltaTime)
+void UAlsGameplayAbility_Rolling::TickOnRoll_Implementation(const float DeltaTime)
 {
 	auto* Character{GetAlsCharacterFromActorInfo()};
 	auto* AnimInstance{Character->GetMesh()->GetAnimInstance()};
@@ -126,13 +124,13 @@ void UAlsGameplayAbility_Roll::TickOnRoll_Implementation(const float DeltaTime)
 	}
 }
 
-void UAlsGameplayAbility_Roll::ProcessTick(const float DeltaTime)
+void UAlsGameplayAbility_Rolling::ProcessTick(const float DeltaTime)
 {
 	TickOnRoll(DeltaTime);
 }
 
 // ReSharper disable once CppMemberFunctionMayBeConst
-void UAlsGameplayAbility_Roll::RefreshRolling(const float DeltaTime)
+void UAlsGameplayAbility_Rolling::RefreshRolling(const float DeltaTime)
 {
 	auto* Character{GetAlsCharacterFromActorInfo()};
 	auto TargetRotation{Character->GetCharacterMovement()->UpdatedComponent->GetComponentRotation()};

@@ -4,13 +4,13 @@
 
 #include "CoreMinimal.h"
 #include "Abilities/AlsGameplayAbility_Montage.h"
-#include "AlsGameplayAbility_Roll.generated.h"
+#include "AlsGameplayAbility_Rolling.generated.h"
 
 /**
  * Roll Action
  */
 UCLASS(Abstract)
-class ALS_API UAlsGameplayAbility_Roll : public UAlsGameplayAbility_Montage
+class ALS_API UAlsGameplayAbility_Rolling : public UAlsGameplayAbility_Montage
 {
 	GENERATED_UCLASS_BODY()
 
