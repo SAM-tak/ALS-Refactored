@@ -100,7 +100,6 @@ void UAlsAnimationInstance::NativeUpdateAnimation(const float DeltaTime)
 
 	RefreshFeetOnGameThread();
 
-	RefreshRagdollingOnGameThread();
 	RefreshPhysicalAnimationOnGameThread();
 }
 
@@ -1782,20 +1781,9 @@ void UAlsAnimationInstance::PlayQueuedTurnInPlaceAnimation()
 	TurnInPlaceState.QueuedTurnYawAngle = 0.0f;
 }
 
-void UAlsAnimationInstance::RefreshRagdollingOnGameThread()
+void UAlsAnimationInstance::RefreshFlailPlayRate()
 {
 	check(IsInGameThread())
-
-	if (LocomotionAction != AlsLocomotionActionTags::Ragdolling)
-	{
-		return;
-	}
-
-	if (RagdollingState.bFreezed)
-	{
-		return;
-	}
-
 	// Scale the flail play rate by the root speed. The faster the ragdoll moves, the faster the character will flail.
 
 	static constexpr auto ReferenceSpeed{1000.0f};

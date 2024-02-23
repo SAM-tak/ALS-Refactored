@@ -9,7 +9,7 @@
 /**
  * Ragdolling
  */
-UCLASS()
+UCLASS(Abstract)
 class ALS_API UAlsGameplayAbility_Ragdolling : public UAlsGameplayAbility
 {
 	GENERATED_UCLASS_BODY()

@@ -323,10 +323,10 @@ private:
 
 	// Ragdolling
 
-private:
-	void RefreshRagdollingOnGameThread();
-
 public:
+	UFUNCTION(BlueprintCallable, Category = "ALS|Animation Instance", Meta = (BlueprintThreadSafe))
+	void RefreshFlailPlayRate();
+
 	FPoseSnapshot& GetFinalRagdollPoseSnapshot();
 
 	void FreezeRagdolling();

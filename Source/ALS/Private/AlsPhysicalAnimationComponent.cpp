@@ -383,7 +383,7 @@ void UAlsPhysicalAnimationComponent::SelectProfile()
 	TStringBuilder<256> StringBuilder;
 	TStringBuilder<256> AdditionalStringBuilder;
 
-	FName RagdollingModeName{UAlsUtility::GetSimpleTagName(AlsLocomotionActionTags::Ragdolling)};
+	FName RagdollingModeName{LatestRagdolling.IsValid() ? UAlsUtility::GetSimpleTagName(LatestRagdolling->AbilityTags.First()) : NAME_None};
 
 	FContainer Container;
 
