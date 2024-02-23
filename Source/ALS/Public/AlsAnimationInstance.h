@@ -324,9 +324,6 @@ private:
 	// Ragdolling
 
 public:
-	UFUNCTION(BlueprintCallable, Category = "ALS|Animation Instance", Meta = (BlueprintThreadSafe))
-	void RefreshFlailPlayRate();
-
 	FPoseSnapshot& GetFinalRagdollPoseSnapshot();
 
 	void FreezeRagdolling();
@@ -334,8 +331,6 @@ public:
 	void UnFreezeRagdolling();
 
 	void RefreshRagdollingAnimationState(const class UAlsGameplayAbility_Ragdolling& Ragdolling);
-
-	float GetRagdollingStartBlendTime() const;
 
 	// PhysicalAnimation
 

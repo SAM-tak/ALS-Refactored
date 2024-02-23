@@ -1781,16 +1781,6 @@ void UAlsAnimationInstance::PlayQueuedTurnInPlaceAnimation()
 	TurnInPlaceState.QueuedTurnYawAngle = 0.0f;
 }
 
-void UAlsAnimationInstance::RefreshFlailPlayRate()
-{
-	check(IsInGameThread())
-	// Scale the flail play rate by the root speed. The faster the ragdoll moves, the faster the character will flail.
-
-	static constexpr auto ReferenceSpeed{1000.0f};
-
-	RagdollingState.FlailPlayRate = UAlsMath::Clamp01(UE_REAL_TO_FLOAT(Character->GetCharacterMovement()->Velocity.Size() / ReferenceSpeed));
-}
-
 FPoseSnapshot& UAlsAnimationInstance::GetFinalRagdollPoseSnapshot()
 {
 	check(IsInGameThread())
@@ -1824,16 +1814,11 @@ void UAlsAnimationInstance::UnFreezeRagdolling()
 	}
 }
 
-float UAlsAnimationInstance::GetRagdollingStartBlendTime() const
-{
-	check(IsInGameThread())
-
-	return Settings->RagdollingStartBlendTime;
-}
-
 void UAlsAnimationInstance::RefreshRagdollingAnimationState(const UAlsGameplayAbility_Ragdolling& Ragdolling)
 {
-	RagdollingState.bGroundedAndAged = Ragdolling.bGrounded & (Ragdolling.ElapsedTime >= GetRagdollingStartBlendTime());
+	RagdollingState.bActive = Ragdolling.IsActive();
+	RagdollingState.StartBlendTime = Ragdolling.StartBlendTime;
+	RagdollingState.bGroundedAndAged = Ragdolling.bGrounded & (Ragdolling.ElapsedTime >= Ragdolling.StartBlendTime);
 	RagdollingState.bFacingUpward = Ragdolling.bFacingUpward;
 	RagdollingState.LyingDownYawAngleDelta = Ragdolling.LyingDownYawAngleDelta;
 }

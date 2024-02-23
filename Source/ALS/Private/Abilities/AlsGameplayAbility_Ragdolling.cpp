@@ -242,7 +242,7 @@ void UAlsGameplayAbility_Ragdolling::Tick_Implementation(const float DeltaTime)
 		}
 	}
 
-	if (ElapsedTime <= AnimInstance->GetRagdollingStartBlendTime() && ElapsedTime + DeltaTime > AnimInstance->GetRagdollingStartBlendTime())
+	if (ElapsedTime <= StartBlendTime && ElapsedTime + DeltaTime > StartBlendTime)
 	{
 		// Re-initialize bFacingUpward flag by current movement direction. If Velocity is Zero, it is chosen bFacingUpward is true.
 		bFacingUpward = Character->GetActorForwardVector().Dot(CharacterMovement->Velocity.GetSafeNormal2D()) <= 0.0f;
@@ -261,6 +261,7 @@ void UAlsGameplayAbility_Ragdolling::EndAbility(const FGameplayAbilitySpecHandle
 	auto CharacterMovement{Character->GetAlsCharacterMovement()};
 
 	AnimInstance->FreezeRagdolling();
+	AnimInstance->RefreshRagdollingAnimationState(*this);
 
 	// Re-enable capsule collision.
 
@@ -269,7 +270,7 @@ void UAlsGameplayAbility_Ragdolling::EndAbility(const FGameplayAbilitySpecHandle
 	CharacterMovement->NetworkSmoothingMode = ENetworkSmoothingMode::Exponential;
 	CharacterMovement->bIgnoreClientMovementErrorChecksAndCorrection = false;
 
-	if (ElapsedTime > AnimInstance->GetRagdollingStartBlendTime())
+	if (ElapsedTime > StartBlendTime)
 	{
 		const auto PelvisTransform{Character->GetMesh()->GetBoneTransform(UAlsConstants::PelvisBoneName())};
 		const auto PelvisRotation{PelvisTransform.Rotator()};
@@ -367,7 +368,7 @@ bool UAlsGameplayAbility_Ragdolling::IsGroundedAndAged() const
 {
 	auto* Character{GetAlsCharacterFromActorInfo()};
 	auto* AnimInstance{Character->GetAlsAnimationInstace()};
-	return bGrounded && ElapsedTime > AnimInstance->GetRagdollingStartBlendTime();
+	return bGrounded && ElapsedTime > StartBlendTime;
 }
 
 void UAlsGameplayAbility_Ragdolling::ProcessTick(const float DeltaTime)
