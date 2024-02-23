@@ -5,6 +5,7 @@
 #include "Abilities/Tasks/AlsAbilityTask_Tick.h"
 #include "AlsCharacter.h"
 #include "AlsCharacterMovementComponent.h"
+#include "AbilitySystemComponent.h"
 #include "Utility/AlsGameplayTags.h"
 #include "Utility/AlsMath.h"
 
@@ -61,7 +62,7 @@ void UAlsGameplayAbility_Rolling::ActivateAbility(const FGameplayAbilitySpecHand
 		TickTask = UAlsAbilityTask_Tick::New(this, FName(TEXT("UAlsGameplayAbility_Roll")));
 		if (TickTask.IsValid())
 		{
-			TickTask->OnTick.AddDynamic(this, &UAlsGameplayAbility_Rolling::ProcessTick);
+			TickTask->OnTick.AddDynamic(this, &ThisClass::ProcessTick);
 			TickTask->ReadyForActivation();
 		}
 
@@ -78,7 +79,7 @@ void UAlsGameplayAbility_Rolling::ActivateAbility(const FGameplayAbilitySpecHand
 }
 
 void UAlsGameplayAbility_Rolling::EndAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo,
-										  const FGameplayAbilityActivationInfo ActivationInfo, bool bReplicateEndAbility, bool bWasCancelled)
+											 const FGameplayAbilityActivationInfo ActivationInfo, bool bReplicateEndAbility, bool bWasCancelled)
 {
 	auto* Character{GetAlsCharacterFromActorInfo()};
 
@@ -99,7 +100,7 @@ void UAlsGameplayAbility_Rolling::EndAbility(const FGameplayAbilitySpecHandle Ha
 	Super::EndAbility(Handle, ActorInfo, ActivationInfo, bReplicateEndAbility, bWasCancelled);
 }
 
-void UAlsGameplayAbility_Rolling::TickOnRoll_Implementation(const float DeltaTime)
+void UAlsGameplayAbility_Rolling::Tick_Implementation(const float DeltaTime)
 {
 	auto* Character{GetAlsCharacterFromActorInfo()};
 	auto* AnimInstance{Character->GetMesh()->GetAnimInstance()};
@@ -120,13 +121,17 @@ void UAlsGameplayAbility_Rolling::TickOnRoll_Implementation(const float DeltaTim
 	{
 		EndAbility(CurrentSpecHandle, GetCurrentActorInfo(), GetCurrentActivationInfo(),
 				   ReplicationPolicy != EGameplayAbilityReplicationPolicy::ReplicateNo, true);
-		Character->StartRagdolling();
+
+		if (TryActiveWhenInAir.IsValid())
+		{
+			GetAbilitySystemComponentFromActorInfo()->TryActivateAbilitiesByTag(FGameplayTagContainer{TryActiveWhenInAir});
+		}
 	}
 }
 
 void UAlsGameplayAbility_Rolling::ProcessTick(const float DeltaTime)
 {
-	TickOnRoll(DeltaTime);
+	Tick(DeltaTime);
 }
 
 // ReSharper disable once CppMemberFunctionMayBeConst

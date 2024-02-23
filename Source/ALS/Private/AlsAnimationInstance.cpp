@@ -7,6 +7,7 @@
 #include "Curves/CurveFloat.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Settings/AlsAnimationInstanceSettings.h"
+#include "Abilities/AlsGameplayAbility_Ragdolling.h"
 #include "Utility/AlsConstants.h"
 #include "Utility/AlsMacros.h"
 #include "Utility/AlsUtility.h"
@@ -1816,7 +1817,10 @@ void UAlsAnimationInstance::FreezeRagdolling()
 	if (!RagdollingState.bFreezed)
 	{
 		// Save a snapshot of the current ragdoll pose for use in animation graph to blend out of the ragdoll.
-		SnapshotPose(RagdollingState.FinalRagdollPose);
+		if (GetSkelMeshComponent()->GetNumComponentSpaceTransforms() > 0) // When stop PIE, SnapshotPose rises Out of range exception.
+		{
+			SnapshotPose(RagdollingState.FinalRagdollPose);
+		}
 
 		RagdollingState.bFreezed = true;
 	}
@@ -1837,6 +1841,13 @@ float UAlsAnimationInstance::GetRagdollingStartBlendTime() const
 	check(IsInGameThread())
 
 	return Settings->RagdollingStartBlendTime;
+}
+
+void UAlsAnimationInstance::RefreshRagdollingAnimationState(const UAlsGameplayAbility_Ragdolling& Ragdolling)
+{
+	RagdollingState.bGroundedAndAged = Ragdolling.bGrounded & (Ragdolling.ElapsedTime >= GetRagdollingStartBlendTime());
+	RagdollingState.bFacingUpward = Ragdolling.bFacingUpward;
+	RagdollingState.LyingDownYawAngleDelta = Ragdolling.LyingDownYawAngleDelta;
 }
 
 void UAlsAnimationInstance::RefreshPhysicalAnimationOnGameThread()

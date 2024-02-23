@@ -6,17 +6,6 @@
 
 UAlsCharacterSettings::UAlsCharacterSettings()
 {
-	Ragdolling.GroundTraceResponseChannels =
-	{
-		ECC_WorldStatic,
-		ECC_WorldDynamic,
-		ECC_Destructible
-	};
-
-	Ragdolling.GroundTraceResponses.WorldStatic = ECR_Block;
-	Ragdolling.GroundTraceResponses.WorldDynamic = ECR_Block;
-	Ragdolling.GroundTraceResponses.Destructible = ECR_Block;
-
 	Mantling.MantlingTraceResponseChannels =
 	{
 		ECC_WorldStatic,
@@ -45,11 +34,7 @@ const FGameplayTag& UAlsCharacterSettings::DesiredToActual(const FGameplayTag& S
 #if WITH_EDITOR
 void UAlsCharacterSettings::PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent)
 {
-	if (PropertyChangedEvent.GetMemberPropertyName() == GET_MEMBER_NAME_CHECKED(ThisClass, Ragdolling))
-	{
-		Ragdolling.PostEditChangeProperty(PropertyChangedEvent);
-	}
-	else if (PropertyChangedEvent.GetMemberPropertyName() == GET_MEMBER_NAME_CHECKED(ThisClass, Mantling))
+	if (PropertyChangedEvent.GetMemberPropertyName() == GET_MEMBER_NAME_CHECKED(ThisClass, Mantling))
 	{
 		Mantling.PostEditChangeProperty(PropertyChangedEvent);
 	}

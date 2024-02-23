@@ -7,7 +7,7 @@
 #include "AlsGameplayAbility_Rolling.generated.h"
 
 /**
- * Roll Action
+ * Rolling Action
  */
 UCLASS(Abstract)
 class ALS_API UAlsGameplayAbility_Rolling : public UAlsGameplayAbility_Montage
@@ -15,19 +15,22 @@ class ALS_API UAlsGameplayAbility_Rolling : public UAlsGameplayAbility_Montage
 	GENERATED_UCLASS_BODY()
 
 protected:
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS|Ability|Roll")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS|Ability|Rolling")
 	uint8 bCrouchOnStart : 1{true};
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS|Ability|Roll")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS|Ability|Rolling")
 	uint8 bRotateToInputOnStart : 1{true};
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS|Ability|Roll", Meta = (ClampMin = 0))
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS|Ability|Rolling", Meta = (ClampMin = 0))
 	float RotationInterpolationSpeed{10.0f};
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS|Ability|Roll")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS|Ability|Rolling")
 	uint8 bInterruptRollingWhenInAir : 1{true};
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "ALS|Ability|Roll|State", Transient, Meta = (ForceUnits = "deg"))
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS|Ability|Rolling", Meta = (EditCondition = "bInterruptRollingWhenInAir"))
+	FGameplayTag TryActiveWhenInAir{AlsLocomotionActionTags::FreeFalling};
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "ALS|Ability|Rolling|State", Transient, Meta = (ForceUnits = "deg"))
 	float TargetYawAngle{0.0f};
 
 public:
@@ -46,7 +49,7 @@ protected:
 	float CalcTargetYawAngle() const;
 
 	UFUNCTION(BlueprintNativeEvent, Category = "Als|Ability|Roll")
-	void TickOnRoll(const float DeltaTime);
+	void Tick(const float DeltaTime);
 
 private:
 	TWeakObjectPtr<class UAlsAbilityTask_Tick> TickTask;

@@ -4,7 +4,6 @@
 #include "State/AlsLocomotionState.h"
 #include "State/AlsMantlingState.h"
 #include "State/AlsMovementBaseState.h"
-#include "State/AlsRagdollingState.h"
 #include "State/AlsViewState.h"
 #include "Utility/AlsGameplayTags.h"
 #include "AbilitySystemInterface.h"
@@ -81,12 +80,6 @@ protected:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State|Als Character", Transient)
 	FAlsMantlingState MantlingState;
-
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State|Als Character", Transient, Replicated)
-	FVector_NetQuantize RagdollTargetLocation;
-
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State|Als Character", Transient)
-	FAlsRagdollingState RagdollingState;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State|Als Character", Transient)
 	FRotator PendingFocalRotationRelativeAdjustment{ForceInit};
@@ -500,60 +493,6 @@ protected:
 	UFUNCTION(BlueprintNativeEvent, Category = "Als Character")
 	void OnMantlingEnded();
 
-	// Ragdolling
-
-public:
-	const FAlsRagdollingState& GetRagdollingState() const;
-
-	bool IsRagdollingAllowedToStart() const;
-
-	UFUNCTION(BlueprintCallable, Category = "Als Character")
-	void StartRagdolling();
-
-private:
-	UFUNCTION(Server, Reliable)
-	void ServerStartRagdolling();
-
-	UFUNCTION(NetMulticast, Reliable)
-	void MulticastStartRagdolling();
-
-	void StartRagdollingImplementation();
-
-protected:
-	UFUNCTION(BlueprintNativeEvent, Category = "Als Character")
-	void OnRagdollingStarted();
-
-public:
-	bool IsRagdollingAllowedToStop() const;
-
-	UFUNCTION(BlueprintCallable, Category = "Als Character", Meta = (ReturnDisplayName = "Success"))
-	bool StopRagdolling();
-
-private:
-	UFUNCTION(Server, Reliable)
-	void ServerStopRagdolling();
-
-	UFUNCTION(NetMulticast, Reliable)
-	void MulticastStopRagdolling();
-
-	void StopRagdollingImplementation();
-
-protected:
-	UFUNCTION(BlueprintNativeEvent, Category = "Als Character")
-	void OnRagdollingEnded();
-
-private:
-	void SetRagdollTargetLocation(const FVector& NewTargetLocation);
-
-	UFUNCTION(Server, Unreliable)
-	void ServerSetRagdollTargetLocation(const FVector_NetQuantize& NewTargetLocation);
-
-	void RefreshRagdolling(float DeltaTime);
-
-	FVector RagdollTraceGround(bool& bGrounded) const;
-
-	bool IsRagdollingGroundedAndAged() const;
-
 	// Others
 
 public:
@@ -615,9 +554,4 @@ inline const FAlsViewState& AAlsCharacter::GetViewState() const
 inline const FAlsLocomotionState& AAlsCharacter::GetLocomotionState() const
 {
 	return LocomotionState;
-}
-
-inline const FAlsRagdollingState& AAlsCharacter::GetRagdollingState() const
-{
-	return RagdollingState;
 }

@@ -146,8 +146,6 @@ void AAlsCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLif
 	DOREPLIFETIME_WITH_PARAMS_FAST(ThisClass, ReplicatedViewRotation, Parameters)
 	DOREPLIFETIME_WITH_PARAMS_FAST(ThisClass, InputDirection, Parameters)
 	DOREPLIFETIME_WITH_PARAMS_FAST(ThisClass, DesiredVelocityYawAngle, Parameters)
-	DOREPLIFETIME_WITH_PARAMS_FAST(ThisClass, RagdollTargetLocation, Parameters)
-
 	DOREPLIFETIME_WITH_PARAMS_FAST(ThisClass, CapsuleUpdateSpeed, Parameters)
 	DOREPLIFETIME_WITH_PARAMS_FAST(ThisClass, bIsLied, Parameters)
 }
@@ -395,8 +393,6 @@ void AAlsCharacter::Tick(const float DeltaTime)
 
 	StartMantlingInAir();
 	RefreshMantling();
-	RefreshRagdolling(DeltaTime);
-	//RefreshRolling(DeltaTime);
 	PhysicalAnimation->Refresh(this);
 
 	Super::Tick(DeltaTime);

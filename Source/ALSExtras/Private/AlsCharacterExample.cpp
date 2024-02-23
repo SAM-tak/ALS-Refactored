@@ -151,8 +151,10 @@ void AAlsCharacterExample::Input_OnJump(const FInputActionValue& ActionValue)
 {
 	if (ActionValue.Get<bool>())
 	{
-		if (StopRagdolling())
+		if (HasMatchingGameplayTag(AlsLocomotionActionTags::Ragdolling))
 		{
+			FGameplayTagContainer Cancelee{AlsLocomotionActionTags::Ragdolling};
+			AbilitySystem->CancelAbilities(&Cancelee);
 			return;
 		}
 
@@ -182,9 +184,14 @@ void AAlsCharacterExample::Input_OnAim(const FInputActionValue& ActionValue)
 
 void AAlsCharacterExample::Input_OnRagdoll()
 {
-	if (!StopRagdolling())
+	if (HasMatchingGameplayTag(AlsLocomotionActionTags::Ragdolling))
 	{
-		StartRagdolling();
+		FGameplayTagContainer Cancelee{AlsLocomotionActionTags::Ragdolling};
+		AbilitySystem->CancelAbilities(&Cancelee);
+	}
+	else
+	{
+		AbilitySystem->TryActivateAbilitiesByTag(FGameplayTagContainer{AlsLocomotionActionTags::Ragdolling});
 	}
 }
 

@@ -82,7 +82,12 @@ protected:
 	UPROPERTY(VisibleAnywhere, Category = "State|PhysicalAnimation", Transient)
 	uint8 bRagdollingFreezed : 1 {false};
 
+	UPROPERTY(VisibleAnywhere, Category = "State|PhysicalAnimation", Transient)
+	TWeakObjectPtr<class UAlsGameplayAbility_Ragdolling> LatestRagdolling;
+
 public:
+	virtual void BeginPlay() override;
+
 	virtual void Refresh(const AAlsCharacter* Character);
 
 	virtual void TickComponent(float DeltaTime, enum ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
@@ -103,4 +108,7 @@ private:
 	bool NeedsProfileChange();
 
 	void SelectProfile();
+
+	UFUNCTION()
+	void OnAbilityActivated(class UGameplayAbility* GameplayAbility);
 };

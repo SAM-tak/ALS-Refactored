@@ -3,7 +3,6 @@
 #include "AlsGameplayTagSettings.h"
 #include "AlsInAirRotationMode.h"
 #include "AlsMantlingSettings.h"
-#include "AlsRagdollingSettings.h"
 #include "AlsViewSettings.h"
 #include "AlsCharacterSettings.generated.h"
 
@@ -53,9 +52,6 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings")
 	FAlsGeneralMantlingSettings Mantling;
-
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings")
-	FAlsRagdollingSettings Ragdolling;
 
 public:
 	UAlsCharacterSettings();

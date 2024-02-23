@@ -3,6 +3,7 @@
 #include "Abilities/AlsGameplayAbility_Landing.h"
 #include "AlsCharacter.h"
 #include "AlsCharacterMovementComponent.h"
+#include "AbilitySystemComponent.h"
 #include "Utility/AlsGameplayTags.h"
 #include "Utility/AlsMath.h"
 
@@ -57,10 +58,10 @@ void UAlsGameplayAbility_Landing::ActivateAbility(const FGameplayAbilitySpecHand
 			return;
 		}
 
-		Character->StartRagdolling();
-
 		EndAbility(CurrentSpecHandle, GetCurrentActorInfo(), GetCurrentActivationInfo(),
 				   ReplicationPolicy != EGameplayAbilityReplicationPolicy::ReplicateNo, false);
+
+		GetAbilitySystemComponentFromActorInfo()->TryActivateAbilitiesByTag(FGameplayTagContainer{AlsLocomotionActionTags::Ragdolling});
 	}
 	else if (bStartRollingOnLand && Character->GetLocomotionState().Velocity.Z <= -RollingOnLandSpeedThreshold)
 	{

@@ -11,7 +11,6 @@
 #include "State/AlsLocomotionAnimationState.h"
 #include "State/AlsMovementBaseState.h"
 #include "State/AlsPoseState.h"
-#include "State/AlsRagdollingState.h"
 #include "State/AlsRagdollingAnimationState.h"
 #include "State/AlsRotateInPlaceState.h"
 #include "State/AlsTransitionsState.h"
@@ -334,7 +333,7 @@ public:
 
 	void UnFreezeRagdolling();
 
-	void UpdateRagdollingAnimationState(const FAlsRagdollingState& State);
+	void RefreshRagdollingAnimationState(const class UAlsGameplayAbility_Ragdolling& Ragdolling);
 
 	float GetRagdollingStartBlendTime() const;
 
@@ -400,13 +399,6 @@ inline void UAlsAnimationInstance::Jump()
 inline void UAlsAnimationInstance::ResetJumped()
 {
 	InAirState.bJumped = false;
-}
-
-inline void UAlsAnimationInstance::UpdateRagdollingAnimationState(const FAlsRagdollingState& State)
-{
-	RagdollingState.bGroundedAndAged = State.bGrounded & (State.ElapsedTime >= GetRagdollingStartBlendTime());
-	RagdollingState.bFacingUpward = State.bFacingUpward;
-	RagdollingState.LyingDownYawAngleDelta = State.LyingDownYawAngleDelta;
 }
 
 inline const FAlsPhysicalAnimationCurveState& UAlsAnimationInstance::GetPhysicalAnimationCurveState() const

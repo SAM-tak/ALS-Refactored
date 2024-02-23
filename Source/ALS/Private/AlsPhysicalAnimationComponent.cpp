@@ -6,11 +6,13 @@
 #include "AlsCharacter.h"
 #include "AlsAnimationInstance.h"
 #include "State/AlsPhysicalAnimationCurveState.h"
+#include "Abilities/AlsGameplayAbility_Ragdolling.h"
 #include "Components/SkeletalMeshComponent.h"
 #include "PhysicsEngine/PhysicalAnimationComponent.h"
 #include "PhysicsEngine/PhysicsAsset.h"
 #include "Curves/CurveFloat.h"
 #include "Engine/Canvas.h"
+#include "AbilitySystemComponent.h"
 #include "Utility/AlsGameplayTags.h"
 #include "Utility/AlsConstants.h"
 #include "Utility/AlsMacros.h"
@@ -489,11 +491,27 @@ void UAlsPhysicalAnimationComponent::SelectProfile()
 	}
 }
 
+void UAlsPhysicalAnimationComponent::BeginPlay()
+{
+	Super::BeginPlay();
+	auto* Character{Cast<AAlsCharacter>(GetOwner())};
+	Character->GetAbilitySystemComponent()->AbilityActivatedCallbacks.AddUObject(this, &ThisClass::OnAbilityActivated);
+}
+
+void UAlsPhysicalAnimationComponent::OnAbilityActivated(class UGameplayAbility* GameplayAbility)
+{
+	auto Ragdolling{Cast<UAlsGameplayAbility_Ragdolling>(GameplayAbility)};
+	if (Ragdolling)
+	{
+		LatestRagdolling = Ragdolling;
+	}
+}
+
 void UAlsPhysicalAnimationComponent::Refresh(const AAlsCharacter* Character)
 {
 	// Apply special behaviour when changed Ragdolling state
 
-	if (Character->GetLocomotionAction() == AlsLocomotionActionTags::Ragdolling)
+	if (LatestRagdolling.IsValid() && LatestRagdolling->IsActive())
 	{
 		if (!bRagdolling)
 		{
@@ -502,7 +520,7 @@ void UAlsPhysicalAnimationComponent::Refresh(const AAlsCharacter* Character)
 			GetSkeletalMesh()->SetAllBodiesPhysicsBlendWeight(1.0f);
 			ApplyPhysicalAnimationProfileBelow(NAME_None, NAME_None, true, true);
 		}
-		bRagdollingFreezed = Character->GetRagdollingState().bFreezing;
+		bRagdollingFreezed = LatestRagdolling->bFreezing;
 	}
 	else
 	{
@@ -524,6 +542,7 @@ void UAlsPhysicalAnimationComponent::Refresh(const AAlsCharacter* Character)
 			}
 			bRagdollingFreezed = false;
 		}
+		LatestRagdolling.Reset();
 	}
 
 	FGameplayTagContainer TempContainer;

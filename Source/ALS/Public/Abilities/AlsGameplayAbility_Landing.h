@@ -7,7 +7,7 @@
 #include "AlsGameplayAbility_Landing.generated.h"
 
 /**
- * 
+ * Landing
  */
 UCLASS(Abstract)
 class ALS_API UAlsGameplayAbility_Landing : public UAlsGameplayAbility_Rolling
