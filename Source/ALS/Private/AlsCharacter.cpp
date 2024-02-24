@@ -63,6 +63,8 @@ AAlsCharacter::AAlsCharacter(const FObjectInitializer& ObjectInitializer) : Supe
 	PhysicalAnimation = CreateDefaultSubobject<UAlsPhysicalAnimationComponent>(PhysicalAnimationComponentName);
 
 	AbilitySystem = CreateDefaultSubobject<UAlsAbilitySystemComponent>(AbilitySystemComponentName);
+	AbilitySystem->SetIsReplicated(true);
+	AbilitySystem->SetReplicationMode(EGameplayEffectReplicationMode::Minimal);
 
 	// This will prevent the editor from combining component details with actor details.
 	// Component details can still be accessed from the actor's component hierarchy.
@@ -391,8 +393,11 @@ void AAlsCharacter::Tick(const float DeltaTime)
 	RefreshGroundedRotation(DeltaTime);
 	RefreshInAirRotation(DeltaTime);
 
-	StartMantlingInAir();
-	RefreshMantling();
+	if (GetLocomotionMode() == AlsLocomotionModeTags::InAir && IsLocallyControlled())
+	{
+		AbilitySystem->TryActivateAbilitiesBySingleTag(AlsLocomotionActionTags::Mantling);
+	}
+
 	PhysicalAnimation->Refresh(this);
 
 	Super::Tick(DeltaTime);
@@ -1969,6 +1974,14 @@ void AAlsCharacter::RefreshViewRelativeTargetYawAngle()
 	LocomotionState.ViewRelativeTargetYawAngle = FRotator3f::NormalizeAxis(UE_REAL_TO_FLOAT(
 		ViewState.Rotation.Yaw - LocomotionState.TargetYawAngle));
 }
+
+void AAlsCharacter::OnMantlingStarted_Implementation(const FAlsMantlingParameters& Parameters) {}
+
+void AAlsCharacter::OnMantlingEnded_Implementation() {}
+
+void AAlsCharacter::OnRagdollingStarted_Implementation() {}
+
+void AAlsCharacter::OnRagdollingEnded_Implementation() {}
 
 bool AAlsCharacter::CanLie() const
 {

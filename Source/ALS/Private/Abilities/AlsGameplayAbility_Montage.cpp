@@ -20,12 +20,12 @@ void UAlsGameplayAbility_Montage::ActivateAbility(const FGameplayAbilitySpecHand
 		return;
 	}
 
-	PlayMontage(MontageToPlay, Handle, ActorInfo, ActivationInfo);
-
-	Super::ActivateAbility(Handle, ActorInfo, ActivationInfo, TriggerEventData);
+	PlayMontage(ActivationInfo, MontageToPlay, PlayRate, SectionName, StartTime, Handle, ActorInfo);
 
 	if (CurrentMotangeDuration <= 0.0f)
 	{
-		EndAbility(Handle, ActorInfo, ActivationInfo, ReplicationPolicy != EGameplayAbilityReplicationPolicy::ReplicateNo, false);
+		return;
 	}
+
+	Super::ActivateAbility(Handle, ActorInfo, ActivationInfo, TriggerEventData);
 }

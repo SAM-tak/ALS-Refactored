@@ -22,9 +22,9 @@ public:
 	TEnumAsByte<ECollisionChannel> GroundTraceChannel{ECC_Visibility};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS|Ability")
-	TArray<TEnumAsByte<ECollisionChannel>> GroundTraceResponseChannels;
+	TArray<TEnumAsByte<ECollisionChannel>> GroundTraceResponseChannels{ECC_WorldStatic, ECC_WorldDynamic, ECC_Destructible};
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "ALS|Ability", AdvancedDisplay)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS|Ability", AdvancedDisplay)
 	FCollisionResponseContainer GroundTraceResponses{ECR_Ignore};
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "ALS|Ability", Meta = (ClampMin = 0, ForceUnits = "s"))

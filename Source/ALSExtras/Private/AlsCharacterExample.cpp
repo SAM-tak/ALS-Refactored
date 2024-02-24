@@ -158,7 +158,7 @@ void AAlsCharacterExample::Input_OnJump(const FInputActionValue& ActionValue)
 			return;
 		}
 
-		if (StartMantlingGrounded())
+		if (HasMatchingGameplayTag(AlsLocomotionModeTags::Grounded) && AbilitySystem->TryActivateAbilitiesBySingleTag(AlsLocomotionActionTags::Mantling))
 		{
 			return;
 		}

@@ -47,16 +47,16 @@ void UAlsGameplayAbility_GettingUp::ActivateAbility(const FGameplayAbilitySpecHa
 		Character->GetAlsCharacterMovement()->SetInputBlocked(true);
 	}
 
-	auto MontageToPlay{Character->HasMatchingGameplayTag(AlsStateFlagTags::FacingUpward) ? GetUpBackMontage : GetUpFrontMontage};
+	const auto& Parameter{Character->HasMatchingGameplayTag(AlsStateFlagTags::FacingUpward) ? GetUpBackMontage : GetUpFrontMontage};
 
-	PlayMontage(MontageToPlay, Handle, ActorInfo, ActivationInfo);
-
-	Super::ActivateAbility(Handle, ActorInfo, ActivationInfo, TriggerEventData);
+	PlayMontage(ActivationInfo, Parameter, Handle, ActorInfo);
 
 	if (CurrentMotangeDuration <= 0.0f)
 	{
-		EndAbility(Handle, ActorInfo, ActivationInfo, ReplicationPolicy != EGameplayAbilityReplicationPolicy::ReplicateNo, false);
+		return;
 	}
+
+	Super::ActivateAbility(Handle, ActorInfo, ActivationInfo, TriggerEventData);
 }
 
 void UAlsGameplayAbility_GettingUp::EndAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo,

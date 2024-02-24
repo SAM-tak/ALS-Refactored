@@ -16,10 +16,10 @@ class ALS_API UAlsGameplayAbility_GettingUp : public UAlsGameplayAbility_Montage
 
 protected:
 	UPROPERTY(EditDefaultsOnly, Category = AlsMontageAbility)
-	TObjectPtr<UAnimMontage> GetUpFrontMontage;
+	FAlsPlayMontageParameter GetUpFrontMontage;
 
 	UPROPERTY(EditDefaultsOnly, Category = AlsMontageAbility)
-	TObjectPtr<UAnimMontage> GetUpBackMontage;
+	FAlsPlayMontageParameter GetUpBackMontage;
 
 public:
 	virtual bool CanActivateAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo,

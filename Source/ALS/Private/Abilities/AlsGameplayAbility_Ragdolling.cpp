@@ -26,13 +26,6 @@ UAlsGameplayAbility_Ragdolling::UAlsGameplayAbility_Ragdolling(const FObjectInit
 	CancelAbilitiesWithTag.AddTag(AlsLocomotionActionTags::Root);
 	BlockAbilitiesWithTag.AddTag(AlsLocomotionActionTags::Ragdolling);
 
-	GroundTraceResponseChannels =
-	{
-		ECC_WorldStatic,
-		ECC_WorldDynamic,
-		ECC_Destructible
-	};
-
 	GroundTraceResponses.WorldStatic = ECR_Block;
 	GroundTraceResponses.WorldDynamic = ECR_Block;
 	GroundTraceResponses.Destructible = ECR_Block;
@@ -125,6 +118,8 @@ void UAlsGameplayAbility_Ragdolling::ActivateAbility(const FGameplayAbilitySpecH
 			TickTask->OnTick.AddDynamic(this, &ThisClass::ProcessTick);
 			TickTask->ReadyForActivation();
 		}
+
+		Character->OnRagdollingStarted();
 	}
 }
 
@@ -322,6 +317,8 @@ void UAlsGameplayAbility_Ragdolling::EndAbility(const FGameplayAbilitySpecHandle
 		AbilitySystem->SetLooseGameplayTagCount(AlsStateFlagTags::FacingUpward, bFacingUpward ? 1 : 0);
 		AbilitySystem->TryActivateAbilitiesBySingleTag(AlsLocomotionActionTags::GettingUp);
 	}
+
+	Character->OnRagdollingEnded();
 }
 
 void UAlsGameplayAbility_Ragdolling::SetTargetLocation(const FVector& NewTargetLocation)

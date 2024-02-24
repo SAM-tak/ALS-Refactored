@@ -2,7 +2,6 @@
 
 #include "AlsGameplayTagSettings.h"
 #include "AlsInAirRotationMode.h"
-#include "AlsMantlingSettings.h"
 #include "AlsViewSettings.h"
 #include "AlsCharacterSettings.generated.h"
 
@@ -50,16 +49,7 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings")
 	FAlsViewSettings View;
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings")
-	FAlsGeneralMantlingSettings Mantling;
-
 public:
-	UAlsCharacterSettings();
-
 	UFUNCTION(BlueprintPure, Category = "Als Character")
 	const FGameplayTag& DesiredToActual(const FGameplayTag& SourceTag) const;
-
-#if WITH_EDITOR
-	virtual void PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent) override;
-#endif
 };

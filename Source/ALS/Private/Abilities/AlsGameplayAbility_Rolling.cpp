@@ -4,6 +4,7 @@
 #include "Abilities/AlsGameplayAbility_Rolling.h"
 #include "Abilities/Tasks/AlsAbilityTask_Tick.h"
 #include "AlsCharacter.h"
+#include "AlsAbilitySystemComponent.h"
 #include "AlsCharacterMovementComponent.h"
 #include "AbilitySystemComponent.h"
 #include "Utility/AlsGameplayTags.h"
@@ -26,8 +27,8 @@ float UAlsGameplayAbility_Rolling::CalcTargetYawAngle_Implementation() const
 {
 	auto* Character{GetAlsCharacterFromActorInfo()};
 	return bRotateToInputOnStart && Character->GetLocomotionState().bHasInput
-		   ? Character->GetLocomotionState().InputYawAngle
-		   : UE_REAL_TO_FLOAT(FRotator::NormalizeAxis(Character->GetActorRotation().Yaw));
+		? Character->GetLocomotionState().InputYawAngle
+		: UE_REAL_TO_FLOAT(FRotator::NormalizeAxis(Character->GetActorRotation().Yaw));
 }
 
 bool UAlsGameplayAbility_Rolling::CanActivateAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo,
@@ -46,7 +47,7 @@ void UAlsGameplayAbility_Rolling::ActivateAbility(const FGameplayAbilitySpecHand
 												  const FGameplayAbilityActivationInfo ActivationInfo, const FGameplayEventData* TriggerEventData)
 {
 	auto* Character{GetAlsCharacterFromActorInfo()};
-	
+
 	if (Character->GetLocalRole() < ROLE_Authority)
 	{
 		Character->GetCharacterMovement()->FlushServerMoves();
@@ -61,7 +62,7 @@ void UAlsGameplayAbility_Rolling::ActivateAbility(const FGameplayAbilitySpecHand
 
 	if (IsActive())
 	{
-		TickTask = UAlsAbilityTask_Tick::New(this, FName(TEXT("UAlsGameplayAbility_Roll")));
+		TickTask = UAlsAbilityTask_Tick::New(this, FName(TEXT("UAlsGameplayAbility_Rolling")));
 		if (TickTask.IsValid())
 		{
 			TickTask->OnTick.AddDynamic(this, &ThisClass::ProcessTick);
@@ -119,14 +120,28 @@ void UAlsGameplayAbility_Rolling::Tick_Implementation(const float DeltaTime)
 		Character->Crouch();
 	}
 
-	if (bInterruptRollingWhenInAir && Character->HasMatchingGameplayTag(AlsLocomotionModeTags::InAir))
+	if (bCancelRollingWhenInAir)
 	{
-		EndAbility(CurrentSpecHandle, GetCurrentActorInfo(), GetCurrentActivationInfo(),
-				   ReplicationPolicy != EGameplayAbilityReplicationPolicy::ReplicateNo, true);
-
-		if (TryActiveWhenInAir.IsValid())
+		if(Character->HasMatchingGameplayTag(AlsLocomotionModeTags::InAir))
 		{
-			GetAbilitySystemComponentFromActorInfo()->TryActivateAbilitiesByTag(FGameplayTagContainer{TryActiveWhenInAir});
+			if (InAirTime >= TimeToCancel)
+			{
+				EndAbility(CurrentSpecHandle, GetCurrentActorInfo(), GetCurrentActivationInfo(),
+						   ReplicationPolicy != EGameplayAbilityReplicationPolicy::ReplicateNo, true);
+
+				if (TryActiveWhenCancel.IsValid())
+				{
+					GetAlsAbilitySystemComponentFromActorInfo()->TryActivateAbilitiesBySingleTag(TryActiveWhenCancel);
+				}
+			}
+			else
+			{
+				InAirTime += DeltaTime;
+			}
+		}
+		else if (InAirTime > 0.0f)
+		{
+			InAirTime = 0.0f;
 		}
 	}
 }

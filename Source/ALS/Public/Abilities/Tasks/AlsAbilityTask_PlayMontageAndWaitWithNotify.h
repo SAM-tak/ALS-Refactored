@@ -22,8 +22,8 @@ public:
 
     UFUNCTION(BlueprintCallable, Category = "Als|Ability|Tasks", meta = (DisplayName = "PlayMontageAndWaitWithNotify", HidePin = "OwningAbility", DefaultToSelf = "OwningAbility", BlueprintInternalUseOnly = "TRUE"))
     static UAlsAbilityTask_PlayMontageAndWaitWithNotify* CreatePlayMontageAndWaitWithNotify(UGameplayAbility* OwningAbility,
-		FName TaskInstanceName, UAnimMontage* MontageToPlay0, float Rate0 = 1.f, FName StartSection0 = NAME_None, bool bStopWhenAbilityEnds0 = true,
-		float AnimRootMotionTranslationScale0 = 1.f, float StartTimeSeconds0 = 0.f, bool bAllowInterruptAfterBlendOut0 = false);
+		FName TaskInstanceName, UAnimMontage* _MontageToPlay, float _Rate = 1.f, FName _StartSection = NAME_None, bool _bStopWhenAbilityEnds = true,
+		float _AnimRootMotionTranslationScale = 1.f, float _StartTimeSeconds = 0.f, bool _bAllowInterruptAfterBlendOut = false);
 
 	virtual void Activate() override;
 

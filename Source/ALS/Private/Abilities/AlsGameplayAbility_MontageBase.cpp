@@ -77,13 +77,21 @@ void UAlsGameplayAbility_MontageBase::StopMontage(float OverrideBlendOutTime)
 	}
 }
 
-void UAlsGameplayAbility_MontageBase::PlayMontage(UAnimMontage* Montage)
+void UAlsGameplayAbility_MontageBase::PlayMontage(const FGameplayAbilityActivationInfo ActivationInfo, const FAlsPlayMontageParameter& Parameter,
+												  const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo)
 {
-	PlayMontage(Montage, CurrentSpecHandle, GetCurrentActorInfo(), GetCurrentActivationInfo());
+	PlayMontage(GetCurrentActivationInfo(), Parameter.MontageToPlay, Parameter.PlayRate, Parameter.SectionName, Parameter.StartTime,
+				CurrentSpecHandle, GetCurrentActorInfo());
 }
 
-void UAlsGameplayAbility_MontageBase::PlayMontage(UAnimMontage* Montage, const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo,
-												  const FGameplayAbilityActivationInfo ActivationInfo)
+void UAlsGameplayAbility_MontageBase::PlayMontage(UAnimMontage* Montage, float PlayRate, FName SectionName, float StartTime)
+{
+	PlayMontage(GetCurrentActivationInfo(), Montage, PlayRate, SectionName, StartTime, CurrentSpecHandle, GetCurrentActorInfo());
+}
+
+void UAlsGameplayAbility_MontageBase::PlayMontage(
+	const FGameplayAbilityActivationInfo ActivationInfo, UAnimMontage* Montage, float PlayRate, FName SectionName, float StartTime,
+	const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo)
 {
 	UAnimInstance* AnimInstance = ActorInfo->GetAnimInstance();
 	auto* const AbilitySystemComponent = ActorInfo->AbilitySystemComponent.Get();

@@ -2,7 +2,6 @@
 
 #include "GameFramework/Character.h"
 #include "State/AlsLocomotionState.h"
-#include "State/AlsMantlingState.h"
 #include "State/AlsMovementBaseState.h"
 #include "State/AlsViewState.h"
 #include "Utility/AlsGameplayTags.h"
@@ -40,14 +39,14 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Als Character")
 	TObjectPtr<UAlsAbilitySystemComponent> AbilitySystem;
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings|Als Character")
+	UPROPERTY(EditAnywhere, Instanced, BlueprintReadOnly, Category = "Settings|Als Character")
 	TObjectPtr<UAlsCharacterSettings> Settings;
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings|Als Character")
+	UPROPERTY(EditAnywhere, Instanced, BlueprintReadOnly, Category = "Settings|Als Character")
 	TObjectPtr<UAlsMovementSettings> MovementSettings;
 
 	/** ability list */
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Settings|Als Character")
+	UPROPERTY(EditAnywhere, Instanced, BlueprintReadWrite, Category = "Settings|Als Character")
 	TObjectPtr<UAlsAbilitySet> Abilities;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings|Als Character")
@@ -77,9 +76,6 @@ protected:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State|Als Character", Transient)
 	FAlsLocomotionState LocomotionState;
-
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State|Als Character", Transient)
-	FAlsMantlingState MantlingState;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State|Als Character", Transient)
 	FRotator PendingFocalRotationRelativeAdjustment{ForceInit};
@@ -445,45 +441,20 @@ protected:
 
 	void RefreshViewRelativeTargetYawAngle();
 
-	// Mantling
+	// Callbacks (tentative)
 
 public:
 	UFUNCTION(BlueprintNativeEvent, Category = "Als Character")
-	bool IsMantlingAllowedToStart() const;
-
-	UFUNCTION(BlueprintCallable, Category = "Als Character", Meta = (ReturnDisplayName = "Success"))
-	bool StartMantlingGrounded();
-
-private:
-	bool StartMantlingInAir();
-
-	bool StartMantling(const FAlsMantlingTraceSettings& TraceSettings);
-
-	UFUNCTION(Server, Reliable)
-	void ServerStartMantling(const FAlsMantlingParameters& Parameters);
-
-	UFUNCTION(NetMulticast, Reliable)
-	void MulticastStartMantling(const FAlsMantlingParameters& Parameters);
-
-	void StartMantlingImplementation(const FAlsMantlingParameters& Parameters);
-
-protected:
-	UFUNCTION(BlueprintNativeEvent, Category = "Als Character")
-	UAlsMantlingSettings* SelectMantlingSettings(EAlsMantlingType MantlingType);
-
-	float CalculateMantlingStartTime(const UAlsMantlingSettings* MantlingSettings, float MantlingHeight) const;
-
-	UFUNCTION(BlueprintNativeEvent, Category = "Als Character")
 	void OnMantlingStarted(const FAlsMantlingParameters& Parameters);
-
-private:
-	void RefreshMantling();
-
-	void StopMantling(bool bStopMontage = false);
-
-protected:
+	
 	UFUNCTION(BlueprintNativeEvent, Category = "Als Character")
 	void OnMantlingEnded();
+
+	UFUNCTION(BlueprintNativeEvent, Category = "Als Character")
+	void OnRagdollingStarted();
+
+	UFUNCTION(BlueprintNativeEvent, Category = "Als Character")
+	void OnRagdollingEnded();
 
 	// Others
 

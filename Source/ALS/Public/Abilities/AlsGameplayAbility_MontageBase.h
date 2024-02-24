@@ -15,6 +15,24 @@ DECLARE_DYNAMIC_MULTICAST_DELEGATE_ThreeParams(FAlsMontageNotifyDelegate, FName,
 class UAbilitySystemComponent;
 class UAnimMontage;
 
+USTRUCT(BlueprintType)
+struct ALS_API FAlsPlayMontageParameter
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditDefaultsOnly, Category = AlsMontageAbility)
+	TObjectPtr<UAnimMontage> MontageToPlay;
+
+	UPROPERTY(EditDefaultsOnly, Category = AlsMontageAbility)
+	float PlayRate{1.0f};
+
+	UPROPERTY(EditDefaultsOnly, Category = AlsMontageAbility)
+	FName SectionName;
+
+	UPROPERTY(EditDefaultsOnly, Category = AlsMontageAbility, Meta = (ForceUnit = "s"))
+	float StartTime;
+};
+
 /**
  *	A gameplay ability that plays a single montage and applies a GameplayEffect
  */
@@ -24,15 +42,6 @@ class ALS_API UAlsGameplayAbility_MontageBase : public UAlsGameplayAbility
 	GENERATED_UCLASS_BODY()
 
 protected:
-	UPROPERTY(EditDefaultsOnly, Category = AlsMontageAbility)
-	float PlayRate{1.0f};
-
-	UPROPERTY(EditDefaultsOnly, Category = AlsMontageAbility)
-	FName SectionName;
-
-	UPROPERTY(EditDefaultsOnly, Category = AlsMontageAbility, Meta = (ForceUnit = "s"))
-	float StartTime;
-
 	/** GameplayEffects to apply and then remove while the animation is playing */
 	UPROPERTY(EditDefaultsOnly, Category = AlsMontageAbility)
 	TArray<TSubclassOf<UGameplayEffect>> GameplayEffectClassesWhileAnimating;
@@ -65,15 +74,18 @@ public:
 	void GetGameplayEffectsWhileAnimating(TArray<const UGameplayEffect *> &OutEffects) const;
 
 protected:
-	void PlayMontage(UAnimMontage* Montage, const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, 
-					 const FGameplayAbilityActivationInfo ActivationInfo);
+	void PlayMontage(const FGameplayAbilityActivationInfo ActivationInfo, const FAlsPlayMontageParameter& Parameter,
+					 const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo);
+
+	void PlayMontage(const FGameplayAbilityActivationInfo ActivationInfo, UAnimMontage* Montage, float PlayRate, FName SectionName, float StartTime,
+		const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo);
 
 	UFUNCTION(BlueprintCallable, Category = AlsMontageAbility)
 	void StopMontage(float OverrideBlendOutTime = -1.0f);
 
 private:
 	UFUNCTION(BlueprintCallable, Category = AlsMontageAbility)
-	void PlayMontage(UAnimMontage* Montage);
+	void PlayMontage(UAnimMontage* Montage, float PlayRate = 1.0f, FName SectionName = NAME_None, float StartTime = 0.0f);
 
 	bool IsNotifyValid(FName NotifyName, const FBranchingPointNotifyPayload& BPNPayload) const;
 
