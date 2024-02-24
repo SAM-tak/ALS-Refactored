@@ -31,8 +31,8 @@ float UAlsGameplayAbility_Rolling::CalcTargetYawAngle_Implementation() const
 }
 
 bool UAlsGameplayAbility_Rolling::CanActivateAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo,
-												  const FGameplayTagContainer* SourceTags, const FGameplayTagContainer* TargetTags,
-												  OUT FGameplayTagContainer* OptionalRelevantTags) const
+													 const FGameplayTagContainer* SourceTags, const FGameplayTagContainer* TargetTags,
+													 OUT FGameplayTagContainer* OptionalRelevantTags) const
 {
 	if (Super::CanActivateAbility(Handle, ActorInfo, SourceTags, TargetTags, OptionalRelevantTags))
 	{
@@ -43,7 +43,7 @@ bool UAlsGameplayAbility_Rolling::CanActivateAbility(const FGameplayAbilitySpecH
 }
 
 void UAlsGameplayAbility_Rolling::ActivateAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo,
-											   const FGameplayAbilityActivationInfo ActivationInfo, const FGameplayEventData* TriggerEventData)
+												  const FGameplayAbilityActivationInfo ActivationInfo, const FGameplayEventData* TriggerEventData)
 {
 	auto* Character{GetAlsCharacterFromActorInfo()};
 	
