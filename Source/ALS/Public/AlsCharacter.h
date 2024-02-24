@@ -20,12 +20,12 @@ class UAlsMovementSettings;
 class UAlsAnimationInstance;
 class UAlsMantlingSettings;
 class UAlsPhysicalAnimationComponent;
-class UAbilitySystemComponent;
+class UAlsAbilitySystemComponent;
 
-UCLASS(AutoExpandCategories = ("Settings|Als Character", "Settings|Als Character|Desired State", "State|Als Character"))
+UCLASS(AutoExpandCategories = ("Settings|Als Character"))
 class ALS_API AAlsCharacter : public ACharacter, public IAbilitySystemInterface, public IGameplayCueInterface, public IGameplayTagAssetInterface
 {
-	GENERATED_BODY()
+	GENERATED_UCLASS_BODY()
 
 protected:
 	UPROPERTY(BlueprintReadOnly, Category = "State|Als Character", Transient)
@@ -38,7 +38,7 @@ protected:
 	TObjectPtr<UAlsPhysicalAnimationComponent> PhysicalAnimation;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Als Character")
-	TObjectPtr<UAbilitySystemComponent> AbilitySystem;
+	TObjectPtr<UAlsAbilitySystemComponent> AbilitySystem;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings|Als Character")
 	TObjectPtr<UAlsCharacterSettings> Settings;
@@ -50,7 +50,7 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Settings|Als Character")
 	TObjectPtr<UAlsAbilitySet> Abilities;
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings|Als Character|Desired State")
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings|Als Character")
 	FGameplayTagContainer InitialGameplayTags;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State|Als Character", Transient)
@@ -87,8 +87,6 @@ protected:
 	FTimerHandle BrakingFrictionFactorResetTimer;
 
 public:
-	explicit AAlsCharacter(const FObjectInitializer& ObjectInitializer = FObjectInitializer::Get());
-
 #if WITH_EDITOR
 	virtual bool CanEditChange(const FProperty* Property) const override;
 #endif
@@ -119,13 +117,7 @@ public:
 	/** Name of the PhysicalAnimationComponent. */
 	static FName AbilitySystemComponentName;
 
-	///** Returns PhysicalAnimation subobject **/
-	//template <class T>
-	//FORCEINLINE_DEBUGGABLE T* GetAbilitySystem() const
-	//{
-	//	return CastChecked<T>(AbilitySystem, ECastCheckedType::NullAllowed);
-	//}
-	//FORCEINLINE UAbilitySystemComponent* GetAbilitySystem() const { return AbilitySystem; }
+	FORCEINLINE UAlsAbilitySystemComponent* GetAlsAbilitySystem() const { return AbilitySystem; }
 
 protected:
 	virtual void BeginPlay() override;

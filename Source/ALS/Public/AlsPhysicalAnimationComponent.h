@@ -17,7 +17,7 @@ class USkeletalBodySetup;
 UCLASS()
 class ALS_API UAlsPhysicalAnimationComponent : public UPhysicalAnimationComponent
 {
-	GENERATED_BODY()
+	GENERATED_UCLASS_BODY()
 	
 protected:
 	// The blend time Of physics blend Weight on activate physics body.

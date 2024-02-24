@@ -7,6 +7,7 @@
 #include "AlsGameplayAbility.generated.h"
 
 class AAlsCharacter;
+class UAlsAbilitySystemComponent;
 
 /**
  *
@@ -17,6 +18,9 @@ class ALS_API UAlsGameplayAbility : public UGameplayAbility
     GENERATED_BODY()
 
 public:
-    UFUNCTION(BlueprintCallable, Category = "ALS|Ability")
+    UFUNCTION(BlueprintPure, Category = "ALS|Ability")
     AAlsCharacter* GetAlsCharacterFromActorInfo() const;
+
+    UFUNCTION(BlueprintPure, Category = "ALS|Ability")
+    UAlsAbilitySystemComponent* GetAlsAbilitySystemComponentFromActorInfo() const;
 };

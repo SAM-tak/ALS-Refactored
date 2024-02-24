@@ -2,8 +2,8 @@
 
 #include "Abilities/AlsAbilitySet.h"
 
+#include "AlsAbilitySystemComponent.h"
 #include "Abilities/AlsGameplayAbility.h"
-#include "AbilitySystemComponent.h"
 #include "Utility/AlsLog.h"
 
 #include UE_INLINE_GENERATED_CPP_BY_NAME(AlsAbilitySet)

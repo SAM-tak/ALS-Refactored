@@ -21,73 +21,9 @@
 
 #include UE_INLINE_GENERATED_CPP_BY_NAME(AlsPhysicalAnimationComponent)
 
-float UAlsPhysicalAnimationComponent::GetLockedValue(const FAlsPhysicalAnimationCurveState& Curves, const FName& BoneName)
+UAlsPhysicalAnimationComponent::UAlsPhysicalAnimationComponent(const FObjectInitializer& ObjectInitializer)
+	: Super(ObjectInitializer)
 {
-	if (BoneName == FName{TEXT("clavicle_l")})
-	{
-		return Curves.LockLeftArm;
-	}
-	if (BoneName == FName{TEXT("upperarm_l")})
-	{
-		return Curves.LockLeftArm;
-	}
-	if (BoneName == FName{TEXT("lowerarm_l")})
-	{
-		return Curves.LockLeftArm;
-	}
-	if (BoneName == FName{TEXT("hand_l")})
-	{
-		return Curves.LockLeftHand;
-	}
-	if (BoneName == FName{TEXT("clavicle_r")})
-	{
-		return Curves.LockRightArm;
-	}
-	if (BoneName == FName{TEXT("upperarm_r")})
-	{
-		return Curves.LockRightArm;
-	}
-	if (BoneName == FName{TEXT("lowerarm_r")})
-	{
-		return Curves.LockRightArm;
-	}
-	if (BoneName == FName{TEXT("hand_r")})
-	{
-		return Curves.LockRightHand;
-	}
-	if (BoneName == FName{TEXT("thigh_l")})
-	{
-		return Curves.LockLeftLeg;
-	}
-	if (BoneName == FName{TEXT("calf_l")})
-	{
-		return Curves.LockLeftLeg;
-	}
-	if (BoneName == UAlsConstants::FootLeftBoneName())
-	{
-		return Curves.LockLeftFoot;
-	}
-	if (BoneName == FName{TEXT("ball_l")})
-	{
-		return Curves.LockLeftFoot;
-	}
-	if (BoneName == FName{TEXT("thigh_r")})
-	{
-		return Curves.LockRightLeg;
-	}
-	if (BoneName == FName{TEXT("calf_r")})
-	{
-		return Curves.LockRightLeg;
-	}
-	if (BoneName == UAlsConstants::FootRightBoneName())
-	{
-		return Curves.LockRightFoot;
-	}
-	if (BoneName == FName{TEXT("ball_r")})
-	{
-		return Curves.LockRightFoot;
-	}
-	return 0.0f;
 }
 
 bool UAlsPhysicalAnimationComponent::IsProfileExist(const FName& ProfileName) const
@@ -509,6 +445,11 @@ void UAlsPhysicalAnimationComponent::OnAbilityActivated(class UGameplayAbility* 
 
 void UAlsPhysicalAnimationComponent::Refresh(const AAlsCharacter* Character)
 {
+	if (LatestRagdolling.IsValid() && LatestRagdolling->bCancelRequested)
+	{
+		LatestRagdolling->Cancel();
+	}
+
 	// Apply special behaviour when changed Ragdolling state
 
 	if (LatestRagdolling.IsValid() && LatestRagdolling->IsActive())
@@ -644,4 +585,73 @@ void UAlsPhysicalAnimationComponent::DisplayDebug(UCanvas* Canvas, const FDebugD
 
 		VerticalLocation += RowOffset;
 	}
+}
+
+float UAlsPhysicalAnimationComponent::GetLockedValue(const FAlsPhysicalAnimationCurveState& Curves, const FName& BoneName)
+{
+	if (BoneName == FName{TEXT("clavicle_l")})
+	{
+		return Curves.LockLeftArm;
+	}
+	if (BoneName == FName{TEXT("upperarm_l")})
+	{
+		return Curves.LockLeftArm;
+	}
+	if (BoneName == FName{TEXT("lowerarm_l")})
+	{
+		return Curves.LockLeftArm;
+	}
+	if (BoneName == FName{TEXT("hand_l")})
+	{
+		return Curves.LockLeftHand;
+	}
+	if (BoneName == FName{TEXT("clavicle_r")})
+	{
+		return Curves.LockRightArm;
+	}
+	if (BoneName == FName{TEXT("upperarm_r")})
+	{
+		return Curves.LockRightArm;
+	}
+	if (BoneName == FName{TEXT("lowerarm_r")})
+	{
+		return Curves.LockRightArm;
+	}
+	if (BoneName == FName{TEXT("hand_r")})
+	{
+		return Curves.LockRightHand;
+	}
+	if (BoneName == FName{TEXT("thigh_l")})
+	{
+		return Curves.LockLeftLeg;
+	}
+	if (BoneName == FName{TEXT("calf_l")})
+	{
+		return Curves.LockLeftLeg;
+	}
+	if (BoneName == UAlsConstants::FootLeftBoneName())
+	{
+		return Curves.LockLeftFoot;
+	}
+	if (BoneName == FName{TEXT("ball_l")})
+	{
+		return Curves.LockLeftFoot;
+	}
+	if (BoneName == FName{TEXT("thigh_r")})
+	{
+		return Curves.LockRightLeg;
+	}
+	if (BoneName == FName{TEXT("calf_r")})
+	{
+		return Curves.LockRightLeg;
+	}
+	if (BoneName == UAlsConstants::FootRightBoneName())
+	{
+		return Curves.LockRightFoot;
+	}
+	if (BoneName == FName{TEXT("ball_r")})
+	{
+		return Curves.LockRightFoot;
+	}
+	return 0.0f;
 }

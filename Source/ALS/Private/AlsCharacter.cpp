@@ -3,10 +3,10 @@
 #include "AlsAnimationInstance.h"
 #include "AlsCharacterMovementComponent.h"
 #include "AlsPhysicalAnimationComponent.h"
+#include "AlsAbilitySystemComponent.h"
 #include "TimerManager.h"
 #include "Components/CapsuleComponent.h"
 #include "Components/SkeletalMeshComponent.h"
-#include "AbilitySystemComponent.h"
 #include "Curves/CurveFloat.h"
 #include "GameFramework/GameNetworkManager.h"
 #include "GameFramework/PlayerController.h"
@@ -62,7 +62,7 @@ AAlsCharacter::AAlsCharacter(const FObjectInitializer& ObjectInitializer) : Supe
 
 	PhysicalAnimation = CreateDefaultSubobject<UAlsPhysicalAnimationComponent>(PhysicalAnimationComponentName);
 
-	AbilitySystem = CreateDefaultSubobject<UAbilitySystemComponent>(AbilitySystemComponentName);
+	AbilitySystem = CreateDefaultSubobject<UAlsAbilitySystemComponent>(AbilitySystemComponentName);
 
 	// This will prevent the editor from combining component details with actor details.
 	// Component details can still be accessed from the actor's component hierarchy.

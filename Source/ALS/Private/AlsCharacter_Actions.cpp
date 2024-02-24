@@ -2,12 +2,12 @@
 
 #include "AlsAnimationInstance.h"
 #include "AlsCharacterMovementComponent.h"
+#include "AlsAbilitySystemComponent.h"
 #include "DrawDebugHelpers.h"
 #include "Components/CapsuleComponent.h"
 #include "Components/SkeletalMeshComponent.h"
 #include "Engine/NetConnection.h"
 #include "Engine/SkeletalMesh.h"
-#include "AbilitySystemComponent.h"
 #include "Net/Core/PushModel/PushModel.h"
 #include "RootMotionSources/AlsRootMotionSource_Mantling.h"
 #include "Settings/AlsCharacterSettings.h"
@@ -515,7 +515,7 @@ void AAlsCharacter::RefreshMantling()
 
 		if (Settings->Mantling.bStartRagdollingOnTargetPrimitiveDestruction)
 		{
-			AbilitySystem->TryActivateAbilitiesByTag(FGameplayTagContainer{AlsLocomotionActionTags::Ragdolling});
+			AbilitySystem->TryActivateAbilitiesBySingleTag(AlsLocomotionActionTags::Ragdolling);
 		}
 	}
 }

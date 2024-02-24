@@ -1,8 +1,8 @@
 // Copyright Epic Games, Inc. All Rights Reserved.
 
 #include "Abilities/AlsGameplayAbility_Montage.h"
+#include "AlsAbilitySystemComponent.h"
 #include "Animation/AnimInstance.h"
-#include "AbilitySystemComponent.h"
 
 #include UE_INLINE_GENERATED_CPP_BY_NAME(AlsGameplayAbility_Montage)
 

@@ -3,7 +3,7 @@
 #include "Abilities/AlsGameplayAbility_Landing.h"
 #include "AlsCharacter.h"
 #include "AlsCharacterMovementComponent.h"
-#include "AbilitySystemComponent.h"
+#include "AlsAbilitySystemComponent.h"
 #include "Utility/AlsGameplayTags.h"
 #include "Utility/AlsMath.h"
 
@@ -12,6 +12,8 @@
 UAlsGameplayAbility_Landing::UAlsGameplayAbility_Landing(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer)
 {
+	ReplicationPolicy = EGameplayAbilityReplicationPolicy::ReplicateYes;
+
 	AbilityTags.Reset();
 	AbilityTags.AddTag(AlsLocomotionActionTags::Landing);
 	ActivationOwnedTags.Reset();
@@ -61,7 +63,7 @@ void UAlsGameplayAbility_Landing::ActivateAbility(const FGameplayAbilitySpecHand
 		EndAbility(CurrentSpecHandle, GetCurrentActorInfo(), GetCurrentActivationInfo(),
 				   ReplicationPolicy != EGameplayAbilityReplicationPolicy::ReplicateNo, false);
 
-		GetAbilitySystemComponentFromActorInfo()->TryActivateAbilitiesByTag(FGameplayTagContainer{AlsLocomotionActionTags::Ragdolling});
+		GetAlsAbilitySystemComponentFromActorInfo()->TryActivateAbilitiesBySingleTag(AlsLocomotionActionTags::Ragdolling);
 	}
 	else if (bStartRollingOnLand && Character->GetLocomotionState().Velocity.Z <= -RollingOnLandSpeedThreshold)
 	{

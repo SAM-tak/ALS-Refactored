@@ -1,9 +1,10 @@
 #include "AlsCharacterExample.h"
 
 #include "AlsCameraMovementComponent.h"
+#include "AlsAbilitySystemComponent.h"
+#include "AlsAnimationInstance.h"
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
-#include "AbilitySystemComponent.h"
 #include "Engine/LocalPlayer.h"
 #include "GameFramework/PlayerController.h"
 #include "Camera/CameraComponent.h"
@@ -151,10 +152,9 @@ void AAlsCharacterExample::Input_OnJump(const FInputActionValue& ActionValue)
 {
 	if (ActionValue.Get<bool>())
 	{
-		if (HasMatchingGameplayTag(AlsLocomotionActionTags::Ragdolling))
+		if (HasMatchingGameplayTag(AlsLocomotionActionTags::Ragdolling) && AnimationInstance->GetRagdollingAnimationState().bGroundedAndAged)
 		{
-			FGameplayTagContainer Cancelee{AlsLocomotionActionTags::Ragdolling};
-			AbilitySystem->CancelAbilities(&Cancelee);
+			AbilitySystem->CancelAbilitiesBySingleTag(AlsLocomotionActionTags::Ragdolling);
 			return;
 		}
 
@@ -186,18 +186,17 @@ void AAlsCharacterExample::Input_OnRagdoll()
 {
 	if (HasMatchingGameplayTag(AlsLocomotionActionTags::Ragdolling))
 	{
-		FGameplayTagContainer Cancelee{AlsLocomotionActionTags::Ragdolling};
-		AbilitySystem->CancelAbilities(&Cancelee);
+		AbilitySystem->CancelAbilitiesBySingleTag(AlsLocomotionActionTags::Ragdolling);
 	}
 	else
 	{
-		AbilitySystem->TryActivateAbilitiesByTag(FGameplayTagContainer{AlsLocomotionActionTags::Ragdolling});
+		AbilitySystem->TryActivateAbilitiesBySingleTag(AlsLocomotionActionTags::Ragdolling);
 	}
 }
 
 void AAlsCharacterExample::Input_OnRoll()
 {
-	AbilitySystem->TryActivateAbilitiesByTag(FGameplayTagContainer{AlsLocomotionActionTags::Rolling});
+	AbilitySystem->TryActivateAbilitiesBySingleTag(AlsLocomotionActionTags::Rolling);
 }
 
 void AAlsCharacterExample::Input_OnRotationMode()

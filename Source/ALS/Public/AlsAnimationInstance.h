@@ -332,6 +332,8 @@ public:
 
 	void RefreshRagdollingAnimationState(const class UAlsGameplayAbility_Ragdolling& Ragdolling);
 
+	const FAlsRagdollingAnimationState& GetRagdollingAnimationState() const;
+
 	// PhysicalAnimation
 
 private:
@@ -394,6 +396,11 @@ inline void UAlsAnimationInstance::Jump()
 inline void UAlsAnimationInstance::ResetJumped()
 {
 	InAirState.bJumped = false;
+}
+
+inline const FAlsRagdollingAnimationState& UAlsAnimationInstance::GetRagdollingAnimationState() const
+{
+	return RagdollingState;
 }
 
 inline const FAlsPhysicalAnimationCurveState& UAlsAnimationInstance::GetPhysicalAnimationCurveState() const

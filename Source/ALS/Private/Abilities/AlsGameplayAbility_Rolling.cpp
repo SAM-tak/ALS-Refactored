@@ -14,6 +14,8 @@
 UAlsGameplayAbility_Rolling::UAlsGameplayAbility_Rolling(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer)
 {
+	ReplicationPolicy = EGameplayAbilityReplicationPolicy::ReplicateYes;
+
 	AbilityTags.AddTag(AlsLocomotionActionTags::Rolling);
 	ActivationOwnedTags.AddTag(AlsLocomotionActionTags::Rolling);
 	CancelAbilitiesWithTag.AddTag(AlsLocomotionActionTags::Root);

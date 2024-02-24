@@ -4,10 +4,10 @@
 #include "Abilities/Tasks/AlsAbilityTask_Tick.h"
 #include "AlsCharacter.h"
 #include "AlsCharacterMovementComponent.h"
+#include "AlsAbilitySystemComponent.h"
 #include "AlsAnimationInstance.h"
 #include "Components/CapsuleComponent.h"
 #include "Components/SkeletalMeshComponent.h"
-#include "AbilitySystemComponent.h"
 #include "Net/UnrealNetwork.h"
 #include "Utility/AlsGameplayTags.h"
 #include "Utility/AlsConstants.h"
@@ -19,6 +19,8 @@
 UAlsGameplayAbility_Ragdolling::UAlsGameplayAbility_Ragdolling(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer)
 {
+	ReplicationPolicy = EGameplayAbilityReplicationPolicy::ReplicateYes;
+
 	AbilityTags.AddTag(AlsLocomotionActionTags::Ragdolling);
 	ActivationOwnedTags.AddTag(AlsLocomotionActionTags::Ragdolling);
 	CancelAbilitiesWithTag.AddTag(AlsLocomotionActionTags::Root);
@@ -60,7 +62,7 @@ void UAlsGameplayAbility_Ragdolling::ActivateAbility(const FGameplayAbilitySpecH
 	auto* AnimInstance{Character->GetAlsAnimationInstace()};
 	auto* CharacterMovement{Character->GetAlsCharacterMovement()};
 
-	OnGroundedAndAged_Thrown = false;
+	bOnGroundedAndAgedFired = false;
 
 	// Ensure freeze flag is off.
 
@@ -128,7 +130,7 @@ void UAlsGameplayAbility_Ragdolling::ActivateAbility(const FGameplayAbilitySpecH
 
 void UAlsGameplayAbility_Ragdolling::Tick_Implementation(const float DeltaTime)
 {
-	if (bFreezing)
+	if (!IsActive() || bFreezing)
 	{
 		return;
 	}
@@ -177,12 +179,6 @@ void UAlsGameplayAbility_Ragdolling::Tick_Implementation(const float DeltaTime)
 			{
 				bFacingUpward = true;
 			}
-		}
-
-		if (!OnGroundedAndAged_Thrown)
-		{
-			OnGroundedAndAged_Thrown = true;
-			K2_OnGroundedAndAged();
 		}
 	}
 
@@ -249,6 +245,12 @@ void UAlsGameplayAbility_Ragdolling::Tick_Implementation(const float DeltaTime)
 	}
 
 	ElapsedTime += DeltaTime;
+
+	if (IsGroundedAndAged() && !bOnGroundedAndAgedFired)
+	{
+		bOnGroundedAndAgedFired = true;
+		K2_OnGroundedAndAged();
+	}
 }
 
 void UAlsGameplayAbility_Ragdolling::EndAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo,
@@ -290,7 +292,7 @@ void UAlsGameplayAbility_Ragdolling::EndAbility(const FGameplayAbilitySpecHandle
 		const auto& ReferenceSkeleton{Character->GetMesh()->GetSkeletalMeshAsset()->GetRefSkeleton()};
 
 		const auto PelvisBoneIndex{ReferenceSkeleton.FindBoneIndex(UAlsConstants::PelvisBoneName())};
-		auto& FinalRagdollPose{ AnimInstance->GetFinalRagdollPoseSnapshot() };
+		auto& FinalRagdollPose{AnimInstance->GetFinalRagdollPoseSnapshot()};
 		if (ALS_ENSURE(PelvisBoneIndex >= 0) && PelvisBoneIndex < FinalRagdollPose.LocalTransforms.Num())
 		{
 			// We expect the pelvis bone to be the root bone or attached to it, so we can safely use the mesh transform here.
@@ -316,8 +318,9 @@ void UAlsGameplayAbility_Ragdolling::EndAbility(const FGameplayAbilitySpecHandle
 
 	if (IsGroundedAndAged())
 	{
-		Character->GetAbilitySystemComponent()->SetLooseGameplayTagCount(AlsStateFlagTags::FacingUpward, bFacingUpward ? 1 : 0);
-		GetAbilitySystemComponentFromActorInfo()->TryActivateAbilitiesByTag(FGameplayTagContainer{AlsLocomotionActionTags::GettingUp});
+		auto* AbilitySystem{GetAlsAbilitySystemComponentFromActorInfo()};
+		AbilitySystem->SetLooseGameplayTagCount(AlsStateFlagTags::FacingUpward, bFacingUpward ? 1 : 0);
+		AbilitySystem->TryActivateAbilitiesBySingleTag(AlsLocomotionActionTags::GettingUp);
 	}
 }
 
@@ -366,14 +369,24 @@ FVector UAlsGameplayAbility_Ragdolling::TraceGround()
 
 bool UAlsGameplayAbility_Ragdolling::IsGroundedAndAged() const
 {
-	auto* Character{GetAlsCharacterFromActorInfo()};
-	auto* AnimInstance{Character->GetAlsAnimationInstace()};
 	return bGrounded && ElapsedTime > StartBlendTime;
 }
 
 void UAlsGameplayAbility_Ragdolling::ProcessTick(const float DeltaTime)
 {
 	Tick(DeltaTime);
+}
+
+void UAlsGameplayAbility_Ragdolling::RequestCancel()
+{
+	bCancelRequested = true;
+}
+
+void UAlsGameplayAbility_Ragdolling::Cancel()
+{
+	bCancelRequested = false;
+	CancelAbility(CurrentSpecHandle, GetCurrentActorInfo(), GetCurrentActivationInfo(),
+		ReplicationPolicy != EGameplayAbilityReplicationPolicy::ReplicateNo);
 }
 
 #if WITH_EDITOR

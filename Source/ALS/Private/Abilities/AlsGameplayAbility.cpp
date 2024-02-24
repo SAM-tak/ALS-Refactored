@@ -2,10 +2,21 @@
 
 #include "Abilities/AlsGameplayAbility.h"
 #include "AlsCharacter.h"
+#include "AlsAbilitySystemComponent.h"
 
 #include UE_INLINE_GENERATED_CPP_BY_NAME(AlsGameplayAbility)
 
 AAlsCharacter* UAlsGameplayAbility::GetAlsCharacterFromActorInfo() const
 {
-    return (CurrentActorInfo ? Cast<AAlsCharacter>(CurrentActorInfo->AvatarActor.Get()) : nullptr);
+	if (!ensure(CurrentActorInfo))
+	{
+		return nullptr;
+	}
+    return Cast<AAlsCharacter>(CurrentActorInfo->AvatarActor.Get());
+}
+
+UAlsAbilitySystemComponent* UAlsGameplayAbility::GetAlsAbilitySystemComponentFromActorInfo() const
+{
+	auto* AlsCharacter{GetAlsCharacterFromActorInfo()};
+    return AlsCharacter ? AlsCharacter->GetAlsAbilitySystem() : nullptr;
 }

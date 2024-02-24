@@ -93,11 +93,17 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "ALS|Ability|State", Transient, Meta = (ForceUnits = "deg"))
 	float MaxBoneAngularSpeed{0.0f};
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS|Ability|State", Meta = (ClampMin = 0, ClampMax = 1, ForceUnits = "x"))
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS|Ability|State", Transient, Meta = (ClampMin = 0, ClampMax = 1, ForceUnits = "x"))
 	float FlailPlayRate{1.0f};
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "ALS|Ability|State", Transient, Replicated)
 	FVector_NetQuantize TargetLocation;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "ALS|Ability|State", Transient)
+	uint8 bOnGroundedAndAgedFired : 1{false};
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "ALS|Ability|State", Transient)
+	uint8 bCancelRequested : 1{false};
 
 public:
 	virtual void ActivateAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo,
@@ -105,6 +111,11 @@ public:
 
 	virtual void EndAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilityActivationInfo ActivationInfo,
 							bool bReplicateEndAbility, bool bWasCancelled) override;
+
+	// In OnGroundedAndAged or Tick context, calls EndAbility or CancelAbility makes stuttering.
+	// Then use this instead.
+	UFUNCTION(BlueprintCallable, Category = "Als|Ability|Ragdolling")
+	void RequestCancel();
 
 #if WITH_EDITOR
 	virtual void PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent) override;
@@ -117,7 +128,7 @@ protected:
 	UFUNCTION(BlueprintImplementableEvent, Category = "ALS|Ability|Ragdolling", DisplayName = "On Grounded And Aged", meta = (ScriptName = "OnGroundedAndAged"))
 	void K2_OnGroundedAndAged();
 
-	uint8 OnGroundedAndAged_Thrown : 1{false};
+	void Cancel();
 
 	TWeakObjectPtr<class UAlsAbilityTask_Tick> TickTask;
 
