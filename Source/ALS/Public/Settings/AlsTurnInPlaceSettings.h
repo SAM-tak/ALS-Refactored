@@ -4,7 +4,7 @@
 
 class UAnimSequenceBase;
 
-UCLASS(BlueprintType, EditInlineNew)
+UCLASS(BlueprintType)
 class ALS_API UAlsTurnInPlaceSettings : public UObject
 {
 	GENERATED_BODY()

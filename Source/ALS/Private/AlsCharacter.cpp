@@ -652,10 +652,6 @@ void AAlsCharacter::OnMovementModeChanged(const EMovementMode PreviousMovementMo
 		case MOVE_Falling:
 			SetLocomotionMode(AlsLocomotionModeTags::InAir);
 			break;
-
-		default:
-			SetLocomotionMode(FGameplayTag::EmptyTag);
-			break;
 	}
 
 	Super::OnMovementModeChanged(PreviousMovementMode, PreviousCustomMode);
@@ -899,18 +895,20 @@ void AAlsCharacter::ApplyDesiredStance()
 {
 	if (!GetLocomotionAction().IsValid())
 	{
-		if (GetLocomotionMode() == AlsLocomotionModeTags::Grounded)
+		auto LocomotionMode{GetLocomotionMode()};
+		if (LocomotionMode == AlsLocomotionModeTags::Grounded)
 		{
-			if (GetDesiredStance() == AlsDesiredStanceTags::Standing)
+			auto DesiredStance{GetDesiredStance()};
+			if (DesiredStance == AlsDesiredStanceTags::Standing)
 			{
 				UnCrouch();
 			}
-			else if (GetDesiredStance() == AlsDesiredStanceTags::Crouching)
+			else if (DesiredStance == AlsDesiredStanceTags::Crouching)
 			{
 				Crouch();
 			}
 		}
-		else if (GetLocomotionMode() == AlsLocomotionModeTags::InAir)
+		else if (LocomotionMode == AlsLocomotionModeTags::InAir)
 		{
 			UnCrouch();
 		}
@@ -1126,34 +1124,6 @@ void AAlsCharacter::SetOverlayMode(const FGameplayTag& NewOverlayMode)
 }
 
 void AAlsCharacter::OnOverlayModeChanged_Implementation(const FGameplayTag& PreviousOverlayMode) {}
-
-void AAlsCharacter::SetLocomotionAction(const FGameplayTag& NewLocomotionAction)
-{
-	const auto PreviousLocomotionAction{GetLocomotionAction()};
-
-	if (PreviousLocomotionAction == NewLocomotionAction)
-	{
-		return;
-	}
-
-	GetOwnedGameplayTags(TempTagContainer);
-	for(auto& Tag : TempTagContainer.Filter(Settings->GameplayTagCaterogy.Actions))
-	{
-		AbilitySystem->SetLooseGameplayTagCount(Tag, 0);
-	}
-	AbilitySystem->SetLooseGameplayTagCount(NewLocomotionAction, 1);
-
-	NotifyLocomotionActionChanged(PreviousLocomotionAction);
-}
-
-void AAlsCharacter::NotifyLocomotionActionChanged(const FGameplayTag& PreviousLocomotionAction)
-{
-	ApplyDesiredStance();
-
-	OnLocomotionActionChanged(PreviousLocomotionAction);
-}
-
-void AAlsCharacter::OnLocomotionActionChanged_Implementation(const FGameplayTag& PreviousLocomotionAction) {}
 
 FRotator AAlsCharacter::GetViewRotation() const
 {

@@ -92,14 +92,6 @@ void UAlsGameplayAbility_Rolling::EndAbility(const FGameplayAbilitySpecHandle Ha
 		PhysicsRotationHandle.Reset();
 	}
 
-	if (bCrouchOnStart)
-	{
-		if (Character->GetDesiredStance() != AlsDesiredStanceTags::Crouching)
-		{
-			Character->UnCrouch();
-		}
-	}
-
 	Super::EndAbility(Handle, ActorInfo, ActivationInfo, bReplicateEndAbility, bWasCancelled);
 }
 

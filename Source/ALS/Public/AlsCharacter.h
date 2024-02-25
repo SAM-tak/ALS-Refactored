@@ -39,14 +39,14 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Als Character")
 	TObjectPtr<UAlsAbilitySystemComponent> AbilitySystem;
 
-	UPROPERTY(EditAnywhere, Instanced, BlueprintReadOnly, Category = "Settings|Als Character")
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings|Als Character")
 	TObjectPtr<UAlsCharacterSettings> Settings;
 
-	UPROPERTY(EditAnywhere, Instanced, BlueprintReadOnly, Category = "Settings|Als Character")
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings|Als Character")
 	TObjectPtr<UAlsMovementSettings> MovementSettings;
 
 	/** ability list */
-	UPROPERTY(EditAnywhere, Instanced, BlueprintReadWrite, Category = "Settings|Als Character")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Settings|Als Character")
 	TObjectPtr<UAlsAbilitySet> Abilities;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings|Als Character")
@@ -70,8 +70,8 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State|Als Character", Transient, Replicated)
 	FVector_NetQuantizeNormal InputDirection;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State|Als Character",
-		Transient, Replicated, Meta = (ClampMin = -180, ClampMax = 180, ForceUnits = "deg"))
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State|Als Character", Transient, Replicated,
+			  Meta = (ClampMin = -180, ClampMax = 180, ForceUnits = "deg"))
 	float DesiredVelocityYawAngle;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State|Als Character", Transient)
@@ -309,14 +309,6 @@ protected:
 public:
 	UFUNCTION(BlueprintPure, Category = "Als Character")
 	FGameplayTag GetLocomotionAction() const;
-
-	void SetLocomotionAction(const FGameplayTag& NewLocomotionAction); // TODO : Remove
-
-protected:
-	virtual void NotifyLocomotionActionChanged(const FGameplayTag& PreviousLocomotionAction);
-
-	UFUNCTION(BlueprintNativeEvent, Category = "Als Character")
-	void OnLocomotionActionChanged(const FGameplayTag& PreviousLocomotionAction);
 
 	// Input
 

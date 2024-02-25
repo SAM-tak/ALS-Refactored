@@ -20,3 +20,30 @@ UAlsAbilitySystemComponent* UAlsGameplayAbility::GetAlsAbilitySystemComponentFro
 	auto* AlsCharacter{GetAlsCharacterFromActorInfo()};
     return AlsCharacter ? AlsCharacter->GetAlsAbilitySystem() : nullptr;
 }
+
+void UAlsGameplayAbility::EndAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo,
+									 const FGameplayAbilityActivationInfo ActivationInfo, bool bReplicateEndAbility, bool bWasCancelled)
+{
+	auto* Character{GetAlsCharacterFromActorInfo()};
+	Super::EndAbility(Handle, ActorInfo, ActivationInfo, bReplicateEndAbility, bWasCancelled);
+	if (Character)
+	{
+		auto LocomotionMode{Character->GetLocomotionMode()};
+		if (LocomotionMode == AlsLocomotionModeTags::Grounded)
+		{
+			auto DesiredStance{Character->GetDesiredStance()};
+			if (DesiredStance == AlsDesiredStanceTags::Standing)
+			{
+				Character->UnCrouch();
+			}
+			else if (DesiredStance == AlsDesiredStanceTags::Crouching)
+			{
+				Character->Crouch();
+			}
+		}
+		else if (LocomotionMode == AlsLocomotionModeTags::InAir)
+		{
+			Character->UnCrouch();
+		}
+	}
+}

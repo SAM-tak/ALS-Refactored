@@ -24,7 +24,7 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS|Ability")
 	TArray<TEnumAsByte<ECollisionChannel>> GroundTraceResponseChannels{ECC_WorldStatic, ECC_WorldDynamic, ECC_Destructible};
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS|Ability", AdvancedDisplay)
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "ALS|Ability", AdvancedDisplay)
 	FCollisionResponseContainer GroundTraceResponses{ECR_Ignore};
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "ALS|Ability", Meta = (ClampMin = 0, ForceUnits = "s"))
@@ -93,7 +93,7 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "ALS|Ability|State", Transient, Meta = (ForceUnits = "deg"))
 	float MaxBoneAngularSpeed{0.0f};
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS|Ability|State", Transient, Meta = (ClampMin = 0, ClampMax = 1, ForceUnits = "x"))
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "ALS|Ability|State", Transient, Meta = (ClampMin = 0, ClampMax = 1, ForceUnits = "x"))
 	float FlailPlayRate{1.0f};
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "ALS|Ability|State", Transient, Replicated)

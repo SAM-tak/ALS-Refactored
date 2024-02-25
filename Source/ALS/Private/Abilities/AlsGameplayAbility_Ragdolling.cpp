@@ -323,13 +323,13 @@ void UAlsGameplayAbility_Ragdolling::EndAbility(const FGameplayAbilitySpecHandle
 
 void UAlsGameplayAbility_Ragdolling::SetTargetLocation(const FVector& NewTargetLocation)
 {
-	auto* Character{GetAlsCharacterFromActorInfo()};
 	if (TargetLocation != NewTargetLocation)
 	{
 		TargetLocation = NewTargetLocation;
 
 		MARK_PROPERTY_DIRTY_FROM_NAME(ThisClass, TargetLocation, this)
 
+		auto* Character{GetAlsCharacterFromActorInfo()};
 		if (Character->GetLocalRole() == ROLE_AutonomousProxy)
 		{
 			ServerSetTargetLocation(TargetLocation);
