@@ -2,8 +2,7 @@
 
 #pragma once
 
-#include "CoreMinimal.h"
-#include "Abilities/AlsGameplayAbility_MontageBase.h"
+#include "Abilities/Actions/AlsGameplayAbility_MontageBase.h"
 #include "AlsGameplayAbility_Mantling.generated.h"
 
 class UAnimMontage;

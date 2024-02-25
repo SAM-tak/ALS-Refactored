@@ -1,6 +1,6 @@
 ﻿#include "RootMotionSources/AlsRootMotionSource_Mantling.h"
 
-#include "Abilities/AlsGameplayAbility_Mantling.h"
+#include "Abilities/Actions/AlsGameplayAbility_Mantling.h"
 #include "Animation/AnimInstance.h"
 #include "Components/SkeletalMeshComponent.h"
 #include "Curves/CurveFloat.h"

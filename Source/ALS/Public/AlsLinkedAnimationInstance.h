@@ -5,10 +5,10 @@
 
 class AAlsCharacter;
 
-UCLASS()
+UCLASS(Abstract)
 class ALS_API UAlsLinkedAnimationInstance : public UAnimInstance
 {
-	GENERATED_BODY()
+	GENERATED_UCLASS_BODY()
 
 protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient)
@@ -18,8 +18,6 @@ protected:
 	TWeakObjectPtr<AAlsCharacter> Character;
 
 public:
-	UAlsLinkedAnimationInstance();
-
 	virtual void NativeInitializeAnimation() override;
 
 	virtual void NativeBeginPlay() override;

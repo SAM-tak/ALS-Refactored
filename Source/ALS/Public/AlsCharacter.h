@@ -21,7 +21,7 @@ class UAlsMantlingSettings;
 class UAlsPhysicalAnimationComponent;
 class UAlsAbilitySystemComponent;
 
-UCLASS(AutoExpandCategories = ("Settings|Als Character"))
+UCLASS(Abstract, AutoExpandCategories = ("Settings|Als Character"))
 class ALS_API AAlsCharacter : public ACharacter, public IAbilitySystemInterface, public IGameplayCueInterface, public IGameplayTagAssetInterface
 {
 	GENERATED_UCLASS_BODY()
@@ -45,9 +45,8 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings|Als Character")
 	TObjectPtr<UAlsMovementSettings> MovementSettings;
 
-	/** ability list */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Settings|Als Character")
-	TObjectPtr<UAlsAbilitySet> Abilities;
+	TObjectPtr<UAlsAbilitySet> AbilitySet;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings|Als Character")
 	FGameplayTagContainer InitialGameplayTags;
@@ -297,13 +296,6 @@ public:
 	UFUNCTION(BlueprintPure, Category = "Als Character")
 	FGameplayTag GetOverlayMode() const;
 
-	UFUNCTION(BlueprintCallable, Category = "Als Character", Meta = (AutoCreateRefTerm = "NewOverlayMode"))
-	void SetOverlayMode(const FGameplayTag& NewOverlayMode);
-
-protected:
-	UFUNCTION(BlueprintNativeEvent, Category = "Als Character")
-	void OnOverlayModeChanged(const FGameplayTag& PreviousOverlayMode);
-
 	// Locomotion Action
 
 public:
@@ -436,6 +428,9 @@ protected:
 	// Callbacks (tentative)
 
 public:
+	UFUNCTION(BlueprintNativeEvent, Category = "Als Character")
+	void OnOverlayModeChanged(const FGameplayTag& PreviousOverlayMode);
+
 	UFUNCTION(BlueprintNativeEvent, Category = "Als Character")
 	void OnMantlingStarted(const FAlsMantlingParameters& Parameters);
 	

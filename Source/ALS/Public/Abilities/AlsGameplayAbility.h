@@ -2,8 +2,12 @@
 
 #pragma once
 
-#include "CoreMinimal.h"
-#include "Abilities/GameplayAbility_Montage.h"
+//#include "CoreMinimal.h"
+//#include "UObject/ObjectMacros.h"
+//#include "Templates/SubclassOf.h"
+//#include "GameplayAbilitySpec.h"
+//#include "GameplayEffect.h"
+#include "Abilities/GameplayAbility.h"
 #include "AlsGameplayAbility.generated.h"
 
 class AAlsCharacter;
@@ -23,7 +27,4 @@ public:
 
     UFUNCTION(BlueprintPure, Category = "ALS|Ability")
     UAlsAbilitySystemComponent* GetAlsAbilitySystemComponentFromActorInfo() const;
-
-    virtual void EndAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo,
-                            const FGameplayAbilityActivationInfo ActivationInfo, bool bReplicateEndAbility, bool bWasCancelled) override;
 };

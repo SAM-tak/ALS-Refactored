@@ -1,6 +1,6 @@
 // Copyright Epic Games, Inc. All Rights Reserved.
 
-#include "Abilities/AlsGameplayAbility_MontageBase.h"
+#include "Abilities/Actions/AlsGameplayAbility_MontageBase.h"
 #include "AlsAbilitySystemComponent.h"
 #include "Animation/AnimInstance.h"
 

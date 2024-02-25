@@ -1,11 +1,12 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
-#include "Abilities/AlsGameplayAbility_Ragdolling.h"
+#include "Abilities/Actions/AlsGameplayAbility_Ragdolling.h"
 #include "Abilities/Tasks/AlsAbilityTask_Tick.h"
 #include "AlsCharacter.h"
 #include "AlsCharacterMovementComponent.h"
-#include "AlsAbilitySystemComponent.h"
 #include "AlsAnimationInstance.h"
+#include "AlsAbilitySystemComponent.h"
+#include "AlsRagdollingAnimInstance.h"
 #include "Components/CapsuleComponent.h"
 #include "Components/SkeletalMeshComponent.h"
 #include "Net/UnrealNetwork.h"
@@ -55,11 +56,20 @@ void UAlsGameplayAbility_Ragdolling::ActivateAbility(const FGameplayAbilitySpecH
 	auto* AnimInstance{Character->GetAlsAnimationInstace()};
 	auto* CharacterMovement{Character->GetAlsCharacterMovement()};
 
+	Character->GetMesh()->LinkAnimClassLayers(OwnAnimLayersClass);
+
+	LayerAnimInstance = Cast<UAlsRagdollingAnimInstance>(Character->GetMesh()->GetLinkedAnimLayerInstanceByClass(OwnAnimLayersClass));
+
+	if(!LayerAnimInstance.IsValid())
+	{
+		return;
+	}
+
 	bOnGroundedAndAgedFired = false;
 
 	// Ensure freeze flag is off.
 
-	AnimInstance->UnFreezeRagdolling();
+	LayerAnimInstance->UnFreeze();
 
 	// Initialize bFacingUpward flag by current movement direction. If Velocity is Zero, it is chosen bFacingUpward is true.
 	// And determine target yaw angle of the character.
@@ -131,7 +141,6 @@ void UAlsGameplayAbility_Ragdolling::Tick_Implementation(const float DeltaTime)
 	}
 
 	auto* Character{GetAlsCharacterFromActorInfo()};
-	auto* AnimInstance{Character->GetAlsAnimationInstace()};
 	auto* CharacterMovement{Character->GetAlsCharacterMovement()};
 
 	const auto bLocallyControlled{Character->IsLocallyControlled() || (Character->GetLocalRole() >= ROLE_Authority && !IsValid(Character->GetController()))};
@@ -177,13 +186,13 @@ void UAlsGameplayAbility_Ragdolling::Tick_Implementation(const float DeltaTime)
 		}
 	}
 
-	AnimInstance->RefreshRagdollingAnimationState(*this);
+	LayerAnimInstance->Refresh(*this);
 
 	if (bAllowFreeze)
 	{
 		RootBoneSpeed = CharacterMovement->Velocity.Size();
 
-		AnimInstance->UnFreezeRagdolling();
+		LayerAnimInstance->UnFreeze();
 
 		if (bGrounded)
 		{
@@ -223,7 +232,7 @@ void UAlsGameplayAbility_Ragdolling::Tick_Implementation(const float DeltaTime)
 
 			if (bFreezing)
 			{
-				AnimInstance->FreezeRagdolling();
+				LayerAnimInstance->Freeze();
 				Character->GetMesh()->SetAllBodiesSimulatePhysics(false);
 			}
 		}
@@ -254,11 +263,13 @@ void UAlsGameplayAbility_Ragdolling::EndAbility(const FGameplayAbilitySpecHandle
 	Super::EndAbility(Handle, ActorInfo, ActivationInfo, bReplicateEndAbility, bWasCancelled);
 
 	auto* Character{GetAlsCharacterFromActorInfo()};
-	auto* AnimInstance{Character->GetAlsAnimationInstace()};
 	auto CharacterMovement{Character->GetAlsCharacterMovement()};
 
-	AnimInstance->FreezeRagdolling();
-	AnimInstance->RefreshRagdollingAnimationState(*this);
+	if (LayerAnimInstance.IsValid())
+	{
+		LayerAnimInstance->Freeze();
+		LayerAnimInstance->Refresh(*this);
+	}
 
 	// Re-enable capsule collision.
 
@@ -267,7 +278,7 @@ void UAlsGameplayAbility_Ragdolling::EndAbility(const FGameplayAbilitySpecHandle
 	CharacterMovement->NetworkSmoothingMode = ENetworkSmoothingMode::Exponential;
 	CharacterMovement->bIgnoreClientMovementErrorChecksAndCorrection = false;
 
-	if (ElapsedTime > StartBlendTime)
+	if (LayerAnimInstance.IsValid() && ElapsedTime > StartBlendTime)
 	{
 		const auto PelvisTransform{Character->GetMesh()->GetBoneTransform(UAlsConstants::PelvisBoneName())};
 		const auto PelvisRotation{PelvisTransform.Rotator()};
@@ -287,7 +298,7 @@ void UAlsGameplayAbility_Ragdolling::EndAbility(const FGameplayAbilitySpecHandle
 		const auto& ReferenceSkeleton{Character->GetMesh()->GetSkeletalMeshAsset()->GetRefSkeleton()};
 
 		const auto PelvisBoneIndex{ReferenceSkeleton.FindBoneIndex(UAlsConstants::PelvisBoneName())};
-		auto& FinalRagdollPose{AnimInstance->GetFinalRagdollPoseSnapshot()};
+		auto& FinalRagdollPose{LayerAnimInstance->GetFinalPoseSnapshot()};
 		if (ALS_ENSURE(PelvisBoneIndex >= 0) && PelvisBoneIndex < FinalRagdollPose.LocalTransforms.Num())
 		{
 			// We expect the pelvis bone to be the root bone or attached to it, so we can safely use the mesh transform here.
@@ -345,7 +356,6 @@ void UAlsGameplayAbility_Ragdolling::ServerSetTargetLocation_Implementation(cons
 FVector UAlsGameplayAbility_Ragdolling::TraceGround()
 {
 	auto* Character{GetAlsCharacterFromActorInfo()};
-	auto* AnimInstance{Character->GetAlsAnimationInstace()};
 	auto* CharacterMovement{Character->GetAlsCharacterMovement()};
 
 	const auto CapsuleHalfHeight{Character->GetCapsuleComponent()->GetScaledCapsuleHalfHeight()};

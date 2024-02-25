@@ -7,7 +7,7 @@
 
 #include UE_INLINE_GENERATED_CPP_BY_NAME(AlsLinkedAnimationInstance)
 
-UAlsLinkedAnimationInstance::UAlsLinkedAnimationInstance()
+UAlsLinkedAnimationInstance::UAlsLinkedAnimationInstance(const FObjectInitializer& ObjectInitializer) : Super(ObjectInitializer)
 {
 	bUseMainInstanceMontageEvaluationData = true;
 }

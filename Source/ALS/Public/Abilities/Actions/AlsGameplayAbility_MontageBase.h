@@ -2,12 +2,7 @@
 
 #pragma once
 
-#include "CoreMinimal.h"
-#include "UObject/ObjectMacros.h"
-#include "Templates/SubclassOf.h"
-#include "GameplayAbilitySpec.h"
-#include "GameplayEffect.h"
-#include "Abilities/AlsGameplayAbility.h"
+#include "Abilities/AlsGameplayAbility_Action.h"
 #include "AlsGameplayAbility_MontageBase.generated.h"
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_ThreeParams(FAlsMontageNotifyDelegate, FName, NotifyName, float, TriggerTime, float, Duration);
@@ -37,7 +32,7 @@ struct ALS_API FAlsPlayMontageParameter
  *	A gameplay ability that plays a single montage and applies a GameplayEffect
  */
 UCLASS(Abstract)
-class ALS_API UAlsGameplayAbility_MontageBase : public UAlsGameplayAbility
+class ALS_API UAlsGameplayAbility_MontageBase : public UAlsGameplayAbility_Action
 {
 	GENERATED_UCLASS_BODY()
 

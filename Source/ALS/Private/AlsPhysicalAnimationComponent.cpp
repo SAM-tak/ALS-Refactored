@@ -6,7 +6,7 @@
 #include "AlsCharacter.h"
 #include "AlsAnimationInstance.h"
 #include "State/AlsPhysicalAnimationCurveState.h"
-#include "Abilities/AlsGameplayAbility_Ragdolling.h"
+#include "Abilities/Actions/AlsGameplayAbility_Ragdolling.h"
 #include "Components/SkeletalMeshComponent.h"
 #include "PhysicsEngine/PhysicalAnimationComponent.h"
 #include "PhysicsEngine/PhysicsAsset.h"
@@ -654,4 +654,9 @@ float UAlsPhysicalAnimationComponent::GetLockedValue(const FAlsPhysicalAnimation
 		return Curves.LockRightFoot;
 	}
 	return 0.0f;
+}
+
+bool UAlsPhysicalAnimationComponent::IsRagdollingGroundedAndAged()
+{
+	return LatestRagdolling.IsValid() && LatestRagdolling->IsActive() && LatestRagdolling->IsGroundedAndAged();
 }

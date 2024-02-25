@@ -1,6 +1,6 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
-#include "Abilities/AlsGameplayAbility_Mantling.h"
+#include "Abilities/Actions/AlsGameplayAbility_Mantling.h"
 #include "Abilities/Tasks/AlsAbilityTask_Tick.h"
 #include "AlsCharacter.h"
 #include "AlsCharacterMovementComponent.h"

@@ -282,12 +282,14 @@ void AAlsCharacter::BeginPlay()
 
 	RefreshGait();
 
-	if (HasAuthority() && Abilities)
+	if (HasAuthority() && AbilitySet)
 	{
-		Abilities->GiveToAbilitySystem(AbilitySystem, nullptr);
+		AbilitySet->GiveToAbilitySystem(AbilitySystem, nullptr);
 	}
 
-	OnOverlayModeChanged(GetOverlayMode());
+	auto DesiredOverlay{GetOverlayMode()};
+	AbilitySystem->SetLooseGameplayTagCount(DesiredOverlay, 0);
+	AbilitySystem->TryActivateAbilitiesBySingleTag(DesiredOverlay);
 }
 
 void AAlsCharacter::PostNetReceiveLocationAndRotation()
@@ -1102,25 +1104,6 @@ bool AAlsCharacter::CanSprint() const
 	}
 
 	return false;
-}
-
-void AAlsCharacter::SetOverlayMode(const FGameplayTag& NewOverlayMode)
-{
-	const auto PreviousOverlayMode{GetOverlayMode()};
-
-	if (PreviousOverlayMode == NewOverlayMode || GetLocalRole() <= ROLE_SimulatedProxy)
-	{
-		return;
-	}
-
-	GetOwnedGameplayTags(TempTagContainer);
-	for(auto& Tag : TempTagContainer.Filter(Settings->GameplayTagCaterogy.OverlayModes))
-	{
-		AbilitySystem->SetLooseGameplayTagCount(Tag, 0);
-	}
-	AbilitySystem->SetLooseGameplayTagCount(NewOverlayMode, 1);
-
-	OnOverlayModeChanged(PreviousOverlayMode);
 }
 
 void AAlsCharacter::OnOverlayModeChanged_Implementation(const FGameplayTag& PreviousOverlayMode) {}

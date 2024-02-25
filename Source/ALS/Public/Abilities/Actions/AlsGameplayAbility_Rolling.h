@@ -2,8 +2,7 @@
 
 #pragma once
 
-#include "CoreMinimal.h"
-#include "Abilities/AlsGameplayAbility_Montage.h"
+#include "Abilities/Actions/AlsGameplayAbility_Montage.h"
 #include "AlsGameplayAbility_Rolling.generated.h"
 
 /**

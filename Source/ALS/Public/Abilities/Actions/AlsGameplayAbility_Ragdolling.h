@@ -2,29 +2,33 @@
 
 #pragma once
 
-#include "CoreMinimal.h"
-#include "Abilities/AlsGameplayAbility.h"
+#include "Abilities/AlsGameplayAbility_Action.h"
 #include "AlsGameplayAbility_Ragdolling.generated.h"
+
+class UAlsRagdollingAnimInstance;
 
 /**
  * Ragdolling
  */
 UCLASS(Abstract)
-class ALS_API UAlsGameplayAbility_Ragdolling : public UAlsGameplayAbility
+class ALS_API UAlsGameplayAbility_Ragdolling : public UAlsGameplayAbility_Action
 {
 	GENERATED_UCLASS_BODY()
 
 	friend class UAlsPhysicalAnimationComponent;
-	friend class UAlsAnimationInstance;
+	friend class UAlsRagdollingAnimInstance;
 
 public:
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "ALS|Ability")
+	TSubclassOf<UAlsRagdollingAnimInstance> OwnAnimLayersClass;
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS|Ability")
 	TEnumAsByte<ECollisionChannel> GroundTraceChannel{ECC_Visibility};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS|Ability")
 	TArray<TEnumAsByte<ECollisionChannel>> GroundTraceResponseChannels{ECC_WorldStatic, ECC_WorldDynamic, ECC_Destructible};
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "ALS|Ability", AdvancedDisplay)
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "ALS|Ability")
 	FCollisionResponseContainer GroundTraceResponses{ECR_Ignore};
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "ALS|Ability", Meta = (ClampMin = 0, ForceUnits = "s"))
@@ -93,9 +97,6 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "ALS|Ability|State", Transient, Meta = (ForceUnits = "deg"))
 	float MaxBoneAngularSpeed{0.0f};
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "ALS|Ability|State", Transient, Meta = (ClampMin = 0, ClampMax = 1, ForceUnits = "x"))
-	float FlailPlayRate{1.0f};
-
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "ALS|Ability|State", Transient, Replicated)
 	FVector_NetQuantize TargetLocation;
 
@@ -104,6 +105,9 @@ protected:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "ALS|Ability|State", Transient)
 	uint8 bCancelRequested : 1{false};
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "ALS|Ability|State", Transient)
+	TWeakObjectPtr<UAlsRagdollingAnimInstance> LayerAnimInstance;
 
 public:
 	virtual void ActivateAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo,
@@ -116,6 +120,9 @@ public:
 	// Then use this instead.
 	UFUNCTION(BlueprintCallable, Category = "Als|Ability|Ragdolling")
 	void RequestCancel();
+
+	UFUNCTION(BlueprintPure, Category = "Als|Ability|Ragdolling")
+	bool IsGroundedAndAged() const;
 
 #if WITH_EDITOR
 	virtual void PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent) override;
@@ -141,7 +148,4 @@ protected:
 	void ServerSetTargetLocation(const FVector_NetQuantize& NewTargetLocation);
 
 	FVector TraceGround();
-
-	UFUNCTION(BlueprintPure, Category = "Als|Ability|Ragdolling")
-	bool IsGroundedAndAged() const;
 };

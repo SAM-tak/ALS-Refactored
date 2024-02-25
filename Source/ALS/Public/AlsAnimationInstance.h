@@ -11,7 +11,6 @@
 #include "State/AlsLocomotionAnimationState.h"
 #include "State/AlsMovementBaseState.h"
 #include "State/AlsPoseState.h"
-#include "State/AlsRagdollingAnimationState.h"
 #include "State/AlsRotateInPlaceState.h"
 #include "State/AlsTransitionsState.h"
 #include "State/AlsTurnInPlaceState.h"
@@ -114,9 +113,6 @@ protected:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient)
 	FAlsTurnInPlaceState TurnInPlaceState;
-
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient)
-	FAlsRagdollingAnimationState RagdollingState;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient)
 	FAlsPhysicalAnimationCurveState PhysicalAnimationCurveState;
@@ -321,19 +317,6 @@ private:
 
 	void PlayQueuedTurnInPlaceAnimation();
 
-	// Ragdolling
-
-public:
-	FPoseSnapshot& GetFinalRagdollPoseSnapshot();
-
-	void FreezeRagdolling();
-
-	void UnFreezeRagdolling();
-
-	void RefreshRagdollingAnimationState(const class UAlsGameplayAbility_Ragdolling& Ragdolling);
-
-	const FAlsRagdollingAnimationState& GetRagdollingAnimationState() const;
-
 	// PhysicalAnimation
 
 private:
@@ -396,11 +379,6 @@ inline void UAlsAnimationInstance::Jump()
 inline void UAlsAnimationInstance::ResetJumped()
 {
 	InAirState.bJumped = false;
-}
-
-inline const FAlsRagdollingAnimationState& UAlsAnimationInstance::GetRagdollingAnimationState() const
-{
-	return RagdollingState;
 }
 
 inline const FAlsPhysicalAnimationCurveState& UAlsAnimationInstance::GetPhysicalAnimationCurveState() const

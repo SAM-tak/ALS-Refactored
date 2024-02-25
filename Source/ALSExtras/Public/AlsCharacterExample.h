@@ -10,7 +10,7 @@ class UInputAction;
 class UAlsCameraMovementComponent;
 class UAlsCameraMovementComponent;
 
-UCLASS(AutoExpandCategories = ("Settings|Als Character Example", "State|Als Character Example"))
+UCLASS(Abstract, AutoExpandCategories = ("Settings|Als Character Example", "State|Als Character Example"))
 class ALSEXTRAS_API AAlsCharacterExample : public AAlsCharacter
 {
 	GENERATED_BODY()

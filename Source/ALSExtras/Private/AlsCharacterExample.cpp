@@ -2,7 +2,7 @@
 
 #include "AlsCameraMovementComponent.h"
 #include "AlsAbilitySystemComponent.h"
-#include "AlsAnimationInstance.h"
+#include "AlsPhysicalAnimationComponent.h"
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
 #include "Engine/LocalPlayer.h"
@@ -152,7 +152,7 @@ void AAlsCharacterExample::Input_OnJump(const FInputActionValue& ActionValue)
 {
 	if (ActionValue.Get<bool>())
 	{
-		if (HasMatchingGameplayTag(AlsLocomotionActionTags::Ragdolling) && AnimationInstance->GetRagdollingAnimationState().bGroundedAndAged)
+		if (PhysicalAnimation->IsRagdollingGroundedAndAged())
 		{
 			AbilitySystem->CancelAbilitiesBySingleTag(AlsLocomotionActionTags::Ragdolling);
 			return;

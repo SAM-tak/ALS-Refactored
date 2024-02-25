@@ -1,7 +1,7 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 
-#include "Abilities/AlsGameplayAbility_GettingUp.h"
+#include "Abilities/Actions/AlsGameplayAbility_GettingUp.h"
 #include "AlsCharacter.h"
 #include "AlsCharacterMovementComponent.h"
 #include "AbilitySystemComponent.h"

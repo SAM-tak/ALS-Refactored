@@ -2,12 +2,12 @@
 
 #include "AlsAnimationInstanceProxy.h"
 #include "AlsCharacter.h"
+#include "Settings/AlsAnimationInstanceSettings.h"
+#include "Abilities/Actions/AlsGameplayAbility_Ragdolling.h"
 #include "DrawDebugHelpers.h"
 #include "Components/CapsuleComponent.h"
 #include "Curves/CurveFloat.h"
 #include "GameFramework/CharacterMovementComponent.h"
-#include "Settings/AlsAnimationInstanceSettings.h"
-#include "Abilities/AlsGameplayAbility_Ragdolling.h"
 #include "Utility/AlsConstants.h"
 #include "Utility/AlsMacros.h"
 #include "Utility/AlsUtility.h"
@@ -1779,48 +1779,6 @@ void UAlsAnimationInstance::PlayQueuedTurnInPlaceAnimation()
 	TurnInPlaceState.QueuedSettings = nullptr;
 	TurnInPlaceState.QueuedSlotName = NAME_None;
 	TurnInPlaceState.QueuedTurnYawAngle = 0.0f;
-}
-
-FPoseSnapshot& UAlsAnimationInstance::GetFinalRagdollPoseSnapshot()
-{
-	check(IsInGameThread())
-
-	return RagdollingState.FinalRagdollPose;
-}
-
-void UAlsAnimationInstance::FreezeRagdolling()
-{
-	check(IsInGameThread())
-
-	if (!RagdollingState.bFreezed)
-	{
-		// Save a snapshot of the current ragdoll pose for use in animation graph to blend out of the ragdoll.
-		if (GetSkelMeshComponent()->GetNumComponentSpaceTransforms() > 0) // When stop PIE, SnapshotPose rises Out of range exception.
-		{
-			SnapshotPose(RagdollingState.FinalRagdollPose);
-		}
-
-		RagdollingState.bFreezed = true;
-	}
-}
-
-void UAlsAnimationInstance::UnFreezeRagdolling()
-{
-	check(IsInGameThread())
-
-	if (RagdollingState.bFreezed)
-	{
-		RagdollingState.bFreezed = false;
-	}
-}
-
-void UAlsAnimationInstance::RefreshRagdollingAnimationState(const UAlsGameplayAbility_Ragdolling& Ragdolling)
-{
-	RagdollingState.bActive = Ragdolling.IsActive();
-	RagdollingState.StartBlendTime = Ragdolling.StartBlendTime;
-	RagdollingState.bGroundedAndAged = Ragdolling.bGrounded & (Ragdolling.ElapsedTime >= Ragdolling.StartBlendTime);
-	RagdollingState.bFacingUpward = Ragdolling.bFacingUpward;
-	RagdollingState.LyingDownYawAngleDelta = Ragdolling.LyingDownYawAngleDelta;
 }
 
 void UAlsAnimationInstance::RefreshPhysicalAnimationOnGameThread()
