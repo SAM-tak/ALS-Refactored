@@ -1,8 +1,8 @@
 ﻿#pragma once
 
-#include "AlsGameplayTagSettings.h"
 #include "AlsInAirRotationMode.h"
 #include "AlsViewSettings.h"
+#include "AlsGameplayTagSettings.h"
 #include "AlsCharacterSettings.generated.h"
 
 UCLASS(Blueprintable, BlueprintType)
@@ -44,10 +44,10 @@ public:
 	uint8 bAutoTurnOffSprint : 1{false};
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings")
-	FAlsGameplayTagSettings GameplayTagCaterogy;
+	FAlsViewSettings View;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings")
-	FAlsViewSettings View;
+	FAlsGameplayTagSettings GameplayTagCaterogy;
 
 public:
 	UFUNCTION(BlueprintPure, Category = "Als Character")

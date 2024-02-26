@@ -48,8 +48,38 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Settings|Als Character")
 	TObjectPtr<UAlsAbilitySet> AbilitySet;
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings|Als Character")
-	FGameplayTagContainer InitialGameplayTags;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings|Als Character|Desired State", Replicated)
+	FGameplayTag DesiredRotationMode{AlsDesiredRotationModeTags::ViewDirection};
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings|Als Character|Desired State", Replicated)
+	FGameplayTag DesiredStance{AlsDesiredStanceTags::Standing};
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings|Als Character|Desired State", Replicated)
+	FGameplayTag DesiredGait{AlsDesiredGaitTags::Running};
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings|Als Character|Desired State", Replicated)
+	FGameplayTag DesiredViewMode{AlsDesiredViewModeTags::ThirdPerson};
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings|Als Character|Desired State", ReplicatedUsing = OnAimingModeChanged)
+	FGameplayTag AimingMode{FGameplayTag::EmptyTag};
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings|Als Character|Desired State")
+	FGameplayTag InitialOverlayMode{AlsOverlayModeTags::Default};
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State|Als Character", Transient)
+	FGameplayTag LocomotionMode{AlsLocomotionModeTags::Grounded};
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State|Als Character", Transient)
+	FGameplayTag RotationMode{AlsRotationModeTags::ViewDirection};
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State|Als Character", Transient)
+	FGameplayTag Stance{AlsStanceTags::Standing};
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State|Als Character", Transient)
+	FGameplayTag Gait{AlsGaitTags::Walking};
+	
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State|Als Character", Transient)
+	FGameplayTag ViewMode{AlsDesiredViewModeTags::ThirdPerson};
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State|Als Character", Transient)
 	FAlsMovementBaseState MovementBase;
@@ -150,7 +180,7 @@ private:
 
 public:
 	UFUNCTION(BlueprintPure, Category = "Als Character")
-	FGameplayTag GetDesiredViewMode() const;
+	const FGameplayTag& GetDesiredViewMode() const;
 
 	UFUNCTION(BlueprintCallable, Category = "Als Character", Meta = (AutoCreateRefTerm = "NewDesiredViewMode"))
 	void SetDesiredViewMode(const FGameplayTag& NewDesiredViewMode);
@@ -159,7 +189,7 @@ public:
 
 public:
 	UFUNCTION(BlueprintPure, Category = "Als Character")
-	FGameplayTag GetViewMode() const;
+	const FGameplayTag& GetViewMode() const;
 
 	UFUNCTION(BlueprintCallable, Category = "Als Character", Meta = (AutoCreateRefTerm = "NewViewMode")) // TODO : ???
 	void SetViewMode(const FGameplayTag& NewViewMode);
@@ -174,11 +204,12 @@ public:
 
 public:
 	UFUNCTION(BlueprintPure, Category = "Als Character")
-	FGameplayTag GetLocomotionMode() const;
+	const FGameplayTag& GetLocomotionMode() const;
 
 protected:
 	void SetLocomotionMode(const FGameplayTag& NewLocomotionMode);
 
+	UFUNCTION()
 	virtual void NotifyLocomotionModeChanged(const FGameplayTag& PreviousLocomotionMode);
 
 	UFUNCTION(BlueprintNativeEvent, Category = "Als Character")
@@ -188,7 +219,7 @@ protected:
 
 public:
 	UFUNCTION(BlueprintPure, Category = "Als Character")
-	FGameplayTag GetAimingMode() const;
+	const FGameplayTag& GetAimingMode() const;
 
 	UFUNCTION(BlueprintCallable, Category = "Als Character")
 	void SetAimingMode(const FGameplayTag& NewAimingMode);
@@ -210,7 +241,7 @@ protected:
 
 public:
 	UFUNCTION(BlueprintPure, Category = "Als Character")
-	FGameplayTag GetDesiredRotationMode() const;
+	const FGameplayTag& GetDesiredRotationMode() const;
 
 	UFUNCTION(BlueprintCallable, Category = "Als Character", Meta = (AutoCreateRefTerm = "NewDesiredRotationMode"))
 	void SetDesiredRotationMode(const FGameplayTag& NewDesiredRotationMode);
@@ -219,7 +250,7 @@ public:
 
 public:
 	UFUNCTION(BlueprintPure, Category = "Als Character")
-	FGameplayTag GetRotationMode() const;
+	const FGameplayTag& GetRotationMode() const;
 
 protected:
 	void SetRotationMode(const FGameplayTag& NewRotationMode);
@@ -233,7 +264,7 @@ protected:
 
 public:
 	UFUNCTION(BlueprintPure, Category = "Als Character")
-	FGameplayTag GetDesiredStance() const;
+	const FGameplayTag& GetDesiredStance() const;
 
 	UFUNCTION(BlueprintCallable, Category = "Als Character", Meta = (AutoCreateRefTerm = "NewDesiredStance"))
 	void SetDesiredStance(const FGameplayTag& NewDesiredStance);
@@ -252,7 +283,7 @@ public:
 
 public:
 	UFUNCTION(BlueprintPure, Category = "Als Character")
-	FGameplayTag GetStance() const;
+	const FGameplayTag& GetStance() const;
 
 protected:
 	void SetStance(const FGameplayTag& NewStance);
@@ -264,7 +295,7 @@ protected:
 
 public:
 	UFUNCTION(BlueprintPure, Category = "Als Character")
-	FGameplayTag GetDesiredGait() const;
+	const FGameplayTag& GetDesiredGait() const;
 
 	UFUNCTION(BlueprintCallable, Category = "Als Character", Meta = (AutoCreateRefTerm = "NewDesiredGait"))
 	void SetDesiredGait(const FGameplayTag& NewDesiredGait);
@@ -273,7 +304,7 @@ public:
 
 public:
 	UFUNCTION(BlueprintPure, Category = "Als Character")
-	FGameplayTag GetGait() const;
+	const FGameplayTag& GetGait() const;
 
 protected:
 	void SetGait(const FGameplayTag& NewGait);
@@ -490,6 +521,56 @@ private:
 
 	void DisplayDebugPA(const UCanvas* Canvas, float Scale, float HorizontalLocation, float& VerticalLocation) const;
 };
+
+inline const FGameplayTag& AAlsCharacter::GetDesiredViewMode() const
+{
+	return DesiredViewMode;
+}
+
+inline const FGameplayTag& AAlsCharacter::GetDesiredRotationMode() const
+{
+	return DesiredRotationMode;
+}
+
+inline const FGameplayTag& AAlsCharacter::GetDesiredStance() const
+{
+	return DesiredStance;
+}
+
+inline const FGameplayTag& AAlsCharacter::GetDesiredGait() const
+{
+	return DesiredGait;
+}
+
+inline const FGameplayTag& AAlsCharacter::GetLocomotionMode() const
+{
+	return LocomotionMode;
+}
+
+inline const FGameplayTag& AAlsCharacter::GetViewMode() const
+{
+	return ViewMode;
+}
+
+inline const FGameplayTag& AAlsCharacter::GetRotationMode() const
+{
+	return RotationMode;
+}
+
+inline const FGameplayTag& AAlsCharacter::GetAimingMode() const
+{
+	return AimingMode;
+}
+
+inline const FGameplayTag& AAlsCharacter::GetStance() const
+{
+	return Stance;
+}
+
+inline const FGameplayTag& AAlsCharacter::GetGait() const
+{
+	return Gait;
+}
 
 inline const FVector& AAlsCharacter::GetInputDirection() const
 {
