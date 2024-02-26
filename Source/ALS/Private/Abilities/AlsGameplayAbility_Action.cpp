@@ -13,10 +13,10 @@ void UAlsGameplayAbility_Action::EndAbility(const FGameplayAbilitySpecHandle Han
 	Super::EndAbility(Handle, ActorInfo, ActivationInfo, bReplicateEndAbility, bWasCancelled);
 	if (Character)
 	{
-		auto LocomotionMode{Character->GetLocomotionMode()};
+		auto& LocomotionMode{Character->GetLocomotionMode()};
 		if (LocomotionMode == AlsLocomotionModeTags::Grounded)
 		{
-			auto DesiredStance{Character->GetDesiredStance()};
+			auto& DesiredStance{Character->GetDesiredStance()};
 			if (DesiredStance == AlsDesiredStanceTags::Standing)
 			{
 				Character->UnCrouch();

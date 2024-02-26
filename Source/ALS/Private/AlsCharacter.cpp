@@ -55,7 +55,7 @@ AAlsCharacter::AAlsCharacter(const FObjectInitializer& ObjectInitializer) : Supe
 
 	PhysicalAnimation = CreateDefaultSubobject<UAlsPhysicalAnimationComponent>(PhysicalAnimationComponentName);
 
-	AbilitySystem = CreateDefaultSubobject<UAlsAbilitySystemComponent>(AbilitySystemComponentName);
+	AbilitySystem = CreateOptionalDefaultSubobject<UAlsAbilitySystemComponent>(AbilitySystemComponentName);
 	AbilitySystem->SetIsReplicated(true);
 	AbilitySystem->SetReplicationMode(EGameplayEffectReplicationMode::Minimal);
 
@@ -142,6 +142,7 @@ void AAlsCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLif
 	DOREPLIFETIME_WITH_PARAMS_FAST(ThisClass, DesiredViewMode, Parameters)
 	DOREPLIFETIME_WITH_PARAMS_FAST(ThisClass, AimingMode, Parameters)
 
+	DOREPLIFETIME_WITH_PARAMS_FAST(ThisClass, bRightShoulder, Parameters)
 	DOREPLIFETIME_WITH_PARAMS_FAST(ThisClass, ReplicatedViewRotation, Parameters)
 	DOREPLIFETIME_WITH_PARAMS_FAST(ThisClass, InputDirection, Parameters)
 	DOREPLIFETIME_WITH_PARAMS_FAST(ThisClass, DesiredVelocityYawAngle, Parameters)
@@ -548,6 +549,7 @@ void AAlsCharacter::OnMovementModeChanged(const EMovementMode PreviousMovementMo
 		case MOVE_Walking:
 		case MOVE_NavWalking:
 			SetLocomotionMode(AlsLocomotionModeTags::Grounded);
+			ApplyDesiredStance();
 			break;
 
 		case MOVE_Falling:
@@ -560,7 +562,7 @@ void AAlsCharacter::OnMovementModeChanged(const EMovementMode PreviousMovementMo
 
 void AAlsCharacter::SetLocomotionMode(const FGameplayTag& NewLocomotionMode)
 {	
-	const auto PreviousLocomotionMode{GetLocomotionMode()};
+	const auto& PreviousLocomotionMode{GetLocomotionMode()};
 
 	if (PreviousLocomotionMode == NewLocomotionMode)
 	{
@@ -610,7 +612,7 @@ void AAlsCharacter::OnLocomotionModeChanged_Implementation(const FGameplayTag& P
 
 void AAlsCharacter::SetAimingMode(const FGameplayTag& NewAimingMode)
 {
-	const auto PreviousAimingMode{GetAimingMode()};
+	const auto& PreviousAimingMode{GetAimingMode()};
 
 	if (PreviousAimingMode == NewAimingMode || GetLocalRole() < ROLE_AutonomousProxy)
 	{
@@ -650,7 +652,7 @@ void AAlsCharacter::SetDesiredRotationMode(const FGameplayTag& NewDesiredRotatio
 
 void AAlsCharacter::SetRotationMode(const FGameplayTag& NewRotationMode)
 {
-	const auto PreviousRotationMode{GetRotationMode()};
+	const auto& PreviousRotationMode{GetRotationMode()};
 
 	AlsCharacterMovement->SetRotationMode(NewRotationMode);
 

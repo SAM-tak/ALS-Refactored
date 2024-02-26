@@ -30,5 +30,5 @@ void UAlsCameraAnimationInstance::NativeUpdateAnimation(const float DeltaTime)
 	Gait = Character->GetGait();
 	LocomotionAction = Character->GetLocomotionAction();
 
-	bRightShoulder = CameraMovement->IsRightShoulder();
+	bRightShoulder = Character->IsRightShoulder();
 }

@@ -214,7 +214,7 @@ void AAlsCharacterExample::Input_OnViewMode()
 // ReSharper disable once CppMemberFunctionMayBeConst
 void AAlsCharacterExample::Input_OnSwitchShoulder()
 {
-	CameraMovement->SetRightShoulder(!CameraMovement->IsRightShoulder());
+	ToggleRightShoulder();
 }
 
 void AAlsCharacterExample::DisplayDebug(UCanvas* Canvas, const FDebugDisplayInfo& DisplayInfo, float& Unused, float& VerticalLocation)

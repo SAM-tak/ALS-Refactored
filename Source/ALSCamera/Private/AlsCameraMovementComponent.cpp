@@ -90,7 +90,7 @@ void UAlsCameraMovementComponent::BeginPlay()
 		bFPP = FAnimWeight::IsFullWeight(UAlsMath::Clamp01(GetAnimInstance()->GetCurveValue(UAlsCameraConstants::FirstPersonOverrideCurveName())));
 	}
 	bPreviousRightShoulder = Settings->ThirdPerson.bRightShoulder;
-	SetRightShoulder(Settings->ThirdPerson.bRightShoulder);
+	Character->SetRightShoulder(Settings->ThirdPerson.bRightShoulder);
 	PreviousViewMode = Character->GetViewMode();
 
 	Super::BeginPlay();
@@ -185,7 +185,7 @@ FVector UAlsCameraMovementComponent::GetThirdPersonPivotLocation() const
 
 FVector UAlsCameraMovementComponent::GetThirdPersonTraceStartLocation() const
 {
-	return Character->GetMesh()->GetSocketLocation(IsRightShoulder()
+	return Character->GetMesh()->GetSocketLocation(Character->IsRightShoulder()
 		                                           ? Settings->ThirdPerson.TraceShoulderRightSocketName
 		                                           : Settings->ThirdPerson.TraceShoulderLeftSocketName);
 }
@@ -425,7 +425,7 @@ void UAlsCameraMovementComponent::TickCamera(const float DeltaTime, bool bAllowL
 		PreviousViewMode = Character->GetViewMode();
 	}
 
-	bool bRightShoulder{IsRightShoulder()};
+	bool bRightShoulder{Character->IsRightShoulder()};
 	if (bPreviousRightShoulder != bRightShoulder)
 	{
 		if (Character->GetViewMode() == AlsViewModeTags::ThirdPerson && Character->GetRotationMode() != AlsRotationModeTags::VelocityDirection &&
@@ -918,29 +918,6 @@ void UAlsCameraMovementComponent::UpdateADSCameraShake(float FirstPersonOverride
 		{
 			CameraManager->StopCameraShake(CurrentADSCameraShake);
 			CurrentADSCameraShake = nullptr;
-		}
-	}
-}
-
-bool UAlsCameraMovementComponent::IsRightShoulder() const
-{
-	return !Character->HasMatchingGameplayTag(AlsCameraTags::LeftShoulder);
-}
-
-void UAlsCameraMovementComponent::SetRightShoulder(const bool bNewRightShoulder)
-{
-	if(Character->HasMatchingGameplayTag(AlsCameraTags::LeftShoulder))
-	{
-		if (bNewRightShoulder)
-		{
-			Character->GetAbilitySystemComponent()->SetLooseGameplayTagCount(AlsCameraTags::LeftShoulder, 0);
-		}
-	}
-	else
-	{
-		if (!bNewRightShoulder)
-		{
-			Character->GetAbilitySystemComponent()->SetLooseGameplayTagCount(AlsCameraTags::LeftShoulder, 1);
 		}
 	}
 }

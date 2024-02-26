@@ -33,12 +33,3 @@ void UAlsGameplayAbility_Overlay::ActivateAbility(const FGameplayAbilitySpecHand
 
 	Character->OnOverlayModeChanged(PreviousOverlayMode);
 }
-
-void UAlsGameplayAbility_Overlay::EndAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo,
-											 const FGameplayAbilityActivationInfo ActivationInfo, bool bReplicateEndAbility, bool bWasCancelled)
-{
-	Super::EndAbility(Handle, ActorInfo, ActivationInfo, bReplicateEndAbility, bWasCancelled);
-	//if (!bWasCancelled || )
-	//{
-	//}
-}

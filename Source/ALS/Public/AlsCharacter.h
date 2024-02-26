@@ -36,6 +36,7 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Als Character")
 	TObjectPtr<UAlsPhysicalAnimationComponent> PhysicalAnimation;
 
+	// Optional
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Als Character")
 	TObjectPtr<UAlsAbilitySystemComponent> AbilitySystem;
 
@@ -47,6 +48,9 @@ protected:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Settings|Als Character")
 	TObjectPtr<UAlsAbilitySet> AbilitySet;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Camera|Als Character", Replicated)
+	uint32 bRightShoulder : 1{true};
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings|Als Character|Desired State", Replicated)
 	FGameplayTag DesiredRotationMode{AlsDesiredRotationModeTags::ViewDirection};
@@ -184,6 +188,15 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = "Als Character", Meta = (AutoCreateRefTerm = "NewDesiredViewMode"))
 	void SetDesiredViewMode(const FGameplayTag& NewDesiredViewMode);
+
+	UFUNCTION(BlueprintPure, Category = "Camera|Als Character")
+	bool IsRightShoulder() const;
+
+	UFUNCTION(BlueprintCallable, Category = "Camera|Als Character")
+	void SetRightShoulder(bool bNewRightShoulder);
+
+	UFUNCTION(BlueprintPure, Category = "Camera|Als Character")
+	bool ToggleRightShoulder();
 
 	// View Mode
 
@@ -585,4 +598,20 @@ inline const FAlsViewState& AAlsCharacter::GetViewState() const
 inline const FAlsLocomotionState& AAlsCharacter::GetLocomotionState() const
 {
 	return LocomotionState;
+}
+
+inline bool AAlsCharacter::IsRightShoulder() const
+{
+	return bRightShoulder;
+}
+
+inline void AAlsCharacter::SetRightShoulder(const bool bNewRightShoulder)
+{
+	bRightShoulder = bNewRightShoulder;
+}
+
+inline bool AAlsCharacter::ToggleRightShoulder()
+{
+	bRightShoulder = bRightShoulder ? false : true;
+	return bRightShoulder;
 }
