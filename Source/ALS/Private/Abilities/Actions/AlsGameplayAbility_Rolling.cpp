@@ -77,6 +77,11 @@ void UAlsGameplayAbility_Rolling::ActivateAbility(const FGameplayAbilitySpecHand
 		{
 			PhysicsRotationHandle = Character->GetAlsCharacterMovement()->OnPhysicsRotation.AddUObject(this, &ThisClass::RefreshRolling);
 		}
+
+		if (bCrouchOnStart)
+		{
+			Character->Crouch();
+		}
 	}
 }
 
@@ -103,11 +108,6 @@ void UAlsGameplayAbility_Rolling::Tick_Implementation(const float DeltaTime)
 		// won't be called on simulated proxies or with ignored root motion.
 
 		RefreshRolling(DeltaTime);
-	}
-
-	if (bCrouchOnStart)
-	{
-		Character->Crouch();
 	}
 
 	if (bCancelRollingWhenInAir)

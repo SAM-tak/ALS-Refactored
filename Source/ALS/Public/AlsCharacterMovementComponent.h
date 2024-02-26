@@ -221,7 +221,7 @@ public:
 	virtual void Lie(bool bClientSimulation = false);
 	virtual void UnLie(bool bClientSimulation = false);
 
-	inline TObjectPtr<class AAlsCharacter> GetAlsCharacter();
+	TObjectPtr<class AAlsCharacter> GetAlsCharacter() const;
 
 	virtual void UpdateCapsuleSize(float DeltaTime, float TargetHalfHeight, float HeightSpeed, float TargetRadius, float RadiusSpeed);
 };

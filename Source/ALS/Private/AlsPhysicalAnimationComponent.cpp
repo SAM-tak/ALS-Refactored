@@ -656,7 +656,12 @@ float UAlsPhysicalAnimationComponent::GetLockedValue(const FAlsPhysicalAnimation
 	return 0.0f;
 }
 
-bool UAlsPhysicalAnimationComponent::IsRagdollingGroundedAndAged()
+bool UAlsPhysicalAnimationComponent::IsRagdolling() const
 {
-	return LatestRagdolling.IsValid() && LatestRagdolling->IsActive() && LatestRagdolling->IsGroundedAndAged();
+	return LatestRagdolling.IsValid() && LatestRagdolling->IsActive();
+}
+
+bool UAlsPhysicalAnimationComponent::IsRagdollingGroundedAndAged() const
+{
+	return IsRagdolling() && LatestRagdolling->IsGroundedAndAged();
 }

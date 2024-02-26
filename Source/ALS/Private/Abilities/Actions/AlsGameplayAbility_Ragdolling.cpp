@@ -114,7 +114,7 @@ void UAlsGameplayAbility_Ragdolling::ActivateAbility(const FGameplayAbilitySpecH
 
 	ElapsedTime = 0.0f;
 	TimeAfterGrounded = TimeAfterGroundedAndStopped = 0.0f;
-	bFacingUpward = bGrounded = false;
+	bFacingUpward = bGrounded = bPreviousGrounded = false;
 	bFreezing = false;
 	PrevActorLocation = Character->GetActorLocation();
 
@@ -247,6 +247,19 @@ void UAlsGameplayAbility_Ragdolling::Tick_Implementation(const float DeltaTime)
 		// Re-initialize bFacingUpward flag by current movement direction. If Velocity is Zero, it is chosen bFacingUpward is true.
 		bFacingUpward = Character->GetActorForwardVector().Dot(CharacterMovement->Velocity.GetSafeNormal2D()) <= 0.0f;
 	}
+
+	if (bPreviousGrounded != bGrounded)
+	{
+		if (bGrounded)
+		{
+			Character->Crouch();
+		}
+		else
+		{
+			Character->UnCrouch();
+		}
+	}
+	bPreviousGrounded = bGrounded;
 
 	ElapsedTime += DeltaTime;
 

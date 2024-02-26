@@ -1,6 +1,7 @@
 #include "AlsCharacterMovementComponent.h"
 
 #include "AlsCharacter.h"
+#include "AlsPhysicalAnimationComponent.h"
 #include "Components/CapsuleComponent.h"
 #include "Components/SkeletalMeshComponent.h"
 #include "Curves/CurveVector.h"
@@ -205,6 +206,25 @@ void UAlsCharacterMovementComponent::TickComponent(float DeltaTime, ELevelTick T
 			(PreviousControlRotation.Yaw + ClampedYaw),
 			CurrentControlRotation.Roll}.Clamp());
 	}
+
+	auto AlsCharacter{GetAlsCharacter()};
+	if (AlsCharacter->GetPhysicalAnimation()->IsRagdolling() && (MovementMode == EMovementMode::MOVE_Custom || MovementMode == EMovementMode::MOVE_None))
+	{
+		// Proxies get replicated crouch state.
+		if (CharacterOwner->GetLocalRole() != ROLE_SimulatedProxy)
+		{
+			// Check for a change in crouch state. Players toggle crouch by changing bWantsToCrouch.
+			if (CharacterOwner->bIsCrouched && !bWantsToCrouch)
+			{
+				CharacterOwner->bIsCrouched = false;
+			}
+			else if (!CharacterOwner->bIsCrouched && bWantsToCrouch)
+			{
+				CharacterOwner->bIsCrouched = true;
+			}
+		}
+	}
+
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 }
 
@@ -1156,7 +1176,7 @@ void UAlsCharacterMovementComponent::UnCrouch(bool bClientSimulation)
 						if (!bEncroached)
 						{
 							// Intentionally not using MoveUpdatedComponent, where a horizontal plane constraint would prevent the base of the capsule from staying at the same spot.
-							UpdatedComponent->MoveComponent(NewLoc - PawnLocation, UpdatedComponent->GetComponentQuat(), false, nullptr, EMoveComponentFlags::MOVECOMP_NoFlags, ETeleportType::TeleportPhysics);
+							//UpdatedComponent->MoveComponent(NewLoc - PawnLocation, UpdatedComponent->GetComponentQuat(), false, nullptr, EMoveComponentFlags::MOVECOMP_NoFlags, ETeleportType::TeleportPhysics);
 						}
 					}
 				}
@@ -1185,7 +1205,7 @@ void UAlsCharacterMovementComponent::UnCrouch(bool bClientSimulation)
 			if (!bEncroached)
 			{
 				// Commit the change in location.
-				UpdatedComponent->MoveComponent(StandingLocation - PawnLocation, UpdatedComponent->GetComponentQuat(), false, nullptr, EMoveComponentFlags::MOVECOMP_NoFlags, ETeleportType::TeleportPhysics);
+				//UpdatedComponent->MoveComponent(StandingLocation - PawnLocation, UpdatedComponent->GetComponentQuat(), false, nullptr, EMoveComponentFlags::MOVECOMP_NoFlags, ETeleportType::TeleportPhysics);
 				bForceNextFloorCheck = true;
 			}
 		}
@@ -1425,7 +1445,7 @@ void UAlsCharacterMovementComponent::UnLie(bool bClientSimulation)
 	}
 }
 
-TObjectPtr<AAlsCharacter> UAlsCharacterMovementComponent::GetAlsCharacter()
+TObjectPtr<AAlsCharacter> UAlsCharacterMovementComponent::GetAlsCharacter() const
 {
 	return Cast<AAlsCharacter>(CharacterOwner);
 }

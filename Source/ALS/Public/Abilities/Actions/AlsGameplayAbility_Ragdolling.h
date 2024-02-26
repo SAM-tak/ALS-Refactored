@@ -107,6 +107,9 @@ protected:
 	uint8 bCancelRequested : 1{false};
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "ALS|Ability|State", Transient)
+	uint8 bPreviousGrounded : 1{false};
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "ALS|Ability|State", Transient)
 	TWeakObjectPtr<UAlsRagdollingAnimInstance> LayerAnimInstance;
 
 public:

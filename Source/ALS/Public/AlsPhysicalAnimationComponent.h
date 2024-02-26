@@ -94,7 +94,9 @@ public:
 
 	virtual void DisplayDebug(UCanvas* Canvas, const FDebugDisplayInfo& DisplayInfo, float& Unused, float& VerticalLocation);
 
-	bool IsRagdollingGroundedAndAged();
+	bool IsRagdolling() const;
+
+	bool IsRagdollingGroundedAndAged() const;
 
 private:
 	void ClearGameplayTags();

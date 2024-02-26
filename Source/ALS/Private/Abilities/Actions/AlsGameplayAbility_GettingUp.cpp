@@ -41,11 +41,6 @@ void UAlsGameplayAbility_GettingUp::ActivateAbility(const FGameplayAbilitySpecHa
 	}
 
 	auto* Character{GetAlsCharacterFromActorInfo()};
-	
-	if (Character->GetLocalRole() < ROLE_Authority)
-	{
-		Character->GetAlsCharacterMovement()->SetInputBlocked(true);
-	}
 
 	const auto& Parameter{Character->HasMatchingGameplayTag(AlsStateFlagTags::FacingUpward) ? GetUpBackMontage : GetUpFrontMontage};
 
@@ -57,6 +52,15 @@ void UAlsGameplayAbility_GettingUp::ActivateAbility(const FGameplayAbilitySpecHa
 	}
 
 	Super::ActivateAbility(Handle, ActorInfo, ActivationInfo, TriggerEventData);
+
+	if (IsActive())
+	{	
+		if (Character->GetLocalRole() < ROLE_Authority)
+		{
+			Character->GetAlsCharacterMovement()->SetInputBlocked(true);
+		}
+		Character->Crouch();
+	}
 }
 
 void UAlsGameplayAbility_GettingUp::EndAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo,
