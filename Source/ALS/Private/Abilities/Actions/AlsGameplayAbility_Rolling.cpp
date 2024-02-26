@@ -83,10 +83,9 @@ void UAlsGameplayAbility_Rolling::ActivateAbility(const FGameplayAbilitySpecHand
 void UAlsGameplayAbility_Rolling::EndAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo,
 											 const FGameplayAbilityActivationInfo ActivationInfo, bool bReplicateEndAbility, bool bWasCancelled)
 {
-	auto* Character{GetAlsCharacterFromActorInfo()};
-
 	if (PhysicsRotationHandle.IsValid())
 	{
+		auto* Character{GetAlsCharacterFromActorInfo()};
 		Character->GetAlsCharacterMovement()->OnPhysicsRotation.Remove(PhysicsRotationHandle);
 		PhysicsRotationHandle.Reset();
 	}
