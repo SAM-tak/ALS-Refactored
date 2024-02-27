@@ -276,8 +276,6 @@ void UAlsGameplayAbility_Ragdolling::Tick(const float DeltaTime)
 void UAlsGameplayAbility_Ragdolling::EndAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo,
 												const FGameplayAbilityActivationInfo ActivationInfo, bool bReplicateEndAbility, bool bWasCancelled)
 {
-	Super::EndAbility(Handle, ActorInfo, ActivationInfo, bReplicateEndAbility, bWasCancelled);
-
 	auto* Character{GetAlsCharacterFromActorInfo()};
 	auto CharacterMovement{Character->GetAlsCharacterMovement()};
 
@@ -342,7 +340,14 @@ void UAlsGameplayAbility_Ragdolling::EndAbility(const FGameplayAbilitySpecHandle
 	{
 		auto* AbilitySystem{GetAlsAbilitySystemComponentFromActorInfo()};
 		AbilitySystem->SetLooseGameplayTagCount(AlsStateFlagTags::FacingUpward, bFacingUpward ? 1 : 0);
-		AbilitySystem->TryActivateAbilitiesBySingleTag(AlsLocomotionActionTags::GettingUp);
+	}
+
+	Super::EndAbility(Handle, ActorInfo, ActivationInfo, bReplicateEndAbility, bWasCancelled);
+
+	if (AbilityWhenCancelled.IsValid())
+	{
+		auto* AbilitySystem{GetAlsAbilitySystemComponentFromActorInfo()};
+		AbilitySystem->TryActivateAbilitiesBySingleTag(AbilityWhenCancelled);
 	}
 
 	Character->OnRagdollingEnded();
