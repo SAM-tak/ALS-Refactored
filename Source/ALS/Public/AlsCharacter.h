@@ -204,7 +204,8 @@ public:
 	UFUNCTION(BlueprintPure, Category = "Als Character")
 	const FGameplayTag& GetViewMode() const;
 
-	UFUNCTION(BlueprintCallable, Category = "Als Character", Meta = (AutoCreateRefTerm = "NewViewMode")) // TODO : ???
+protected:
+	UFUNCTION(BlueprintCallable, Category = "Als Character")
 	void SetViewMode(const FGameplayTag& NewViewMode);
 
 	UFUNCTION(BlueprintNativeEvent, Category = "Als Character")
@@ -486,6 +487,12 @@ public:
 
 	UFUNCTION(BlueprintNativeEvent, Category = "Als Character")
 	void OnRagdollingEnded();
+
+	// Utility
+
+public:
+	UFUNCTION(BlueprintPure, Category = "Als Character")
+	const FGameplayTag& DesiredToActual(const FGameplayTag& SourceTag) const;
 
 	// Others
 

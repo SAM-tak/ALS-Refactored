@@ -2,7 +2,7 @@
 
 #include "AlsInAirRotationMode.h"
 #include "AlsViewSettings.h"
-#include "AlsGameplayTagSettings.h"
+#include "Utility/AlsGameplayTags.h"
 #include "AlsCharacterSettings.generated.h"
 
 UCLASS(Blueprintable, BlueprintType)
@@ -46,10 +46,24 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings")
 	FAlsViewSettings View;
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings")
-	FAlsGameplayTagSettings GameplayTagCaterogy;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Settings|GameplayTag")
+	FGameplayTagContainer OverlayModeTags{AlsOverlayModeTags::Root};
 
-public:
-	UFUNCTION(BlueprintPure, Category = "Als Character")
-	const FGameplayTag& DesiredToActual(const FGameplayTag& SourceTag) const;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Settings|GameplayTag")
+	FGameplayTagContainer ActionTags{AlsLocomotionActionTags::Root};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Settings|GameplayTag")
+	TMap<FGameplayTag, FGameplayTag> DesiredToActualMap{
+		{AlsDesiredViewModeTags::FirstPerson, AlsViewModeTags::FirstPerson},
+		{AlsDesiredViewModeTags::ThirdPerson, AlsViewModeTags::ThirdPerson},
+		{AlsDesiredRotationModeTags::VelocityDirection, AlsRotationModeTags::VelocityDirection},
+		{AlsDesiredRotationModeTags::ViewDirection, AlsRotationModeTags::ViewDirection},
+		{AlsDesiredRotationModeTags::Aiming, AlsRotationModeTags::Aiming},
+		{AlsDesiredStanceTags::Standing, AlsStanceTags::Standing},
+		{AlsDesiredStanceTags::Crouching, AlsStanceTags::Crouching},
+		{AlsDesiredStanceTags::Lying, AlsStanceTags::Lying},
+		{AlsDesiredGaitTags::Walking, AlsGaitTags::Walking},
+		{AlsDesiredGaitTags::Running, AlsGaitTags::Running},
+		{AlsDesiredGaitTags::Sprinting, AlsGaitTags::Sprinting},
+	};
 };

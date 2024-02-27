@@ -332,8 +332,12 @@ void UAlsGameplayAbility_Mantling::ActivateAbility(const FGameplayAbilitySpecHan
 		return;
 	}
 
-	Parameters = ParameterMap[Handle];
-	ParameterMap.Remove(Handle);
+	const auto& Parameters = ParameterMap[Handle];
+
+	ON_SCOPE_EXIT
+	{
+		ParameterMap.Remove(Handle);
+	};
 
 	auto* Character{GetAlsCharacterFromActorInfo()};
 	auto* AnimInstance{Character->GetAlsAnimationInstace()};
