@@ -36,11 +36,12 @@ void UAlsRagdollingAnimInstance::UnFreeze()
 	}
 }
 
-void UAlsRagdollingAnimInstance::Refresh(const UAlsGameplayAbility_Ragdolling& Ability)
+void UAlsRagdollingAnimInstance::Refresh(const UAlsGameplayAbility_Ragdolling& Ability, bool IsActive)
 {
 	check(IsInGameThread())
 
-	bActive = Ability.IsActive();
+	//bActive = Ability.IsActive() && !Ability.bIsAbilityEnding; // this is not work. bIsAbilityEnding can be true in Super::EndAbility.
+	bActive = IsActive;
 	StartBlendTime = Ability.StartBlendTime;
 	bGroundedAndAged = Ability.IsGroundedAndAged();
 	bFacingUpward = Ability.bFacingUpward;

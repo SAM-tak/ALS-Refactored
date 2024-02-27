@@ -114,7 +114,8 @@ void UAlsGameplayAbility_Ragdolling::ActivateAbility(const FGameplayAbilitySpecH
 
 	ElapsedTime = 0.0f;
 	TimeAfterGrounded = TimeAfterGroundedAndStopped = 0.0f;
-	bFacingUpward = bGrounded = bPreviousGrounded = false;
+	bFacingUpward = bGrounded = false;
+	bPreviousGrounded = true;
 	bFreezing = false;
 	PrevActorLocation = Character->GetActorLocation();
 
@@ -125,7 +126,7 @@ void UAlsGameplayAbility_Ragdolling::ActivateAbility(const FGameplayAbilitySpecH
 		TickTask = UAlsAbilityTask_Tick::New(this, FName(TEXT("UAlsGameplayAbility_Ragdolling")));
 		if (TickTask.IsValid())
 		{
-			TickTask->OnTick.AddDynamic(this, &ThisClass::ProcessTick);
+			TickTask->OnTick.AddDynamic(this, &ThisClass::Tick);
 			TickTask->ReadyForActivation();
 		}
 
@@ -133,7 +134,7 @@ void UAlsGameplayAbility_Ragdolling::ActivateAbility(const FGameplayAbilitySpecH
 	}
 }
 
-void UAlsGameplayAbility_Ragdolling::Tick_Implementation(const float DeltaTime)
+void UAlsGameplayAbility_Ragdolling::Tick(const float DeltaTime)
 {
 	if (!IsActive() || bFreezing)
 	{
@@ -186,7 +187,7 @@ void UAlsGameplayAbility_Ragdolling::Tick_Implementation(const float DeltaTime)
 		}
 	}
 
-	LayerAnimInstance->Refresh(*this);
+	LayerAnimInstance->Refresh(*this, IsActive());
 
 	if (bAllowFreeze)
 	{
@@ -261,12 +262,14 @@ void UAlsGameplayAbility_Ragdolling::Tick_Implementation(const float DeltaTime)
 	}
 	bPreviousGrounded = bGrounded;
 
+	K2_OnTick(DeltaTime);
+
 	ElapsedTime += DeltaTime;
 
 	if (IsGroundedAndAged() && !bOnGroundedAndAgedFired)
 	{
 		bOnGroundedAndAgedFired = true;
-		K2_OnGroundedAndAged();
+		K2_OnGroundedAndAgedAtFirstTime();
 	}
 }
 
@@ -281,7 +284,7 @@ void UAlsGameplayAbility_Ragdolling::EndAbility(const FGameplayAbilitySpecHandle
 	if (LayerAnimInstance.IsValid())
 	{
 		LayerAnimInstance->Freeze();
-		LayerAnimInstance->Refresh(*this);
+		LayerAnimInstance->Refresh(*this, false);
 	}
 
 	// Re-enable capsule collision.
@@ -390,11 +393,6 @@ FVector UAlsGameplayAbility_Ragdolling::TraceGround()
 bool UAlsGameplayAbility_Ragdolling::IsGroundedAndAged() const
 {
 	return bGrounded && ElapsedTime > StartBlendTime;
-}
-
-void UAlsGameplayAbility_Ragdolling::ProcessTick(const float DeltaTime)
-{
-	Tick(DeltaTime);
 }
 
 void UAlsGameplayAbility_Ragdolling::RequestCancel()

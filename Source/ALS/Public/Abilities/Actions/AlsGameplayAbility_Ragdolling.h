@@ -132,18 +132,19 @@ public:
 #endif
 
 protected:
-	UFUNCTION(BlueprintNativeEvent, Category = "Als|Ability|Ragdolling")
+	UFUNCTION()
 	void Tick(const float DeltaTime);
 
-	UFUNCTION(BlueprintImplementableEvent, Category = "ALS|Ability|Ragdolling", DisplayName = "On Grounded And Aged", meta = (ScriptName = "OnGroundedAndAged"))
-	void K2_OnGroundedAndAged();
+	UFUNCTION(BlueprintImplementableEvent, Category = "Als|Ability|Ragdolling", DisplayName = "Tick", Meta = (ScriptName = "Tick"))
+	void K2_OnTick(const float DeltaTime);
+
+	UFUNCTION(BlueprintImplementableEvent, Category = "ALS|Ability|Ragdolling", DisplayName = "On Grounded And Aged At First Time",
+			  Meta = (ScriptName = "OnGroundedAndAgedAtFirstTime"))
+	void K2_OnGroundedAndAgedAtFirstTime();
 
 	void Cancel();
 
 	TWeakObjectPtr<class UAlsAbilityTask_Tick> TickTask;
-
-	UFUNCTION()
-	void ProcessTick(const float DeltaTime);
 
 	void SetTargetLocation(const FVector& NewTargetLocation);
 

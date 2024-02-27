@@ -5,6 +5,7 @@
 
 #include "AlsCharacter.h"
 #include "AlsAnimationInstance.h"
+#include "AlsAbilitySystemComponent.h"
 #include "State/AlsPhysicalAnimationCurveState.h"
 #include "Abilities/Actions/AlsGameplayAbility_Ragdolling.h"
 #include "Components/SkeletalMeshComponent.h"
@@ -12,7 +13,6 @@
 #include "PhysicsEngine/PhysicsAsset.h"
 #include "Curves/CurveFloat.h"
 #include "Engine/Canvas.h"
-#include "AbilitySystemComponent.h"
 #include "Utility/AlsGameplayTags.h"
 #include "Utility/AlsConstants.h"
 #include "Utility/AlsMacros.h"
@@ -445,6 +445,11 @@ void UAlsPhysicalAnimationComponent::OnAbilityActivated(class UGameplayAbility* 
 
 void UAlsPhysicalAnimationComponent::Refresh(const AAlsCharacter* Character)
 {
+	while (!ActivationRequest.IsEmpty())
+	{
+		Character->GetAlsAbilitySystem()->TryActivateAbilitiesBySingleTag(ActivationRequest.Pop());
+	}
+
 	if (LatestRagdolling.IsValid() && LatestRagdolling->bCancelRequested)
 	{
 		LatestRagdolling->Cancel();
@@ -664,4 +669,9 @@ bool UAlsPhysicalAnimationComponent::IsRagdolling() const
 bool UAlsPhysicalAnimationComponent::IsRagdollingGroundedAndAged() const
 {
 	return IsRagdolling() && LatestRagdolling->IsGroundedAndAged();
+}
+
+void UAlsPhysicalAnimationComponent::RequestActivation(const FGameplayTag& AbilityTag)
+{
+	ActivationRequest.Push(AbilityTag);
 }

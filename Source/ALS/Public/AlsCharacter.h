@@ -538,8 +538,6 @@ private:
 	void DisplayDebugTraces(const UCanvas* Canvas, float Scale, float HorizontalLocation, float& VerticalLocation) const;
 
 	void DisplayDebugMantling(const UCanvas* Canvas, float Scale, float HorizontalLocation, float& VerticalLocation) const;
-
-	void DisplayDebugPA(const UCanvas* Canvas, float Scale, float HorizontalLocation, float& VerticalLocation) const;
 };
 
 inline const FGameplayTag& AAlsCharacter::GetDesiredViewMode() const

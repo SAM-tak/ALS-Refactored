@@ -64,7 +64,7 @@ void UAlsGameplayAbility_Rolling::ActivateAbility(const FGameplayAbilitySpecHand
 		TickTask = UAlsAbilityTask_Tick::New(this, FName(TEXT("UAlsGameplayAbility_Rolling")));
 		if (TickTask.IsValid())
 		{
-			TickTask->OnTick.AddDynamic(this, &ThisClass::ProcessTick);
+			TickTask->OnTick.AddDynamic(this, &ThisClass::Tick);
 			TickTask->ReadyForActivation();
 		}
 
@@ -134,11 +134,6 @@ void UAlsGameplayAbility_Rolling::Tick_Implementation(const float DeltaTime)
 			InAirTime = 0.0f;
 		}
 	}
-}
-
-void UAlsGameplayAbility_Rolling::ProcessTick(const float DeltaTime)
-{
-	Tick(DeltaTime);
 }
 
 // ReSharper disable once CppMemberFunctionMayBeConst

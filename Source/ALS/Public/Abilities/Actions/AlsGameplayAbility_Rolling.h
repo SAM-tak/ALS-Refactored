@@ -61,8 +61,5 @@ private:
 
 	FDelegateHandle PhysicsRotationHandle;
 
-	UFUNCTION()
-	void ProcessTick(const float DeltaTime);
-
 	void RefreshRolling(const float DeltaTime);
 };

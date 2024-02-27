@@ -85,6 +85,9 @@ protected:
 	UPROPERTY(VisibleAnywhere, Category = "State|PhysicalAnimation", Transient)
 	TWeakObjectPtr<class UAlsGameplayAbility_Ragdolling> LatestRagdolling;
 
+	UPROPERTY(VisibleAnywhere, Category = "State|PhysicalAnimation", Transient)
+	TArray<FGameplayTag> ActivationRequest;
+
 public:
 	virtual void BeginPlay() override;
 
@@ -97,6 +100,9 @@ public:
 	bool IsRagdolling() const;
 
 	bool IsRagdollingGroundedAndAged() const;
+
+	UFUNCTION(BlueprintCallable, Category = "Als|PhysicalAnimation")
+	void RequestActivation(const FGameplayTag &AbilityTag);
 
 private:
 	void ClearGameplayTags();

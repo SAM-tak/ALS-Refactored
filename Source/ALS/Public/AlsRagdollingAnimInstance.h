@@ -37,5 +37,5 @@ public:
 
 	void UnFreeze();
 
-	void Refresh(const class UAlsGameplayAbility_Ragdolling& Ability);
+	void Refresh(const class UAlsGameplayAbility_Ragdolling& Ability, bool IsActive);
 };
