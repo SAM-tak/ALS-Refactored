@@ -344,12 +344,6 @@ void UAlsGameplayAbility_Ragdolling::EndAbility(const FGameplayAbilitySpecHandle
 
 	Super::EndAbility(Handle, ActorInfo, ActivationInfo, bReplicateEndAbility, bWasCancelled);
 
-	if (AbilityWhenCancelled.IsValid())
-	{
-		auto* AbilitySystem{GetAlsAbilitySystemComponentFromActorInfo()};
-		AbilitySystem->TryActivateAbilitiesBySingleTag(AbilityWhenCancelled);
-	}
-
 	Character->OnRagdollingEnded();
 }
 

@@ -445,14 +445,14 @@ void UAlsPhysicalAnimationComponent::OnAbilityActivated(class UGameplayAbility* 
 
 void UAlsPhysicalAnimationComponent::Refresh(const AAlsCharacter* Character)
 {
-	while (!ActivationRequest.IsEmpty())
-	{
-		Character->GetAlsAbilitySystem()->TryActivateAbilitiesBySingleTag(ActivationRequest.Pop());
-	}
-
 	if (LatestRagdolling.IsValid() && LatestRagdolling->bCancelRequested)
 	{
 		LatestRagdolling->Cancel();
+	}
+
+	while (!ActivationRequest.IsEmpty())
+	{
+		Character->GetAlsAbilitySystem()->TryActivateAbilitiesBySingleTag(ActivationRequest.Pop());
 	}
 
 	// Apply special behaviour when changed Ragdolling state

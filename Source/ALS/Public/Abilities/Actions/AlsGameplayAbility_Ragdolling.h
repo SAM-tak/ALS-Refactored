@@ -57,9 +57,6 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS|Ability", Meta = (ClampMin = 0, EditCondition = "bAllowFreeze", ForceUnits = "deg"))
 	float AngularSpeedThresholdToFreeze{45.0f};
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS|Ability")
-	FGameplayTag AbilityWhenCancelled{FGameplayTag::EmptyTag};
-
 protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "ALS|Ability|State", Transient, Meta = (ForceUnits = "deg"))
 	float LyingDownYawAngleDelta{0.0f};
