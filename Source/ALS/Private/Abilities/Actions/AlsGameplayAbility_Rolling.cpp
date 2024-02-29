@@ -3,9 +3,9 @@
 #include "Abilities/Actions/AlsGameplayAbility_Rolling.h"
 #include "Abilities/Tasks/AlsAbilityTask_Tick.h"
 #include "AlsCharacter.h"
+#include "AlsAnimationInstance.h"
 #include "AlsAbilitySystemComponent.h"
 #include "AlsCharacterMovementComponent.h"
-#include "AbilitySystemComponent.h"
 #include "Utility/AlsGameplayTags.h"
 #include "Utility/AlsMath.h"
 
@@ -88,11 +88,21 @@ void UAlsGameplayAbility_Rolling::ActivateAbility(const FGameplayAbilitySpecHand
 void UAlsGameplayAbility_Rolling::EndAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo,
 											 const FGameplayAbilityActivationInfo ActivationInfo, bool bReplicateEndAbility, bool bWasCancelled)
 {
+	auto* Character{GetAlsCharacterFromActorInfo()};
+
 	if (PhysicsRotationHandle.IsValid())
 	{
-		auto* Character{GetAlsCharacterFromActorInfo()};
 		Character->GetAlsCharacterMovement()->OnPhysicsRotation.Remove(PhysicsRotationHandle);
 		PhysicsRotationHandle.Reset();
+	}
+
+	if (Character->GetDesiredStance() == AlsDesiredStanceTags::Crouching)
+	{
+		Character->GetAlsAnimationInstace()->SetGroundedEntryMode(AlsGroundedEntryModeTags::StandingToCrouching, StartPositionOfCrouchingEntry);
+	}
+	else
+	{
+		Character->GetAlsAnimationInstace()->SetGroundedEntryMode(AlsGroundedEntryModeTags::CrouchingToStanding, StartPositionOfStandingEntry);
 	}
 
 	Super::EndAbility(Handle, ActorInfo, ActivationInfo, bReplicateEndAbility, bWasCancelled);

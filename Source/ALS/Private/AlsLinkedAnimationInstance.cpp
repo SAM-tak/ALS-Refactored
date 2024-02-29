@@ -68,6 +68,23 @@ void UAlsLinkedAnimationInstance::RefreshLook()
 	}
 }
 
+FGameplayTag UAlsLinkedAnimationInstance::GetEntryStance() const
+{
+	if (Parent.IsValid())
+	{
+		if (Parent->GroundedEntryMode == AlsGroundedEntryModeTags::StandingToCrouching)
+		{
+			return AlsStanceTags::Standing;
+		}
+		if (Parent->GroundedEntryMode == AlsGroundedEntryModeTags::CrouchingToStanding)
+		{
+			return AlsStanceTags::Crouching;
+		}
+		return Parent->Stance;
+	}
+	return AlsStanceTags::Standing;
+}
+
 void UAlsLinkedAnimationInstance::ResetGroundedEntryMode()
 {
 	if (Parent.IsValid())

@@ -124,5 +124,6 @@ namespace AlsStateFlagTags
 namespace AlsGroundedEntryModeTags
 {
 	UE_DEFINE_GAMEPLAY_TAG(Root, FName{TEXTVIEW("Als.GroundedEntryMode")})
-	UE_DEFINE_GAMEPLAY_TAG(FromRoll, FName{TEXTVIEW("Als.GroundedEntryMode.FromRoll")})
-}
+	UE_DEFINE_GAMEPLAY_TAG(StandingToCrouching, FName{TEXTVIEW("Als.GroundedEntryMode.StandingToCrouching")})
+	UE_DEFINE_GAMEPLAY_TAG(CrouchingToStanding, FName{TEXTVIEW("Als.GroundedEntryMode.CrouchingToStanding")})
+}	 // namespace AlsGroundedEntryModeTags

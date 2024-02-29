@@ -126,5 +126,6 @@ namespace AlsStateFlagTags
 namespace AlsGroundedEntryModeTags
 {
 	ALS_API UE_DECLARE_GAMEPLAY_TAG_EXTERN(Root)
-	ALS_API UE_DECLARE_GAMEPLAY_TAG_EXTERN(FromRoll)
+	ALS_API UE_DECLARE_GAMEPLAY_TAG_EXTERN(CrouchingToStanding)
+	ALS_API UE_DECLARE_GAMEPLAY_TAG_EXTERN(StandingToCrouching)
 }

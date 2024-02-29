@@ -4,7 +4,7 @@
 #include "Abilities/Actions/AlsGameplayAbility_GettingUp.h"
 #include "AlsCharacter.h"
 #include "AlsCharacterMovementComponent.h"
-#include "AbilitySystemComponent.h"
+#include "AlsAbilitySystemComponent.h"
 #include "Utility/AlsGameplayTags.h"
 
 #include UE_INLINE_GENERATED_CPP_BY_NAME(AlsGameplayAbility_GettingUp)
@@ -44,6 +44,8 @@ void UAlsGameplayAbility_GettingUp::ActivateAbility(const FGameplayAbilitySpecHa
 
 	const auto& Parameter{Character->HasMatchingGameplayTag(AlsStateFlagTags::FacingUpward) ? GetUpBackMontage : GetUpFrontMontage};
 
+	Character->GetAlsAbilitySystem()->SetLooseGameplayTagCount(AlsStateFlagTags::FacingUpward, 0);
+
 	PlayMontage(ActivationInfo, Parameter, Handle, ActorInfo);
 
 	if (CurrentMotangeDuration <= 0.0f)
@@ -64,7 +66,7 @@ void UAlsGameplayAbility_GettingUp::ActivateAbility(const FGameplayAbilitySpecHa
 }
 
 void UAlsGameplayAbility_GettingUp::EndAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo,
-											 const FGameplayAbilityActivationInfo ActivationInfo, bool bReplicateEndAbility, bool bWasCancelled)
+											   const FGameplayAbilityActivationInfo ActivationInfo, bool bReplicateEndAbility, bool bWasCancelled)
 {
 	Super::EndAbility(Handle, ActorInfo, ActivationInfo, bReplicateEndAbility, bWasCancelled);
 

@@ -88,8 +88,6 @@ void UAlsAnimationInstance::NativeUpdateAnimation(const float DeltaTime)
 	if (LocomotionAction != Character->GetLocomotionAction())
 	{
 		LocomotionAction = Character->GetLocomotionAction();
-
-		ResetGroundedEntryMode();
 	}
 
 	RefreshMovementBaseOnGameThread();

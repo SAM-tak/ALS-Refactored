@@ -79,6 +79,9 @@ protected:
 	FGameplayTag GroundedEntryMode;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient)
+	float StartPositionOverrideForGroundedEntry;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient)
 	FAlsMovementBaseState MovementBase;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient)
@@ -186,7 +189,7 @@ private:
 	// Grounded
 
 public:
-	void SetGroundedEntryMode(const FGameplayTag& NewGroundedEntryMode);
+	void SetGroundedEntryMode(const FGameplayTag& NewGroundedEntryMode, float STartPosition);
 
 	const FAlsGroundedState& GetGroundedState() const;
 
@@ -346,9 +349,10 @@ inline void UAlsAnimationInstance::MarkTeleported()
 	TeleportedTime = GetWorld()->GetTimeSeconds();
 }
 
-inline void UAlsAnimationInstance::SetGroundedEntryMode(const FGameplayTag& NewGroundedEntryMode)
+inline void UAlsAnimationInstance::SetGroundedEntryMode(const FGameplayTag& NewGroundedEntryMode, float NewStartPosition)
 {
 	GroundedEntryMode = NewGroundedEntryMode;
+	StartPositionOverrideForGroundedEntry = NewStartPosition;
 }
 
 inline const FAlsGroundedState& UAlsAnimationInstance::GetGroundedState() const
