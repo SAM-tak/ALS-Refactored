@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 
 #include "AnimationModifier.h"
 #include "Utility/AlsConstants.h"

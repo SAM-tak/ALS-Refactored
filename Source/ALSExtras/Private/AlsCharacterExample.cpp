@@ -145,7 +145,7 @@ void AAlsCharacterExample::Input_OnCrouch()
 
 void AAlsCharacterExample::Input_OnProne()
 {
-	SetDesiredStance(AlsDesiredStanceTags::Lying);
+	SetDesiredStance(AlsDesiredStanceTags::LyingFront);
 }
 
 void AAlsCharacterExample::Input_OnJump(const FInputActionValue& ActionValue)

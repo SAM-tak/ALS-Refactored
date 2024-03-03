@@ -811,6 +811,10 @@ void AAlsCharacter::ApplyDesiredStance()
 			{
 				Crouch();
 			}
+			else if (DesiredStance == AlsDesiredStanceTags::LyingFront || DesiredStance == AlsDesiredStanceTags::LyingBack)
+			{
+				Lie();
+			}
 		}
 		else if (LocomotionMode == AlsLocomotionModeTags::InAir)
 		{
@@ -825,6 +829,24 @@ bool AAlsCharacter::CanCrouch() const
 	// TODO Wait for https://github.com/EpicGames/UnrealEngine/pull/9558 to be merged into the engine.
 
 	return bIsCrouched || Super::CanCrouch();
+}
+
+void AAlsCharacter::Crouch(bool bClientSimulation)
+{
+	Super::Crouch(bClientSimulation);
+	if (AlsCharacterMovement)
+	{
+		AlsCharacterMovement->bWantsToLie = false;
+	}
+}
+
+void AAlsCharacter::UnCrouch(bool bClientSimulation)
+{
+	Super::UnCrouch(bClientSimulation);
+	if (AlsCharacterMovement)
+	{
+		AlsCharacterMovement->bWantsToLie = false;
+	}
 }
 
 void AAlsCharacter::OnStartCrouch(const float HalfHeightAdjust, const float ScaledHalfHeightAdjust)
@@ -846,7 +868,10 @@ void AAlsCharacter::OnStartCrouch(const float HalfHeightAdjust, const float Scal
 
 	K2_OnStartCrouch(HalfHeightAdjust, ScaledHalfHeightAdjust);
 
-	SetStance(AlsStanceTags::Crouching);
+	if (!bIsLied)
+	{
+		SetStance(AlsStanceTags::Crouching);
+	}
 }
 
 void AAlsCharacter::OnEndCrouch(const float HalfHeightAdjust, const float ScaledHalfHeightAdjust)
@@ -1836,6 +1861,23 @@ bool AAlsCharacter::CanLie() const
 	return true;
 }
 
+void AAlsCharacter::Lie()
+{
+	if (AlsCharacterMovement)
+	{
+		if (CanLie())
+		{
+			AlsCharacterMovement->bWantsToLie = true;
+		}
+#if !(UE_BUILD_SHIPPING || UE_BUILD_TEST)
+		else if (!AlsCharacterMovement->CanEverCrouch())
+		{
+			UE_LOG(LogAls, Log, TEXT("%s is trying to lie, but lying is disabled on this character! (check CharacterMovement NavAgentSettings)"), *GetName());
+		}
+#endif
+	}
+}
+
 void AAlsCharacter::OnStartLie(const float HalfHeightAdjust, const float ScaledHalfHeightAdjust)
 {
 	auto* PredictionData{GetCharacterMovement()->GetPredictionData_Client_Character()};
@@ -1853,9 +1895,9 @@ void AAlsCharacter::OnStartLie(const float HalfHeightAdjust, const float ScaledH
 		PredictionData->OriginalMeshTranslationOffset = PredictionData->MeshTranslationOffset;
 	}
 
-	//K2_OnStartLie(HalfHeightAdjust, ScaledHalfHeightAdjust);
+	K2_OnStartLie(HalfHeightAdjust, ScaledHalfHeightAdjust);
 
-	SetStance(AlsStanceTags::Lying);
+	SetStance(AlsStanceTags::LyingFront);
 }
 
 void AAlsCharacter::OnEndLie(const float HalfHeightAdjust, const float ScaledHalfHeightAdjust)
@@ -1871,9 +1913,16 @@ void AAlsCharacter::OnEndLie(const float HalfHeightAdjust, const float ScaledHal
 		PredictionData->OriginalMeshTranslationOffset = PredictionData->MeshTranslationOffset;
 	}
 
-	//K2_OnEndLie(HalfHeightAdjust, ScaledHalfHeightAdjust);
+	K2_OnEndLie(HalfHeightAdjust, ScaledHalfHeightAdjust);
 
-	SetStance(AlsStanceTags::Standing);
+	if (bIsCrouched)
+	{
+		SetStance(AlsStanceTags::Crouching);
+	}
+	else
+	{
+		SetStance(AlsStanceTags::Standing);
+	}
 }
 
 void AAlsCharacter::RefreshCapsuleSize(float DeltaTime)

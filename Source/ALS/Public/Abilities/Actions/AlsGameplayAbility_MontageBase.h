@@ -25,7 +25,7 @@ struct ALS_API FAlsPlayMontageParameter
 	FName SectionName;
 
 	UPROPERTY(EditDefaultsOnly, Category = AlsMontageAbility, Meta = (ForceUnit = "s"))
-	float StartTime;
+	float StartTime{0.0f};
 };
 
 /**
@@ -54,7 +54,7 @@ protected:
 	float CurrentMotangeDuration{0.f};
 
 	UPROPERTY(VisibleAnywhere, Category = "AlsMontageAbility|State", Transient)
-	int32 CurrentMontageInstanceID{INDEX_NONE};
+	int32 CurrentMontageInstanceId{INDEX_NONE};
 
 private:
 	TArray<struct FActiveGameplayEffectHandle> AppliedEffects;

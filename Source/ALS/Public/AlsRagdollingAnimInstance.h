@@ -27,9 +27,6 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "ALS|Ragdolling", Transient)
 	uint8 bFacingUpward : 1{false};
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "ALS|Ragdolling", Transient)
-	uint8 bFreezed : 1{false};
-
 public:
 	FPoseSnapshot& GetFinalPoseSnapshot();
 
@@ -37,5 +34,5 @@ public:
 
 	void UnFreeze();
 
-	void Refresh(const class UAlsGameplayAbility_Ragdolling& Ability, bool IsActive);
+	void Refresh(const class UAlsGameplayAbility_Ragdolling& Ability, bool bNewActive);
 };

@@ -1,4 +1,4 @@
-﻿#include "Utility/AlsGameplayTags.h"
+#include "Utility/AlsGameplayTags.h"
 
 namespace AlsTags
 {
@@ -7,7 +7,7 @@ namespace AlsTags
 
 namespace AlsDesiredStateTags
 {
-	UE_DEFINE_GAMEPLAY_TAG(Root, FName{ TEXTVIEW("Als.Desired") })
+	UE_DEFINE_GAMEPLAY_TAG(Root, FName{TEXTVIEW("Als.Desired")})
 }
 
 namespace AlsDesiredViewModeTags
@@ -30,7 +30,8 @@ namespace AlsDesiredStanceTags
 	UE_DEFINE_GAMEPLAY_TAG(Root, FName{TEXTVIEW("Als.Desired.Stance")})
 	UE_DEFINE_GAMEPLAY_TAG(Standing, FName{TEXTVIEW("Als.Desired.Stance.Standing")})
 	UE_DEFINE_GAMEPLAY_TAG(Crouching, FName{TEXTVIEW("Als.Desired.Stance.Crouching")})
-	UE_DEFINE_GAMEPLAY_TAG(Lying, FName{TEXTVIEW("Als.Desired.Stance.Lying")})
+	UE_DEFINE_GAMEPLAY_TAG(LyingFront, FName{TEXTVIEW("Als.Desired.Stance.LyingFront")})
+	UE_DEFINE_GAMEPLAY_TAG(LyingBack, FName{TEXTVIEW("Als.Desired.Stance.LyingBack")})
 }
 
 namespace AlsDesiredGaitTags
@@ -75,7 +76,8 @@ namespace AlsStanceTags
 	UE_DEFINE_GAMEPLAY_TAG(Root, FName{TEXTVIEW("Als.Stance")})
 	UE_DEFINE_GAMEPLAY_TAG(Standing, FName{TEXTVIEW("Als.Stance.Standing")})
 	UE_DEFINE_GAMEPLAY_TAG(Crouching, FName{TEXTVIEW("Als.Stance.Crouching")})
-	UE_DEFINE_GAMEPLAY_TAG(Lying, FName{TEXTVIEW("Als.Stance.Lying")})
+	UE_DEFINE_GAMEPLAY_TAG(LyingFront, FName{TEXTVIEW("Als.Stance.LyingFront")})
+	UE_DEFINE_GAMEPLAY_TAG(LyingBack, FName{TEXTVIEW("Als.Stance.LyingBack")})
 }
 
 namespace AlsGaitTags
@@ -126,4 +128,8 @@ namespace AlsGroundedEntryModeTags
 	UE_DEFINE_GAMEPLAY_TAG(Root, FName{TEXTVIEW("Als.GroundedEntryMode")})
 	UE_DEFINE_GAMEPLAY_TAG(StandingToCrouching, FName{TEXTVIEW("Als.GroundedEntryMode.StandingToCrouching")})
 	UE_DEFINE_GAMEPLAY_TAG(CrouchingToStanding, FName{TEXTVIEW("Als.GroundedEntryMode.CrouchingToStanding")})
+	UE_DEFINE_GAMEPLAY_TAG(LyingFrontToCrouching, FName{TEXTVIEW("Als.GroundedEntryMode.LyingFrontToCrouching")})
+	UE_DEFINE_GAMEPLAY_TAG(LyingBackToCrouching, FName{TEXTVIEW("Als.GroundedEntryMode.LyingBackToCrouching")})
+	UE_DEFINE_GAMEPLAY_TAG(CrouchingToLyingFront, FName{TEXTVIEW("Als.GroundedEntryMode.CrouchingToLyingFront")})
+	UE_DEFINE_GAMEPLAY_TAG(CrouchingToLyingBack, FName{TEXTVIEW("Als.GroundedEntryMode.CrouchingToLyingBack")})
 }	 // namespace AlsGroundedEntryModeTags

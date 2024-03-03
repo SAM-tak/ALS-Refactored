@@ -14,15 +14,13 @@ void UAlsRagdollingAnimInstance::Freeze()
 {
 	check(IsInGameThread())
 
-	if (!bFreezed)
+	if (!FinalPose.bIsValid)
 	{
 		// Save a snapshot of the current ragdoll pose for use in animation graph to blend out of the ragdoll.
 		if (GetSkelMeshComponent()->GetNumComponentSpaceTransforms() > 0) // When stop PIE, SnapshotPose rises Out of range exception.
 		{
 			SnapshotPose(FinalPose);
 		}
-
-		bFreezed = true;
 	}
 }
 
@@ -30,18 +28,18 @@ void UAlsRagdollingAnimInstance::UnFreeze()
 {
 	check(IsInGameThread())
 
-	if (bFreezed)
+	if (FinalPose.bIsValid)
 	{
-		bFreezed = false;
+		FinalPose.Reset();
 	}
 }
 
-void UAlsRagdollingAnimInstance::Refresh(const UAlsGameplayAbility_Ragdolling& Ability, bool IsActive)
+void UAlsRagdollingAnimInstance::Refresh(const UAlsGameplayAbility_Ragdolling& Ability, bool bNewActive)
 {
 	check(IsInGameThread())
 
 	//bActive = Ability.IsActive() && !Ability.bIsAbilityEnding; // this is not work. bIsAbilityEnding can be true in Super::EndAbility.
-	bActive = IsActive;
+	bActive = bNewActive;
 	StartBlendTime = Ability.StartBlendTime;
 	bGroundedAndAged = Ability.IsGroundedAndAged();
 	bFacingUpward = Ability.bFacingUpward;

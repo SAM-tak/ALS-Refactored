@@ -266,10 +266,14 @@ void UAlsGameplayAbility_Ragdolling::Tick(const float DeltaTime)
 
 	ElapsedTime += DeltaTime;
 
-	if (IsGroundedAndAged() && !bOnGroundedAndAgedFired)
+	if (IsGroundedAndAged())
 	{
-		bOnGroundedAndAgedFired = true;
-		K2_OnGroundedAndAgedAtFirstTime();
+		if (!bOnGroundedAndAgedFired)
+		{
+			bOnGroundedAndAgedFired = true;
+			K2_OnGroundedAndAgedAtFirstTime();
+		}
+		Character->Lie();
 	}
 }
 

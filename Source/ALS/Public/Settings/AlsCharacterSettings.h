@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 
 #include "AlsInAirRotationMode.h"
 #include "AlsViewSettings.h"
@@ -61,7 +61,8 @@ public:
 		{AlsDesiredRotationModeTags::Aiming, AlsRotationModeTags::Aiming},
 		{AlsDesiredStanceTags::Standing, AlsStanceTags::Standing},
 		{AlsDesiredStanceTags::Crouching, AlsStanceTags::Crouching},
-		{AlsDesiredStanceTags::Lying, AlsStanceTags::Lying},
+		{AlsDesiredStanceTags::LyingFront, AlsStanceTags::LyingFront},
+		{AlsDesiredStanceTags::LyingBack, AlsStanceTags::LyingBack},
 		{AlsDesiredGaitTags::Walking, AlsGaitTags::Walking},
 		{AlsDesiredGaitTags::Running, AlsGaitTags::Running},
 		{AlsDesiredGaitTags::Sprinting, AlsGaitTags::Sprinting},

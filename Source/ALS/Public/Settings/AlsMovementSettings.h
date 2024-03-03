@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 
 #include "Engine/DataAsset.h"
 #include "Utility/AlsGameplayTags.h"
@@ -45,7 +45,9 @@ struct ALS_API FAlsMovementStanceSettings
 	TMap<FGameplayTag, FAlsMovementGaitSettings> Stances
 	{
 		{AlsStanceTags::Standing, {}},
-		{AlsStanceTags::Crouching, {}}
+		{AlsStanceTags::Crouching, {}},
+		{AlsStanceTags::LyingFront, {}},
+		{AlsStanceTags::LyingBack, {}}
 	};
 };
 

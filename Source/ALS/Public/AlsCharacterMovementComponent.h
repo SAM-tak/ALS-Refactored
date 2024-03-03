@@ -6,6 +6,33 @@
 
 using FAlsPhysicsRotationDelegate = TMulticastDelegate<void(float DeltaTime)>;
 
+struct FAlsCharacterMovementComponentAsyncInput : public FCharacterMovementComponentAsyncInput
+{
+	FGameplayTag RotationMode{AlsRotationModeTags::ViewDirection};
+	FGameplayTag Stance{AlsStanceTags::Standing};
+	FGameplayTag MaxAllowedGait{AlsGaitTags::Walking};
+	bool bWantsToLie;
+	bool bIsLied;
+};
+
+struct FAlsCharacterMovementComponentAsyncOutput : public FCharacterMovementComponentAsyncOutput
+{
+	FGameplayTag RotationMode{AlsRotationModeTags::ViewDirection};
+	FGameplayTag Stance{AlsStanceTags::Standing};
+	FGameplayTag MaxAllowedGait{AlsGaitTags::Walking};
+	bool bWantsToLie;
+	bool bIsLied;
+};
+
+class ALS_API FAlsCharacterMovementComponentAsyncCallback
+	: public Chaos::TSimCallbackObject<FAlsCharacterMovementComponentAsyncInput, FAlsCharacterMovementComponentAsyncOutput>
+{
+public:
+	virtual FName GetFNameForStatId() const override;
+private:
+	virtual void OnPreSimulate_Internal() override;
+};
+
 class ALS_API FAlsCharacterNetworkMoveData : public FCharacterNetworkMoveData
 {
 private:
@@ -45,6 +72,8 @@ public:
 
 	FGameplayTag MaxAllowedGait{AlsGaitTags::Walking};
 
+	bool bWantsToLie{false};
+
 public:
 	virtual void Clear() override;
 
@@ -79,6 +108,9 @@ class ALS_API UAlsCharacterMovementComponent : public UCharacterMovementComponen
 
 protected:
 	FAlsCharacterNetworkMoveDataContainer MoveDataContainer;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = NavMovement, meta = (DisplayName = "Movement Capabilities : CanLie", Keywords = "Nav Agent"))
+	uint8 NavAgentProps_bCanLie : 1{true};
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient)
 	TObjectPtr<UAlsMovementSettings> MovementSettings;
@@ -214,16 +246,40 @@ public:
 public:
 	/** If true, try to lie (or keep lying down) on next update. If false, try to stop lying on next update. */
 	UPROPERTY(Category = "Als|Als Character Movement", VisibleInstanceOnly, BlueprintReadOnly)
-	uint8 bWantsToLie : 1;
+	uint8 bWantsToLie : 1{false};
 
 	virtual void Crouch(bool bClientSimulation = false) override;
 	virtual void UnCrouch(bool bClientSimulation = false) override;
+	virtual bool IsLying() const;
 	virtual void Lie(bool bClientSimulation = false);
 	virtual void UnLie(bool bClientSimulation = false);
+	virtual bool CanLieInCurrentState() const;
 
+	FORCEINLINE bool CanEverLie() const { return NavAgentProps_bCanLie; }
+
+	virtual bool CanAttemptJump() const override;
+
+	virtual void UpdateCharacterStateBeforeMovement(float DeltaSeconds) override;
+	virtual void UpdateCharacterStateAfterMovement(float DeltaSeconds) override;
+	
 	TObjectPtr<class AAlsCharacter> GetAlsCharacter() const;
 
 	virtual void UpdateCapsuleSize(float DeltaTime, float TargetHalfHeight, float HeightSpeed, float TargetRadius, float RadiusSpeed);
+
+protected:
+	/* Prepare inputs for asynchronous simulation on physics thread */
+	virtual void FillAsyncInput(const FVector& InputVector, FCharacterMovementComponentAsyncInput& AsyncInput) override;
+	virtual void BuildAsyncInput() override;
+	/* Apply outputs from async sim. */
+	virtual void ApplyAsyncOutput(FCharacterMovementComponentAsyncOutput& Output) override;
+	virtual void ProcessAsyncOutput() override;
+
+	/* Register async callback with physics system. */
+	virtual void RegisterAsyncCallback() override;
+	virtual bool IsAsyncCallbackRegistered() const override;
+
+private:
+	FAlsCharacterMovementComponentAsyncCallback* AlsAsyncCallback;
 };
 
 inline const FAlsMovementGaitSettings& UAlsCharacterMovementComponent::GetGaitSettings() const

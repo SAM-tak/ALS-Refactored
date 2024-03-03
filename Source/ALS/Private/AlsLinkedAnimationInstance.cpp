@@ -76,9 +76,19 @@ FGameplayTag UAlsLinkedAnimationInstance::GetEntryStance() const
 		{
 			return AlsStanceTags::Standing;
 		}
-		if (Parent->GroundedEntryMode == AlsGroundedEntryModeTags::CrouchingToStanding)
+		if (Parent->GroundedEntryMode == AlsGroundedEntryModeTags::CrouchingToStanding ||
+			Parent->GroundedEntryMode == AlsGroundedEntryModeTags::CrouchingToLyingFront ||
+			Parent->GroundedEntryMode == AlsGroundedEntryModeTags::CrouchingToLyingBack)
 		{
 			return AlsStanceTags::Crouching;
+		}
+		if (Parent->GroundedEntryMode == AlsGroundedEntryModeTags::LyingFrontToCrouching)
+		{
+			return AlsStanceTags::LyingFront;
+		}
+		if (Parent->GroundedEntryMode == AlsGroundedEntryModeTags::LyingBackToCrouching)
+		{
+			return AlsStanceTags::LyingBack;
 		}
 		return Parent->Stance;
 	}

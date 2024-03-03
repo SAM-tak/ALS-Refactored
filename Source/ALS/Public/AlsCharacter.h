@@ -26,6 +26,8 @@ class ALS_API AAlsCharacter : public ACharacter, public IAbilitySystemInterface,
 {
 	GENERATED_UCLASS_BODY()
 
+	friend class UAlsPhysicalAnimationComponent;
+
 protected:
 	UPROPERTY(BlueprintReadOnly, Category = "State|Als Character", Transient)
 	TObjectPtr<UAlsCharacterMovementComponent> AlsCharacterMovement;
@@ -291,6 +293,10 @@ protected:
 public:
 	virtual bool CanCrouch() const override;
 
+	virtual void Crouch(bool bClientSimulation = false) override;
+
+	virtual void UnCrouch(bool bClientSimulation = false) override;
+
 	virtual void OnStartCrouch(float HalfHeightAdjust, float ScaledHalfHeightAdjust) override;
 
 	virtual void OnEndCrouch(float HalfHeightAdjust, float ScaledHalfHeightAdjust) override;
@@ -503,9 +509,21 @@ public:
 	UPROPERTY(BlueprintReadOnly, Category = "State|Als Character", replicatedUsing = OnRep_IsLied)
 	uint32 bIsLied : 1;
 
-	bool CanLie() const;
-	void OnStartLie(const float HalfHeightAdjust, const float ScaledHalfHeightAdjust);
-	void OnEndLie(const float HalfHeightAdjust, const float ScaledHalfHeightAdjust);
+	UFUNCTION(BlueprintCallable, Category = Character)
+	virtual bool CanLie() const;
+
+	UFUNCTION(BlueprintCallable, Category = Character)
+	virtual void Lie();
+
+	virtual void OnStartLie(const float HalfHeightAdjust, const float ScaledHalfHeightAdjust);
+
+	virtual void OnEndLie(const float HalfHeightAdjust, const float ScaledHalfHeightAdjust);
+
+	UFUNCTION(BlueprintImplementableEvent, meta = (DisplayName = "OnStartLie", ScriptName = "OnStartLie"))
+	void K2_OnStartLie(float HalfHeightAdjust, float ScaledHalfHeightAdjust);
+
+	UFUNCTION(BlueprintImplementableEvent, meta = (DisplayName = "OnEndLie", ScriptName = "OnEndLie"))
+	void K2_OnEndLie(float HalfHeightAdjust, float ScaledHalfHeightAdjust);
 
 private:
 	void RefreshCapsuleSize(float DeltaTime);

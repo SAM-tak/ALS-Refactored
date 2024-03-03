@@ -126,7 +126,7 @@ void UAlsGameplayAbility_MontageBase::PlayMontage(
 			if (auto* MontageInstance = AnimInstance->GetActiveInstanceForMontage(Montage))
 			{
 				// AnimInstance's OnPlayMontageNotifyBegin/End fire for all notify. Then stores Montage's InstanceID
-				CurrentMontageInstanceID = MontageInstance->GetInstanceID();
+				CurrentMontageInstanceId = MontageInstance->GetInstanceID();
 
 				AnimInstance->OnPlayMontageNotifyBegin.AddDynamic(this, &ThisClass::OnNotifyBeginReceived);
 				AnimInstance->OnPlayMontageNotifyEnd.AddDynamic(this, &ThisClass::OnNotifyEndReceived);
@@ -137,7 +137,7 @@ void UAlsGameplayAbility_MontageBase::PlayMontage(
 
 bool UAlsGameplayAbility_MontageBase::IsNotifyValid(FName NotifyName, const FBranchingPointNotifyPayload& BPNPayload) const
 {
-    return CurrentMontageInstanceID != INDEX_NONE && BPNPayload.MontageInstanceID == CurrentMontageInstanceID;
+    return CurrentMontageInstanceId != INDEX_NONE && BPNPayload.MontageInstanceID == CurrentMontageInstanceId;
 }
 
 void UAlsGameplayAbility_MontageBase::OnNotifyBeginReceived(FName NotifyName, const FBranchingPointNotifyPayload& BPNPayload)

@@ -91,7 +91,7 @@ protected:
 public:
 	virtual void BeginPlay() override;
 
-	virtual void Refresh(const AAlsCharacter* Character);
+	virtual void Refresh(AAlsCharacter* Character);
 
 	virtual void TickComponent(float DeltaTime, enum ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 

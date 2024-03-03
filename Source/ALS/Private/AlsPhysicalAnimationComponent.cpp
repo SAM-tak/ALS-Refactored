@@ -443,7 +443,7 @@ void UAlsPhysicalAnimationComponent::OnAbilityActivated(class UGameplayAbility* 
 	}
 }
 
-void UAlsPhysicalAnimationComponent::Refresh(const AAlsCharacter* Character)
+void UAlsPhysicalAnimationComponent::Refresh(AAlsCharacter* Character)
 {
 	if (LatestRagdolling.IsValid() && LatestRagdolling->bCancelRequested)
 	{
@@ -467,6 +467,15 @@ void UAlsPhysicalAnimationComponent::Refresh(const AAlsCharacter* Character)
 			ApplyPhysicalAnimationProfileBelow(NAME_None, NAME_None, true, true);
 		}
 		bRagdollingFreezed = LatestRagdolling->bFreezing;
+
+		if (LatestRagdolling->bGrounded)
+		{
+			Character->SetLocomotionMode(AlsLocomotionModeTags::Grounded);
+		}
+		else
+		{
+			Character->SetLocomotionMode(AlsLocomotionModeTags::InAir);
+		}
 	}
 	else
 	{

@@ -7,6 +7,8 @@
 #include "Curves/CurveVector.h"
 #include "Engine/World.h"
 #include "GameFramework/Controller.h"
+#include "Physics/Experimental/PhysScene_Chaos.h"
+#include "PBDRigidsSolver.h"
 #include "Utility/AlsMacros.h"
 #include "Utility/AlsUtility.h"
 #include "Utility/AlsLog.h"
@@ -63,6 +65,7 @@ void FAlsSavedMove::SetMoveFor(ACharacter* Character, const float NewDeltaTime, 
 		RotationMode = Movement->RotationMode;
 		Stance = Movement->Stance;
 		MaxAllowedGait = Movement->MaxAllowedGait;
+		bWantsToLie = Movement->bWantsToLie;
 	}
 }
 
@@ -107,6 +110,7 @@ void FAlsSavedMove::PrepMoveFor(ACharacter* Character)
 		Movement->RotationMode = RotationMode;
 		Movement->Stance = Stance;
 		Movement->MaxAllowedGait = MaxAllowedGait;
+		Movement->bWantsToLie = bWantsToLie;
 
 		Movement->RefreshGaitSettings();
 	}
@@ -207,23 +211,23 @@ void UAlsCharacterMovementComponent::TickComponent(float DeltaTime, ELevelTick T
 			CurrentControlRotation.Roll}.Clamp());
 	}
 
-	auto AlsCharacter{GetAlsCharacter()};
-	if (AlsCharacter->GetPhysicalAnimation()->IsRagdolling() && (MovementMode == EMovementMode::MOVE_Custom || MovementMode == EMovementMode::MOVE_None))
-	{
-		// Proxies get replicated crouch state.
-		if (CharacterOwner->GetLocalRole() != ROLE_SimulatedProxy)
-		{
-			// Check for a change in crouch state. Players toggle crouch by changing bWantsToCrouch.
-			if (CharacterOwner->bIsCrouched && !bWantsToCrouch)
-			{
-				CharacterOwner->bIsCrouched = false;
-			}
-			else if (!CharacterOwner->bIsCrouched && bWantsToCrouch)
-			{
-				CharacterOwner->bIsCrouched = true;
-			}
-		}
-	}
+	//auto AlsCharacter{GetAlsCharacter()};
+	//if (AlsCharacter->GetPhysicalAnimation()->IsRagdolling() && (MovementMode == EMovementMode::MOVE_Custom || MovementMode == EMovementMode::MOVE_None))
+	//{
+	//	// Proxies get replicated crouch state.
+	//	if (CharacterOwner->GetLocalRole() != ROLE_SimulatedProxy)
+	//	{
+	//		// Check for a change in crouch state. Players toggle crouch by changing bWantsToCrouch.
+	//		if (CharacterOwner->bIsCrouched && !bWantsToCrouch)
+	//		{
+	//			CharacterOwner->bIsCrouched = false;
+	//		}
+	//		else if (!CharacterOwner->bIsCrouched && bWantsToCrouch)
+	//		{
+	//			CharacterOwner->bIsCrouched = true;
+	//		}
+	//	}
+	//}
 
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 }
@@ -376,15 +380,15 @@ void UAlsCharacterMovementComponent::PhysWalking(const float DeltaTime, int32 It
 	bJustTeleported = false;
 	bool bCheckedFall = false;
 	bool bTriedLedgeMove = false;
-	float remainingTime = DeltaTime;
+	float RemainingTime = DeltaTime;
 
 	// Perform the move
-	while ( (remainingTime >= MIN_TICK_TIME) && (Iterations < MaxSimulationIterations) && CharacterOwner && (CharacterOwner->Controller || bRunPhysicsWithNoController || HasAnimRootMotion() || CurrentRootMotion.HasOverrideVelocity() || (CharacterOwner->GetLocalRole() == ROLE_SimulatedProxy)) )
+	while ( (RemainingTime >= MIN_TICK_TIME) && (Iterations < MaxSimulationIterations) && CharacterOwner && (CharacterOwner->Controller || bRunPhysicsWithNoController || HasAnimRootMotion() || CurrentRootMotion.HasOverrideVelocity() || (CharacterOwner->GetLocalRole() == ROLE_SimulatedProxy)) )
 	{
 		Iterations++;
 		bJustTeleported = false;
-		const float timeTick = GetSimulationTimeStep(remainingTime, Iterations);
-		remainingTime -= timeTick;
+		const float TimeTick = GetSimulationTimeStep(RemainingTime, Iterations);
+		RemainingTime -= TimeTick;
 
 		// Save current values
 		UPrimitiveComponent * const OldBase = GetMovementBase();
@@ -402,35 +406,35 @@ void UAlsCharacterMovementComponent::PhysWalking(const float DeltaTime, int32 It
 		// Apply acceleration
 		if( !HasAnimRootMotion() && !CurrentRootMotion.HasOverrideVelocity() )
 		{
-			CalcVelocity(timeTick, GroundFriction, false, GetMaxBrakingDeceleration());
+			CalcVelocity(TimeTick, GroundFriction, false, GetMaxBrakingDeceleration());
 			// devCode(ensureMsgf(!Velocity.ContainsNaN(), TEXT("PhysWalking: Velocity contains NaN after CalcVelocity (%s)\n%s"), *GetPathNameSafe(this), *Velocity.ToString()));
 		}
 
-		ApplyRootMotionToVelocity(timeTick);
+		ApplyRootMotionToVelocity(TimeTick);
 		// devCode(ensureMsgf(!Velocity.ContainsNaN(), TEXT("PhysWalking: Velocity contains NaN after Root Motion application (%s)\n%s"), *GetPathNameSafe(this), *Velocity.ToString()));
 
 		if( IsFalling() )
 		{
 			// Root motion could have put us into Falling.
 			// No movement has taken place this movement tick so we pass on full time/past iteration count
-			StartNewPhysics(remainingTime+timeTick, Iterations-1);
+			StartNewPhysics(RemainingTime+TimeTick, Iterations-1);
 			return;
 		}
 
 		// Compute move parameters
 		const FVector MoveVelocity = Velocity;
-		const FVector Delta = timeTick * MoveVelocity;
+		const FVector Delta = TimeTick * MoveVelocity;
 		const bool bZeroDelta = Delta.IsNearlyZero();
 		FStepDownResult StepDownResult;
 
 		if ( bZeroDelta )
 		{
-			remainingTime = 0.f;
+			RemainingTime = 0.f;
 		}
 		else
 		{
 			// try to move forward
-			MoveAlongFloor(MoveVelocity, timeTick, &StepDownResult);
+			MoveAlongFloor(MoveVelocity, TimeTick, &StepDownResult);
 
 			if ( IsFalling() )
 			{
@@ -439,14 +443,14 @@ void UAlsCharacterMovementComponent::PhysWalking(const float DeltaTime, int32 It
 				if (DesiredDist > UE_KINDA_SMALL_NUMBER)
 				{
 					const float ActualDist = (UpdatedComponent->GetComponentLocation() - OldLocation).Size2D();
-					remainingTime += timeTick * (1.f - FMath::Min(1.f,ActualDist/DesiredDist));
+					RemainingTime += TimeTick * (1.f - FMath::Min(1.f,ActualDist/DesiredDist));
 				}
-				StartNewPhysics(remainingTime,Iterations);
+				StartNewPhysics(RemainingTime,Iterations);
 				return;
 			}
 			else if ( IsSwimming() ) //just entered water
 			{
-				StartSwimming(OldLocation, OldVelocity, timeTick, remainingTime, Iterations);
+				StartSwimming(OldLocation, OldVelocity, TimeTick, RemainingTime, Iterations);
 				return;
 			}
 		}
@@ -478,8 +482,8 @@ void UAlsCharacterMovementComponent::PhysWalking(const float DeltaTime, int32 It
 				bTriedLedgeMove = true;
 
 				// Try new movement direction
-				Velocity = NewDelta/timeTick;
-				remainingTime += timeTick;
+				Velocity = NewDelta/TimeTick;
+				RemainingTime += TimeTick;
 				continue;
 			}
 			else
@@ -487,7 +491,7 @@ void UAlsCharacterMovementComponent::PhysWalking(const float DeltaTime, int32 It
 				// see if it is OK to jump
 				// @todo collision : only thing that can be problem is that oldbase has world collision on
 				bool bMustJump = bZeroDelta || (OldBase == NULL || (!OldBase->IsQueryCollisionEnabled() && MovementBaseUtility::IsDynamicBase(OldBase)));
-				if ( (bMustJump || !bCheckedFall) && CheckFall(OldFloor, CurrentFloor.HitResult, Delta, OldLocation, remainingTime, timeTick, Iterations, bMustJump) )
+				if ( (bMustJump || !bCheckedFall) && CheckFall(OldFloor, CurrentFloor.HitResult, Delta, OldLocation, RemainingTime, TimeTick, Iterations, bMustJump) )
 				{
 					return;
 				}
@@ -495,7 +499,7 @@ void UAlsCharacterMovementComponent::PhysWalking(const float DeltaTime, int32 It
 
 				// revert this move
 				RevertMove(OldLocation, OldBase, PreviousBaseLocation, OldFloor, true);
-				remainingTime = 0.f;
+				RemainingTime = 0.f;
 				break;
 			}
 		}
@@ -506,7 +510,7 @@ void UAlsCharacterMovementComponent::PhysWalking(const float DeltaTime, int32 It
 			{
 				if (ShouldCatchAir(OldFloor, CurrentFloor))
 				{
-					HandleWalkingOffLedge(OldFloor.HitResult.ImpactNormal, OldFloor.HitResult.Normal, OldLocation, timeTick);
+					HandleWalkingOffLedge(OldFloor.HitResult.ImpactNormal, OldFloor.HitResult.Normal, OldLocation, TimeTick);
 					if (IsMovingOnGround())
 					{
 						// TODO Start of custom ALS code block.
@@ -516,7 +520,7 @@ void UAlsCharacterMovementComponent::PhysWalking(const float DeltaTime, int32 It
 						// TODO End of custom ALS code block.
 
 						// If still walking, then fall. If not, assume the user set a different mode they want to keep.
-						StartFalling(Iterations, remainingTime, timeTick, Delta, OldLocation);
+						StartFalling(Iterations, RemainingTime, TimeTick, Delta, OldLocation);
 					}
 					return;
 				}
@@ -530,7 +534,7 @@ void UAlsCharacterMovementComponent::PhysWalking(const float DeltaTime, int32 It
 				AdjustFloorHeight();
 				SetBase(CurrentFloor.HitResult.Component.Get(), CurrentFloor.HitResult.BoneName);
 			}
-			else if (CurrentFloor.HitResult.bStartPenetrating && remainingTime <= 0.f)
+			else if (CurrentFloor.HitResult.bStartPenetrating && RemainingTime <= 0.f)
 			{
 				// The floor check failed because it started in penetration
 				// We do not want to try to move downward because the downward sweep failed, rather we'd like to try to pop out of the floor.
@@ -544,7 +548,7 @@ void UAlsCharacterMovementComponent::PhysWalking(const float DeltaTime, int32 It
 			// check if just entered water
 			if ( IsSwimming() )
 			{
-				StartSwimming(OldLocation, Velocity, timeTick, remainingTime, Iterations);
+				StartSwimming(OldLocation, Velocity, TimeTick, RemainingTime, Iterations);
 				return;
 			}
 
@@ -552,7 +556,7 @@ void UAlsCharacterMovementComponent::PhysWalking(const float DeltaTime, int32 It
 			if (!CurrentFloor.IsWalkableFloor() && !CurrentFloor.HitResult.bStartPenetrating)
 			{
 				const bool bMustJump = bJustTeleported || bZeroDelta || (OldBase == NULL || (!OldBase->IsQueryCollisionEnabled() && MovementBaseUtility::IsDynamicBase(OldBase)));
-				if ((bMustJump || !bCheckedFall) && CheckFall(OldFloor, CurrentFloor.HitResult, Delta, OldLocation, remainingTime, timeTick, Iterations, bMustJump) )
+				if ((bMustJump || !bCheckedFall) && CheckFall(OldFloor, CurrentFloor.HitResult, Delta, OldLocation, RemainingTime, TimeTick, Iterations, bMustJump) )
 				{
 					return;
 				}
@@ -565,7 +569,7 @@ void UAlsCharacterMovementComponent::PhysWalking(const float DeltaTime, int32 It
 		if (IsMovingOnGround())
 		{
 			// Make velocity reflect actual move
-			if( !bJustTeleported && !HasAnimRootMotion() && !CurrentRootMotion.HasOverrideVelocity() && timeTick >= MIN_TICK_TIME)
+			if( !bJustTeleported && !HasAnimRootMotion() && !CurrentRootMotion.HasOverrideVelocity() && TimeTick >= MIN_TICK_TIME)
 			{
 				// TODO Start of custom ALS code block.
 
@@ -575,7 +579,7 @@ void UAlsCharacterMovementComponent::PhysWalking(const float DeltaTime, int32 It
 				// TODO End of custom ALS code block.
 
 				// TODO-RootMotionSource: Allow this to happen during partial override Velocity, but only set allowed axes?
-				Velocity = (UpdatedComponent->GetComponentLocation() - OldLocation) / timeTick;
+				Velocity = (UpdatedComponent->GetComponentLocation() - OldLocation) / TimeTick;
 				MaintainHorizontalGroundVelocity();
 			}
 		}
@@ -583,7 +587,7 @@ void UAlsCharacterMovementComponent::PhysWalking(const float DeltaTime, int32 It
 		// If we didn't move at all this iteration then abort (since future iterations will also be stuck).
 		if (UpdatedComponent->GetComponentLocation() == OldLocation)
 		{
-			remainingTime = 0.f;
+			RemainingTime = 0.f;
 			break;
 		}
 	}
@@ -1245,7 +1249,7 @@ void UAlsCharacterMovementComponent::Lie(bool bClientSimulation)
 		return;
 	}
 
-	if (!bClientSimulation && !CanCrouchInCurrentState())
+	if (!bClientSimulation && !CanLieInCurrentState())
 	{
 		return;
 	}
@@ -1291,7 +1295,7 @@ void UAlsCharacterMovementComponent::Lie(bool bClientSimulation)
 	HalfHeightAdjust = (DefaultCharacter->GetCapsuleComponent()->GetUnscaledCapsuleHalfHeight() - ClampedCrouchedHalfHeight);
 	ScaledHalfHeightAdjust = HalfHeightAdjust * ComponentScale;
 
-	CharacterOwner->OnStartCrouch(HalfHeightAdjust, ScaledHalfHeightAdjust);
+	GetAlsCharacter()->OnStartLie(HalfHeightAdjust, ScaledHalfHeightAdjust);
 
 	// Don't smooth this change in mesh position
 	if ((bClientSimulation && CharacterOwner->GetLocalRole() == ROLE_SimulatedProxy) || (IsNetMode(NM_ListenServer) && CharacterOwner->GetRemoteRole() == ROLE_AutonomousProxy))
@@ -1321,7 +1325,7 @@ void UAlsCharacterMovementComponent::UnLie(bool bClientSimulation)
 		{
 			GetAlsCharacter()->bIsLied = false;
 		}
-		GetAlsCharacter()->OnEndCrouch(0.f, 0.f);
+		GetAlsCharacter()->OnEndLie(0.f, 0.f);
 		return;
 	}
 
@@ -1482,4 +1486,166 @@ void UAlsCharacterMovementComponent::UpdateCapsuleSize(float DeltaTime, float Ta
 		// Change actor location must be applied after change mesh relative location.
 		CharacterOwner->AddActorLocalOffset(FVector{0.0, 0.0, HalfHeight - OldUnscaledHalfHeight});
 	}
+}
+
+bool UAlsCharacterMovementComponent::CanAttemptJump() const
+{
+	return !bWantsToLie && Super::CanAttemptJump();
+}
+
+bool UAlsCharacterMovementComponent::IsLying() const
+{
+	auto AlsCharacter{GetAlsCharacter()};
+	return AlsCharacter && AlsCharacter->bIsLied;
+}
+
+bool UAlsCharacterMovementComponent::CanLieInCurrentState() const
+{
+	if (!CanEverLie())
+	{
+		return false;
+	}
+
+	return (IsFalling() || IsMovingOnGround()) && UpdatedComponent && !UpdatedComponent->IsSimulatingPhysics();
+}
+
+void UAlsCharacterMovementComponent::UpdateCharacterStateBeforeMovement(float DeltaSeconds)
+{
+	Super::UpdateCharacterStateBeforeMovement(DeltaSeconds);
+	// Proxies get replicated crouch state.
+	if (CharacterOwner->GetLocalRole() != ROLE_SimulatedProxy)
+	{
+		// Check for a change in lie state. Players toggle lying by changing bWantsToLie.
+		const bool bIsLying = IsLying();
+		if (bIsLying && (!bWantsToLie || !CanLieInCurrentState()))
+		{
+			UnLie(false);
+		}
+		else if (!bIsLying && bWantsToLie && CanLieInCurrentState())
+		{
+			Lie(false);
+		}
+	}
+}
+
+void UAlsCharacterMovementComponent::UpdateCharacterStateAfterMovement(float DeltaSeconds)
+{
+	Super::UpdateCharacterStateAfterMovement(DeltaSeconds);
+	// Proxies get replicated lie state.
+	if (CharacterOwner->GetLocalRole() != ROLE_SimulatedProxy)
+	{
+		// Unlie if no longer allowed to be lied
+		if (IsLying() && !CanLieInCurrentState())
+		{
+			UnLie(false);
+		}
+	}
+}
+
+FName FAlsCharacterMovementComponentAsyncCallback::GetFNameForStatId() const
+{
+	const static FLazyName StaticName("FAlsCharacterMovementComponentAsyncCallback");
+	return StaticName;
+}
+
+void FAlsCharacterMovementComponentAsyncCallback::OnPreSimulate_Internal()
+{
+	PreSimulateImpl<FAlsCharacterMovementComponentAsyncInput, FAlsCharacterMovementComponentAsyncOutput>(*this);
+}
+
+void UAlsCharacterMovementComponent::FillAsyncInput(const FVector& InputVector, FCharacterMovementComponentAsyncInput& AsyncInput)
+{
+	if (!CharacterOwner || !CharacterOwner->Controller)
+	{
+		return;
+	}
+
+	auto& AlsAsyncInput{static_cast<FAlsCharacterMovementComponentAsyncInput&>(AsyncInput)};
+
+	AlsAsyncInput.bCanEverCrouch = CanEverCrouch();
+
+	// Only game thread inputs need to be updated here.
+	AlsAsyncInput.GTInputs.bWantsToCrouch = bWantsToCrouch;
+
+	auto* AlsAsyncSimState{static_cast<FAlsCharacterMovementComponentAsyncOutput*>(AsyncSimState.Get())};
+
+	AlsAsyncSimState->RotationMode = RotationMode;
+	AlsAsyncSimState->Stance = Stance;
+	AlsAsyncSimState->MaxAllowedGait = MaxAllowedGait;
+	AlsAsyncSimState->bWantsToCrouch = bWantsToCrouch;
+	AlsAsyncSimState->bIsCrouched = CharacterOwner->bIsCrouched;
+}
+
+void UAlsCharacterMovementComponent::BuildAsyncInput()
+{
+	if (CharacterMovementCVars::AsyncCharacterMovement == 1 && IsAsyncCallbackRegistered())
+	{
+		FAlsCharacterMovementComponentAsyncInput* Input = AlsAsyncCallback->GetProducerInputData_External();
+		if (Input->bInitialized == false)
+		{
+			Input->Initialize<FAlsCharacterMovementComponentAsyncInput::FCharacterInput, FAlsCharacterMovementComponentAsyncInput::FUpdatedComponentInput>();
+		}
+
+		if (AsyncSimState.IsValid() == false)
+		{
+			AsyncSimState = MakeShared<FAlsCharacterMovementComponentAsyncOutput, ESPMode::ThreadSafe>();
+		}
+		Input->AsyncSimState = AsyncSimState;
+
+		const FVector InputVector = ConsumeInputVector();
+		FillAsyncInput(InputVector, *Input);
+
+		PostBuildAsyncInput();
+	}
+}
+
+void UAlsCharacterMovementComponent::ApplyAsyncOutput(FCharacterMovementComponentAsyncOutput& Output)
+{
+	Super::ApplyAsyncOutput(Output);
+
+	ensure(Output.DeltaTime > 0.0f);
+
+	if (Output.IsValid() == false)
+	{
+		return;
+	}
+
+	auto& AlsOutput{static_cast<FAlsCharacterMovementComponentAsyncOutput&>(Output)};
+
+	// TODO Crouching, check if scaled radius/half haeight changed on capsule and handle?
+	ensure(AlsOutput.bIsLied == false);
+	RotationMode = AlsOutput.RotationMode;
+	Stance = AlsOutput.Stance;
+	MaxAllowedGait = AlsOutput.MaxAllowedGait;
+	bWantsToLie = AlsOutput.bWantsToLie;
+}
+
+void UAlsCharacterMovementComponent::ProcessAsyncOutput()
+{
+	if (CharacterMovementCVars::AsyncCharacterMovement == 1 && IsAsyncCallbackRegistered())
+	{
+		while (auto Output = AlsAsyncCallback->PopOutputData_External())
+		{
+			ApplyAsyncOutput(*Output);
+		}
+	}
+}
+
+void UAlsCharacterMovementComponent::RegisterAsyncCallback()
+{
+	if (CharacterMovementCVars::AsyncCharacterMovement == 1)
+	{
+		if (UWorld* World = GetWorld())
+		{
+			if (FPhysScene* PhysScene = World->GetPhysicsScene())
+			{
+				AlsAsyncCallback = PhysScene->GetSolver()->CreateAndRegisterSimCallbackObject_External<FAlsCharacterMovementComponentAsyncCallback>();
+			}
+		}
+	}
+}
+
+bool UAlsCharacterMovementComponent::IsAsyncCallbackRegistered() const
+{
+	return AlsAsyncCallback != nullptr;
 }
