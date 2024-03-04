@@ -21,6 +21,7 @@
 
 struct FAlsFootLimitsSettings;
 class UAlsLinkedAnimationInstance;
+class UAlsRagdollingAnimInstance;
 class AAlsCharacter;
 
 UCLASS()
@@ -33,9 +34,15 @@ class ALS_API UAlsAnimationInstance : public UAnimInstance
 protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings")
 	TObjectPtr<UAlsAnimationInstanceSettings> Settings;
+	
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "State", Transient, Meta = (ClampMin = 0, ClampMax = 1))
+	float IdleAdditiveAmount{1.0f};
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient)
 	TWeakObjectPtr<AAlsCharacter> Character;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient)
+	TWeakObjectPtr<UAlsRagdollingAnimInstance> RagdollingAnimInstance;
 
 	// Used to indicate that the animation instance has not been updated for a long time
 	// and its current state may not be correct (such as foot location used in foot locking).
@@ -320,6 +327,11 @@ private:
 
 	void PlayQueuedTurnInPlaceAnimation();
 
+	// Ragdolling
+
+public:
+	UAlsRagdollingAnimInstance* GetRagdollingAnimInstance() const;
+
 	// PhysicalAnimation
 
 private:
@@ -337,6 +349,11 @@ public:
 inline UAlsAnimationInstanceSettings* UAlsAnimationInstance::GetSettingsUnsafe() const
 {
 	return Settings;
+}
+
+inline UAlsRagdollingAnimInstance* UAlsAnimationInstance::GetRagdollingAnimInstance() const
+{
+	return RagdollingAnimInstance.Get();
 }
 
 inline void UAlsAnimationInstance::MarkPendingUpdate()

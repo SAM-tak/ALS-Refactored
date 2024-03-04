@@ -110,11 +110,12 @@ namespace AlsLocomotionActionTags
 {
 	UE_DEFINE_GAMEPLAY_TAG(Root, FName{TEXTVIEW("Als.LocomotionAction")})
 	UE_DEFINE_GAMEPLAY_TAG(Mantling, FName{TEXTVIEW("Als.LocomotionAction.Mantling")})
-	UE_DEFINE_GAMEPLAY_TAG(Ragdolling, FName{TEXTVIEW("Als.LocomotionAction.Ragdolling")})
 	UE_DEFINE_GAMEPLAY_TAG(GettingUp, FName{TEXTVIEW("Als.LocomotionAction.GettingUp")})
 	UE_DEFINE_GAMEPLAY_TAG(Rolling, FName{TEXTVIEW("Als.LocomotionAction.Rolling")})
 	UE_DEFINE_GAMEPLAY_TAG(Landing, FName{TEXTVIEW("Als.LocomotionAction.Landing")})
 	UE_DEFINE_GAMEPLAY_TAG(FreeFalling, FName{TEXTVIEW("Als.LocomotionAction.FreeFalling")})
+	UE_DEFINE_GAMEPLAY_TAG(KnockedDown, FName{ TEXTVIEW("Als.LocomotionAction.KnockedDown") })
+	UE_DEFINE_GAMEPLAY_TAG(Dying, FName{ TEXTVIEW("Als.LocomotionAction.Dying") })
 }
 
 namespace AlsStateFlagTags

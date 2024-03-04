@@ -154,7 +154,8 @@ void AAlsCharacterExample::Input_OnJump(const FInputActionValue& ActionValue)
 	{
 		if (PhysicalAnimation->IsRagdollingGroundedAndAged())
 		{
-			AbilitySystem->CancelAbilitiesBySingleTag(AlsLocomotionActionTags::Ragdolling);
+			AbilitySystem->CancelAbilitiesBySingleTag(AlsLocomotionActionTags::KnockedDown);
+			AbilitySystem->CancelAbilitiesBySingleTag(AlsLocomotionActionTags::Dying);
 			return;
 		}
 
@@ -184,13 +185,13 @@ void AAlsCharacterExample::Input_OnAim(const FInputActionValue& ActionValue)
 
 void AAlsCharacterExample::Input_OnRagdoll()
 {
-	if (HasMatchingGameplayTag(AlsLocomotionActionTags::Ragdolling))
+	if (HasMatchingGameplayTag(RagdollActionTag))
 	{
-		AbilitySystem->CancelAbilitiesBySingleTag(AlsLocomotionActionTags::Ragdolling);
+		AbilitySystem->CancelAbilitiesBySingleTag(RagdollActionTag);
 	}
 	else
 	{
-		AbilitySystem->TryActivateAbilitiesBySingleTag(AlsLocomotionActionTags::Ragdolling);
+		AbilitySystem->TryActivateAbilitiesBySingleTag(RagdollActionTag);
 	}
 }
 

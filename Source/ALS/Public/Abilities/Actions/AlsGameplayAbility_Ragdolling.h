@@ -5,7 +5,7 @@
 #include "Abilities/AlsGameplayAbility_Action.h"
 #include "AlsGameplayAbility_Ragdolling.generated.h"
 
-class UAlsRagdollingAnimInstance;
+class UAlsLinkedAnimationInstance;
 
 /**
  * Ragdolling
@@ -19,8 +19,8 @@ class ALS_API UAlsGameplayAbility_Ragdolling : public UAlsGameplayAbility_Action
 	friend class UAlsRagdollingAnimInstance;
 
 public:
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "ALS|Ability")
-	TSubclassOf<UAlsRagdollingAnimInstance> OwnAnimLayersClass;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "ALS|Ability")
+	TSubclassOf<UAlsLinkedAnimationInstance> OverrideAnimLayersClass;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS|Ability")
 	TEnumAsByte<ECollisionChannel> GroundTraceChannel{ECC_Visibility};
@@ -110,7 +110,7 @@ protected:
 	uint8 bPreviousGrounded : 1{false};
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "ALS|Ability|State", Transient)
-	TWeakObjectPtr<UAlsRagdollingAnimInstance> LayerAnimInstance;
+	TWeakObjectPtr<UAlsLinkedAnimationInstance> OverrideAnimInstance;
 
 public:
 	virtual void ActivateAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo,

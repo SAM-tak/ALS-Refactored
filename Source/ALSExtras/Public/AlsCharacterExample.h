@@ -81,6 +81,9 @@ protected:
 		Meta = (ClampMin = 0, ForceUnits = "deg/s"))
 	float LookRightRate{240.0f};
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Settings|Als Character Example")
+	FGameplayTag RagdollActionTag{AlsLocomotionActionTags::Dying};
+
 public:
 	AAlsCharacterExample();
 

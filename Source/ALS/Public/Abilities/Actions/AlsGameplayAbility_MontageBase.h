@@ -8,25 +8,6 @@
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_ThreeParams(FAlsMontageNotifyDelegate, FName, NotifyName, float, TriggerTime, float, Duration);
 
 class UAbilitySystemComponent;
-class UAnimMontage;
-
-USTRUCT(BlueprintType)
-struct ALS_API FAlsPlayMontageParameter
-{
-	GENERATED_BODY()
-
-	UPROPERTY(EditDefaultsOnly, Category = AlsMontageAbility)
-	TObjectPtr<UAnimMontage> MontageToPlay;
-
-	UPROPERTY(EditDefaultsOnly, Category = AlsMontageAbility)
-	float PlayRate{1.0f};
-
-	UPROPERTY(EditDefaultsOnly, Category = AlsMontageAbility)
-	FName SectionName;
-
-	UPROPERTY(EditDefaultsOnly, Category = AlsMontageAbility, Meta = (ForceUnit = "s"))
-	float StartTime{0.0f};
-};
 
 /**
  *	A gameplay ability that plays a single montage and applies a GameplayEffect
@@ -69,14 +50,16 @@ public:
 	void GetGameplayEffectsWhileAnimating(TArray<const UGameplayEffect *> &OutEffects) const;
 
 protected:
-	void PlayMontage(const FGameplayAbilityActivationInfo ActivationInfo, const FAlsPlayMontageParameter& Parameter,
+	void PlayMontage(const FGameplayAbilityActivationInfo& ActivationInfo, const FAlsPlayMontageParameter& Parameter,
 					 const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo);
 
-	void PlayMontage(const FGameplayAbilityActivationInfo ActivationInfo, UAnimMontage* Montage, float PlayRate, FName SectionName, float StartTime,
+	void PlayMontage(const FGameplayAbilityActivationInfo& ActivationInfo, UAnimMontage* Montage, float PlayRate, FName SectionName, float StartTime,
 		const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo);
 
-	UFUNCTION(BlueprintCallable, Category = AlsMontageAbility)
-	void StopMontage(float OverrideBlendOutTime = -1.0f);
+	virtual void PlayMontage(const FGameplayAbilityActivationInfo& ActivationInfo, const FGameplayAbilityActorInfo* ActorInfo,
+							 const FAlsPlayMontageParameter& Parameter) override;
+
+	virtual void PlayMontage(const FAlsPlayMontageParameter& Parameter) override;
 
 private:
 	UFUNCTION(BlueprintCallable, Category = AlsMontageAbility)

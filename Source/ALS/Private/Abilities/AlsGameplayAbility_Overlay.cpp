@@ -30,6 +30,4 @@ void UAlsGameplayAbility_Overlay::ActivateAbility(const FGameplayAbilitySpecHand
 	auto PreviousOverlayMode{Character->GetOverlayMode()};
 
 	Super::ActivateAbility(Handle, ActorInfo, ActivationInfo, TriggerEventData);
-
-	Character->OnOverlayModeChanged(PreviousOverlayMode);
 }

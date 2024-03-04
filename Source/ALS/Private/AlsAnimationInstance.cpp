@@ -2,6 +2,7 @@
 
 #include "AlsAnimationInstanceProxy.h"
 #include "AlsCharacter.h"
+#include "AlsRagdollingAnimInstance.h"
 #include "Settings/AlsAnimationInstanceSettings.h"
 #include "Abilities/Actions/AlsGameplayAbility_Ragdolling.h"
 #include "DrawDebugHelpers.h"
@@ -33,9 +34,12 @@ void UAlsAnimationInstance::NativeInitializeAnimation()
 void UAlsAnimationInstance::NativeBeginPlay()
 {
 	Super::NativeBeginPlay();
+	
+	RagdollingAnimInstance = Cast<UAlsRagdollingAnimInstance>(GetLinkedAnimGraphInstanceByTag(FName{TEXT("Ragdolling")}));
 
 	ALS_ENSURE(IsValid(Settings));
 	ALS_ENSURE(Character.IsValid());
+	ALS_ENSURE(RagdollingAnimInstance.IsValid());
 }
 
 void UAlsAnimationInstance::NativeUpdateAnimation(const float DeltaTime)

@@ -1015,8 +1015,6 @@ bool AAlsCharacter::CanSprint() const
 	return false;
 }
 
-void AAlsCharacter::OnOverlayModeChanged_Implementation(const FGameplayTag& PreviousOverlayMode) {}
-
 FRotator AAlsCharacter::GetViewRotation() const
 {
 	return ViewState.Rotation;
@@ -1834,14 +1832,6 @@ void AAlsCharacter::RefreshViewRelativeTargetYawAngle()
 	LocomotionState.ViewRelativeTargetYawAngle = FRotator3f::NormalizeAxis(UE_REAL_TO_FLOAT(
 		ViewState.Rotation.Yaw - LocomotionState.TargetYawAngle));
 }
-
-void AAlsCharacter::OnMantlingStarted_Implementation(const FAlsMantlingParameters& Parameters) {}
-
-void AAlsCharacter::OnMantlingEnded_Implementation() {}
-
-void AAlsCharacter::OnRagdollingStarted_Implementation() {}
-
-void AAlsCharacter::OnRagdollingEnded_Implementation() {}
 
 const FGameplayTag& AAlsCharacter::DesiredToActual(const FGameplayTag& SourceTag) const
 {

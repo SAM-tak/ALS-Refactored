@@ -30,6 +30,8 @@ UAlsGameplayAbility_Mantling::UAlsGameplayAbility_Mantling(const FObjectInitiali
 	ActivationOwnedTags.AddTag(AlsLocomotionActionTags::Mantling);
 	CancelAbilitiesWithTag.AddTag(AlsLocomotionActionTags::Root);
 	BlockAbilitiesWithTag.AddTag(AlsLocomotionActionTags::Mantling);
+	ActivationBlockedTags.AddTag(AlsLocomotionActionTags::KnockedDown);
+	ActivationBlockedTags.AddTag(AlsLocomotionActionTags::Dying);
 
 	MantlingTraceResponses.WorldStatic = ECR_Block;
 	MantlingTraceResponses.WorldDynamic = ECR_Block;
@@ -430,8 +432,6 @@ void UAlsGameplayAbility_Mantling::ActivateAbility(const FGameplayAbilitySpecHan
 			TickTask->OnTick.AddDynamic(this, &ThisClass::ProcessTick);
 			TickTask->ReadyForActivation();
 		}
-
-		Character->OnMantlingStarted(Parameters);
 	}
 }
 
@@ -487,8 +487,6 @@ void UAlsGameplayAbility_Mantling::EndAbility(const FGameplayAbilitySpecHandle H
 
 	CharacterMovement->SetMovementModeLocked(false);
 	CharacterMovement->SetMovementMode(MOVE_Walking);
-
-	Character->OnMantlingEnded();
 
 	//ForceNetUpdate();
 }

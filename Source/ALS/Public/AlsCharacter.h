@@ -476,24 +476,6 @@ protected:
 
 	void RefreshViewRelativeTargetYawAngle();
 
-	// Callbacks (tentative)
-
-public:
-	UFUNCTION(BlueprintNativeEvent, Category = "Als Character")
-	void OnOverlayModeChanged(const FGameplayTag& PreviousOverlayMode);
-
-	UFUNCTION(BlueprintNativeEvent, Category = "Als Character")
-	void OnMantlingStarted(const FAlsMantlingParameters& Parameters);
-	
-	UFUNCTION(BlueprintNativeEvent, Category = "Als Character")
-	void OnMantlingEnded();
-
-	UFUNCTION(BlueprintNativeEvent, Category = "Als Character")
-	void OnRagdollingStarted();
-
-	UFUNCTION(BlueprintNativeEvent, Category = "Als Character")
-	void OnRagdollingEnded();
-
 	// Utility
 
 public:
