@@ -317,7 +317,9 @@ bool UAlsGameplayAbility_Mantling::CanMantle(const FGameplayAbilitySpecHandle Ha
 	Params.MantlingType = bInAir ? EAlsMantlingType::InAir
 								 : MantlingHeight > MantlingHighHeightThreshold
 									? EAlsMantlingType::High
-									: EAlsMantlingType::Low;
+									: MantlingHeight > MantlingMediumHeightThreshold
+										? EAlsMantlingType::Medium
+										: EAlsMantlingType::Low;
 
 	// If the target primitive can't move, then use world coordinates to save
 	// some performance by skipping some coordinate space transformations later.

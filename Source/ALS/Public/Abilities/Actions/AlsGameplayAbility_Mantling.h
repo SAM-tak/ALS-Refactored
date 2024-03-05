@@ -12,6 +12,7 @@ UENUM(BlueprintType)
 enum class EAlsMantlingType : uint8
 {
 	High,
+	Medium,
 	Low,
 	InAir
 };
@@ -115,6 +116,9 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS|Ability", Meta = (ForceUnits = "cm"))
 	float MantlingHighHeightThreshold{125.0f};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS|Ability", Meta = (ForceUnits = "cm"))
+	float MantlingMediumHeightThreshold{75.0f};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS|Ability")
 	FAlsMantlingTraceSettings GroundedTrace;
