@@ -22,10 +22,10 @@ UAlsGameplayAbility_Ragdolling::UAlsGameplayAbility_Ragdolling(const FObjectInit
 {
 	ReplicationPolicy = EGameplayAbilityReplicationPolicy::ReplicateYes;
 
-	AbilityTags.AddTag(AlsLocomotionActionTags::KnockedDown);
-	ActivationOwnedTags.AddTag(AlsLocomotionActionTags::KnockedDown);
+	AbilityTags.AddTag(AlsLocomotionActionTags::BeingKnockedDown);
+	ActivationOwnedTags.AddTag(AlsLocomotionActionTags::BeingKnockedDown);
 	CancelAbilitiesWithTag.AddTag(AlsLocomotionActionTags::Root);
-	BlockAbilitiesWithTag.AddTag(AlsLocomotionActionTags::KnockedDown);
+	BlockAbilitiesWithTag.AddTag(AlsLocomotionActionTags::BeingKnockedDown);
 
 	GroundTraceResponses.WorldStatic = ECR_Block;
 	GroundTraceResponses.WorldDynamic = ECR_Block;
@@ -54,10 +54,10 @@ void UAlsGameplayAbility_Ragdolling::ActivateAbility(const FGameplayAbilitySpecH
 
 	auto* Character{GetAlsCharacterFromActorInfo()};
 	auto* AnimInstance{Character->GetAlsAnimationInstace()};
-	auto* CharacterMovement{Character->GetAlsCharacterMovement()};
-	auto* RagdollingAnimInstance{Character->GetAlsAnimationInstace()->GetRagdollingAnimInstance()};
 
-	if (!RagdollingAnimInstance)
+	RagdollingAnimInstance = Character->GetAlsAnimationInstace()->GetRagdollingAnimInstance();
+
+	if (!IsValid(RagdollingAnimInstance))
 	{
 		return;
 	}
@@ -81,6 +81,8 @@ void UAlsGameplayAbility_Ragdolling::ActivateAbility(const FGameplayAbilitySpecH
 	// Ensure freeze flag is off.
 
 	RagdollingAnimInstance->UnFreeze();
+
+	auto* CharacterMovement{Character->GetAlsCharacterMovement()};
 
 	// Initialize bFacingUpward flag by current movement direction. If Velocity is Zero, it is chosen bFacingUpward is true.
 	// And determine target yaw angle of the character.
@@ -134,6 +136,7 @@ void UAlsGameplayAbility_Ragdolling::ActivateAbility(const FGameplayAbilitySpecH
 
 	if (IsActive())
 	{
+		RagdollingAnimInstance->Refresh(*this, true);
 		TickTask = UAlsAbilityTask_Tick::New(this, FName(TEXT("UAlsGameplayAbility_Ragdolling")));
 		if (TickTask.IsValid())
 		{
@@ -152,7 +155,6 @@ void UAlsGameplayAbility_Ragdolling::Tick(const float DeltaTime)
 
 	auto* Character{GetAlsCharacterFromActorInfo()};
 	auto* CharacterMovement{Character->GetAlsCharacterMovement()};
-	auto* RagdollingAnimInstance{Character->GetAlsAnimationInstace()->GetRagdollingAnimInstance()};
 
 	const auto bLocallyControlled{Character->IsLocallyControlled() || (Character->GetLocalRole() >= ROLE_Authority && !IsValid(Character->GetController()))};
 
@@ -197,7 +199,7 @@ void UAlsGameplayAbility_Ragdolling::Tick(const float DeltaTime)
 		}
 	}
 
-	Character->GetAlsAnimationInstace()->GetRagdollingAnimInstance()->Refresh(*this, IsActive());
+	RagdollingAnimInstance->Refresh(*this, IsActive());
 
 	if (bAllowFreeze)
 	{
@@ -281,9 +283,13 @@ void UAlsGameplayAbility_Ragdolling::Tick(const float DeltaTime)
 		if (!bOnGroundedAndAgedFired)
 		{
 			bOnGroundedAndAgedFired = true;
-			K2_OnGroundedAndAgedAtFirstTime();
+			K2_OnGroundedAndAged();
 		}
 		Character->Lie();
+	}
+	else
+	{
+		bOnGroundedAndAgedFired = false;
 	}
 }
 
@@ -292,13 +298,9 @@ void UAlsGameplayAbility_Ragdolling::EndAbility(const FGameplayAbilitySpecHandle
 {
 	auto* Character{GetAlsCharacterFromActorInfo()};
 	auto CharacterMovement{Character->GetAlsCharacterMovement()};
-	auto* RagdollingAnimInstance{Character->GetAlsAnimationInstace()->GetRagdollingAnimInstance()};
 
-	if (RagdollingAnimInstance)
-	{
-		RagdollingAnimInstance->Freeze();
-		RagdollingAnimInstance->Refresh(*this, false);
-	}
+	RagdollingAnimInstance->Freeze();
+	RagdollingAnimInstance->Refresh(*this, false);
 
 	// Re-enable capsule collision.
 
@@ -357,9 +359,9 @@ void UAlsGameplayAbility_Ragdolling::EndAbility(const FGameplayAbilitySpecHandle
 		AbilitySystem->SetLooseGameplayTagCount(AlsStateFlagTags::FacingUpward, bFacingUpward ? 1 : 0);
 	}
 
-	Super::EndAbility(Handle, ActorInfo, ActivationInfo, bReplicateEndAbility, bWasCancelled);
-
 	Character->GetMesh()->UnlinkAnimClassLayers(OverrideAnimLayersClass);
+
+	Super::EndAbility(Handle, ActorInfo, ActivationInfo, bReplicateEndAbility, bWasCancelled);
 }
 
 void UAlsGameplayAbility_Ragdolling::SetTargetLocation(const FVector& NewTargetLocation)

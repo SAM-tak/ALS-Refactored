@@ -30,7 +30,8 @@ UAlsGameplayAbility_Mantling::UAlsGameplayAbility_Mantling(const FObjectInitiali
 	ActivationOwnedTags.AddTag(AlsLocomotionActionTags::Mantling);
 	CancelAbilitiesWithTag.AddTag(AlsLocomotionActionTags::Root);
 	BlockAbilitiesWithTag.AddTag(AlsLocomotionActionTags::Mantling);
-	ActivationBlockedTags.AddTag(AlsLocomotionActionTags::KnockedDown);
+	BlockAbilitiesWithTag.AddTag(AlsLocomotionActionTags::Rolling);
+	ActivationBlockedTags.AddTag(AlsLocomotionActionTags::BeingKnockedDown);
 	ActivationBlockedTags.AddTag(AlsLocomotionActionTags::Dying);
 
 	MantlingTraceResponses.WorldStatic = ECR_Block;
@@ -47,7 +48,27 @@ bool UAlsGameplayAbility_Mantling::CanActivateAbility(const FGameplayAbilitySpec
 		return false;
 	}
 
-	auto* Character{Cast<AAlsCharacter>(ActorInfo->OwnerActor)};
+	if (ParameterMap.Contains(Handle))
+	{
+		return true;
+	}
+
+	FAlsMantlingParameters Params;
+	if (CanMantle(Handle, *ActorInfo, Params) && CanMantleByParameter(*ActorInfo, Params))
+	{
+		// The idea of putting the mutable member variable into the ActivateAbility method does not work well.
+		// The memory area is cleared, or if it is a different instance from when CanActivateAbility is called,
+		// anyway the contents of the parameter are lost.
+		// Therefore, I am passing it with a static variable map.
+		CommitParameter(Handle, Params);
+		return true;
+	}
+	return false;
+}
+
+bool UAlsGameplayAbility_Mantling::CanMantle(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo& ActorInfo, FAlsMantlingParameters& Params) const
+{
+	auto* Character{Cast<AAlsCharacter>(ActorInfo.OwnerActor)};
 	if (!IsValid(Character))
 	{
 		return false;
@@ -95,9 +116,9 @@ bool UAlsGameplayAbility_Mantling::CanActivateAbility(const FGameplayAbilitySpec
 
 	const auto TraceCapsuleRadius{CapsuleRadius - 1.0f};
 
-	bool InAir{Character->HasMatchingGameplayTag(AlsLocomotionModeTags::InAir)};
+	bool bInAir{Character->HasMatchingGameplayTag(AlsLocomotionModeTags::InAir)};
 
-	const FAlsMantlingTraceSettings& TraceSettings{InAir ? InAirTrace : GroundedTrace};
+	const FAlsMantlingTraceSettings& TraceSettings{bInAir ? InAirTrace : GroundedTrace};
 
 	const auto LedgeHeightDelta{UE_REAL_TO_FLOAT((TraceSettings.LedgeHeight.GetMax() - TraceSettings.LedgeHeight.GetMin()) * CapsuleScale)};
 
@@ -288,15 +309,13 @@ bool UAlsGameplayAbility_Mantling::CanActivateAbility(const FGameplayAbilitySpec
 	const auto TargetRotation{TargetDirection.ToOrientationQuat()};
 	const auto MantlingHeight{UE_REAL_TO_FLOAT((TargetLocation.Z - CapsuleBottomLocation.Z) / CapsuleScale)};
 
-	FAlsMantlingParameters Params;
-
 	Params.TargetPrimitive = TargetPrimitive;
 	Params.MantlingHeight = MantlingHeight;
 
 	// Determine the mantling type by checking the movement mode and mantling height.
 
-	Params.MantlingType = InAir ? EAlsMantlingType::InAir
-								: MantlingHeight > MantlingHighHeightThreshold
+	Params.MantlingType = bInAir ? EAlsMantlingType::InAir
+								 : MantlingHeight > MantlingHighHeightThreshold
 									? EAlsMantlingType::High
 									: EAlsMantlingType::Low;
 
@@ -318,12 +337,12 @@ bool UAlsGameplayAbility_Mantling::CanActivateAbility(const FGameplayAbilitySpec
 		Params.TargetRelativeRotation = TargetRotation.Rotator();
 	}
 
-	// The idea of putting the mutable member variable into the ActivateAbility method does not work well.
-	// The memory area is cleared, or if it is a different instance from when CanActivateAbility is called,
-	// anyway the contents of the parameter are lost.
-	// Therefore, I am passing it with a static variable map.
-	ParameterMap.Add(Handle, Params);
 	return true;
+}
+
+void UAlsGameplayAbility_Mantling::CommitParameter(const FGameplayAbilitySpecHandle Handle, const FAlsMantlingParameters& Parameters) const
+{
+	ParameterMap.Add(Handle, Parameters);
 }
 
 void UAlsGameplayAbility_Mantling::ActivateAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo,
@@ -345,7 +364,7 @@ void UAlsGameplayAbility_Mantling::ActivateAbility(const FGameplayAbilitySpecHan
 	auto* AnimInstance{Character->GetAlsAnimationInstace()};
 	auto* CharacterMovement{Character->GetAlsCharacterMovement()};
 	
-	const auto* MantlingSettings{SelectMantlingSettings(Parameters.MantlingType)};
+	const auto* MantlingSettings{SelectMantlingSettings(Parameters)};
 
 	if (!ALS_ENSURE(IsValid(MantlingSettings)) || !ALS_ENSURE(IsValid(MantlingSettings->Montage)))
 	{
@@ -429,7 +448,7 @@ void UAlsGameplayAbility_Mantling::ActivateAbility(const FGameplayAbilitySpecHan
 		TickTask = UAlsAbilityTask_Tick::New(this, FName(TEXT("UAlsGameplayAbility_Mantling")));
 		if (TickTask.IsValid())
 		{
-			TickTask->OnTick.AddDynamic(this, &ThisClass::ProcessTick);
+			TickTask->OnTick.AddDynamic(this, &ThisClass::Tick);
 			TickTask->ReadyForActivation();
 		}
 	}
@@ -552,12 +571,12 @@ float UAlsGameplayAbility_Mantling::CalculateMantlingStartTime(const UAlsMantlin
 	}
 }
 
-void UAlsGameplayAbility_Mantling::ProcessTick(const float DeltaTime)
+bool UAlsGameplayAbility_Mantling::CanMantleByParameter_Implementation(const FGameplayAbilityActorInfo& ActorInfo, const FAlsMantlingParameters& Parameter) const
 {
-	Tick(DeltaTime);
+	return true;
 }
 
-UAlsMantlingSettings* UAlsGameplayAbility_Mantling::SelectMantlingSettings_Implementation(EAlsMantlingType MantlingType)
+UAlsMantlingSettings* UAlsGameplayAbility_Mantling::SelectMantlingSettings_Implementation(const FAlsMantlingParameters& Parameters) const
 {
 	return nullptr;
 }

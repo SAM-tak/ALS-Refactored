@@ -144,12 +144,24 @@ public:
 
 protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "ALS|Ability|State", Transient)
-	int32 RootMotionSourceId = 0;
+	int32 RootMotionSourceId{0};
 
 	float CalculateMantlingStartTime(const UAlsMantlingSettings* MantlingSettings, const float MantlingHeight) const;
 
 	UFUNCTION(BlueprintNativeEvent, Category = "Als|Ability|Mantling")
 	void Tick(const float DeltaTime);
+
+	UFUNCTION(BlueprintNativeEvent, Category = "Als|Ability|Mantling")
+	bool CanMantleByParameter(const FGameplayAbilityActorInfo& ActorInfo, const FAlsMantlingParameters& Parameter) const;
+
+	UFUNCTION(BlueprintCallable, Category = "Als|Ability|Mantling")
+	void CommitParameter(const FGameplayAbilitySpecHandle Handle, const FAlsMantlingParameters& Parameters) const;
+
+	UFUNCTION(BlueprintCallable, Category = "Als|Ability|Mantling")
+	bool CanMantle(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo& ActorInfo, FAlsMantlingParameters& MantlingParameters) const;
+
+	UFUNCTION(BlueprintNativeEvent, Category = "Als|Ability|Mantling")
+	UAlsMantlingSettings* SelectMantlingSettings(const FAlsMantlingParameters& Parameters) const;
 
 public:
 	virtual bool CanActivateAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo,
@@ -162,9 +174,6 @@ public:
 	virtual void EndAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilityActivationInfo ActivationInfo,
 							bool bReplicateEndAbility, bool bWasCancelled) override;
 
-	UFUNCTION(BlueprintNativeEvent, Category = "Als|Ability|Mantling")
-	UAlsMantlingSettings* SelectMantlingSettings(EAlsMantlingType MantlingType);
-
 #if WITH_EDITOR
 	virtual void PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent) override;
 #endif
@@ -173,7 +182,4 @@ private:
 	static TMap<FGameplayAbilitySpecHandle, FAlsMantlingParameters> ParameterMap;
 
 	TWeakObjectPtr<class UAlsAbilityTask_Tick> TickTask;
-
-	UFUNCTION()
-	void ProcessTick(const float DeltaTime);
 };

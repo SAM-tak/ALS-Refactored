@@ -63,7 +63,7 @@ void UAlsGameplayAbility_Landing::ActivateAbility(const FGameplayAbilitySpecHand
 		EndAbility(CurrentSpecHandle, GetCurrentActorInfo(), GetCurrentActivationInfo(),
 				   ReplicationPolicy != EGameplayAbilityReplicationPolicy::ReplicateNo, false);
 
-		GetAlsAbilitySystemComponentFromActorInfo()->TryActivateAbilitiesBySingleTag(AlsLocomotionActionTags::KnockedDown);
+		GetAlsAbilitySystemComponentFromActorInfo()->TryActivateAbilitiesBySingleTag(AlsLocomotionActionTags::BeingKnockedDown);
 	}
 	else if (bStartRollingOnLand && Character->GetLocomotionState().Velocity.Z <= -RollingOnLandSpeedThreshold)
 	{

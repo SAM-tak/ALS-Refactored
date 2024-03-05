@@ -112,6 +112,9 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "ALS|Ability|State", Transient)
 	TWeakObjectPtr<UAlsLinkedAnimationInstance> OverrideAnimInstance;
 
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "ALS|Ability|State", Transient)
+	UAlsRagdollingAnimInstance* RagdollingAnimInstance{nullptr};
+
 public:
 	virtual void ActivateAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo,
 								 const FGameplayAbilityActivationInfo ActivationInfo, const FGameplayEventData* TriggerEventData) override;
@@ -138,9 +141,8 @@ protected:
 	UFUNCTION(BlueprintImplementableEvent, Category = "Als|Ability|Ragdolling", DisplayName = "Tick", Meta = (ScriptName = "Tick"))
 	void K2_OnTick(const float DeltaTime);
 
-	UFUNCTION(BlueprintImplementableEvent, Category = "ALS|Ability|Ragdolling", DisplayName = "On Grounded And Aged At First Time",
-			  Meta = (ScriptName = "OnGroundedAndAgedAtFirstTime"))
-	void K2_OnGroundedAndAgedAtFirstTime();
+	UFUNCTION(BlueprintImplementableEvent, Category = "ALS|Ability|Ragdolling", DisplayName = "On Grounded And Aged", Meta = (ScriptName = "OnGroundedAndAged"))
+	void K2_OnGroundedAndAged();
 
 	void Cancel();
 

@@ -99,7 +99,8 @@ public:
 
 	bool IsRagdolling() const;
 
-	bool IsRagdollingGroundedAndAged() const;
+	UFUNCTION(BlueprintPure, Category = "Als|PhysicalAnimation")
+	bool IsRagdollingAndGroundedAndAged() const;
 
 	UFUNCTION(BlueprintCallable, Category = "Als|PhysicalAnimation")
 	void RequestActivation(const FGameplayTag &AbilityTag);

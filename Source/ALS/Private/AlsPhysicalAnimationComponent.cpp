@@ -450,9 +450,14 @@ void UAlsPhysicalAnimationComponent::Refresh(AAlsCharacter* Character)
 		LatestRagdolling->Cancel();
 	}
 
-	while (!ActivationRequest.IsEmpty())
+	if (!ActivationRequest.IsEmpty())
 	{
-		Character->GetAlsAbilitySystem()->TryActivateAbilitiesBySingleTag(ActivationRequest.Pop());
+		Character->GetAlsAbilitySystem()->SetLooseGameplayTagCount(AlsStateFlagTags::DelayedActivation, 1);
+		while (!ActivationRequest.IsEmpty())
+		{
+			Character->GetAlsAbilitySystem()->TryActivateAbilitiesBySingleTag(ActivationRequest.Pop());
+		}
+		Character->GetAlsAbilitySystem()->SetLooseGameplayTagCount(AlsStateFlagTags::DelayedActivation, 0);
 	}
 
 	// Apply special behaviour when changed Ragdolling state
@@ -675,7 +680,7 @@ bool UAlsPhysicalAnimationComponent::IsRagdolling() const
 	return LatestRagdolling.IsValid() && LatestRagdolling->IsActive();
 }
 
-bool UAlsPhysicalAnimationComponent::IsRagdollingGroundedAndAged() const
+bool UAlsPhysicalAnimationComponent::IsRagdollingAndGroundedAndAged() const
 {
 	return IsRagdolling() && LatestRagdolling->IsGroundedAndAged();
 }

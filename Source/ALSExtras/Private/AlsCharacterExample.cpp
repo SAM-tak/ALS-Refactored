@@ -152,16 +152,16 @@ void AAlsCharacterExample::Input_OnJump(const FInputActionValue& ActionValue)
 {
 	if (ActionValue.Get<bool>())
 	{
-		if (PhysicalAnimation->IsRagdollingGroundedAndAged())
+		if (HasMatchingGameplayTag(AlsLocomotionModeTags::Grounded))
 		{
-			AbilitySystem->CancelAbilitiesBySingleTag(AlsLocomotionActionTags::KnockedDown);
-			AbilitySystem->CancelAbilitiesBySingleTag(AlsLocomotionActionTags::Dying);
-			return;
-		}
-
-		if (HasMatchingGameplayTag(AlsLocomotionModeTags::Grounded) && AbilitySystem->TryActivateAbilitiesBySingleTag(AlsLocomotionActionTags::Mantling))
-		{
-			return;
+			if (AbilitySystem->TryActivateAbilitiesBySingleTag(AlsLocomotionActionTags::GettingUp))
+			{
+				return;
+			}		
+			if (AbilitySystem->TryActivateAbilitiesBySingleTag(AlsLocomotionActionTags::Mantling))
+			{
+				return;
+			}
 		}
 
 		if (GetDesiredStance() != AlsDesiredStanceTags::Standing)
@@ -185,7 +185,11 @@ void AAlsCharacterExample::Input_OnAim(const FInputActionValue& ActionValue)
 
 void AAlsCharacterExample::Input_OnRagdoll()
 {
-	if (HasMatchingGameplayTag(RagdollActionTag))
+	if(HasMatchingGameplayTag(AlsLocomotionActionTags::GettingDown))
+	{
+		AbilitySystem->TryActivateAbilitiesBySingleTag(AlsLocomotionActionTags::GettingUp);
+	}
+	else if (HasMatchingGameplayTag(RagdollActionTag))
 	{
 		AbilitySystem->CancelAbilitiesBySingleTag(RagdollActionTag);
 	}

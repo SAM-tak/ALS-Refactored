@@ -14,16 +14,16 @@ class ALS_API UAlsGameplayAbility_Montage : public UAlsGameplayAbility_MontageBa
 	GENERATED_BODY()
 
 protected:
-	UPROPERTY(EditDefaultsOnly, Category = AlsMontageAbility)
+	UPROPERTY(EditDefaultsOnly, Category = "Als|Ability|Montage")
 	TObjectPtr<UAnimMontage> MontageToPlay;
 
-	UPROPERTY(EditDefaultsOnly, Category = AlsMontageAbility)
+	UPROPERTY(EditDefaultsOnly, Category = "Als|Ability|Montage")
 	float PlayRate{1.0f};
 
-	UPROPERTY(EditDefaultsOnly, Category = AlsMontageAbility)
+	UPROPERTY(EditDefaultsOnly, Category = "Als|Ability|Montage")
 	FName SectionName;
 
-	UPROPERTY(EditDefaultsOnly, Category = AlsMontageAbility, Meta = (ForceUnit = "s"))
+	UPROPERTY(EditDefaultsOnly, Category = "Als|Ability|Montage", Meta = (ForceUnit = "s"))
 	float StartTime;
 
 

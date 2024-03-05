@@ -111,17 +111,19 @@ namespace AlsLocomotionActionTags
 	UE_DEFINE_GAMEPLAY_TAG(Root, FName{TEXTVIEW("Als.LocomotionAction")})
 	UE_DEFINE_GAMEPLAY_TAG(Mantling, FName{TEXTVIEW("Als.LocomotionAction.Mantling")})
 	UE_DEFINE_GAMEPLAY_TAG(GettingUp, FName{TEXTVIEW("Als.LocomotionAction.GettingUp")})
+	UE_DEFINE_GAMEPLAY_TAG(GettingDown, FName{TEXTVIEW("Als.LocomotionAction.GettingDown")})
 	UE_DEFINE_GAMEPLAY_TAG(Rolling, FName{TEXTVIEW("Als.LocomotionAction.Rolling")})
 	UE_DEFINE_GAMEPLAY_TAG(Landing, FName{TEXTVIEW("Als.LocomotionAction.Landing")})
 	UE_DEFINE_GAMEPLAY_TAG(FreeFalling, FName{TEXTVIEW("Als.LocomotionAction.FreeFalling")})
-	UE_DEFINE_GAMEPLAY_TAG(KnockedDown, FName{ TEXTVIEW("Als.LocomotionAction.KnockedDown") })
-	UE_DEFINE_GAMEPLAY_TAG(Dying, FName{ TEXTVIEW("Als.LocomotionAction.Dying") })
+	UE_DEFINE_GAMEPLAY_TAG(BeingKnockedDown, FName{TEXTVIEW("Als.LocomotionAction.BeingKnockedDown")})
+	UE_DEFINE_GAMEPLAY_TAG(Dying, FName{TEXTVIEW("Als.LocomotionAction.Dying")})
 }
 
 namespace AlsStateFlagTags
 {
 	UE_DEFINE_GAMEPLAY_TAG(Root, FName{TEXTVIEW("Als.StateFlag")})
 	UE_DEFINE_GAMEPLAY_TAG(FacingUpward, FName{TEXTVIEW("Als.StateFlag.FacingUpward")})
+	UE_DEFINE_GAMEPLAY_TAG(DelayedActivation, FName{TEXTVIEW("Als.StateFlag.DelayedActivation")})
 }
 
 namespace AlsGroundedEntryModeTags

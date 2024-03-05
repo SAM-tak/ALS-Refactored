@@ -56,8 +56,11 @@ AAlsCharacter::AAlsCharacter(const FObjectInitializer& ObjectInitializer) : Supe
 	PhysicalAnimation = CreateDefaultSubobject<UAlsPhysicalAnimationComponent>(PhysicalAnimationComponentName);
 
 	AbilitySystem = CreateOptionalDefaultSubobject<UAlsAbilitySystemComponent>(AbilitySystemComponentName);
-	AbilitySystem->SetIsReplicated(true);
-	AbilitySystem->SetReplicationMode(EGameplayEffectReplicationMode::Minimal);
+	if (AbilitySystem)
+	{
+		AbilitySystem->SetIsReplicated(true);
+		AbilitySystem->SetReplicationMode(EGameplayEffectReplicationMode::Minimal);
+	}
 
 	// This will prevent the editor from combining component details with actor details.
 	// Component details can still be accessed from the actor's component hierarchy.

@@ -501,10 +501,10 @@ public:
 
 	virtual void OnEndLie(const float HalfHeightAdjust, const float ScaledHalfHeightAdjust);
 
-	UFUNCTION(BlueprintImplementableEvent, meta = (DisplayName = "OnStartLie", ScriptName = "OnStartLie"))
+	UFUNCTION(BlueprintImplementableEvent, Meta = (DisplayName = "OnStartLie", ScriptName = "OnStartLie"))
 	void K2_OnStartLie(float HalfHeightAdjust, float ScaledHalfHeightAdjust);
 
-	UFUNCTION(BlueprintImplementableEvent, meta = (DisplayName = "OnEndLie", ScriptName = "OnEndLie"))
+	UFUNCTION(BlueprintImplementableEvent, Meta = (DisplayName = "OnEndLie", ScriptName = "OnEndLie"))
 	void K2_OnEndLie(float HalfHeightAdjust, float ScaledHalfHeightAdjust);
 
 private:
