@@ -20,22 +20,7 @@ protected:
 	TWeakObjectPtr<UAlsCameraMovementComponent> CameraMovement;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient)
-	FGameplayTag ViewMode{AlsViewModeTags::ThirdPerson};
-
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient)
-	FGameplayTag LocomotionMode;
-
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient)
-	FGameplayTag RotationMode{AlsRotationModeTags::ViewDirection};
-
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient)
-	FGameplayTag Stance{AlsStanceTags::Standing};
-
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient)
-	FGameplayTag Gait{AlsGaitTags::Walking};
-
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient)
-	FGameplayTag LocomotionAction;
+	FGameplayTagContainer CurrentGameplayTags;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient)
 	uint8 bRightShoulder : 1 {true};

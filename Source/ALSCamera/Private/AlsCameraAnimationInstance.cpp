@@ -23,12 +23,7 @@ void UAlsCameraAnimationInstance::NativeUpdateAnimation(const float DeltaTime)
 		return;
 	}
 
-	ViewMode = Character->GetViewMode();
-	LocomotionMode = Character->GetLocomotionMode();
-	RotationMode = Character->GetRotationMode();
-	Stance = Character->GetStance();
-	Gait = Character->GetGait();
-	LocomotionAction = Character->GetLocomotionAction();
+	Character->GetOwnedGameplayTags(CurrentGameplayTags);
 
 	bRightShoulder = Character->IsRightShoulder();
 }

@@ -84,6 +84,8 @@ void UAlsAnimationInstance::NativeUpdateAnimation(const float DeltaTime)
 	Gait = Character->GetGait();
 	OverlayMode = Character->GetOverlayMode();
 
+	Character->GetOwnedGameplayTags(CurrentGameplayTags);
+
 	if (FaceRotationMode != AlsRotationModeTags::Aiming)
 	{
 		FaceRotationMode = Character->GetDesiredRotationMode();

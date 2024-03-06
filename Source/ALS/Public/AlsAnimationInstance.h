@@ -89,6 +89,9 @@ protected:
 	float StartPositionOverrideForGroundedEntry;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient)
+	FGameplayTagContainer CurrentGameplayTags;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient)
 	FAlsMovementBaseState MovementBase;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient)
