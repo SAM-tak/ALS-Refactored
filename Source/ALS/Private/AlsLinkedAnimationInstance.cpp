@@ -90,7 +90,7 @@ FGameplayTag UAlsLinkedAnimationInstance::GetEntryStance() const
 		{
 			return AlsStanceTags::LyingBack;
 		}
-		return Parent->Stance;
+		return Parent->CurrentGameplayTags.Filter(FGameplayTagContainer{AlsStanceTags::Root}).First();
 	}
 	return AlsStanceTags::Standing;
 }
