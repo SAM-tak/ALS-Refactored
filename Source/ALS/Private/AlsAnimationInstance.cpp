@@ -77,24 +77,14 @@ void UAlsAnimationInstance::NativeUpdateAnimation(const float DeltaTime)
 	bDisplayDebugTraces = UAlsUtility::ShouldDisplayDebugForActor(Character.Get(), UAlsConstants::TracesDebugDisplayName());
 #endif
 
-	ViewMode = Character->GetViewMode();
-	LocomotionMode = Character->GetLocomotionMode();
-	RotationMode = FaceRotationMode = Character->GetRotationMode();
-	Stance = Character->GetStance();
-	Gait = Character->GetGait();
-	OverlayMode = Character->GetOverlayMode();
 
 	Character->GetOwnedGameplayTags(CurrentGameplayTags);
-
+	FaceRotationMode = Character->GetRotationMode();
 	if (FaceRotationMode != AlsRotationModeTags::Aiming)
 	{
 		FaceRotationMode = Character->GetDesiredRotationMode();
 	}
-
-	if (LocomotionAction != Character->GetLocomotionAction())
-	{
-		LocomotionAction = Character->GetLocomotionAction();
-	}
+	LocomotionAction = Character->GetLocomotionAction();
 
 	RefreshMovementBaseOnGameThread();
 	RefreshViewOnGameThread();
@@ -306,7 +296,7 @@ void UAlsAnimationInstance::RefreshViewOnGameThread()
 
 bool UAlsAnimationInstance::IsSpineRotationAllowed()
 {
-	return RotationMode == AlsRotationModeTags::Aiming;
+	return CurrentGameplayTags.HasTag(AlsRotationModeTags::Aiming);
 }
 
 void UAlsAnimationInstance::RefreshView(const float DeltaTime)
@@ -510,7 +500,7 @@ void UAlsAnimationInstance::RefreshGrounded(const float DeltaTime)
 	GroundedState.SprintBlockAmount = GetCurveValueClamped01(UAlsConstants::SprintBlockCurveName());
 	GroundedState.HipsDirectionLockAmount = FMath::Clamp(GetCurveValue(UAlsConstants::HipsDirectionLockCurveName()), -1.0f, 1.0f);
 
-	if (LocomotionMode != AlsLocomotionModeTags::Grounded)
+	if (!CurrentGameplayTags.HasTag(AlsLocomotionModeTags::Grounded))
 	{
 		GroundedState.VelocityBlend.bReinitializationRequired = true;
 		GroundedState.SprintTime = 0.0f;
@@ -562,7 +552,7 @@ void UAlsAnimationInstance::RefreshMovementDirection()
 	// Calculate the movement direction. This value represents the direction the character is moving relative
 	// to the camera and is used in the cycle blending to blend to the appropriate directional states.
 
-	if (Gait == AlsGaitTags::Sprinting)
+	if (CurrentGameplayTags.HasTag(AlsGaitTags::Sprinting))
 	{
 		GroundedState.MovementDirection = EAlsMovementDirection::Forward;
 		return;
@@ -637,7 +627,7 @@ void UAlsAnimationInstance::RefreshRotationYawOffsets()
 
 void UAlsAnimationInstance::RefreshSprint(const FVector3f& RelativeAccelerationAmount, const float DeltaTime)
 {
-	if (Gait != AlsGaitTags::Sprinting)
+	if (!CurrentGameplayTags.HasTag(AlsGaitTags::Sprinting))
 	{
 		GroundedState.SprintTime = 0.0f;
 		GroundedState.SprintAccelerationAmount = 0.0f;
@@ -685,7 +675,7 @@ void UAlsAnimationInstance::RefreshWalkRunBlendAmount()
 {
 	// Calculate the walk run blend amount. This value is used within the blend spaces to blend between walking and running.
 
-	GroundedState.WalkRunBlendAmount = Gait == AlsGaitTags::Walking ? 0.0f : 1.0f;
+	GroundedState.WalkRunBlendAmount = CurrentGameplayTags.HasTag(AlsGaitTags::Walking) ? 0.0f : 1.0f;
 }
 
 void UAlsAnimationInstance::RefreshStandingPlayRate()
@@ -771,7 +761,7 @@ void UAlsAnimationInstance::RefreshInAir(const float DeltaTime)
 		InAirState.JumpPlayRate = UAlsMath::LerpClamped(MinPlayRate, MaxPlayRate, LocomotionState.Speed / ReferenceSpeed);
 	}
 
-	if (LocomotionMode != AlsLocomotionModeTags::InAir)
+	if (!CurrentGameplayTags.HasTag(AlsLocomotionModeTags::InAir))
 	{
 		return;
 	}
@@ -1044,7 +1034,7 @@ void UAlsAnimationInstance::RefreshFootLock(FAlsFootState& FootState, const FNam
 {
 	auto NewFootLockAmount{GetCurveValueClamped01(FootLockCurveName)};
 
-	if (LocomotionState.bMovingSmooth || LocomotionMode != AlsLocomotionModeTags::Grounded)
+	if (LocomotionState.bMovingSmooth || !CurrentGameplayTags.HasTag(AlsLocomotionModeTags::Grounded))
 	{
 		// Smoothly disable foot locking if the character is moving or in the air,
 		// instead of relying on the curve value from the animation blueprint.
@@ -1171,7 +1161,7 @@ void UAlsAnimationInstance::RefreshFootOffset(FAlsFootState& FootState, const fl
 		return;
 	}
 
-	if (LocomotionMode == AlsLocomotionModeTags::InAir)
+	if (CurrentGameplayTags.HasTag(AlsLocomotionModeTags::InAir))
 	{
 		FootState.OffsetTargetLocationZ = 0.0f;
 		FootState.OffsetTargetRotation = FQuat::Identity;
@@ -1358,7 +1348,7 @@ void UAlsAnimationInstance::PlayQuickStopAnimation()
 		return;
 	}
 
-	if (RotationMode != AlsRotationModeTags::VelocityDirection)
+	if (!CurrentGameplayTags.HasTag(AlsRotationModeTags::VelocityDirection))
 	{
 		PlayTransitionLeftAnimation(Settings->Transitions.QuickStopBlendInDuration, Settings->Transitions.QuickStopBlendOutDuration,
 		                            Settings->Transitions.QuickStopPlayRate.X, Settings->Transitions.QuickStopStartTime);
@@ -1392,7 +1382,7 @@ void UAlsAnimationInstance::PlayQuickStopAnimation()
 void UAlsAnimationInstance::PlayTransitionAnimation(UAnimSequenceBase* Animation, const float BlendInDuration, const float BlendOutDuration,
                                                     const float PlayRate, const float StartTime, const bool bFromStandingIdleOnly)
 {
-	if (bFromStandingIdleOnly && (LocomotionState.bMoving || Stance != AlsStanceTags::Standing))
+	if (bFromStandingIdleOnly && (LocomotionState.bMoving || !CurrentGameplayTags.HasTag(AlsStanceTags::Standing)))
 	{
 		return;
 	}
@@ -1419,7 +1409,7 @@ void UAlsAnimationInstance::PlayTransitionLeftAnimation(const float BlendInDurat
 		return;
 	}
 
-	PlayTransitionAnimation(Stance == AlsStanceTags::Crouching
+	PlayTransitionAnimation(CurrentGameplayTags.HasTag(AlsStanceTags::Crouching)
 		                        ? Settings->Transitions.CrouchingTransitionLeftAnimation
 		                        : Settings->Transitions.StandingTransitionLeftAnimation,
 	                        BlendInDuration, BlendOutDuration, PlayRate, StartTime, bFromStandingIdleOnly);
@@ -1433,7 +1423,7 @@ void UAlsAnimationInstance::PlayTransitionRightAnimation(const float BlendInDura
 		return;
 	}
 
-	PlayTransitionAnimation(Stance == AlsStanceTags::Crouching
+	PlayTransitionAnimation(CurrentGameplayTags.HasTag(AlsStanceTags::Crouching)
 		                        ? Settings->Transitions.CrouchingTransitionRightAnimation
 		                        : Settings->Transitions.StandingTransitionRightAnimation,
 	                        BlendInDuration, BlendOutDuration, PlayRate, StartTime, bFromStandingIdleOnly);
@@ -1467,7 +1457,7 @@ void UAlsAnimationInstance::RefreshDynamicTransition()
 		return;
 	}
 
-	if (!TransitionsState.bTransitionsAllowed || LocomotionState.bMoving || LocomotionMode != AlsLocomotionModeTags::Grounded)
+	if (!TransitionsState.bTransitionsAllowed || LocomotionState.bMoving || !CurrentGameplayTags.HasTag(AlsLocomotionModeTags::Grounded))
 	{
 		return;
 	}
@@ -1502,25 +1492,25 @@ void UAlsAnimationInstance::RefreshDynamicTransition()
 
 	if (!bTransitionLeftAllowed)
 	{
-		DynamicTransitionAnimation = Stance == AlsStanceTags::Crouching
+		DynamicTransitionAnimation = CurrentGameplayTags.HasTag(AlsStanceTags::Crouching)
 			                             ? Settings->Transitions.CrouchingDynamicTransitionRightAnimation
 			                             : Settings->Transitions.StandingDynamicTransitionRightAnimation;
 	}
 	else if (!bTransitionRightAllowed)
 	{
-		DynamicTransitionAnimation = Stance == AlsStanceTags::Crouching
+		DynamicTransitionAnimation = CurrentGameplayTags.HasTag(AlsStanceTags::Crouching)
 			                             ? Settings->Transitions.CrouchingDynamicTransitionLeftAnimation
 			                             : Settings->Transitions.StandingDynamicTransitionLeftAnimation;
 	}
 	else if (FootLockLeftDistanceSquared >= FootLockRightDistanceSquared)
 	{
-		DynamicTransitionAnimation = Stance == AlsStanceTags::Crouching
+		DynamicTransitionAnimation = CurrentGameplayTags.HasTag(AlsStanceTags::Crouching)
 			                             ? Settings->Transitions.CrouchingDynamicTransitionLeftAnimation
 			                             : Settings->Transitions.StandingDynamicTransitionLeftAnimation;
 	}
 	else
 	{
-		DynamicTransitionAnimation = Stance == AlsStanceTags::Crouching
+		DynamicTransitionAnimation = CurrentGameplayTags.HasTag(AlsStanceTags::Crouching)
 			                             ? Settings->Transitions.CrouchingDynamicTransitionRightAnimation
 			                             : Settings->Transitions.StandingDynamicTransitionRightAnimation;
 	}
@@ -1585,7 +1575,7 @@ void UAlsAnimationInstance::StopQueuedTransitionAndTurnInPlaceAnimations()
 
 bool UAlsAnimationInstance::IsRotateInPlaceAllowed()
 {
-	return RotationMode == AlsRotationModeTags::Aiming || ViewMode == AlsViewModeTags::FirstPerson;
+	return CurrentGameplayTags.HasTag(AlsRotationModeTags::Aiming) || CurrentGameplayTags.HasTag(AlsViewModeTags::FirstPerson);
 }
 
 void UAlsAnimationInstance::RefreshRotateInPlace(const float DeltaTime)
@@ -1594,7 +1584,7 @@ void UAlsAnimationInstance::RefreshRotateInPlace(const float DeltaTime)
 
 	// Rotate in place is allowed only if the character is standing still and aiming or in first-person view mode.
 
-	if (LocomotionState.bMoving || LocomotionMode != AlsLocomotionModeTags::Grounded || !IsRotateInPlaceAllowed())
+	if (LocomotionState.bMoving || !CurrentGameplayTags.HasTag(AlsLocomotionModeTags::Grounded) || !IsRotateInPlaceAllowed())
 	{
 		RotateInPlaceState.bRotatingLeft = false;
 		RotateInPlaceState.bRotatingRight = false;
@@ -1647,7 +1637,7 @@ void UAlsAnimationInstance::RefreshRotateInPlace(const float DeltaTime)
 
 bool UAlsAnimationInstance::IsTurnInPlaceAllowed()
 {
-	return RotationMode == AlsRotationModeTags::ViewDirection && ViewMode != AlsViewModeTags::FirstPerson;
+	return CurrentGameplayTags.HasTag(AlsRotationModeTags::ViewDirection) && !CurrentGameplayTags.HasTag(AlsViewModeTags::FirstPerson);
 }
 
 void UAlsAnimationInstance::RefreshTurnInPlace(const float DeltaTime)
@@ -1655,7 +1645,7 @@ void UAlsAnimationInstance::RefreshTurnInPlace(const float DeltaTime)
 	// Turn in place is allowed only if transitions are allowed, the character
 	// standing still and looking at the camera and not in first-person mode.
 
-	if (LocomotionState.bMoving || LocomotionMode != AlsLocomotionModeTags::Grounded || !IsTurnInPlaceAllowed())
+	if (LocomotionState.bMoving || !CurrentGameplayTags.HasTag(AlsLocomotionModeTags::Grounded) || !IsTurnInPlaceAllowed())
 	{
 		TurnInPlaceState.ActivationDelay = 0.0f;
 		TurnInPlaceState.bFootLockInhibited = false;
@@ -1702,7 +1692,7 @@ void UAlsAnimationInstance::RefreshTurnInPlace(const float DeltaTime)
 	UAlsTurnInPlaceSettings* TurnInPlaceSettings{nullptr};
 	FName TurnInPlaceSlotName;
 
-	if (Stance == AlsStanceTags::Standing)
+	if (CurrentGameplayTags.HasTag(AlsStanceTags::Standing))
 	{
 		TurnInPlaceSlotName = UAlsConstants::TurnInPlaceStandingSlotName();
 
@@ -1721,7 +1711,7 @@ void UAlsAnimationInstance::RefreshTurnInPlace(const float DeltaTime)
 				                      : Settings->TurnInPlace.StandingTurn180Right;
 		}
 	}
-	else if (Stance == AlsStanceTags::Crouching)
+	else if (CurrentGameplayTags.HasTag(AlsStanceTags::Crouching))
 	{
 		TurnInPlaceSlotName = UAlsConstants::TurnInPlaceCrouchingSlotName();
 
