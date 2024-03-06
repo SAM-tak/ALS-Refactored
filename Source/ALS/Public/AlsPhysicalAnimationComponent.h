@@ -7,9 +7,42 @@
 #include "PhysicsEngine/PhysicalAnimationComponent.h"
 #include "AlsPhysicalAnimationComponent.generated.h"
 
-struct FAlsPhysicalAnimationCurveState;
 class AAlsCharacter;
 class USkeletalBodySetup;
+
+USTRUCT(BlueprintType)
+struct ALS_API FAlsPhysicalAnimationCurveValues
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS")
+	float LockLeftArm{0.0f};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS")
+	float LockRightArm{0.0f};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS")
+	float LockLeftHand{0.0f};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS")
+	float LockRightHand{0.0f};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS")
+	float LockLeftLeg{0.0f};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS")
+	float LockRightLeg{0.0f};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS")
+	float LockLeftFoot{0.0f};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS")
+	float LockRightFoot{0.0f};
+
+	void Refresh(AAlsCharacter* Character);
+
+	float GetLockedValue(const FName& BoneName) const;
+};
 
 /**
  * PhysicalAnimationComponent for ALS Refactored
@@ -74,13 +107,16 @@ protected:
 	FGameplayTagContainer PreviousGameplayTags;
 
 	UPROPERTY(VisibleAnywhere, Category = "State|PhysicalAnimation", Transient)
-	uint8 bActive : 1 {false};
+	FAlsPhysicalAnimationCurveValues CurveValues;
 
 	UPROPERTY(VisibleAnywhere, Category = "State|PhysicalAnimation", Transient)
-	uint8 bRagdolling : 1 {false};
+	uint8 bActive : 1{false};
 
 	UPROPERTY(VisibleAnywhere, Category = "State|PhysicalAnimation", Transient)
-	uint8 bRagdollingFreezed : 1 {false};
+	uint8 bRagdolling : 1{false};
+
+	UPROPERTY(VisibleAnywhere, Category = "State|PhysicalAnimation", Transient)
+	uint8 bRagdollingFreezed : 1{false};
 
 	UPROPERTY(VisibleAnywhere, Category = "State|PhysicalAnimation", Transient)
 	TWeakObjectPtr<class UAlsGameplayAbility_Ragdolling> LatestRagdolling;
@@ -109,8 +145,6 @@ private:
 	void ClearGameplayTags();
 
 	void RefreshBodyState(float DelaTime);
-
-	static float GetLockedValue(const FAlsPhysicalAnimationCurveState& Curves, const FName& BoneName);
 
 	bool IsProfileExist(const FName& ProfileName) const;
 

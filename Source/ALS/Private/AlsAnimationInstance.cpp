@@ -93,8 +93,6 @@ void UAlsAnimationInstance::NativeUpdateAnimation(const float DeltaTime)
 	RefreshInAirOnGameThread();
 
 	RefreshFeetOnGameThread();
-
-	RefreshPhysicalAnimationOnGameThread();
 }
 
 void UAlsAnimationInstance::NativeThreadSafeUpdateAnimation(const float DeltaTime)
@@ -1773,20 +1771,6 @@ void UAlsAnimationInstance::PlayQueuedTurnInPlaceAnimation()
 	TurnInPlaceState.QueuedSettings = nullptr;
 	TurnInPlaceState.QueuedSlotName = NAME_None;
 	TurnInPlaceState.QueuedTurnYawAngle = 0.0f;
-}
-
-void UAlsAnimationInstance::RefreshPhysicalAnimationOnGameThread()
-{
-	check(IsInGameThread())
-
-	PhysicalAnimationCurveState.LockLeftArm = GetCurveValueClamped01(UAlsConstants::PALockArmLeftCurveName());
-	PhysicalAnimationCurveState.LockRightArm = GetCurveValueClamped01(UAlsConstants::PALockArmRightCurveName());
-	PhysicalAnimationCurveState.LockLeftHand = GetCurveValueClamped01(UAlsConstants::PALockHandLeftCurveName());
-	PhysicalAnimationCurveState.LockRightHand = GetCurveValueClamped01(UAlsConstants::PALockHandRightCurveName());
-	PhysicalAnimationCurveState.LockLeftLeg = GetCurveValueClamped01(UAlsConstants::PALockLegLeftCurveName());
-	PhysicalAnimationCurveState.LockRightLeg = GetCurveValueClamped01(UAlsConstants::PALockLegRightCurveName());
-	PhysicalAnimationCurveState.LockLeftFoot = GetCurveValueClamped01(UAlsConstants::PALockFootLeftCurveName());
-	PhysicalAnimationCurveState.LockRightFoot = GetCurveValueClamped01(UAlsConstants::PALockFootRightCurveName());
 }
 
 float UAlsAnimationInstance::GetCurveValueClamped01(const FName& CurveName) const

@@ -6,7 +6,6 @@
 #include "AlsCharacter.h"
 #include "AlsAnimationInstance.h"
 #include "AlsAbilitySystemComponent.h"
-#include "State/AlsPhysicalAnimationCurveState.h"
 #include "Abilities/Actions/AlsGameplayAbility_Ragdolling.h"
 #include "Components/SkeletalMeshComponent.h"
 #include "PhysicsEngine/PhysicalAnimationComponent.h"
@@ -21,6 +20,88 @@
 
 #include UE_INLINE_GENERATED_CPP_BY_NAME(AlsPhysicalAnimationComponent)
 
+void FAlsPhysicalAnimationCurveValues::Refresh(AAlsCharacter *Character)
+{
+	auto AnimInstance{Character->GetAlsAnimationInstace()};
+	LockLeftArm = AnimInstance->GetCurveValueClamped01(UAlsConstants::PALockArmLeftCurveName());
+	LockRightArm = AnimInstance->GetCurveValueClamped01(UAlsConstants::PALockArmRightCurveName());
+	LockLeftHand = AnimInstance->GetCurveValueClamped01(UAlsConstants::PALockHandLeftCurveName());
+	LockRightHand = AnimInstance->GetCurveValueClamped01(UAlsConstants::PALockHandRightCurveName());
+	LockLeftLeg = AnimInstance->GetCurveValueClamped01(UAlsConstants::PALockLegLeftCurveName());
+	LockRightLeg = AnimInstance->GetCurveValueClamped01(UAlsConstants::PALockLegRightCurveName());
+	LockLeftFoot = AnimInstance->GetCurveValueClamped01(UAlsConstants::PALockFootLeftCurveName());
+	LockRightFoot = AnimInstance->GetCurveValueClamped01(UAlsConstants::PALockFootRightCurveName());
+}
+
+float FAlsPhysicalAnimationCurveValues::GetLockedValue(const FName& BoneName) const
+{
+	if (BoneName == FName{TEXT("clavicle_l")})
+	{
+		return LockLeftArm;
+	}
+	if (BoneName == FName{TEXT("upperarm_l")})
+	{
+		return LockLeftArm;
+	}
+	if (BoneName == FName{TEXT("lowerarm_l")})
+	{
+		return LockLeftArm;
+	}
+	if (BoneName == FName{TEXT("hand_l")})
+	{
+		return LockLeftHand;
+	}
+	if (BoneName == FName{TEXT("clavicle_r")})
+	{
+		return LockRightArm;
+	}
+	if (BoneName == FName{TEXT("upperarm_r")})
+	{
+		return LockRightArm;
+	}
+	if (BoneName == FName{TEXT("lowerarm_r")})
+	{
+		return LockRightArm;
+	}
+	if (BoneName == FName{TEXT("hand_r")})
+	{
+		return LockRightHand;
+	}
+	if (BoneName == FName{TEXT("thigh_l")})
+	{
+		return LockLeftLeg;
+	}
+	if (BoneName == FName{TEXT("calf_l")})
+	{
+		return LockLeftLeg;
+	}
+	if (BoneName == UAlsConstants::FootLeftBoneName())
+	{
+		return LockLeftFoot;
+	}
+	if (BoneName == FName{TEXT("ball_l")})
+	{
+		return LockLeftFoot;
+	}
+	if (BoneName == FName{TEXT("thigh_r")})
+	{
+		return LockRightLeg;
+	}
+	if (BoneName == FName{TEXT("calf_r")})
+	{
+		return LockRightLeg;
+	}
+	if (BoneName == UAlsConstants::FootRightBoneName())
+	{
+		return LockRightFoot;
+	}
+	if (BoneName == FName{TEXT("ball_r")})
+	{
+		return LockRightFoot;
+	}
+	return 0.0f;
+}
+
 UAlsPhysicalAnimationComponent::UAlsPhysicalAnimationComponent(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer)
 {
@@ -28,9 +109,9 @@ UAlsPhysicalAnimationComponent::UAlsPhysicalAnimationComponent(const FObjectInit
 
 bool UAlsPhysicalAnimationComponent::IsProfileExist(const FName& ProfileName) const
 {
-	for (auto i : GetSkeletalMesh()->Bodies)
+	for (auto Body : GetSkeletalMesh()->Bodies)
 	{
-		if (USkeletalBodySetup* BodySetup = Cast<USkeletalBodySetup>(i->BodySetup.Get()))
+		if (USkeletalBodySetup* BodySetup = Cast<USkeletalBodySetup>(Body->BodySetup.Get()))
 		{
 			if (BodySetup->FindPhysicalAnimationProfile(ProfileName))
 			{
@@ -55,14 +136,14 @@ bool UAlsPhysicalAnimationComponent::HasAnyProfile(const USkeletalBodySetup* Bod
 
 bool UAlsPhysicalAnimationComponent::NeedsProfileChange()
 {
-	bool RetVal = CurrentGameplayTags != PreviousGameplayTags;
+	bool bRetVal = CurrentGameplayTags != PreviousGameplayTags;
 	PreviousGameplayTags = CurrentGameplayTags;
 	if (CurrentMultiplyProfileNames != MultiplyProfileNames)
 	{
 		CurrentMultiplyProfileNames = MultiplyProfileNames;
-		RetVal = true;
+		bRetVal = true;
 	}
-	return RetVal;
+	return bRetVal;
 }
 
 void UAlsPhysicalAnimationComponent::ClearGameplayTags()
@@ -74,17 +155,16 @@ void UAlsPhysicalAnimationComponent::ClearGameplayTags()
 void UAlsPhysicalAnimationComponent::RefreshBodyState(float DeltaTime)
 {
 	USkeletalMeshComponent* Mesh{GetSkeletalMesh()};
-	const FAlsPhysicalAnimationCurveState& Curves{Cast<UAlsAnimationInstance>(GetSkeletalMesh()->GetAnimInstance())->GetPhysicalAnimationCurveState()};
 
 	bool bNeedUpdate = bActive;
 
 	if (!bActive && CurrentProfileNames.Num() > 0)
 	{
-		for (auto BI : Mesh->Bodies)
+		for (auto Body : Mesh->Bodies)
 		{
-			if (USkeletalBodySetup* BodySetup = Cast<USkeletalBodySetup>(BI->BodySetup.Get()))
+			if (USkeletalBodySetup* BodySetup = Cast<USkeletalBodySetup>(Body->BodySetup.Get()))
 			{
-				if (GetLockedValue(Curves, BodySetup->BoneName) <= 0.0f && HasAnyProfile(BodySetup))
+				if (CurveValues.GetLockedValue(BodySetup->BoneName) <= 0.0f && HasAnyProfile(BodySetup))
 				{
 					bNeedUpdate = true;
 					break;
@@ -97,52 +177,52 @@ void UAlsPhysicalAnimationComponent::RefreshBodyState(float DeltaTime)
 
 	if (bNeedUpdate)
 	{
-		for (auto BI : Mesh->Bodies)
+		for (auto Body : Mesh->Bodies)
 		{
-			if (USkeletalBodySetup* BodySetup = Cast<USkeletalBodySetup>(BI->BodySetup.Get()))
+			if (USkeletalBodySetup* BodySetup = Cast<USkeletalBodySetup>(Body->BodySetup.Get()))
 			{
-				float LockedValue{GetLockedValue(Curves, BodySetup->BoneName)};
+				float LockedValue{CurveValues.GetLockedValue(BodySetup->BoneName)};
 				if (!FAnimWeight::IsRelevant(LockedValue) && HasAnyProfile(BodySetup))
 				{
 					bActiveAny = true;
-					if (BI->IsInstanceSimulatingPhysics())
+					if (Body->IsInstanceSimulatingPhysics())
 					{
 						float Speed = 1.0f / FMath::Max(0.000001f, BlendTimeOfBlendWeightOnActivate);
-						BI->PhysicsBlendWeight = FMath::Min(1.0f, FMath::FInterpConstantTo(BI->PhysicsBlendWeight, 1.0f, DeltaTime, Speed));
+						Body->PhysicsBlendWeight = FMath::Min(1.0f, FMath::FInterpConstantTo(Body->PhysicsBlendWeight, 1.0f, DeltaTime, Speed));
 					}
 					else
 					{
-						BI->SetInstanceSimulatePhysics(true);
-						BI->PhysicsBlendWeight = 0.0f;
+						Body->SetInstanceSimulatePhysics(true);
+						Body->PhysicsBlendWeight = 0.0f;
 					}
 				}
 				else
 				{
 					if (FAnimWeight::IsRelevant(LockedValue))
 					{
-						if (BI->IsInstanceSimulatingPhysics())
+						if (Body->IsInstanceSimulatingPhysics())
 						{
-							BI->PhysicsBlendWeight = FMath::FInterpConstantTo(BI->PhysicsBlendWeight, 1.0f - LockedValue, DeltaTime, 15.0f);
+							Body->PhysicsBlendWeight = FMath::FInterpConstantTo(Body->PhysicsBlendWeight, 1.0f - LockedValue, DeltaTime, 15.0f);
 						}
 						else
 						{
 							if (!FAnimWeight::IsFullWeight(LockedValue))
 							{
-								BI->SetInstanceSimulatePhysics(true);
+								Body->SetInstanceSimulatePhysics(true);
 							}
-							BI->PhysicsBlendWeight = 0.0f;
+							Body->PhysicsBlendWeight = 0.0f;
 						}
 					}
 					else
 					{
 						float Speed = 1.0f / FMath::Max(0.000001f, BlendTimeOfBlendWeightOnDeactivate);
-						BI->PhysicsBlendWeight = FMath::FInterpConstantTo(BI->PhysicsBlendWeight, 0.0f, DeltaTime, Speed);
+						Body->PhysicsBlendWeight = FMath::FInterpConstantTo(Body->PhysicsBlendWeight, 0.0f, DeltaTime, Speed);
 					}
-					if (BI->PhysicsBlendWeight == 0.0f)
+					if (Body->PhysicsBlendWeight == 0.0f)
 					{
-						if (BI->IsInstanceSimulatingPhysics())
+						if (Body->IsInstanceSimulatingPhysics())
 						{
-							BI->SetInstanceSimulatePhysics(false);
+							Body->SetInstanceSimulatePhysics(false);
 						}
 					}
 					else
@@ -250,7 +330,7 @@ namespace AlsPhysicalAnimationTagCombination
 		}
 		else
 		{
-			bool NextDepth = false;
+			bool bNextDepth = false;
 			auto IndicesNum{Indices.Num()};
 			for (int Index = 0; Index < IndicesNum; ++Index)
 			{
@@ -275,11 +355,11 @@ namespace AlsPhysicalAnimationTagCombination
 					else
 					{
 						Indices[Index] = 0;
-						NextDepth = true;
+						bNextDepth = true;
 					}
 				}
 			}
-			if (NextDepth)
+			if (bNextDepth)
 			{
 				if(IndicesNum + 1 < SourceNum)
 				{
@@ -409,12 +489,12 @@ void UAlsPhysicalAnimationComponent::SelectProfile()
 
 	if (NextProfileNames != CurrentProfileNames || NextMultiplyProfileNames != CurrentMultiplyProfileNames)
 	{
-		bool First = true;
+		bool bFirst = true;
 		for (const auto& NextProfileName : NextProfileNames)
 		{
 			ApplyPhysicalAnimationProfileBelow(NAME_None, NextProfileName);
-			GetSkeletalMesh()->SetConstraintProfileForAll(NextProfileName, First);
-			First = false;
+			GetSkeletalMesh()->SetConstraintProfileForAll(NextProfileName, bFirst);
+			bFirst = false;
 		}
 		CurrentProfileNames = NextProfileNames;
 
@@ -459,6 +539,8 @@ void UAlsPhysicalAnimationComponent::Refresh(AAlsCharacter* Character)
 		}
 		Character->GetAlsAbilitySystem()->SetLooseGameplayTagCount(AlsStateFlagTags::DelayedActivation, 0);
 	}
+
+	CurveValues.Refresh(Character);
 
 	// Apply special behaviour when changed Ragdolling state
 
@@ -524,12 +606,12 @@ void UAlsPhysicalAnimationComponent::TickComponent(float DeltaTime, enum ELevelT
 	{
 		if (CurrentProfileNames != OverrideProfileNames || CurrentMultiplyProfileNames != MultiplyProfileNames)
 		{
-			bool first = true;
+			bool bFirst = true;
 			for (const auto& CurrentProfileName : OverrideProfileNames)
 			{
 				ApplyPhysicalAnimationProfileBelow(NAME_None, CurrentProfileName);
-				GetSkeletalMesh()->SetConstraintProfileForAll(CurrentProfileName, first);
-				first = false;
+				GetSkeletalMesh()->SetConstraintProfileForAll(CurrentProfileName, bFirst);
+				bFirst = false;
 			}
 			CurrentProfileNames = OverrideProfileNames;
 			ClearGameplayTags();
@@ -593,86 +675,17 @@ void UAlsPhysicalAnimationComponent::DisplayDebug(UCanvas* Canvas, const FDebugD
 
 	VerticalLocation += RowOffset;
 
-	for (auto BI : GetSkeletalMesh()->Bodies)
+	for (auto Body : GetSkeletalMesh()->Bodies)
 	{
-		Text.SetColor(FMath::Lerp(FLinearColor::Gray, FLinearColor::Red, UAlsMath::Clamp01(BI->PhysicsBlendWeight)));
+		Text.SetColor(FMath::Lerp(FLinearColor::Gray, FLinearColor::Red, UAlsMath::Clamp01(Body->PhysicsBlendWeight)));
 
-		Text.Text = FText::AsCultureInvariant(FString::Printf(TEXT("%s %s %1.2f"), *BI->GetBodySetup()->BoneName.ToString(),
-			BI->IsInstanceSimulatingPhysics() ? TEXT("ON") : TEXT("OFF"),
-			BI->PhysicsBlendWeight));
+		Text.Text = FText::AsCultureInvariant(FString::Printf(TEXT("%s %s %1.2f"), *Body->GetBodySetup()->BoneName.ToString(),
+			Body->IsInstanceSimulatingPhysics() ? TEXT("ON") : TEXT("OFF"),
+			Body->PhysicsBlendWeight));
 		Text.Draw(Canvas->Canvas, {HorizontalLocation, VerticalLocation});
 
 		VerticalLocation += RowOffset;
 	}
-}
-
-float UAlsPhysicalAnimationComponent::GetLockedValue(const FAlsPhysicalAnimationCurveState& Curves, const FName& BoneName)
-{
-	if (BoneName == FName{TEXT("clavicle_l")})
-	{
-		return Curves.LockLeftArm;
-	}
-	if (BoneName == FName{TEXT("upperarm_l")})
-	{
-		return Curves.LockLeftArm;
-	}
-	if (BoneName == FName{TEXT("lowerarm_l")})
-	{
-		return Curves.LockLeftArm;
-	}
-	if (BoneName == FName{TEXT("hand_l")})
-	{
-		return Curves.LockLeftHand;
-	}
-	if (BoneName == FName{TEXT("clavicle_r")})
-	{
-		return Curves.LockRightArm;
-	}
-	if (BoneName == FName{TEXT("upperarm_r")})
-	{
-		return Curves.LockRightArm;
-	}
-	if (BoneName == FName{TEXT("lowerarm_r")})
-	{
-		return Curves.LockRightArm;
-	}
-	if (BoneName == FName{TEXT("hand_r")})
-	{
-		return Curves.LockRightHand;
-	}
-	if (BoneName == FName{TEXT("thigh_l")})
-	{
-		return Curves.LockLeftLeg;
-	}
-	if (BoneName == FName{TEXT("calf_l")})
-	{
-		return Curves.LockLeftLeg;
-	}
-	if (BoneName == UAlsConstants::FootLeftBoneName())
-	{
-		return Curves.LockLeftFoot;
-	}
-	if (BoneName == FName{TEXT("ball_l")})
-	{
-		return Curves.LockLeftFoot;
-	}
-	if (BoneName == FName{TEXT("thigh_r")})
-	{
-		return Curves.LockRightLeg;
-	}
-	if (BoneName == FName{TEXT("calf_r")})
-	{
-		return Curves.LockRightLeg;
-	}
-	if (BoneName == UAlsConstants::FootRightBoneName())
-	{
-		return Curves.LockRightFoot;
-	}
-	if (BoneName == FName{TEXT("ball_r")})
-	{
-		return Curves.LockRightFoot;
-	}
-	return 0.0f;
 }
 
 bool UAlsPhysicalAnimationComponent::IsRagdolling() const

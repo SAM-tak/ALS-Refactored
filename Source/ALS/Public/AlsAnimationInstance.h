@@ -15,7 +15,6 @@
 #include "State/AlsTransitionsState.h"
 #include "State/AlsTurnInPlaceState.h"
 #include "State/AlsViewAnimationState.h"
-#include "State/AlsPhysicalAnimationCurveState.h"
 #include "Utility/AlsGameplayTags.h"
 #include "AlsAnimationInstance.generated.h"
 
@@ -108,9 +107,6 @@ protected:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient)
 	FAlsTurnInPlaceState TurnInPlaceState;
-
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient)
-	FAlsPhysicalAnimationCurveState PhysicalAnimationCurveState;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient)
 	FHitResult GroundHit;
@@ -317,14 +313,6 @@ private:
 public:
 	UAlsRagdollingAnimInstance* GetRagdollingAnimInstance() const;
 
-	// PhysicalAnimation
-
-private:
-	void RefreshPhysicalAnimationOnGameThread();
-	
-public:
-	const FAlsPhysicalAnimationCurveState& GetPhysicalAnimationCurveState() const;
-
 	// Utility
 
 public:
@@ -385,9 +373,4 @@ inline void UAlsAnimationInstance::Jump()
 inline void UAlsAnimationInstance::ResetJumped()
 {
 	InAirState.bJumped = false;
-}
-
-inline const FAlsPhysicalAnimationCurveState& UAlsAnimationInstance::GetPhysicalAnimationCurveState() const
-{
-	return PhysicalAnimationCurveState;
 }
