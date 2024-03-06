@@ -23,7 +23,7 @@ protected:
 	FGameplayTagContainer CurrentGameplayTags;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient)
-	uint8 bRightShoulder : 1 {true};
+	uint8 bRightShoulder : 1{true};
 
 public:
 	virtual void NativeInitializeAnimation() override;
