@@ -30,18 +30,6 @@ float UAlsGameplayAbility_Rolling::CalcTargetYawAngle_Implementation() const
 		: UE_REAL_TO_FLOAT(FRotator::NormalizeAxis(Character->GetActorRotation().Yaw));
 }
 
-bool UAlsGameplayAbility_Rolling::CanActivateAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo,
-													 const FGameplayTagContainer* SourceTags, const FGameplayTagContainer* TargetTags,
-													 OUT FGameplayTagContainer* OptionalRelevantTags) const
-{
-	if (Super::CanActivateAbility(Handle, ActorInfo, SourceTags, TargetTags, OptionalRelevantTags))
-	{
-		const auto* Character{Cast<AAlsCharacter>(ActorInfo->OwnerActor)};
-		return IsValid(Character) && Character->HasMatchingGameplayTag(AlsLocomotionModeTags::Grounded);
-	}
-	return false;
-}
-
 void UAlsGameplayAbility_Rolling::ActivateAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo,
 												  const FGameplayAbilityActivationInfo ActivationInfo, const FGameplayEventData* TriggerEventData)
 {
