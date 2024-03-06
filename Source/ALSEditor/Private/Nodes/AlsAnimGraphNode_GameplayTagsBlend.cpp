@@ -13,8 +13,7 @@ UAlsAnimGraphNode_GameplayTagsBlend::UAlsAnimGraphNode_GameplayTagsBlend()
 
 void UAlsAnimGraphNode_GameplayTagsBlend::PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent)
 {
-	if (PropertyChangedEvent.GetPropertyName() == GET_MEMBER_NAME_CHECKED(FAlsAnimNode_GameplayTagsBlend, Tags)
-		|| PropertyChangedEvent.GetPropertyName() == GET_MEMBER_NAME_CHECKED(FAlsAnimNode_GameplayTagsBlend, TagMatches)
+	if (PropertyChangedEvent.GetPropertyName() == GET_MEMBER_NAME_CHECKED(FAlsAnimNode_GameplayTagsBlend, TagMatches)
 		|| PropertyChangedEvent.GetPropertyName() == GET_MEMBER_NAME_CHECKED(FAlsGameplayTagContainerMatch, Tags)
 		|| PropertyChangedEvent.GetPropertyName() == GET_MEMBER_NAME_CHECKED(FAlsGameplayTagContainerMatch, bAll))
 	{
@@ -61,11 +60,9 @@ void UAlsAnimGraphNode_GameplayTagsBlend::CustomizePinData(UEdGraphPin* Pin, con
 
 	Pin->PinFriendlyName = PinIndex <= 0
 		                    ? LOCTEXT("Default", "Default")
-		                    : PinIndex > Node.Tags.Num() + Node.TagMatches.Num()
+		                    : PinIndex > Node.TagMatches.Num()
 								? LOCTEXT("Invalid", "Invalid")
-								: PinIndex <= Node.Tags.Num()
-									? FText::FromName(UAlsUtility::GetSimpleTagName(Node.Tags[PinIndex - 1]))
-									: FAlsAnimNode_GameplayTagsBlend::GetPosePinName(Node.TagMatches[PinIndex - Node.Tags.Num() - 1]);
+								: FAlsAnimNode_GameplayTagsBlend::GetPosePinName(Node.TagMatches[PinIndex - 1]);
 
 	if (bBlendPosePin)
 	{

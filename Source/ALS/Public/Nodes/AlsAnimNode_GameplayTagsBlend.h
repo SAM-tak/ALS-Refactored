@@ -26,13 +26,7 @@ struct ALS_API FAlsAnimNode_GameplayTagsBlend : public FAnimNode_BlendListBase
 public:
 #if WITH_EDITORONLY_DATA
 	UPROPERTY(EditAnywhere, Category = Settings, Meta = (FoldProperty, PinShownByDefault))
-	FGameplayTag ActiveTag;
-
-	UPROPERTY(EditAnywhere, Category = Settings, Meta = (FoldProperty, PinShownByDefault))
 	FGameplayTagContainer Container;
-
-	UPROPERTY(EditAnywhere, Category = Settings, Meta = (FoldProperty))
-	TArray<FGameplayTag> Tags;
 
 	UPROPERTY(EditAnywhere, Category = Settings, Meta = (FoldProperty))
 	TArray<FAlsGameplayTagContainerMatch> TagMatches;
@@ -42,11 +36,7 @@ protected:
 	virtual int32 GetActiveChildIndex() override;
 
 public:
-	const FGameplayTag& GetActiveTag() const;
-
 	const FGameplayTagContainer& GetContainer() const;
-
-	const TArray<FGameplayTag>& GetTags() const;
 
 	const TArray<FAlsGameplayTagContainerMatch>& GetTagMatches() const;
 
