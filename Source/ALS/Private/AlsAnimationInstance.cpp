@@ -84,7 +84,7 @@ void UAlsAnimationInstance::NativeUpdateAnimation(const float DeltaTime)
 	{
 		FaceRotationMode = Character->GetDesiredRotationMode();
 	}
-	LocomotionAction = Character->GetLocomotionAction();
+	bIsActionRunning = Character->GetLocomotionAction().IsValid();
 
 	RefreshMovementBaseOnGameThread();
 	RefreshViewOnGameThread();
@@ -299,7 +299,7 @@ bool UAlsAnimationInstance::IsSpineRotationAllowed()
 
 void UAlsAnimationInstance::RefreshView(const float DeltaTime)
 {
-	if (!LocomotionAction.IsValid())
+	if (!bIsActionRunning)
 	{
 		ViewState.YawAngle = FRotator3f::NormalizeAxis(UE_REAL_TO_FLOAT(ViewState.Rotation.Yaw - LocomotionState.Rotation.Yaw));
 		ViewState.PitchAngle = FRotator3f::NormalizeAxis(UE_REAL_TO_FLOAT(ViewState.Rotation.Pitch - LocomotionState.Rotation.Pitch));
@@ -814,8 +814,7 @@ void UAlsAnimationInstance::RefreshGroundPredictionAmount()
 		                                                      InAirState.VerticalVelocity) * LocomotionState.Scale
 	};
 	
-	FHitResult Hit{GroundHit};
-	const auto bGroundValid{Hit.IsValidBlockingHit() && Hit.ImpactNormal.Z >= LocomotionState.WalkableFloorZ};
+	bool bGroundValid{GroundHit.IsValidBlockingHit() && GroundHit.ImpactNormal.Z >= LocomotionState.WalkableFloorZ};
 
 	FTraceDelegate TraceDelegate = FTraceDelegate::CreateWeakLambda(this, [this](const FTraceHandle& Handle, FTraceDatum& Data) mutable
 	{
@@ -837,9 +836,9 @@ void UAlsAnimationInstance::RefreshGroundPredictionAmount()
 #if WITH_EDITORONLY_DATA && ENABLE_DRAW_DEBUG
 		if (bDisplayDebugTraces)
 		{
-			UAlsUtility::DrawDebugSweepSingleCapsule(GetWorld(), Hit.TraceStart, Hit.TraceEnd, FRotator::ZeroRotator,
+			UAlsUtility::DrawDebugSweepSingleCapsule(GetWorld(), GroundHit.TraceStart, GroundHit.TraceEnd, FRotator::ZeroRotator,
 													 LocomotionState.CapsuleRadius, LocomotionState.CapsuleHalfHeight,
-													 bGroundValid, Hit, {0.25f, 0.0f, 1.0f}, {0.75f, 0.0f, 1.0f});
+													 bGroundValid, GroundHit, {0.25f, 0.0f, 1.0f}, {0.75f, 0.0f, 1.0f});
 		}
 #endif
 	}
@@ -847,7 +846,7 @@ void UAlsAnimationInstance::RefreshGroundPredictionAmount()
 	{
 		RequestQueue.Emplace([this, TraceDelegate, SweepStartLocation, SweepVector
 #if WITH_EDITORONLY_DATA && ENABLE_DRAW_DEBUG
-							, Hit, bGroundValid
+							, bGroundValid
 #endif
 		]
 		{
@@ -858,16 +857,16 @@ void UAlsAnimationInstance::RefreshGroundPredictionAmount()
 #if WITH_EDITORONLY_DATA && ENABLE_DRAW_DEBUG
 			if (bDisplayDebugTraces)
 			{
-				UAlsUtility::DrawDebugSweepSingleCapsule(GetWorld(), Hit.TraceStart, Hit.TraceEnd, FRotator::ZeroRotator,
+				UAlsUtility::DrawDebugSweepSingleCapsule(GetWorld(), GroundHit.TraceStart, GroundHit.TraceEnd, FRotator::ZeroRotator,
 														 LocomotionState.CapsuleRadius, LocomotionState.CapsuleHalfHeight,
-														 bGroundValid, Hit, {0.25f, 0.0f, 1.0f}, {0.75f, 0.0f, 1.0f});
+														 bGroundValid, GroundHit, {0.25f, 0.0f, 1.0f}, {0.75f, 0.0f, 1.0f});
 			}
 #endif
 		});
 	}
 
 	InAirState.GroundPredictionAmount = bGroundValid
-		                                ? Settings->InAir.GroundPredictionAmountCurve->GetFloatValue(Hit.Time) * AllowanceAmount
+		                                ? Settings->InAir.GroundPredictionAmountCurve->GetFloatValue(GroundHit.Time) * AllowanceAmount
 		                                : 0.0f;
 }
 
@@ -1068,8 +1067,8 @@ void UAlsAnimationInstance::RefreshFootLock(FAlsFootState& FootState, const FNam
 		return;
 	}
 
-	const auto bNewAmountEqualOne{FAnimWeight::IsFullWeight(NewFootLockAmount)};
-	const auto bNewAmountGreaterThanPrevious{NewFootLockAmount > FootState.LockAmount};
+	bool bNewAmountEqualOne{FAnimWeight::IsFullWeight(NewFootLockAmount)};
+	bool bNewAmountGreaterThanPrevious{NewFootLockAmount > FootState.LockAmount};
 
 	// Update the foot lock amount only if the new amount is less than the current amount or equal to 1. This
 	// allows the foot to blend out from a locked location or lock to a new location, but never blend in.
@@ -1190,8 +1189,7 @@ void UAlsAnimationInstance::RefreshFootOffset(FAlsFootState& FootState, const fl
 		FinalLocation.X, FinalLocation.Y, GetProxyOnAnyThread<FAnimInstanceProxy>().GetComponentTransform().GetLocation().Z
 	};
 	
-	FHitResult Hit{FootState.Hit};
-	const auto bGroundValid{Hit.IsValidBlockingHit() && Hit.ImpactNormal.Z >= LocomotionState.WalkableFloorZ};
+	bool bGroundValid{FootState.Hit.IsValidBlockingHit() && FootState.Hit.ImpactNormal.Z >= LocomotionState.WalkableFloorZ};
 
 	FTraceDelegate TraceDelegate = FTraceDelegate::CreateWeakLambda(this, [&FootState](const FTraceHandle& Handle, FTraceDatum& Data) mutable
 	{
@@ -1219,7 +1217,8 @@ void UAlsAnimationInstance::RefreshFootOffset(FAlsFootState& FootState, const fl
 #if WITH_EDITORONLY_DATA && ENABLE_DRAW_DEBUG
 		if (bDisplayDebugTraces)
 		{
-			UAlsUtility::DrawDebugLineTraceSingle(GetWorld(), Hit.TraceStart, Hit.TraceEnd, bGroundValid, Hit, {0.0f, 0.25f, 1.0f}, {0.0f, 0.75f, 1.0f});
+			UAlsUtility::DrawDebugLineTraceSingle(GetWorld(), FootState.Hit.TraceStart, FootState.Hit.TraceEnd, bGroundValid, FootState.Hit,
+												  {0.0f, 0.25f, 1.0f}, {0.0f, 0.75f, 1.0f});
 		}
 #endif
 	}
@@ -1227,7 +1226,7 @@ void UAlsAnimationInstance::RefreshFootOffset(FAlsFootState& FootState, const fl
 	{
 		RequestQueue.Emplace([this, TraceDelegate, TraceLocation
 #if WITH_EDITORONLY_DATA && ENABLE_DRAW_DEBUG
-							, Hit, bGroundValid
+							, &FootState, bGroundValid
 #endif
 		]
 		{
@@ -1243,7 +1242,8 @@ void UAlsAnimationInstance::RefreshFootOffset(FAlsFootState& FootState, const fl
 #if WITH_EDITORONLY_DATA && ENABLE_DRAW_DEBUG
 			if (bDisplayDebugTraces)
 			{
-				UAlsUtility::DrawDebugLineTraceSingle(GetWorld(), Hit.TraceStart, Hit.TraceEnd, bGroundValid, Hit, {0.0f, 0.25f, 1.0f}, {0.0f, 0.75f, 1.0f});
+				UAlsUtility::DrawDebugLineTraceSingle(GetWorld(), FootState.Hit.TraceStart, FootState.Hit.TraceEnd, bGroundValid, FootState.Hit,
+													  {0.0f, 0.25f, 1.0f}, {0.0f, 0.75f, 1.0f});
 			}
 #endif
 		});
@@ -1251,7 +1251,7 @@ void UAlsAnimationInstance::RefreshFootOffset(FAlsFootState& FootState, const fl
 
 	if (bGroundValid)
 	{
-		const auto SlopeAngleCos{UE_REAL_TO_FLOAT(Hit.ImpactNormal.Z)};
+		const auto SlopeAngleCos{UE_REAL_TO_FLOAT(FootState.Hit.ImpactNormal.Z)};
 
 		const auto FootHeight{Settings->Feet.FootHeight * LocomotionState.Scale};
 		const auto FootHeightOffset{SlopeAngleCos > UE_SMALL_NUMBER ? FootHeight / SlopeAngleCos - FootHeight : 0.0f};
@@ -1259,11 +1259,11 @@ void UAlsAnimationInstance::RefreshFootOffset(FAlsFootState& FootState, const fl
 		// Find the difference between the impact location and the expected (flat) floor location.
 		// These values are offset by the foot height to get better behavior on sloped surfaces.
 
-		FootState.OffsetTargetLocationZ = Hit.ImpactPoint.Z - TraceLocation.Z + FootHeightOffset;
+		FootState.OffsetTargetLocationZ = FootState.Hit.ImpactPoint.Z - TraceLocation.Z + FootHeightOffset;
 
 		// Calculate the rotation offset.
 
-		FootState.OffsetTargetRotation = FQuat::FindBetweenNormals(FVector::UpVector, Hit.ImpactNormal);
+		FootState.OffsetTargetRotation = FQuat::FindBetweenNormals(FVector::UpVector, FootState.Hit.ImpactNormal);
 	}
 
 	// Interpolate current offsets to the new target values.

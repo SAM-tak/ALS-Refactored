@@ -14,7 +14,7 @@ struct ALS_API FAlsGameplayTagContainerMatch
 	FGameplayTagContainer Tags;
 
 	UPROPERTY(EditAnywhere)
-	bool bAll;
+	bool bAll{false};
 };
 #endif
 

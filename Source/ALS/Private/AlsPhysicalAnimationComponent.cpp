@@ -35,67 +35,35 @@ void FAlsPhysicalAnimationCurveValues::Refresh(AAlsCharacter *Character)
 
 float FAlsPhysicalAnimationCurveValues::GetLockedValue(const FName& BoneName) const
 {
-	if (BoneName == FName{TEXT("clavicle_l")})
+	if (BoneName == FName{TEXT("clavicle_l")} || BoneName == FName{TEXT("upperarm_l")} || BoneName == FName{TEXT("lowerarm_l")})
 	{
 		return LockLeftArm;
 	}
-	if (BoneName == FName{TEXT("upperarm_l")})
+	if (BoneName == FName{TEXT("clavicle_r")} || BoneName == FName{TEXT("upperarm_r")} || BoneName == FName{TEXT("lowerarm_r")})
 	{
-		return LockLeftArm;
-	}
-	if (BoneName == FName{TEXT("lowerarm_l")})
-	{
-		return LockLeftArm;
+		return LockRightArm;
 	}
 	if (BoneName == FName{TEXT("hand_l")})
 	{
 		return LockLeftHand;
 	}
-	if (BoneName == FName{TEXT("clavicle_r")})
-	{
-		return LockRightArm;
-	}
-	if (BoneName == FName{TEXT("upperarm_r")})
-	{
-		return LockRightArm;
-	}
-	if (BoneName == FName{TEXT("lowerarm_r")})
-	{
-		return LockRightArm;
-	}
 	if (BoneName == FName{TEXT("hand_r")})
 	{
 		return LockRightHand;
 	}
-	if (BoneName == FName{TEXT("thigh_l")})
+	if (BoneName == FName{TEXT("thigh_l")} || BoneName == FName{TEXT("calf_l")})
 	{
 		return LockLeftLeg;
 	}
-	if (BoneName == FName{TEXT("calf_l")})
-	{
-		return LockLeftLeg;
-	}
-	if (BoneName == UAlsConstants::FootLeftBoneName())
-	{
-		return LockLeftFoot;
-	}
-	if (BoneName == FName{TEXT("ball_l")})
-	{
-		return LockLeftFoot;
-	}
-	if (BoneName == FName{TEXT("thigh_r")})
+	if (BoneName == FName{TEXT("thigh_r")} || BoneName == FName{TEXT("calf_r")})
 	{
 		return LockRightLeg;
 	}
-	if (BoneName == FName{TEXT("calf_r")})
+	if (BoneName == UAlsConstants::FootLeftBoneName() || BoneName == FName{TEXT("ball_l")})
 	{
-		return LockRightLeg;
+		return LockLeftFoot;
 	}
-	if (BoneName == UAlsConstants::FootRightBoneName())
-	{
-		return LockRightFoot;
-	}
-	if (BoneName == FName{TEXT("ball_r")})
+	if (BoneName == UAlsConstants::FootRightBoneName() || BoneName == FName{TEXT("ball_r")})
 	{
 		return LockRightFoot;
 	}
@@ -124,6 +92,11 @@ bool UAlsPhysicalAnimationComponent::IsProfileExist(const FName& ProfileName) co
 
 bool UAlsPhysicalAnimationComponent::HasAnyProfile(const USkeletalBodySetup* BodySetup) const
 {
+	if (CurrentProfileNames.IsEmpty())
+	{
+		return bRagdolling && BodySetup->PhysicsType != EPhysicsType::PhysType_Kinematic;
+	}
+
 	for (const auto& ProfileName : CurrentProfileNames)
 	{
 		if (BodySetup->FindPhysicalAnimationProfile(ProfileName))
@@ -131,6 +104,7 @@ bool UAlsPhysicalAnimationComponent::HasAnyProfile(const USkeletalBodySetup* Bod
 			return true;
 		}
 	}
+
 	return false;
 }
 
@@ -158,7 +132,7 @@ void UAlsPhysicalAnimationComponent::RefreshBodyState(float DeltaTime)
 
 	bool bNeedUpdate = bActive;
 
-	if (!bActive && CurrentProfileNames.Num() > 0)
+	if (!bActive && (!CurrentProfileNames.IsEmpty() || bRagdolling))
 	{
 		for (auto Body : Mesh->Bodies)
 		{
@@ -470,7 +444,7 @@ void UAlsPhysicalAnimationComponent::SelectProfile()
 	{
 		NextBaseProfileName = RagdollingModeName;
 	}
-	if (NextBaseProfileName.IsNone() && IsProfileExist(UAlsConstants::DefaultPAProfileName()))
+	if (NextBaseProfileName.IsNone() && !bRagdolling && IsProfileExist(UAlsConstants::DefaultPAProfileName()))
 	{
 		NextBaseProfileName = UAlsConstants::DefaultPAProfileName();
 	}
@@ -540,8 +514,6 @@ void UAlsPhysicalAnimationComponent::Refresh(AAlsCharacter* Character)
 		Character->GetAlsAbilitySystem()->SetLooseGameplayTagCount(AlsStateFlagTags::DelayedActivation, 0);
 	}
 
-	CurveValues.Refresh(Character);
-
 	// Apply special behaviour when changed Ragdolling state
 
 	if (LatestRagdolling.IsValid() && LatestRagdolling->IsActive())
@@ -596,6 +568,8 @@ void UAlsPhysicalAnimationComponent::Refresh(AAlsCharacter* Character)
 	}
 	CurrentGameplayTags.Reset();
 	CurrentGameplayTags.AppendMatchingTags(TempContainer, TempMaskContainer);
+
+	CurveValues.Refresh(Character);
 }
 
 void UAlsPhysicalAnimationComponent::TickComponent(float DeltaTime, enum ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
