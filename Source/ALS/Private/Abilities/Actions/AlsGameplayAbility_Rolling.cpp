@@ -14,8 +14,6 @@
 UAlsGameplayAbility_Rolling::UAlsGameplayAbility_Rolling(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer)
 {
-	ReplicationPolicy = EGameplayAbilityReplicationPolicy::ReplicateYes;
-
 	AbilityTags.AddTag(AlsLocomotionActionTags::Rolling);
 	ActivationOwnedTags.AddTag(AlsLocomotionActionTags::Rolling);
 	CancelAbilitiesWithTag.AddTag(AlsLocomotionActionTags::Root);
@@ -114,8 +112,7 @@ void UAlsGameplayAbility_Rolling::Tick_Implementation(const float DeltaTime)
 		{
 			if (InAirTime >= TimeToCancel)
 			{
-				EndAbility(CurrentSpecHandle, GetCurrentActorInfo(), GetCurrentActivationInfo(),
-						   ReplicationPolicy != EGameplayAbilityReplicationPolicy::ReplicateNo, true);
+				EndAbility(CurrentSpecHandle, GetCurrentActorInfo(), GetCurrentActivationInfo(), true, true);
 
 				if (TryActiveWhenCancel.IsValid())
 				{

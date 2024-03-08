@@ -10,8 +10,6 @@
 UAlsGameplayAbility_Overlay::UAlsGameplayAbility_Overlay(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer)
 {
-	ReplicationPolicy = EGameplayAbilityReplicationPolicy::ReplicateYes;
-
 	CancelAbilitiesWithTag.AddTag(AlsOverlayModeTags::Root);
 }
 

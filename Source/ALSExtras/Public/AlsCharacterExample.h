@@ -13,7 +13,7 @@ class UAlsCameraMovementComponent;
 UCLASS(Abstract, AutoExpandCategories = ("Settings|Als Character Example", "State|Als Character Example"))
 class ALSEXTRAS_API AAlsCharacterExample : public AAlsCharacter
 {
-	GENERATED_BODY()
+	GENERATED_UCLASS_BODY()
 
 protected:
 	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category = "Als Character Example")
@@ -85,8 +85,6 @@ protected:
 	FGameplayTag RagdollActionTag{AlsLocomotionActionTags::Dying};
 
 public:
-	AAlsCharacterExample();
-
 	virtual void NotifyControllerChanged() override;
 
 	// Input

@@ -12,8 +12,6 @@
 UAlsGameplayAbility_Landing::UAlsGameplayAbility_Landing(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer)
 {
-	ReplicationPolicy = EGameplayAbilityReplicationPolicy::ReplicateYes;
-
 	AbilityTags.Reset();
 	AbilityTags.AddTag(AlsLocomotionActionTags::Landing);
 	ActivationOwnedTags.Reset();
@@ -60,8 +58,7 @@ void UAlsGameplayAbility_Landing::ActivateAbility(const FGameplayAbilitySpecHand
 			return;
 		}
 
-		EndAbility(CurrentSpecHandle, GetCurrentActorInfo(), GetCurrentActivationInfo(),
-				   ReplicationPolicy != EGameplayAbilityReplicationPolicy::ReplicateNo, false);
+		EndAbility(CurrentSpecHandle, GetCurrentActorInfo(), GetCurrentActivationInfo(), false, false);
 
 		GetAlsAbilitySystemComponentFromActorInfo()->TryActivateAbilitiesBySingleTag(AlsLocomotionActionTags::BeingKnockedDown);
 	}

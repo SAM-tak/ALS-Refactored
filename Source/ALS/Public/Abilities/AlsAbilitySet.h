@@ -29,11 +29,11 @@ struct FAlsAbilitySet_GameplayAbility
 public:
 	// Gameplay ability to grant.
 	UPROPERTY(EditDefaultsOnly)
-	TSubclassOf<UAlsGameplayAbility> Ability = nullptr;
+	TSubclassOf<UAlsGameplayAbility> Ability{nullptr};
 
 	// Level of ability to grant.
 	UPROPERTY(EditDefaultsOnly)
-	int32 AbilityLevel = 1;
+	int32 AbilityLevel{1};
 
 	// Tag used to process input for the ability.
 	UPROPERTY(EditDefaultsOnly, Meta = (Categories = "InputTag"))
@@ -53,11 +53,11 @@ struct FAlsAbilitySet_GameplayEffect
 public:
 	// Gameplay effect to grant.
 	UPROPERTY(EditDefaultsOnly)
-	TSubclassOf<UGameplayEffect> GameplayEffect = nullptr;
+	TSubclassOf<UGameplayEffect> GameplayEffect{nullptr};
 
 	// Level of gameplay effect to grant.
 	UPROPERTY(EditDefaultsOnly)
-	float EffectLevel = 1.0f;
+	float EffectLevel{1.0f};
 };
 
 /**
@@ -122,8 +122,7 @@ public:
 
 	// Grants the ability set to the specified ability system component.
 	// The returned handles can be used later to take away anything that was granted.
-	void GiveToAbilitySystem(UAbilitySystemComponent* AlsASC, FAlsAbilitySet_GrantedHandles* OutGrantedHandles,
-		UObject* SourceObject = nullptr) const;
+	void GiveToAbilitySystem(UAbilitySystemComponent* AlsASC, FAlsAbilitySet_GrantedHandles* OutGrantedHandles, UObject* SourceObject = nullptr) const;
 
 protected:
 	// Gameplay abilities to grant when this ability set is granted.

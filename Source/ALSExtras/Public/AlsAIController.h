@@ -6,14 +6,11 @@
 UCLASS(DisplayName = "Als AI Controller")
 class ALSEXTRAS_API AAlsAIController : public AAIController
 {
-	GENERATED_BODY()
+	GENERATED_UCLASS_BODY()
 
 protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings")
 	TObjectPtr<UBehaviorTree> BehaviorTree;
-
-public:
-	AAlsAIController();
 
 protected:
 	virtual void OnPossess(APawn* NewPawn) override;

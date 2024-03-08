@@ -20,8 +20,6 @@
 UAlsGameplayAbility_Ragdolling::UAlsGameplayAbility_Ragdolling(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer)
 {
-	ReplicationPolicy = EGameplayAbilityReplicationPolicy::ReplicateYes;
-
 	AbilityTags.AddTag(AlsLocomotionActionTags::BeingKnockedDown);
 	ActivationOwnedTags.AddTag(AlsLocomotionActionTags::BeingKnockedDown);
 	CancelAbilitiesWithTag.AddTag(AlsLocomotionActionTags::Root);
@@ -419,8 +417,7 @@ void UAlsGameplayAbility_Ragdolling::RequestCancel()
 void UAlsGameplayAbility_Ragdolling::Cancel()
 {
 	bCancelRequested = false;
-	CancelAbility(CurrentSpecHandle, GetCurrentActorInfo(), GetCurrentActivationInfo(),
-		ReplicationPolicy != EGameplayAbilityReplicationPolicy::ReplicateNo);
+	CancelAbility(CurrentSpecHandle, GetCurrentActorInfo(), GetCurrentActivationInfo(), true);
 }
 
 #if WITH_EDITOR

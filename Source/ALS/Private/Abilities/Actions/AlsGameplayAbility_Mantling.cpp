@@ -24,8 +24,6 @@ TMap<FGameplayAbilitySpecHandle, FAlsMantlingParameters> UAlsGameplayAbility_Man
 UAlsGameplayAbility_Mantling::UAlsGameplayAbility_Mantling(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer)
 {
-	ReplicationPolicy = EGameplayAbilityReplicationPolicy::ReplicateYes;
-
 	AbilityTags.AddTag(AlsLocomotionActionTags::Mantling);
 	ActivationOwnedTags.AddTag(AlsLocomotionActionTags::Mantling);
 	CancelAbilitiesWithTag.AddTag(AlsLocomotionActionTags::Root);
@@ -103,7 +101,7 @@ bool UAlsGameplayAbility_Mantling::CanMantle(const FGameplayAbilitySpecHandle Ha
 	};
 
 #if ENABLE_DRAW_DEBUG
-	const auto bDisplayDebug{UAlsUtility::ShouldDisplayDebugForActor(Character, UAlsConstants::MantlingDebugDisplayName())};
+	bool bDisplayDebug{UAlsUtility::ShouldDisplayDebugForActor(Character, UAlsConstants::MantlingDebugDisplayName())};
 #endif
 
 	const auto* Capsule{Character->GetCapsuleComponent()};
@@ -388,7 +386,7 @@ void UAlsGameplayAbility_Mantling::ActivateAbility(const FGameplayAbilitySpecHan
 
 	// Calculate actor offsets (offsets between actor and target transform).
 
-	const auto bUseRelativeLocation{MovementBaseUtility::UseRelativeLocation(Parameters.TargetPrimitive.Get())};
+	bool bUseRelativeLocation{MovementBaseUtility::UseRelativeLocation(Parameters.TargetPrimitive.Get())};
 	const auto TargetRelativeRotation{Parameters.TargetRelativeRotation.GetNormalized()};
 
 	const auto TargetTransform{
@@ -463,8 +461,7 @@ void UAlsGameplayAbility_Mantling::Tick_Implementation(const float DeltaTime)
 
 	if (CharacterMovement->MovementMode != MOVE_Custom)
 	{
-		EndAbility(CurrentSpecHandle, GetCurrentActorInfo(), GetCurrentActivationInfo(),
-			ReplicationPolicy != EGameplayAbilityReplicationPolicy::ReplicateNo, true);
+		EndAbility(CurrentSpecHandle, GetCurrentActorInfo(), GetCurrentActivationInfo(), true, true);
 		return;
 	}
 
@@ -474,8 +471,7 @@ void UAlsGameplayAbility_Mantling::Tick_Implementation(const float DeltaTime)
 
 	if (RootMotionSource != nullptr && !RootMotionSource->TargetPrimitive.IsValid())
 	{
-		EndAbility(CurrentSpecHandle, GetCurrentActorInfo(), GetCurrentActivationInfo(),
-			ReplicationPolicy != EGameplayAbilityReplicationPolicy::ReplicateNo, true);
+		EndAbility(CurrentSpecHandle, GetCurrentActorInfo(), GetCurrentActivationInfo(),true, true);
 
 		if (bStartRagdollingOnTargetPrimitiveDestruction)
 		{
@@ -509,7 +505,7 @@ void UAlsGameplayAbility_Mantling::EndAbility(const FGameplayAbilitySpecHandle H
 	CharacterMovement->SetMovementModeLocked(false);
 	CharacterMovement->SetMovementMode(MOVE_Walking);
 
-	//ForceNetUpdate();
+	Character->ForceNetUpdate();
 }
 
 float UAlsGameplayAbility_Mantling::CalculateMantlingStartTime(const UAlsMantlingSettings* MantlingSettings, const float MantlingHeight) const
@@ -597,7 +593,7 @@ void UAlsGameplayAbility_Mantling::PostEditChangeProperty(FPropertyChangedEvent&
 
 	MantlingTraceResponses.SetAllChannels(ECR_Ignore);
 
-	for (const auto CollisionChannel : MantlingTraceResponseChannels)
+	for (const auto& CollisionChannel : MantlingTraceResponseChannels)
 	{
 		MantlingTraceResponses.SetResponse(CollisionChannel, ECR_Block);
 	}

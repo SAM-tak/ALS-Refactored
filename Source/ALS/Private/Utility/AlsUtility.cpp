@@ -88,6 +88,17 @@ FTransform UAlsUtility::ExtractRootTransformFromMontage(const UAnimMontage* Mont
 	}
 
 	const auto* Segment{Montage->SlotAnimTracks[0].AnimTrack.GetSegmentAtTime(Time)};
+	if (Segment == nullptr && Montage->SlotAnimTracks[0].AnimTrack.AnimSegments.Num() > 0)
+	{
+		if (Time <= 0)
+		{
+			Segment = &Montage->SlotAnimTracks[0].AnimTrack.AnimSegments.Top();
+		}
+		else
+		{
+			Segment = &Montage->SlotAnimTracks[0].AnimTrack.AnimSegments.Last();
+		}
+	}
 	if (!ALS_ENSURE(Segment != nullptr))
 	{
 		return FTransform::Identity;

@@ -2,7 +2,7 @@
 
 #include UE_INLINE_GENERATED_CPP_BY_NAME(AlsAIController)
 
-AAlsAIController::AAlsAIController()
+AAlsAIController::AAlsAIController(const FObjectInitializer& ObjectInitializer) : Super(ObjectInitializer)
 {
 	bAttachToPawn = true;
 }

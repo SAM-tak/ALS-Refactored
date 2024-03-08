@@ -39,7 +39,7 @@ void FAlsAbilitySet_GrantedHandles::TakeFromAbilitySystem(UAbilitySystemComponen
 		return;
 	}
 
-	for (const FGameplayAbilitySpecHandle& Handle : AbilitySpecHandles)
+	for (const auto& Handle : AbilitySpecHandles)
 	{
 		if (Handle.IsValid())
 		{
@@ -47,7 +47,7 @@ void FAlsAbilitySet_GrantedHandles::TakeFromAbilitySystem(UAbilitySystemComponen
 		}
 	}
 
-	for (const FActiveGameplayEffectHandle& Handle : GameplayEffectHandles)
+	for (const auto& Handle : GameplayEffectHandles)
 	{
 		if (Handle.IsValid())
 		{
@@ -55,7 +55,7 @@ void FAlsAbilitySet_GrantedHandles::TakeFromAbilitySystem(UAbilitySystemComponen
 		}
 	}
 
-	for (UAttributeSet* Set : GrantedAttributeSets)
+	for (const auto& Set : GrantedAttributeSets)
 	{
 		AlsASC->RemoveSpawnedAttribute(Set);
 	}
@@ -69,8 +69,7 @@ UAlsAbilitySet::UAlsAbilitySet(const FObjectInitializer& ObjectInitializer) : Su
 {
 }
 
-void UAlsAbilitySet::GiveToAbilitySystem(
-	UAbilitySystemComponent* AlsASC, FAlsAbilitySet_GrantedHandles* OutGrantedHandles, UObject* SourceObject) const
+void UAlsAbilitySet::GiveToAbilitySystem(UAbilitySystemComponent* AlsASC, FAlsAbilitySet_GrantedHandles* OutGrantedHandles, UObject* SourceObject) const
 {
 	check(AlsASC);
 
@@ -81,24 +80,23 @@ void UAlsAbilitySet::GiveToAbilitySystem(
 	}
 
 	// Grant the gameplay abilities.
-	for (int32 AbilityIndex = 0; AbilityIndex < GrantedGameplayAbilities.Num(); ++AbilityIndex)
+	for (int32 AbilityIndex{0}; AbilityIndex < GrantedGameplayAbilities.Num(); ++AbilityIndex)
 	{
-		const FAlsAbilitySet_GameplayAbility& AbilityToGrant = GrantedGameplayAbilities[AbilityIndex];
+		const auto& AbilityToGrant{GrantedGameplayAbilities[AbilityIndex]};
 
 		if (!IsValid(AbilityToGrant.Ability))
 		{
-			UE_LOG(LogAls, Error, TEXT("GrantedGameplayAbilities[%d] on ability set [%s] is not valid."),
-				AbilityIndex, *GetNameSafe(this));
+			UE_LOG(LogAls, Error, TEXT("GrantedGameplayAbilities[%d] on ability set [%s] is not valid."), AbilityIndex, *GetNameSafe(this));
 			continue;
 		}
 
-		UAlsGameplayAbility* AbilityCDO = AbilityToGrant.Ability->GetDefaultObject<UAlsGameplayAbility>();
+		auto* AbilityCDO{AbilityToGrant.Ability->GetDefaultObject<UAlsGameplayAbility>()};
 
-		FGameplayAbilitySpec AbilitySpec(AbilityCDO, AbilityToGrant.AbilityLevel);
+		FGameplayAbilitySpec AbilitySpec{AbilityCDO, AbilityToGrant.AbilityLevel};
 		AbilitySpec.SourceObject = SourceObject;
 		AbilitySpec.DynamicAbilityTags.AddTag(AbilityToGrant.InputTag);
 
-		const FGameplayAbilitySpecHandle AbilitySpecHandle = AlsASC->GiveAbility(AbilitySpec);
+		const auto AbilitySpecHandle{AlsASC->GiveAbility(AbilitySpec)};
 
 		if (OutGrantedHandles)
 		{
@@ -107,20 +105,18 @@ void UAlsAbilitySet::GiveToAbilitySystem(
 	}
 
 	// Grant the gameplay effects.
-	for (int32 EffectIndex = 0; EffectIndex < GrantedGameplayEffects.Num(); ++EffectIndex)
+	for (int32 EffectIndex{0}; EffectIndex < GrantedGameplayEffects.Num(); ++EffectIndex)
 	{
-		const FAlsAbilitySet_GameplayEffect& EffectToGrant = GrantedGameplayEffects[EffectIndex];
+		const auto& EffectToGrant{GrantedGameplayEffects[EffectIndex]};
 
 		if (!IsValid(EffectToGrant.GameplayEffect))
 		{
-			UE_LOG(LogAls, Error, TEXT("GrantedGameplayEffects[%d] on ability set [%s] is not valid"), EffectIndex,
-				*GetNameSafe(this));
+			UE_LOG(LogAls, Error, TEXT("GrantedGameplayEffects[%d] on ability set [%s] is not valid"), EffectIndex, *GetNameSafe(this));
 			continue;
 		}
 
-		const UGameplayEffect* GameplayEffect = EffectToGrant.GameplayEffect->GetDefaultObject<UGameplayEffect>();
-		const FActiveGameplayEffectHandle GameplayEffectHandle =
-			AlsASC->ApplyGameplayEffectToSelf(GameplayEffect, EffectToGrant.EffectLevel, AlsASC->MakeEffectContext());
+		const auto* GameplayEffect{EffectToGrant.GameplayEffect->GetDefaultObject<UGameplayEffect>()};
+		const auto GameplayEffectHandle{AlsASC->ApplyGameplayEffectToSelf(GameplayEffect, EffectToGrant.EffectLevel, AlsASC->MakeEffectContext())};
 
 		if (OutGrantedHandles)
 		{
@@ -129,18 +125,17 @@ void UAlsAbilitySet::GiveToAbilitySystem(
 	}
 
 	// Grant the attribute sets.
-	for (int32 SetIndex = 0; SetIndex < GrantedAttributes.Num(); ++SetIndex)
+	for (int32 SetIndex{0}; SetIndex < GrantedAttributes.Num(); ++SetIndex)
 	{
-		const FAlsAbilitySet_AttributeSet& SetToGrant = GrantedAttributes[SetIndex];
+		const auto& SetToGrant{GrantedAttributes[SetIndex]};
 
 		if (!IsValid(SetToGrant.AttributeSet))
 		{
-			UE_LOG(LogAls, Error, TEXT("GrantedAttributes[%d] on ability set [%s] is not valid"), SetIndex,
-				*GetNameSafe(this));
+			UE_LOG(LogAls, Error, TEXT("GrantedAttributes[%d] on ability set [%s] is not valid"), SetIndex, *GetNameSafe(this));
 			continue;
 		}
 
-		UAttributeSet* NewSet = NewObject<UAttributeSet>(AlsASC->GetOwner(), SetToGrant.AttributeSet);
+		auto* NewSet{NewObject<UAttributeSet>(AlsASC->GetOwner(), SetToGrant.AttributeSet)};
 		AlsASC->AddAttributeSetSubobject(NewSet);
 
 		if (OutGrantedHandles)

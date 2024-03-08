@@ -52,8 +52,7 @@ void UAlsGameplayAbility_MontageBase::OnEndMontage_Implementation(UAnimMontage* 
 {
 	if (IsActive())
 	{
-		EndAbility(CurrentSpecHandle, GetCurrentActorInfo(), GetCurrentActivationInfo(),
-				   ReplicationPolicy != EGameplayAbilityReplicationPolicy::ReplicateNo, bInterrupted);
+		EndAbility(CurrentSpecHandle, GetCurrentActorInfo(), GetCurrentActivationInfo(), true, bInterrupted);
 	}
 }
 
@@ -147,8 +146,7 @@ void UAlsGameplayAbility_MontageBase::OnNotifyBeginReceived(FName NotifyName, co
     {
 		if (NotifyName == FName(TEXT("EndAbility")))
 		{
-			EndAbility(CurrentSpecHandle, GetCurrentActorInfo(), GetCurrentActivationInfo(),
-					   ReplicationPolicy != EGameplayAbilityReplicationPolicy::ReplicateNo, false);
+			EndAbility(CurrentSpecHandle, GetCurrentActorInfo(), GetCurrentActivationInfo(), true, false);
 		}
 
         float TriggerTime = BPNPayload.NotifyEvent ? BPNPayload.NotifyEvent->GetTriggerTime() : 0.f;

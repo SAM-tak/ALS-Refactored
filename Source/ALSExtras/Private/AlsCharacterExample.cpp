@@ -12,7 +12,7 @@
 
 #include UE_INLINE_GENERATED_CPP_BY_NAME(AlsCharacterExample)
 
-AAlsCharacterExample::AAlsCharacterExample()
+AAlsCharacterExample::AAlsCharacterExample(const FObjectInitializer& ObjectInitializer) : Super(ObjectInitializer)
 {
 	CameraMovement = CreateDefaultSubobject<UAlsCameraMovementComponent>(FName{TEXTVIEW("CameraMovement")});
 	CameraMovement->SetRelativeRotation_Direct({0.0f, 90.0f, 0.0f});
@@ -185,7 +185,7 @@ void AAlsCharacterExample::Input_OnAim(const FInputActionValue& ActionValue)
 
 void AAlsCharacterExample::Input_OnRagdoll()
 {
-	if(HasMatchingGameplayTag(AlsLocomotionActionTags::GettingDown))
+	if (HasMatchingGameplayTag(AlsLocomotionActionTags::GettingDown))
 	{
 		AbilitySystem->TryActivateAbilitiesBySingleTag(AlsLocomotionActionTags::GettingUp);
 	}
