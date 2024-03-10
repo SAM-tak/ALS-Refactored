@@ -188,13 +188,16 @@ void AAlsCharacter::PreRegisterAllComponents()
 	// Set some default values here so that the animation instance and the
 	// camera component can read the most up-to-date values during initialization.
 
-	ViewMode = DesiredToActual(DesiredViewMode);
+	if (IsValid(Settings))
+	{
+		ViewMode = DesiredToActual(DesiredViewMode);
 
-	RotationMode = AimingMode.IsValid() ? AlsRotationModeTags::Aiming : DesiredToActual(GetDesiredRotationMode());
+		RotationMode = AimingMode.IsValid() ? AlsRotationModeTags::Aiming : DesiredToActual(GetDesiredRotationMode());
 
-	Stance = DesiredToActual(DesiredStance);
+		Stance = DesiredToActual(DesiredStance);
 
-	Gait = DesiredToActual(DesiredGait);
+		Gait = DesiredToActual(DesiredGait);
+	}
 
 	Super::PreRegisterAllComponents();
 }
@@ -293,6 +296,20 @@ void AAlsCharacter::BeginPlay()
 	}
 
 	AbilitySystem->TryActivateAbilitiesBySingleTag(InitialOverlayMode);
+}
+
+void AAlsCharacter::NotifyControllerChanged()
+{
+	OnContollerChanged.Broadcast(PreviousController, Controller);
+
+	Super::NotifyControllerChanged();
+}
+
+void AAlsCharacter::SetupPlayerInputComponent(UInputComponent* Input)
+{
+	Super::SetupPlayerInputComponent(Input);
+
+	OnSetupPlayerInputComponent.Broadcast(Input);
 }
 
 void AAlsCharacter::PostNetReceiveLocationAndRotation()
@@ -433,13 +450,13 @@ void AAlsCharacter::Restart()
 
 void AAlsCharacter::RefreshMeshProperties() const
 {
-	const auto bStandalone{IsNetMode(NM_Standalone)};
-	const auto bDedicatedServer{IsNetMode(NM_DedicatedServer)};
-	const auto bListenServer{IsNetMode(NM_ListenServer)};
+	bool bStandalone{IsNetMode(NM_Standalone)};
+	bool bDedicatedServer{IsNetMode(NM_DedicatedServer)};
+	bool bListenServer{IsNetMode(NM_ListenServer)};
 
-	const auto bAuthority{GetLocalRole() >= ROLE_Authority};
-	const auto bRemoteAutonomousProxy{GetRemoteRole() == ROLE_AutonomousProxy};
-	const auto bLocallyControlled{IsLocallyControlled()};
+	bool bAuthority{GetLocalRole() >= ROLE_Authority};
+	bool bRemoteAutonomousProxy{GetRemoteRole() == ROLE_AutonomousProxy};
+	bool bLocallyControlled{IsLocallyControlled()};
 
 	// Make sure that the pose is always ticked on the server when the character is controlled
 	// by a remote client, otherwise some problems may arise (such as jitter when rolling).
@@ -456,9 +473,7 @@ void AAlsCharacter::RefreshMeshProperties() const
 
 	GetMesh()->VisibilityBasedAnimTickOption = FMath::Min(TargetTickOption, DefaultTickOption);
 
-	const auto bMeshIsTicking{
-		GetMesh()->bRecentlyRendered || GetMesh()->VisibilityBasedAnimTickOption <= EVisibilityBasedAnimTickOption::AlwaysTickPose
-	};
+	bool bMeshIsTicking{GetMesh()->bRecentlyRendered || GetMesh()->VisibilityBasedAnimTickOption <= EVisibilityBasedAnimTickOption::AlwaysTickPose};
 
 	// Use absolute mesh rotation to be able to precisely synchronize character rotation
 	// with animations by manually updating the mesh rotation from the animation instance.
@@ -470,8 +485,8 @@ void AAlsCharacter::RefreshMeshProperties() const
 	// To save performance, use this only when really necessary, such as
 	// when URO is enabled, or for autonomous proxies on the listen server.
 
-	const auto bUROActive{GetMesh()->AnimUpdateRateParams != nullptr && GetMesh()->AnimUpdateRateParams->UpdateRate > 1};
-	const auto bAutonomousProxyOnListenServer{bListenServer && bRemoteAutonomousProxy};
+	bool bUROActive{GetMesh()->AnimUpdateRateParams != nullptr && GetMesh()->AnimUpdateRateParams->UpdateRate > 1};
+	bool bAutonomousProxyOnListenServer{bListenServer && bRemoteAutonomousProxy};
 
 	// Can't use absolute mesh rotation when the character is standing on a rotating object, as it
 	// causes constant rotation jitter. Be careful: although it eliminates jitter in this case, not
@@ -479,7 +494,7 @@ void AAlsCharacter::RefreshMeshProperties() const
 
 	const auto bStandingOnRotatingObject{MovementBase.bHasRelativeRotation};
 
-	const auto bUseAbsoluteRotation{
+	bool bUseAbsoluteRotation{
 		bMeshIsTicking && !bDedicatedServer && !bLocallyControlled && !bStandingOnRotatingObject &&
 		(bUROActive || bAutonomousProxyOnListenServer)
 	};
@@ -701,8 +716,8 @@ void AAlsCharacter::OnRotationModeChanged_Implementation(const FGameplayTag& Pre
 
 void AAlsCharacter::RefreshRotationMode()
 {
-	const auto bSprinting{GetGait() == AlsGaitTags::Sprinting};
-	const auto bAiming{GetAimingMode().IsValid() || GetDesiredRotationMode() == AlsDesiredRotationModeTags::Aiming};
+	bool bSprinting{GetGait() == AlsGaitTags::Sprinting};
+	bool bAiming{GetAimingMode().IsValid() || GetDesiredRotationMode() == AlsDesiredRotationModeTags::Aiming};
 
 	if (ViewMode == AlsViewModeTags::FirstPerson)
 	{
@@ -1023,7 +1038,7 @@ FRotator AAlsCharacter::GetViewRotation() const
 	return ViewState.Rotation;
 }
 
-void AAlsCharacter::OnChangedPerspective_Implementation(bool FirstPersonPerspective) {}
+void AAlsCharacter::OnChangedPerspective_Implementation(bool bFirstPersonPerspective) {}
 
 void AAlsCharacter::SetInputDirection(FVector NewInputDirection)
 {
@@ -1089,7 +1104,7 @@ void AAlsCharacter::CorrectViewNetworkSmoothing(const FRotator& NewTargetRotatio
 		return;
 	}
 
-	const auto bListenServer{IsNetMode(NM_ListenServer)};
+	bool bListenServer{IsNetMode(NM_ListenServer)};
 
 	const auto NewNetworkSmoothingServerTime{
 		bListenServer
@@ -1623,7 +1638,7 @@ bool AAlsCharacter::RefreshConstrainedAimingRotation(const float DeltaTime, cons
 
 	static constexpr auto ViewYawSpeedThreshold{620.0f};
 
-	const auto bApplyPrimaryConstraint{ViewState.YawSpeed > ViewYawSpeedThreshold};
+	bool bApplyPrimaryConstraint{ViewState.YawSpeed > ViewYawSpeedThreshold};
 
 	if (!bApplyPrimaryConstraint && !bApplySecondaryConstraint)
 	{
@@ -1832,13 +1847,12 @@ void AAlsCharacter::RefreshTargetYawAngle(const float TargetYawAngle)
 
 void AAlsCharacter::RefreshViewRelativeTargetYawAngle()
 {
-	LocomotionState.ViewRelativeTargetYawAngle = FRotator3f::NormalizeAxis(UE_REAL_TO_FLOAT(
-		ViewState.Rotation.Yaw - LocomotionState.TargetYawAngle));
+	LocomotionState.ViewRelativeTargetYawAngle = FRotator3f::NormalizeAxis(UE_REAL_TO_FLOAT(ViewState.Rotation.Yaw - LocomotionState.TargetYawAngle));
 }
 
 const FGameplayTag& AAlsCharacter::DesiredToActual(const FGameplayTag& SourceTag) const
 {
-	if (SourceTag.IsValid())
+	if (SourceTag.IsValid() && IsValid(Settings))
 	{
 		auto* Value{Settings->DesiredToActualMap.Find(SourceTag)};
 		if (Value)

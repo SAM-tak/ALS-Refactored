@@ -44,6 +44,8 @@ void AAlsCharacter::DisplayDebug(UCanvas* Canvas, const FDebugDisplayInfo& Displ
 	{
 		VerticalLocation = MaxVerticalLocation;
 
+		OnDisplayDebug.Broadcast(Canvas, DisplayInfo, Unused, VerticalLocation);
+
 		Super::DisplayDebug(Canvas, DisplayInfo, Unused, VerticalLocation);
 		return;
 	}
@@ -143,6 +145,8 @@ void AAlsCharacter::DisplayDebug(UCanvas* Canvas, const FDebugDisplayInfo& Displ
 	MaxVerticalLocation = FMath::Max(MaxVerticalLocation, VerticalLocation);
 
 	VerticalLocation = MaxVerticalLocation;
+
+	OnDisplayDebug.Broadcast(Canvas, DisplayInfo, Unused, VerticalLocation);
 
 	Super::DisplayDebug(Canvas, DisplayInfo, Unused, VerticalLocation);
 }

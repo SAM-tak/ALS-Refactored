@@ -154,7 +154,7 @@ void UAlsGameplayAbility_Ragdolling::Tick(const float DeltaTime)
 	auto* Character{GetAlsCharacterFromActorInfo()};
 	auto* CharacterMovement{Character->GetAlsCharacterMovement()};
 
-	const auto bLocallyControlled{Character->IsLocallyControlled() || (Character->GetLocalRole() >= ROLE_Authority && !IsValid(Character->GetController()))};
+	bool bLocallyControlled{Character->IsLocallyControlled() || (Character->GetLocalRole() >= ROLE_Authority && !IsValid(Character->GetController()))};
 
 	if (bLocallyControlled)
 	{

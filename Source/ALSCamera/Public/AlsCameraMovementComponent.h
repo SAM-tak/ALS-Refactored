@@ -7,12 +7,13 @@ class UCameraComponent;
 class UAlsCameraSettings;
 class AAlsCharacter;
 
-UCLASS(HideCategories = (Object, Mobility, Clothing, Physics, MasterPoseComponent, Collision, AnimationRig, Lighting, Deformer,
+UCLASS(Blueprintable, Meta = (BlueprintSpawnableComponent),
+	   HideCategories = (Object, Mobility, Clothing, Physics, MasterPoseComponent, Collision, AnimationRig, Lighting, Deformer,
 						 Rendering, PathTracing, HLOD, Navigation, VirtualTexture, Materials, LeaderPoseComponent,
 						 Optimization, LOD, MaterialParameters, TextureStreaming, Mobile, RayTracing))
 class ALSCAMERA_API UAlsCameraMovementComponent : public USkeletalMeshComponent
 {
-	GENERATED_BODY()
+	GENERATED_UCLASS_BODY()
 
 protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings")
@@ -26,6 +27,9 @@ protected:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient)
 	TWeakObjectPtr<AAlsCharacter> Character;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient)
+	TWeakObjectPtr<UCameraComponent> TargetCamera;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient, Meta = (ForceUnits = "x"))
 	float PreviousGlobalTimeDilation{1.0f};
@@ -88,8 +92,6 @@ protected:
 	TObjectPtr<UCameraShakeBase> CurrentADSCameraShake;
 
 public:
-	UAlsCameraMovementComponent();
-
 	virtual void OnRegister() override;
 
 	virtual void Activate(bool bReset = false) override;
@@ -150,10 +152,6 @@ private:
 
 	void UpdateADSCameraShake(float FirstPersonOverride, float AimingAmount);
 
-	// Cache
-	
-	UCameraComponent* Camera{nullptr};
-
 	// Overlap
 
 	mutable TArray<FOverlapResult> Overlaps;
@@ -161,7 +159,7 @@ private:
 	// Debug
 
 public:
-	virtual void DisplayDebug(const UCanvas* Canvas, const FDebugDisplayInfo& DisplayInfo, float& VerticalLocation) const;
+	virtual void DisplayDebug(UCanvas* Canvas, const FDebugDisplayInfo& DisplayInfo, float& Unused, float& VerticalLocation);
 
 private:
 	static void DisplayDebugHeader(const UCanvas* Canvas, const FText& HeaderText, const FLinearColor& HeaderColor,
@@ -181,5 +179,5 @@ inline FVector UAlsCameraMovementComponent::GetCurrentFocusLocation() const
 
 inline UCameraComponent* UAlsCameraMovementComponent::GetCameraComponent() const
 {
-	return Camera;
+	return TargetCamera.Get();
 }

@@ -1,27 +1,20 @@
 #pragma once
 
-#include "AlsCharacter.h"
-#include "AlsCharacterExample.generated.h"
+#include "AlsCharacterComponent.h"
+#include "Utility/AlsGameplayTags.h"
+#include "AlsCharacterExampleComponent.generated.h"
 
 struct FInputActionValue;
-class UCameraComponent;
 class UInputMappingContext;
 class UInputAction;
 class UAlsCameraMovementComponent;
-class UAlsCameraMovementComponent;
 
-UCLASS(Abstract, AutoExpandCategories = ("Settings|Als Character Example", "State|Als Character Example"))
-class ALSEXTRAS_API AAlsCharacterExample : public AAlsCharacter
+UCLASS(Blueprintable, Meta = (BlueprintSpawnableComponent), AutoExpandCategories = ("Settings|Als Character Example"))
+class ALSEXTRAS_API UAlsCharacterExampleComponent : public UAlsCharacterComponent
 {
-	GENERATED_UCLASS_BODY()
+	GENERATED_BODY()
 
 protected:
-	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category = "Als Character Example")
-	TObjectPtr<UAlsCameraMovementComponent> CameraMovement;
-
-	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category = "Als Character Example")
-	TObjectPtr<UCameraComponent> Camera;
-
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings|Als Character Example", Meta = (DisplayThumbnail = false))
 	TObjectPtr<UInputMappingContext> InputMappingContext;
 
@@ -51,6 +44,9 @@ protected:
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings|Als Character Example", Meta = (DisplayThumbnail = false))
 	TObjectPtr<UInputAction> AimAction;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings|Als Character Example", Meta = (DisplayThumbnail = false))
+	TObjectPtr<UInputAction> FireAction;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings|Als Character Example", Meta = (DisplayThumbnail = false))
 	TObjectPtr<UInputAction> RagdollAction;
@@ -84,13 +80,17 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Settings|Als Character Example")
 	FGameplayTag RagdollActionTag{AlsLocomotionActionTags::Dying};
 
-public:
-	virtual void NotifyControllerChanged() override;
+	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Transient, Category = "State|Als Character Example")
+	TWeakObjectPtr<UAlsCameraMovementComponent> CameraMovementComponent;
+
+protected:
+	virtual void OnRegister() override;
+
+	virtual void OnControllerChanged_Implementation(AController* PreviousController, AController* NewController) override;
 
 	// Input
 
-protected:
-	virtual void SetupPlayerInputComponent(UInputComponent* Input) override;
+	virtual void OnSetupPlayerInputComponent_Implementation(UInputComponent* Input) override;
 
 private:
 	void Input_OnLookMouse(const FInputActionValue& ActionValue);
@@ -111,6 +111,8 @@ private:
 
 	void Input_OnAim(const FInputActionValue& ActionValue);
 
+	void Input_OnFire(const FInputActionValue& ActionValue);
+
 	void Input_OnRagdoll();
 
 	void Input_OnRoll();
@@ -120,9 +122,4 @@ private:
 	void Input_OnViewMode();
 
 	void Input_OnSwitchShoulder();
-
-	// Debug
-
-public:
-	virtual void DisplayDebug(UCanvas* Canvas, const FDebugDisplayInfo& DisplayInfo, float& Unused, float& VerticalLocation) override;
 };

@@ -128,7 +128,7 @@ void UAlsPhysicalAnimationComponent::ClearGameplayTags()
 
 void UAlsPhysicalAnimationComponent::RefreshBodyState(float DeltaTime)
 {
-	USkeletalMeshComponent* Mesh{GetSkeletalMesh()};
+	auto* Mesh{GetSkeletalMesh()};
 
 	bool bNeedUpdate = bActive;
 
@@ -675,4 +675,10 @@ bool UAlsPhysicalAnimationComponent::IsRagdollingAndGroundedAndAged() const
 void UAlsPhysicalAnimationComponent::RequestActivation(const FGameplayTag& AbilityTag)
 {
 	ActivationRequest.Push(AbilityTag);
+}
+
+bool UAlsPhysicalAnimationComponent::IsBoneUnderSimulation(const FName& BoneName) const
+{
+	auto* Body = GetSkeletalMesh()->GetBodyInstance(BoneName);
+	return Body && Body->IsInstanceSimulatingPhysics();
 }

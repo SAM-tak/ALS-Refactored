@@ -60,7 +60,7 @@
 			"Enabled": true
 		},
 		{
-			"Name": "GameplayStateTree",
+			"Name": "ModularGameplay",
 			"Enabled": true
 		},
 		{

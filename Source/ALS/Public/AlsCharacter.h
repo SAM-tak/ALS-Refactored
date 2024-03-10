@@ -21,6 +21,12 @@ class UAlsMantlingSettings;
 class UAlsPhysicalAnimationComponent;
 class UAlsAbilitySystemComponent;
 
+DECLARE_MULTICAST_DELEGATE_TwoParams(FAlsCharacter_OnContollerChanged, AController*, AController*);
+
+DECLARE_MULTICAST_DELEGATE_OneParam(FAlsCharacter_OnSetupPlayerInputComponent, UInputComponent*);
+
+DECLARE_MULTICAST_DELEGATE_FourParams(FAlsCharacter_OnDebugDisplayDelegate, UCanvas*, const FDebugDisplayInfo&, float&, float&);
+
 UCLASS(Abstract, AutoExpandCategories = ("Settings|Als Character"))
 class ALS_API AAlsCharacter : public ACharacter, public IAbilitySystemInterface, public IGameplayCueInterface, public IGameplayTagAssetInterface
 {
@@ -93,7 +99,7 @@ protected:
 	// Replicated raw view rotation. Depending on the context, this rotation can be in world space, or in movement
 	// base space. In most cases, it is better to use FAlsViewState::Rotation to take advantage of network smoothing.
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State|Als Character", Transient,
-		ReplicatedUsing = "OnReplicated_ReplicatedViewRotation")
+			  ReplicatedUsing = "OnReplicated_ReplicatedViewRotation")
 	FRotator ReplicatedViewRotation;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State|Als Character", Transient)
@@ -153,7 +159,15 @@ public:
 protected:
 	virtual void BeginPlay() override;
 
+	virtual void NotifyControllerChanged() override;
+
+	virtual void SetupPlayerInputComponent(UInputComponent* Input) override;
+
 public:
+	FAlsCharacter_OnContollerChanged OnContollerChanged;
+
+	FAlsCharacter_OnSetupPlayerInputComponent OnSetupPlayerInputComponent;
+
 	virtual void PostNetReceiveLocationAndRotation() override;
 
 	virtual void OnRep_ReplicatedBasedMovement() override;
@@ -378,7 +392,7 @@ public:
 	virtual FRotator GetViewRotation() const override;
 
 	UFUNCTION(BlueprintNativeEvent, Category = "Als Character")
-	void OnChangedPerspective(bool FirstPersonPerspective);
+	void OnChangedPerspective(bool bFirstPersonPerspective);
 
 	UFUNCTION(BlueprintCallable, Category = "Als Character")
 	void SetLookRotation(const FRotator& NewLookRotation);
@@ -520,6 +534,8 @@ private:
 
 public:
 	virtual void DisplayDebug(UCanvas* Canvas, const FDebugDisplayInfo& DisplayInfo, float& Unused, float& VerticalLocation) override;
+
+	FAlsCharacter_OnDebugDisplayDelegate OnDisplayDebug;
 
 private:
 	static void DisplayDebugHeader(const UCanvas* Canvas, const FText& HeaderText, const FLinearColor& HeaderColor,

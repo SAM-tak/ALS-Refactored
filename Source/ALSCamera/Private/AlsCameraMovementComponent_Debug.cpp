@@ -12,7 +12,7 @@
 
 #define LOCTEXT_NAMESPACE "AlsCameraMovementComponentDebug"
 
-void UAlsCameraMovementComponent::DisplayDebug(const UCanvas* Canvas, const FDebugDisplayInfo& DisplayInfo, float& VerticalLocation) const
+void UAlsCameraMovementComponent::DisplayDebug(UCanvas* Canvas, const FDebugDisplayInfo& DisplayInfo, float& Unused, float& VerticalLocation)
 {
 	const auto Scale{FMath::Min(Canvas->SizeX / (1280.0f * Canvas->GetDPIScale()), Canvas->SizeY / (720.0f * Canvas->GetDPIScale()))};
 
@@ -22,17 +22,24 @@ void UAlsCameraMovementComponent::DisplayDebug(const UCanvas* Canvas, const FDeb
 	auto MaxVerticalLocation{VerticalLocation};
 	auto HorizontalLocation{5.0f * Scale};
 
+	static const auto CameraCurvesHeaderText{FText::AsCultureInvariant(FString{TEXTVIEW("Als.CameraCurves (Shift + 7)")})};
+	static const auto ShapesHeaderText{FText::AsCultureInvariant(FString{TEXTVIEW("Als.CameraShapes (Shift + 8)")})};
+	static const auto TracesHeaderText{FText::AsCultureInvariant(FString{TEXTVIEW("Als.CameraTraces (Shift + 9)")})};
+
 	if (!DisplayInfo.IsDisplayOn(UAlsCameraConstants::CameraCurvesDebugDisplayName()) &&
 	    !DisplayInfo.IsDisplayOn(UAlsCameraConstants::CameraShapesDebugDisplayName()) &&
 	    !DisplayInfo.IsDisplayOn(UAlsCameraConstants::CameraTracesDebugDisplayName()))
 	{
-		VerticalLocation = MaxVerticalLocation;
+		DisplayDebugHeader(Canvas, CameraCurvesHeaderText, {0.0f, 0.333333f, 0.0f}, Scale, HorizontalLocation, VerticalLocation);
+		VerticalLocation += RowOffset;
+		DisplayDebugHeader(Canvas, ShapesHeaderText, {0.0f, 0.333333f, 0.0f}, Scale, HorizontalLocation, VerticalLocation);
+		VerticalLocation += RowOffset;
+		DisplayDebugHeader(Canvas, TracesHeaderText, {0.0f, 0.333333f, 0.0f}, Scale, HorizontalLocation, VerticalLocation);
+		VerticalLocation += RowOffset;
 		return;
 	}
 
 	const auto InitialVerticalLocation{VerticalLocation};
-
-	static const auto CameraCurvesHeaderText{FText::AsCultureInvariant(FString{TEXTVIEW("Als.CameraCurves (Shift + 7)")})};
 
 	if (DisplayInfo.IsDisplayOn(UAlsCameraConstants::CameraCurvesDebugDisplayName()))
 	{
@@ -52,8 +59,6 @@ void UAlsCameraMovementComponent::DisplayDebug(const UCanvas* Canvas, const FDeb
 
 	MaxVerticalLocation = FMath::Max(MaxVerticalLocation, VerticalLocation);
 
-	static const auto ShapesHeaderText{FText::AsCultureInvariant(FString{TEXTVIEW("Als.CameraShapes (Shift + 8)")})};
-
 	if (DisplayInfo.IsDisplayOn(UAlsCameraConstants::CameraShapesDebugDisplayName()))
 	{
 		DisplayDebugHeader(Canvas, ShapesHeaderText, FLinearColor::Green, Scale, HorizontalLocation, VerticalLocation);
@@ -66,8 +71,6 @@ void UAlsCameraMovementComponent::DisplayDebug(const UCanvas* Canvas, const FDeb
 
 	VerticalLocation += RowOffset;
 	MaxVerticalLocation = FMath::Max(MaxVerticalLocation, VerticalLocation);
-
-	static const auto TracesHeaderText{FText::AsCultureInvariant(FString{TEXTVIEW("Als.CameraTraces (Shift + 9)")})};
 
 	if (DisplayInfo.IsDisplayOn(UAlsCameraConstants::CameraTracesDebugDisplayName()))
 	{
@@ -241,7 +244,7 @@ void UAlsCameraMovementComponent::DisplayDebugShapes(const UCanvas* Canvas, cons
 	VerticalLocation += RowOffset;
 
 	static const auto CameraFovText{
-		FText::AsCultureInvariant(FName::NameToDisplayString(GET_MEMBER_NAME_STRING_CHECKED(ThisClass, Camera->FieldOfView), false))
+		FText::AsCultureInvariant(FName::NameToDisplayString(GET_MEMBER_NAME_STRING_CHECKED(ThisClass, TargetCamera->FieldOfView), false))
 	};
 
 	Color = FLinearColor::White;
@@ -250,7 +253,7 @@ void UAlsCameraMovementComponent::DisplayDebugShapes(const UCanvas* Canvas, cons
 	Text.Text = CameraFovText;
 	Text.Draw(Canvas->Canvas, {HorizontalLocation, VerticalLocation});
 
-	DebugStringBuilder.Appendf(TEXT("%.2f"), Camera->FieldOfView);
+	DebugStringBuilder.Appendf(TEXT("%.2f"), TargetCamera->FieldOfView);
 
 	Text.Text = FText::AsCultureInvariant(FString{DebugStringBuilder});
 	Text.Draw(Canvas->Canvas, {HorizontalLocation + ColumnOffset, VerticalLocation});

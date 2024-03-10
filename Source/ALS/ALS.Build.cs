@@ -11,12 +11,12 @@ public class ALS : ModuleRules
 
 		PublicDependencyModuleNames.AddRange(new[]
 		{
-			"Core", "CoreUObject", "Engine", "GameplayTags", "GameplayAbilities", "GameplayTasks", "AnimGraphRuntime", "RigVM", "ControlRig", "Chaos"
+			"Core", "CoreUObject", "Engine", "GameplayTags", "GameplayAbilities", "GameplayTasks", "ModularGameplay"
 		});
 
 		PrivateDependencyModuleNames.AddRange(new[]
 		{
-			"EngineSettings", "NetCore", "PhysicsCore", "Niagara"
+			"EngineSettings", "NetCore", "PhysicsCore", "Niagara", "AnimGraphRuntime", "RigVM", "ControlRig", "Chaos"
 		});
 
 		if (Target.Type == TargetRules.TargetType.Editor)

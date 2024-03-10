@@ -16,7 +16,7 @@
 
 #include UE_INLINE_GENERATED_CPP_BY_NAME(AlsCameraMovementComponent)
 
-UAlsCameraMovementComponent::UAlsCameraMovementComponent()
+UAlsCameraMovementComponent::UAlsCameraMovementComponent(const FObjectInitializer& ObjectInitializer) : Super(ObjectInitializer)
 {
 	PrimaryComponentTick.bStartWithTickEnabled = false;
 	PrimaryComponentTick.TickGroup = TG_PostPhysics;
@@ -42,12 +42,14 @@ void UAlsCameraMovementComponent::Activate(const bool bReset)
 {
 	Super::Activate(bReset);
 
+	Character->OnDisplayDebug.AddUObject(this, &ThisClass::DisplayDebug);
+
 	SetComponentTickEnabled(true);
 
-	if (IsValid(Camera))
+	if (TargetCamera.IsValid())
 	{
-		Camera->Activate();
-		Camera->SetComponentTickEnabled(true);
+		TargetCamera->Activate();
+		TargetCamera->SetComponentTickEnabled(true);
 	}
 
 	if (!bReset && !ShouldActivate())
@@ -60,11 +62,13 @@ void UAlsCameraMovementComponent::Activate(const bool bReset)
 
 void UAlsCameraMovementComponent::Deactivate()
 {
+	Character->OnDisplayDebug.RemoveAll(this);
+
 	SetComponentTickEnabled(false);
-	if (IsValid(Camera))
+	if (TargetCamera.IsValid())
 	{
-		Camera->SetComponentTickEnabled(false);
-		Camera->Deactivate();
+		TargetCamera->SetComponentTickEnabled(false);
+		TargetCamera->Deactivate();
 	}
 	Super::Deactivate();
 }
@@ -80,10 +84,16 @@ void UAlsCameraMovementComponent::RegisterComponentTickFunctions(const bool bReg
 
 void UAlsCameraMovementComponent::BeginPlay()
 {
+	ALS_ENSURE(IsValid(Settings));
 	ALS_ENSURE(IsValid(GetAnimInstance()));
 	ALS_ENSURE(Character.IsValid());
-	ALS_ENSURE(IsValid(Camera));
-	ALS_ENSURE(IsValid(Settings));
+
+	if (Character.IsValid() && !TargetCamera.IsValid())
+	{
+		SetCameraComponent(Character->FindComponentByClass<UCameraComponent>());
+	}
+
+	ALS_ENSURE(TargetCamera.IsValid());
 
 	if (GetAnimInstance())
 	{
@@ -134,14 +144,14 @@ void UAlsCameraMovementComponent::CompleteParallelAnimationEvaluation(const bool
 
 void UAlsCameraMovementComponent::SetCameraComponent(UCameraComponent* NewCameraComponent)
 {
-	if (IsValid(Camera))
+	if (TargetCamera.IsValid())
 	{
-		Camera->RemoveTickPrerequisiteComponent(this);
+		TargetCamera->RemoveTickPrerequisiteComponent(this);
 	}
-	Camera = NewCameraComponent;
-	if (IsValid(Camera))
+	TargetCamera = NewCameraComponent;
+	if (TargetCamera.IsValid())
 	{
-		Camera->AddTickPrerequisiteComponent(this);
+		TargetCamera->AddTickPrerequisiteComponent(this);
 	}
 }
 
@@ -284,13 +294,13 @@ void UAlsCameraMovementComponent::TickCamera(const float DeltaTime, bool bAllowL
 		UpdateFocalLength();
 		Character->SetLookRotation(Character->GetViewRotation());
 
-		if (IsValid(Camera))
+		if (TargetCamera.IsValid())
 		{
-			Camera->FieldOfView = Settings->FirstPerson.FOV;
-			Camera->bPanoramic = Settings->FirstPerson.bPanoramic;
-			Camera->PanoramicFieldOfView = Settings->FirstPerson.PanoramaFOV;
-			Camera->PanoramaSideViewRate = Settings->FirstPerson.PanoramaSideViewRate;
-			Camera->SetWorldLocationAndRotation(CameraLocation, CameraRotation);
+			TargetCamera->FieldOfView = Settings->FirstPerson.FOV;
+			TargetCamera->bPanoramic = Settings->FirstPerson.bPanoramic;
+			TargetCamera->PanoramicFieldOfView = Settings->FirstPerson.PanoramaFOV;
+			TargetCamera->PanoramaSideViewRate = Settings->FirstPerson.PanoramaSideViewRate;
+			TargetCamera->SetWorldLocationAndRotation(CameraLocation, CameraRotation);
 		}
 
 		if (!bFPP)
@@ -455,13 +465,13 @@ void UAlsCameraMovementComponent::TickCamera(const float DeltaTime, bool bAllowL
 		UpdateFocalLength();
 		Character->SetLookRotation(Character->GetViewRotation());
 
-		if (IsValid(Camera))
+		if (TargetCamera.IsValid())
 		{
-			Camera->SetWorldLocationAndRotation(CameraLocation, CameraRotation);
-			Camera->FieldOfView = Settings->FirstPerson.FOV;
-			Camera->bPanoramic = Settings->FirstPerson.bPanoramic;
-			Camera->PanoramicFieldOfView = Settings->FirstPerson.PanoramaFOV;
-			Camera->PanoramaSideViewRate = Settings->FirstPerson.PanoramaSideViewRate;
+			TargetCamera->SetWorldLocationAndRotation(CameraLocation, CameraRotation);
+			TargetCamera->FieldOfView = Settings->FirstPerson.FOV;
+			TargetCamera->bPanoramic = Settings->FirstPerson.bPanoramic;
+			TargetCamera->PanoramicFieldOfView = Settings->FirstPerson.PanoramaFOV;
+			TargetCamera->PanoramaSideViewRate = Settings->FirstPerson.PanoramaSideViewRate;
 		}
 	}
 	else if (!FAnimWeight::IsRelevant(FirstPersonOverride))
@@ -471,13 +481,13 @@ void UAlsCameraMovementComponent::TickCamera(const float DeltaTime, bool bAllowL
 		UpdateFocalLength();
 		Character->SetLookRotation((GetCurrentFocusLocation() - GetEyeCameraLocation()).Rotation());
 
-		if (IsValid(Camera))
+		if (TargetCamera.IsValid())
 		{
-			Camera->FieldOfView = Settings->ThirdPerson.FOV;
-			Camera->bPanoramic = Settings->ThirdPerson.bPanoramic;
-			Camera->PanoramicFieldOfView = Settings->ThirdPerson.PanoramaFOV;
-			Camera->PanoramaSideViewRate = Settings->ThirdPerson.PanoramaSideViewRate;
-			Camera->SetWorldLocationAndRotation(CameraLocation, CameraRotation);
+			TargetCamera->FieldOfView = Settings->ThirdPerson.FOV;
+			TargetCamera->bPanoramic = Settings->ThirdPerson.bPanoramic;
+			TargetCamera->PanoramicFieldOfView = Settings->ThirdPerson.PanoramaFOV;
+			TargetCamera->PanoramaSideViewRate = Settings->ThirdPerson.PanoramaSideViewRate;
+			TargetCamera->SetWorldLocationAndRotation(CameraLocation, CameraRotation);
 		}
 	}
 	else
@@ -485,13 +495,13 @@ void UAlsCameraMovementComponent::TickCamera(const float DeltaTime, bool bAllowL
 		auto FirstPersonCameraLocation{GetFirstPersonCameraLocation() - GetForwardVector() * Settings->FirstPerson.HeadSize};
 		CameraLocation = FMath::Lerp(CameraResultLocation, FirstPersonCameraLocation, FirstPersonOverride);
 
-		if (IsValid(Camera))
+		if (TargetCamera.IsValid())
 		{
-			Camera->FieldOfView = FMath::Lerp(Settings->ThirdPerson.FOV, Settings->FirstPerson.FOV, FirstPersonOverride);
-			Camera->bPanoramic = Settings->ThirdPerson.bPanoramic | Settings->FirstPerson.bPanoramic;
-			Camera->PanoramicFieldOfView = FMath::Lerp(Settings->ThirdPerson.PanoramaFOV, Settings->FirstPerson.PanoramaFOV, FirstPersonOverride);
-			Camera->PanoramaSideViewRate = FMath::Lerp(Settings->ThirdPerson.PanoramaSideViewRate, Settings->FirstPerson.PanoramaSideViewRate, FirstPersonOverride);
-			Camera->SetWorldLocationAndRotation(CameraLocation, CameraRotation);
+			TargetCamera->FieldOfView = FMath::Lerp(Settings->ThirdPerson.FOV, Settings->FirstPerson.FOV, FirstPersonOverride);
+			TargetCamera->bPanoramic = Settings->ThirdPerson.bPanoramic | Settings->FirstPerson.bPanoramic;
+			TargetCamera->PanoramicFieldOfView = FMath::Lerp(Settings->ThirdPerson.PanoramaFOV, Settings->FirstPerson.PanoramaFOV, FirstPersonOverride);
+			TargetCamera->PanoramaSideViewRate = FMath::Lerp(Settings->ThirdPerson.PanoramaSideViewRate, Settings->FirstPerson.PanoramaSideViewRate, FirstPersonOverride);
+			TargetCamera->SetWorldLocationAndRotation(CameraLocation, CameraRotation);
 		}
 	}
 

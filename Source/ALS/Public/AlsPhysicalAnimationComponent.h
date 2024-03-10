@@ -141,6 +141,9 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Als|PhysicalAnimation")
 	void RequestActivation(const FGameplayTag &AbilityTag);
 
+	UFUNCTION(BlueprintPure, Category = "Als|PhysicalAnimation")
+	bool IsBoneUnderSimulation(const FName& BoneName) const;
+
 private:
 	void ClearGameplayTags();
 

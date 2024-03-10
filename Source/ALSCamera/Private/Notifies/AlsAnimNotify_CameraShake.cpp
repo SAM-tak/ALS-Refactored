@@ -7,7 +7,7 @@
 
 #include UE_INLINE_GENERATED_CPP_BY_NAME(AlsAnimNotify_CameraShake)
 
-UAlsAnimNotify_CameraShake::UAlsAnimNotify_CameraShake()
+UAlsAnimNotify_CameraShake::UAlsAnimNotify_CameraShake(const FObjectInitializer& ObjectInitializer) : Super(ObjectInitializer)
 {
 #if WITH_EDITORONLY_DATA
 	bShouldFireInEditor = false;
