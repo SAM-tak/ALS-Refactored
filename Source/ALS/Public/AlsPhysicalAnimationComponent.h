@@ -55,16 +55,16 @@ class ALS_API UAlsPhysicalAnimationComponent : public UPhysicalAnimationComponen
 protected:
 	// The blend time Of physics blend Weight on activate physics body.
 	// Not used when ragdolling activate. Ragdolling start with weight 1.0 immediately.
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = PhysicalAnimation, Meta = (ClampMin = 0, ForceUnits = "s"))
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "PhysicalAnimation|Settings", Meta = (ClampMin = 0, ForceUnits = "s"))
 	float BlendTimeOfBlendWeightOnActivate{0.1f};
 
 	// The blend time Of physics blend Weight on deactivate physics body.
 	// Not used when ragdolling deactivate. In the case of a ragdoll, the weight becomes zero immediately.
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = PhysicalAnimation, Meta = (ClampMin = 0, ForceUnits = "s"))
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "PhysicalAnimation|Settings", Meta = (ClampMin = 0, ForceUnits = "s"))
 	float BlendTimeOfBlendWeightOnDeactivate{0.1f};
 
 	// A mask of GameplayTags used to determine the Profile. The order in the list is used as a priority.
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = PhysicalAnimation)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "PhysicalAnimation|Settings")
 	TArray<FGameplayTagContainer> GameplayTagMasks{
 		FGameplayTagContainer{AlsLocomotionActionTags::Root},
 		FGameplayTagContainer{AlsLocomotionModeTags::Root},
@@ -88,40 +88,40 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = PhysicalAnimation)
 	TArray<FName> MultiplyProfileNames;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "State|PhysicalAnimation", Transient)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "PhysicalAnimation|State", Transient)
 	TEnumAsByte<ECollisionChannel> PrevCollisionObjectType{ECC_Pawn};
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "State|PhysicalAnimation", Transient)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "PhysicalAnimation|State", Transient)
 	TEnumAsByte<ECollisionEnabled::Type> PrevCollisionEnabled{ECollisionEnabled::QueryOnly};
 
-	UPROPERTY(VisibleAnywhere, Category = "State|PhysicalAnimation", Transient)
+	UPROPERTY(VisibleAnywhere, Category = "PhysicalAnimation|State", Transient)
 	TArray<FName> CurrentProfileNames;
 
-	UPROPERTY(VisibleAnywhere, Category = "State|PhysicalAnimation", Transient)
+	UPROPERTY(VisibleAnywhere, Category = "PhysicalAnimation|State", Transient)
 	TArray<FName> CurrentMultiplyProfileNames;
 
-	UPROPERTY(VisibleAnywhere, Category = "State|PhysicalAnimation", Transient)
+	UPROPERTY(VisibleAnywhere, Category = "PhysicalAnimation|State", Transient)
 	FGameplayTagContainer CurrentGameplayTags;
 
-	UPROPERTY(VisibleAnywhere, Category = "State|PhysicalAnimation", Transient)
+	UPROPERTY(VisibleAnywhere, Category = "PhysicalAnimation|State", Transient)
 	FGameplayTagContainer PreviousGameplayTags;
 
-	UPROPERTY(VisibleAnywhere, Category = "State|PhysicalAnimation", Transient)
+	UPROPERTY(VisibleAnywhere, Category = "PhysicalAnimation|State", Transient)
 	FAlsPhysicalAnimationCurveValues CurveValues;
 
-	UPROPERTY(VisibleAnywhere, Category = "State|PhysicalAnimation", Transient)
+	UPROPERTY(VisibleAnywhere, Category = "PhysicalAnimation|State", Transient)
 	uint8 bActive : 1{false};
 
-	UPROPERTY(VisibleAnywhere, Category = "State|PhysicalAnimation", Transient)
+	UPROPERTY(VisibleAnywhere, Category = "PhysicalAnimation|State", Transient)
 	uint8 bRagdolling : 1{false};
 
-	UPROPERTY(VisibleAnywhere, Category = "State|PhysicalAnimation", Transient)
+	UPROPERTY(VisibleAnywhere, Category = "PhysicalAnimation|State", Transient)
 	uint8 bRagdollingFreezed : 1{false};
 
-	UPROPERTY(VisibleAnywhere, Category = "State|PhysicalAnimation", Transient)
+	UPROPERTY(VisibleAnywhere, Category = "PhysicalAnimation|State", Transient)
 	TWeakObjectPtr<class UAlsGameplayAbility_Ragdolling> LatestRagdolling;
 
-	UPROPERTY(VisibleAnywhere, Category = "State|PhysicalAnimation", Transient)
+	UPROPERTY(VisibleAnywhere, Category = "PhysicalAnimation|State", Transient)
 	TArray<FGameplayTag> ActivationRequest;
 
 public:
@@ -135,13 +135,13 @@ public:
 
 	bool IsRagdolling() const;
 
-	UFUNCTION(BlueprintPure, Category = "Als|PhysicalAnimation")
+	UFUNCTION(BlueprintPure, Category = "ALS|PhysicalAnimation")
 	bool IsRagdollingAndGroundedAndAged() const;
 
-	UFUNCTION(BlueprintCallable, Category = "Als|PhysicalAnimation")
+	UFUNCTION(BlueprintCallable, Category = "ALS|PhysicalAnimation")
 	void RequestActivation(const FGameplayTag &AbilityTag);
 
-	UFUNCTION(BlueprintPure, Category = "Als|PhysicalAnimation")
+	UFUNCTION(BlueprintPure, Category = "ALS|PhysicalAnimation")
 	bool IsBoneUnderSimulation(const FName& BoneName) const;
 
 private:

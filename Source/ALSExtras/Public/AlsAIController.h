@@ -9,7 +9,7 @@ class ALSEXTRAS_API AAlsAIController : public AAIController
 	GENERATED_UCLASS_BODY()
 
 protected:
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings")
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AlsAIController|Settings")
 	TObjectPtr<UBehaviorTree> BehaviorTree;
 
 protected:

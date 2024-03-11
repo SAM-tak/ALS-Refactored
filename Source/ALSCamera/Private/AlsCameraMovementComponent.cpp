@@ -79,9 +79,9 @@ void UAlsCameraMovementComponent::OnControllerChanged_Implementation(AController
 void UAlsCameraMovementComponent::Activate(const bool bReset)
 {
 	Super::Activate(bReset);
-
+#if !UE_BUILD_SHIPPING
 	Character->OnDisplayDebug.AddUObject(this, &ThisClass::DisplayDebug);
-
+#endif
 	SetComponentTickEnabled(true);
 
 	if (TargetCamera.IsValid())
@@ -100,14 +100,15 @@ void UAlsCameraMovementComponent::Activate(const bool bReset)
 
 void UAlsCameraMovementComponent::Deactivate()
 {
-	Character->OnDisplayDebug.RemoveAll(this);
-
 	SetComponentTickEnabled(false);
 	if (TargetCamera.IsValid())
 	{
 		TargetCamera->SetComponentTickEnabled(false);
 		TargetCamera->Deactivate();
 	}
+#if !UE_BUILD_SHIPPING
+	Character->OnDisplayDebug.RemoveAll(this);
+#endif
 	Super::Deactivate();
 }
 

@@ -9,22 +9,22 @@ class ALS_API UAlsRagdollingAnimInstance : public UAlsLinkedAnimationInstance
 	GENERATED_BODY()
 
 protected:
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "ALS|Ragdolling", Transient)
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = AlsRagdolling, Transient)
 	FPoseSnapshot FinalPose;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "ALS|Ragdolling", Transient, Meta = (ForceUnits = "deg"))
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = AlsRagdolling, Transient, Meta = (ForceUnits = "deg"))
 	float LyingDownYawAngleDelta{0.0f};
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "ALS|Ragdolling", Transient, Meta = (ClampMin = 0, ForceUnits = "s"))
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = AlsRagdolling, Transient, Meta = (ClampMin = 0, ForceUnits = "s"))
 	float StartBlendTime{0.3f};
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "ALS|Ragdolling", Transient)
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = AlsRagdolling, Transient)
 	uint8 bActive : 1{false};
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "ALS|Ragdolling", Transient)
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = AlsRagdolling, Transient)
 	uint8 bGroundedAndAged : 1{false};
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "ALS|Ragdolling", Transient)
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = AlsRagdolling, Transient)
 	uint8 bFacingUpward : 1{false};
 
 public:

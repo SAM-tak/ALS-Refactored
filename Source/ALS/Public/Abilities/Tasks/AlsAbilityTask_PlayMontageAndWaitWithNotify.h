@@ -20,7 +20,7 @@ public:
 	UPROPERTY(BlueprintAssignable)
 	FOnMontagePlayDelegate OnNotifyEnd;
 
-    UFUNCTION(BlueprintCallable, Category = "Als|Ability|Tasks", meta = (DisplayName = "PlayMontageAndWaitWithNotify", HidePin = "OwningAbility", DefaultToSelf = "OwningAbility", BlueprintInternalUseOnly = "TRUE"))
+    UFUNCTION(BlueprintCallable, Category = "ALS|Ability|Tasks", meta = (DisplayName = "PlayMontageAndWaitWithNotify", HidePin = "OwningAbility", DefaultToSelf = "OwningAbility", BlueprintInternalUseOnly = "TRUE"))
     static UAlsAbilityTask_PlayMontageAndWaitWithNotify* CreatePlayMontageAndWaitWithNotify(UGameplayAbility* OwningAbility,
 		FName TaskInstanceName, UAnimMontage* _MontageToPlay, float _Rate = 1.f, FName _StartSection = NAME_None, bool _bStopWhenAbilityEnds = true,
 		float _AnimRootMotionTranslationScale = 1.f, float _StartTimeSeconds = 0.f, bool _bAllowInterruptAfterBlendOut = false);

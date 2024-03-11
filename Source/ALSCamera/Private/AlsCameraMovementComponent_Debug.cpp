@@ -12,6 +12,7 @@
 
 #define LOCTEXT_NAMESPACE "AlsCameraMovementComponentDebug"
 
+#if !UE_BUILD_SHIPPING
 void UAlsCameraMovementComponent::DisplayDebug(UCanvas* Canvas, const FDebugDisplayInfo& DisplayInfo, float& Unused, float& VerticalLocation)
 {
 	const auto Scale{FMath::Min(Canvas->SizeX / (1280.0f * Canvas->GetDPIScale()), Canvas->SizeY / (720.0f * Canvas->GetDPIScale()))};
@@ -323,5 +324,6 @@ void UAlsCameraMovementComponent::DisplayDebugTraces(const UCanvas* Canvas, cons
 
 	VerticalLocation += RowOffset;
 }
+#endif // !UE_BUILD_SHIPPING
 
 #undef LOCTEXT_NAMESPACE

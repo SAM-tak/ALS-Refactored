@@ -11,7 +11,7 @@ class ALS_API UAlsCharacterComponent : public UPawnComponent
 	GENERATED_UCLASS_BODY()
 
 protected:
-	UPROPERTY(BlueprintReadOnly, Transient, Category = "State|Als Character Component")
+	UPROPERTY(BlueprintReadOnly, Transient, Category = "AlsCharacterComponent|State")
 	TWeakObjectPtr<AAlsCharacter> Character;
 
 protected:

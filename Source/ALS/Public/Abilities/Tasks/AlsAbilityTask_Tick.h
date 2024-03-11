@@ -18,7 +18,7 @@ public:
     UPROPERTY(BlueprintAssignable)
     FAlsAbilityTask_OnTickDelegate OnTick;
 
-    UFUNCTION(BlueprintCallable, Category = "Als|Ability|Tasks", meta = (DisplayName = "New Tick Ability Task", HidePin = "OwningAbility", DefaultToSelf = "OwningAbility", BlueprintInternalUseOnly = "TRUE"))
+    UFUNCTION(BlueprintCallable, Category = "ALS|Ability|Tasks", meta = (DisplayName = "New Tick Ability Task", HidePin = "OwningAbility", DefaultToSelf = "OwningAbility", BlueprintInternalUseOnly = "TRUE"))
     static UAlsAbilityTask_Tick* New(UGameplayAbility* OwningAbility, const FName TaskInstanceName);
 
     virtual void TickTask(float DeltaTime) override;

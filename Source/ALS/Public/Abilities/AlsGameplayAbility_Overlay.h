@@ -16,7 +16,7 @@ class ALS_API UAlsGameplayAbility_Overlay : public UAlsGameplayAbility
     GENERATED_UCLASS_BODY()
 
 public:
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "ALS|Ability")
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = AlsAbility)
 	TSubclassOf<UAlsLinkedAnimationInstance> OwnAnimLayersClass;
 
 public:

@@ -112,39 +112,39 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = NavMovement, meta = (DisplayName = "Movement Capabilities : CanLie", Keywords = "Nav Agent"))
 	uint8 NavAgentProps_bCanLie : 1{true};
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient)
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "AlsCharacterMovement|State", Transient)
 	TObjectPtr<UAlsMovementSettings> MovementSettings;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient)
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "AlsCharacterMovement|State", Transient)
 	FAlsMovementGaitSettings GaitSettings;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient)
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "AlsCharacterMovement|State", Transient)
 	FGameplayTag RotationMode{AlsRotationModeTags::ViewDirection};
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient)
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "AlsCharacterMovement|State", Transient)
 	FGameplayTag Stance{AlsStanceTags::Standing};
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient)
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "AlsCharacterMovement|State", Transient)
 	FGameplayTag MaxAllowedGait{AlsGaitTags::Walking};
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient)
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "AlsCharacterMovement|State", Transient)
 	uint8 bMovementModeLocked : 1 {false};
 
 	// Used to temporarily prohibit the player from moving the character. Also works for AI-controlled characters.
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient)
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "AlsCharacterMovement|State", Transient)
 	uint8 bInputBlocked : 1 {false};
 
 	// Valid only on locally controlled characters.
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient)
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "AlsCharacterMovement|State", Transient)
 	FRotator PreviousControlRotation{NAN, NAN, NAN};
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient)
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "AlsCharacterMovement|State", Transient)
 	FVector PendingPenetrationAdjustment;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient)
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "AlsCharacterMovement|State", Transient)
 	FVector PrePenetrationAdjustmentVelocity;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient)
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "AlsCharacterMovement|State", Transient)
 	uint8 bPrePenetrationAdjustmentVelocityValid : 1 {false};
 
 public:
@@ -243,7 +243,7 @@ public:
 
 public:
 	/** If true, try to lie (or keep lying down) on next update. If false, try to stop lying on next update. */
-	UPROPERTY(Category = "Als|Als Character Movement", VisibleInstanceOnly, BlueprintReadOnly)
+	UPROPERTY(Category = "Character Movement (General Settings)", VisibleInstanceOnly, BlueprintReadOnly)
 	uint8 bWantsToLie : 1{false};
 
 	virtual void Crouch(bool bClientSimulation = false) override;

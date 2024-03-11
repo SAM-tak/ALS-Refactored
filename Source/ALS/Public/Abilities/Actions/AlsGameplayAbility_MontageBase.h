@@ -19,22 +19,22 @@ class ALS_API UAlsGameplayAbility_MontageBase : public UAlsGameplayAbility_Actio
 
 protected:
 	/** GameplayEffects to apply and then remove while the animation is playing */
-	UPROPERTY(EditDefaultsOnly, Category = "Als|Ability|Montage")
+	UPROPERTY(EditDefaultsOnly, Category = "AlsAbility|Montage")
 	TArray<TSubclassOf<UGameplayEffect>> GameplayEffectClassesWhileAnimating;
 
-	UPROPERTY(EditDefaultsOnly, Category = "Als|Ability|Montage", Meta = (ForceUnit = "s"))
+	UPROPERTY(EditDefaultsOnly, Category = "AlsAbility|Montage", Meta = (ForceUnit = "s"))
 	float BlendOutDurationOnCancel{0.15f};
 
-	UPROPERTY(BlueprintAssignable, Category = "Als|Ability|Montage")
+	UPROPERTY(BlueprintAssignable, Category = "AlsAbility|Montage")
 	FAlsMontageNotifyDelegate OnNotifyBegin;
 
-	UPROPERTY(BlueprintAssignable, Category = "Als|Ability|Montage")
+	UPROPERTY(BlueprintAssignable, Category = "AlsAbility|Montage")
 	FAlsMontageNotifyDelegate OnNotifyEnd;
 
-	UPROPERTY(VisibleAnywhere, Category = "Als|Ability|Montage|State", Transient)
+	UPROPERTY(VisibleAnywhere, Category = "AlsAbility|Montage|State", Transient)
 	float CurrentMotangeDuration{0.f};
 
-	UPROPERTY(VisibleAnywhere, Category = "Als|Ability|Montage|State", Transient)
+	UPROPERTY(VisibleAnywhere, Category = "AlsAbility|Montage|State", Transient)
 	int32 CurrentMontageInstanceId{INDEX_NONE};
 
 private:
@@ -44,7 +44,7 @@ public:
 	virtual void EndAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilityActivationInfo ActivationInfo,
 							bool bReplicateEndAbility, bool bWasCancelled) override;
 
-	UFUNCTION(BlueprintNativeEvent, Category = "Als|Ability|Montage")
+	UFUNCTION(BlueprintNativeEvent, Category = "ALS|Ability|Montage")
 	void OnEndMontage(UAnimMontage *Montage, bool bInterrupted);
 
 	void GetGameplayEffectsWhileAnimating(TArray<const UGameplayEffect *> &OutEffects) const;
@@ -62,7 +62,7 @@ protected:
 	virtual void PlayMontage(const FAlsPlayMontageParameter& Parameter) override;
 
 private:
-	UFUNCTION(BlueprintCallable, Category = "Als|Ability|Montage")
+	UFUNCTION(BlueprintCallable, Category = "ALS|Ability|Montage")
 	void PlayMontage(UAnimMontage* Montage, float PlayRate = 1.0f, FName SectionName = NAME_None, float StartTime = 0.0f);
 
 	bool IsNotifyValid(FName NotifyName, const FBranchingPointNotifyPayload& BPNPayload) const;

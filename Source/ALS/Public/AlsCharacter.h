@@ -27,7 +27,7 @@ DECLARE_MULTICAST_DELEGATE_OneParam(FAlsCharacter_OnSetupPlayerInputComponent, U
 
 DECLARE_MULTICAST_DELEGATE_FourParams(FAlsCharacter_OnDebugDisplayDelegate, UCanvas*, const FDebugDisplayInfo&, float&, float&);
 
-UCLASS(Abstract, AutoExpandCategories = ("Settings|Als Character"))
+UCLASS(Abstract, AutoExpandCategories = ("Als Character|Settings"))
 class ALS_API AAlsCharacter : public ACharacter, public IAbilitySystemInterface, public IGameplayCueInterface, public IGameplayTagAssetInterface
 {
 	GENERATED_UCLASS_BODY()
@@ -35,10 +35,10 @@ class ALS_API AAlsCharacter : public ACharacter, public IAbilitySystemInterface,
 	friend class UAlsPhysicalAnimationComponent;
 
 protected:
-	UPROPERTY(BlueprintReadOnly, Category = "State|Als Character", Transient)
+	UPROPERTY(BlueprintReadOnly, Category = "Als Character|State", Transient)
 	TObjectPtr<UAlsCharacterMovementComponent> AlsCharacterMovement;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State|Als Character", Transient)
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Als Character|State", Transient)
 	TWeakObjectPtr<UAlsAnimationInstance> AnimationInstance;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Als Character")
@@ -47,77 +47,76 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Als Character")
 	TObjectPtr<UAlsAbilitySystemComponent> AbilitySystem;
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings|Als Character")
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Als Character|Settings")
 	TObjectPtr<UAlsCharacterSettings> Settings;
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings|Als Character")
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Als Character|Settings")
 	TObjectPtr<UAlsMovementSettings> MovementSettings;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Settings|Als Character")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Als Character|Settings")
 	TObjectPtr<UAlsAbilitySet> AbilitySet;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Camera|Als Character", Replicated)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Als Character|Camera", Replicated)
 	uint32 bRightShoulder : 1{true};
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings|Als Character|Desired State", Replicated)
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Als Character|Settings|Desired State", Replicated)
 	FGameplayTag DesiredRotationMode{AlsDesiredRotationModeTags::ViewDirection};
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings|Als Character|Desired State", Replicated)
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Als Character|Settings|Desired State", Replicated)
 	FGameplayTag DesiredStance{AlsDesiredStanceTags::Standing};
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings|Als Character|Desired State", Replicated)
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Als Character|Settings|Desired State", Replicated)
 	FGameplayTag DesiredGait{AlsDesiredGaitTags::Running};
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings|Als Character|Desired State", Replicated)
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Als Character|Settings|Desired State", Replicated)
 	FGameplayTag DesiredViewMode{AlsDesiredViewModeTags::ThirdPerson};
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings|Als Character|Desired State", ReplicatedUsing = OnAimingModeChanged)
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Als Character|Settings|Desired State", ReplicatedUsing = OnAimingModeChanged)
 	FGameplayTag AimingMode{FGameplayTag::EmptyTag};
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings|Als Character|Desired State")
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Als Character|Settings|Desired State")
 	FGameplayTag InitialOverlayMode{AlsOverlayModeTags::Default};
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State|Als Character", Transient)
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Als Character|State", Transient)
 	FGameplayTag LocomotionMode{AlsLocomotionModeTags::Grounded};
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State|Als Character", Transient)
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Als Character|State", Transient)
 	FGameplayTag RotationMode{AlsRotationModeTags::ViewDirection};
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State|Als Character", Transient)
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Als Character|State", Transient)
 	FGameplayTag Stance{AlsStanceTags::Standing};
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State|Als Character", Transient)
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Als Character|State", Transient)
 	FGameplayTag Gait{AlsGaitTags::Walking};
 	
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State|Als Character", Transient)
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Als Character|State", Transient)
 	FGameplayTag ViewMode{AlsDesiredViewModeTags::ThirdPerson};
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State|Als Character", Transient)
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Als Character|State", Transient)
 	FAlsMovementBaseState MovementBase;
 
 	// Replicated raw view rotation. Depending on the context, this rotation can be in world space, or in movement
 	// base space. In most cases, it is better to use FAlsViewState::Rotation to take advantage of network smoothing.
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State|Als Character", Transient,
-			  ReplicatedUsing = "OnReplicated_ReplicatedViewRotation")
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Als Character|State", Transient, ReplicatedUsing = "OnReplicated_ReplicatedViewRotation")
 	FRotator ReplicatedViewRotation;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State|Als Character", Transient)
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Als Character|State", Transient)
 	FAlsViewState ViewState;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State|Als Character", Transient, Meta = (ClampMin = 0, ForceUnits = "s"))
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Als Character|State", Transient, Meta = (ClampMin = 0, ForceUnits = "s"))
 	float ViewModeChangeBlockTime{0.f};
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State|Als Character", Transient, Replicated)
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Als Character|State", Transient, Replicated)
 	FVector_NetQuantizeNormal InputDirection;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State|Als Character", Transient, Replicated,
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Als Character|State", Transient, Replicated,
 			  Meta = (ClampMin = -180, ClampMax = 180, ForceUnits = "deg"))
 	float DesiredVelocityYawAngle;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State|Als Character", Transient)
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Als Character|State", Transient)
 	FAlsLocomotionState LocomotionState;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State|Als Character", Transient)
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Als Character|State", Transient)
 	FRotator PendingFocalRotationRelativeAdjustment{ForceInit};
 
 	FTimerHandle BrakingFrictionFactorResetTimer;
@@ -200,32 +199,32 @@ private:
 	// Desired View Mode
 
 public:
-	UFUNCTION(BlueprintPure, Category = "Als Character")
+	UFUNCTION(BlueprintPure, Category = "ALS|Character")
 	const FGameplayTag& GetDesiredViewMode() const;
 
-	UFUNCTION(BlueprintCallable, Category = "Als Character", Meta = (AutoCreateRefTerm = "NewDesiredViewMode"))
+	UFUNCTION(BlueprintCallable, Category = "ALS|Character", Meta = (AutoCreateRefTerm = "NewDesiredViewMode"))
 	void SetDesiredViewMode(const FGameplayTag& NewDesiredViewMode);
 
-	UFUNCTION(BlueprintPure, Category = "Camera|Als Character")
+	UFUNCTION(BlueprintPure, Category = "Als|Character|Camera")
 	bool IsRightShoulder() const;
 
-	UFUNCTION(BlueprintCallable, Category = "Camera|Als Character")
+	UFUNCTION(BlueprintCallable, Category = "Als|Character|Camera")
 	void SetRightShoulder(bool bNewRightShoulder);
 
-	UFUNCTION(BlueprintPure, Category = "Camera|Als Character")
+	UFUNCTION(BlueprintPure, Category = "Als|Character|Camera")
 	bool ToggleRightShoulder();
 
 	// View Mode
 
 public:
-	UFUNCTION(BlueprintPure, Category = "Als Character")
+	UFUNCTION(BlueprintPure, Category = "ALS|Character")
 	const FGameplayTag& GetViewMode() const;
 
 protected:
-	UFUNCTION(BlueprintCallable, Category = "Als Character")
+	UFUNCTION(BlueprintCallable, Category = "ALS|Character")
 	void SetViewMode(const FGameplayTag& NewViewMode);
 
-	UFUNCTION(BlueprintNativeEvent, Category = "Als Character")
+	UFUNCTION(BlueprintNativeEvent, Category = "ALS|Character")
 	void OnViewModeChanged(const FGameplayTag& PreviousViewMode);
 
 	// Locomotion Mode
@@ -234,7 +233,7 @@ public:
 	virtual void OnMovementModeChanged(EMovementMode PreviousMovementMode, uint8 PreviousCustomMode = 0) override;
 
 public:
-	UFUNCTION(BlueprintPure, Category = "Als Character")
+	UFUNCTION(BlueprintPure, Category = "ALS|Character")
 	const FGameplayTag& GetLocomotionMode() const;
 
 protected:
@@ -243,50 +242,50 @@ protected:
 	UFUNCTION()
 	virtual void NotifyLocomotionModeChanged(const FGameplayTag& PreviousLocomotionMode);
 
-	UFUNCTION(BlueprintNativeEvent, Category = "Als Character")
+	UFUNCTION(BlueprintNativeEvent, Category = "ALS|Character")
 	void OnLocomotionModeChanged(const FGameplayTag& PreviousLocomotionMode);
 
 	// Desired Aiming
 
 public:
-	UFUNCTION(BlueprintPure, Category = "Als Character")
+	UFUNCTION(BlueprintPure, Category = "ALS|Character")
 	const FGameplayTag& GetAimingMode() const;
 
-	UFUNCTION(BlueprintCallable, Category = "Als Character")
+	UFUNCTION(BlueprintCallable, Category = "ALS|Character")
 	void SetAimingMode(const FGameplayTag& NewAimingMode);
 
-	UFUNCTION(BlueprintPure, Category = "Als Character")
+	UFUNCTION(BlueprintPure, Category = "ALS|Character")
 	float GetAimAmount() const;
 
-	UFUNCTION(BlueprintNativeEvent, Category = "Als Character")
+	UFUNCTION(BlueprintNativeEvent, Category = "ALS|Character")
 	bool HasSight() const;
 
-	UFUNCTION(BlueprintNativeEvent, Category = "Als Character")
+	UFUNCTION(BlueprintNativeEvent, Category = "ALS|Character")
 	void GetSightLocAndRot(FVector& Loc, FRotator& Rot) const;
 
 protected:
-	UFUNCTION(BlueprintNativeEvent, Category = "Als Character")
+	UFUNCTION(BlueprintNativeEvent, Category = "ALS|Character")
 	void OnAimingModeChanged(const FGameplayTag& PreviousAimingMode);
 
 	// Desired Rotation Mode
 
 public:
-	UFUNCTION(BlueprintPure, Category = "Als Character")
+	UFUNCTION(BlueprintPure, Category = "ALS|Character")
 	const FGameplayTag& GetDesiredRotationMode() const;
 
-	UFUNCTION(BlueprintCallable, Category = "Als Character", Meta = (AutoCreateRefTerm = "NewDesiredRotationMode"))
+	UFUNCTION(BlueprintCallable, Category = "ALS|Character", Meta = (AutoCreateRefTerm = "NewDesiredRotationMode"))
 	void SetDesiredRotationMode(const FGameplayTag& NewDesiredRotationMode);
 
 	// Rotation Mode
 
 public:
-	UFUNCTION(BlueprintPure, Category = "Als Character")
+	UFUNCTION(BlueprintPure, Category = "ALS|Character")
 	const FGameplayTag& GetRotationMode() const;
 
 protected:
 	void SetRotationMode(const FGameplayTag& NewRotationMode);
 
-	UFUNCTION(BlueprintNativeEvent, Category = "Als Character")
+	UFUNCTION(BlueprintNativeEvent, Category = "ALS|Character")
 	void OnRotationModeChanged(const FGameplayTag& PreviousRotationMode);
 
 	void RefreshRotationMode();
@@ -294,10 +293,10 @@ protected:
 	// Desired Stance
 
 public:
-	UFUNCTION(BlueprintPure, Category = "Als Character")
+	UFUNCTION(BlueprintPure, Category = "ALS|Character")
 	const FGameplayTag& GetDesiredStance() const;
 
-	UFUNCTION(BlueprintCallable, Category = "Als Character", Meta = (AutoCreateRefTerm = "NewDesiredStance"))
+	UFUNCTION(BlueprintCallable, Category = "ALS|Character", Meta = (AutoCreateRefTerm = "NewDesiredStance"))
 	void SetDesiredStance(const FGameplayTag& NewDesiredStance);
 
 protected:
@@ -317,34 +316,34 @@ public:
 	virtual void OnEndCrouch(float HalfHeightAdjust, float ScaledHalfHeightAdjust) override;
 
 public:
-	UFUNCTION(BlueprintPure, Category = "Als Character")
+	UFUNCTION(BlueprintPure, Category = "ALS|Character")
 	const FGameplayTag& GetStance() const;
 
 protected:
 	void SetStance(const FGameplayTag& NewStance);
 
-	UFUNCTION(BlueprintNativeEvent, Category = "Als Character")
+	UFUNCTION(BlueprintNativeEvent, Category = "ALS|Character")
 	void OnStanceChanged(const FGameplayTag& PreviousStance);
 
 	// Desired Gait
 
 public:
-	UFUNCTION(BlueprintPure, Category = "Als Character")
+	UFUNCTION(BlueprintPure, Category = "ALS|Character")
 	const FGameplayTag& GetDesiredGait() const;
 
-	UFUNCTION(BlueprintCallable, Category = "Als Character", Meta = (AutoCreateRefTerm = "NewDesiredGait"))
+	UFUNCTION(BlueprintCallable, Category = "ALS|Character", Meta = (AutoCreateRefTerm = "NewDesiredGait"))
 	void SetDesiredGait(const FGameplayTag& NewDesiredGait);
 
 	// Gait
 
 public:
-	UFUNCTION(BlueprintPure, Category = "Als Character")
+	UFUNCTION(BlueprintPure, Category = "ALS|Character")
 	const FGameplayTag& GetGait() const;
 
 protected:
 	void SetGait(const FGameplayTag& NewGait);
 
-	UFUNCTION(BlueprintNativeEvent, Category = "Als Character")
+	UFUNCTION(BlueprintNativeEvent, Category = "ALS|Character")
 	void OnGaitChanged(const FGameplayTag& PreviousGait);
 
 private:
@@ -359,13 +358,13 @@ private:
 	// Overlay Mode
 
 public:
-	UFUNCTION(BlueprintPure, Category = "Als Character")
+	UFUNCTION(BlueprintPure, Category = "ALS|Character")
 	FGameplayTag GetOverlayMode() const;
 
 	// Locomotion Action
 
 public:
-	UFUNCTION(BlueprintPure, Category = "Als Character")
+	UFUNCTION(BlueprintPure, Category = "ALS|Character")
 	FGameplayTag GetLocomotionAction() const;
 
 	// Input
@@ -381,7 +380,7 @@ protected:
 	// Controll Rotation Adjustment
 
 public:
-	UFUNCTION(BlueprintCallable, Category = "Als Character")
+	UFUNCTION(BlueprintCallable, Category = "ALS|Character")
 	void SetFocalRotation(const FRotator& NewFocalRotation);
 
 private:
@@ -392,10 +391,10 @@ private:
 public:
 	virtual FRotator GetViewRotation() const override;
 
-	UFUNCTION(BlueprintNativeEvent, Category = "Als Character")
+	UFUNCTION(BlueprintNativeEvent, Category = "ALS|Character")
 	void OnChangedPerspective(bool bFirstPersonPerspective);
 
-	UFUNCTION(BlueprintCallable, Category = "Als Character")
+	UFUNCTION(BlueprintCallable, Category = "ALS|Character")
 	void SetLookRotation(const FRotator& NewLookRotation);
 
 private:
@@ -494,16 +493,16 @@ protected:
 	// Utility
 
 public:
-	UFUNCTION(BlueprintPure, Category = "Als Character")
+	UFUNCTION(BlueprintPure, Category = "ALS|Character")
 	const FGameplayTag& DesiredToActual(const FGameplayTag& SourceTag) const;
 
 	// Others
 
 public:
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings|Als Character", Replicated, Meta = (ForceUnits = "s"))
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Als Character|Settings", Replicated, Meta = (ForceUnits = "s"))
 	float CapsuleUpdateSpeed;
 
-	UPROPERTY(BlueprintReadOnly, Category = "State|Als Character", replicatedUsing = OnRep_IsLied)
+	UPROPERTY(BlueprintReadOnly, Category = "Als Character|State", replicatedUsing = OnRep_IsLied)
 	uint32 bIsLied : 1;
 
 	UFUNCTION(BlueprintCallable, Category = Character)
@@ -531,6 +530,7 @@ private:
 	UFUNCTION()
 	virtual void OnRep_IsLied();
 
+#if !UE_BUILD_SHIPPING
 	// Debug
 
 public:
@@ -555,6 +555,7 @@ private:
 	void DisplayDebugTraces(const UCanvas* Canvas, float Scale, float HorizontalLocation, float& VerticalLocation) const;
 
 	void DisplayDebugMantling(const UCanvas* Canvas, float Scale, float HorizontalLocation, float& VerticalLocation) const;
+#endif // !UE_BUILD_SHIPPING
 };
 
 inline void AAlsCharacter::ReplaceAlsAbilitySystem(UAlsAbilitySystemComponent* NewAbilitySystem)
