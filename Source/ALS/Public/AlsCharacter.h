@@ -44,7 +44,6 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Als Character")
 	TObjectPtr<UAlsPhysicalAnimationComponent> PhysicalAnimation;
 
-	// Optional
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Als Character")
 	TObjectPtr<UAlsAbilitySystemComponent> AbilitySystem;
 
@@ -188,6 +187,8 @@ public:
 	virtual bool HasMatchingGameplayTag(FGameplayTag TagToCheck) const override;
 	virtual bool HasAllMatchingGameplayTags(const FGameplayTagContainer& TagContainer) const override;
 	virtual bool HasAnyMatchingGameplayTags(const FGameplayTagContainer& TagContainer) const override;
+
+	void ReplaceAlsAbilitySystem(UAlsAbilitySystemComponent *NewAbilitySystem);
 
 private:
 	mutable FGameplayTagContainer TempTagContainer;
@@ -555,6 +556,11 @@ private:
 
 	void DisplayDebugMantling(const UCanvas* Canvas, float Scale, float HorizontalLocation, float& VerticalLocation) const;
 };
+
+inline void AAlsCharacter::ReplaceAlsAbilitySystem(UAlsAbilitySystemComponent* NewAbilitySystem)
+{
+	AbilitySystem = NewAbilitySystem;
+}
 
 inline const FGameplayTag& AAlsCharacter::GetDesiredViewMode() const
 {

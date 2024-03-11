@@ -102,7 +102,7 @@ public:
 UCLASS()
 class ALS_API UAlsCharacterMovementComponent : public UCharacterMovementComponent
 {
-	GENERATED_BODY()
+	GENERATED_UCLASS_BODY()
 
 	friend FAlsSavedMove;
 
@@ -151,8 +151,6 @@ public:
 	FAlsPhysicsRotationDelegate OnPhysicsRotation;
 
 public:
-	UAlsCharacterMovementComponent();
-
 #if WITH_EDITOR
 	virtual bool CanEditChange(const FProperty* Property) const override;
 #endif

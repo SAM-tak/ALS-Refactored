@@ -9,10 +9,12 @@
 #include "Camera/CameraComponent.h"
 #include "GameFramework/WorldSettings.h"
 #include "Curves/CurveFloat.h"
+#include "Misc/UObjectToken.h"
 #include "Utility/AlsCameraConstants.h"
 #include "Utility/AlsMacros.h"
 #include "Utility/AlsMath.h"
 #include "Utility/AlsUtility.h"
+#include "Utility/AlsLog.h"
 
 #include UE_INLINE_GENERATED_CPP_BY_NAME(AlsCameraMovementComponent)
 
@@ -33,9 +35,45 @@ UAlsCameraMovementComponent::UAlsCameraMovementComponent(const FObjectInitialize
 
 void UAlsCameraMovementComponent::OnRegister()
 {
+	Super::OnRegister();
+
 	Character = Cast<AAlsCharacter>(GetOwner());
 
-	Super::OnRegister();
+	if (!Character.IsValid())
+	{
+		UE_LOG(LogAls, Error, TEXT("[UAlsCameraMovementComponent::OnRegister] This component has been added to a blueprint whose base class is not a child of AlsCharacter. To use this component, it MUST be placed on a child of AlsCharacter Blueprint."));
+
+#if WITH_EDITOR
+		if (GIsEditor)
+		{
+			static const FText Message = NSLOCTEXT("UAlsCameraMovementComponent", "NotOnAlsCharacterError", "has been added to a blueprint whose base class is not a child of AlsCharacter. To use this component, it MUST be placed on a child of AlsCharacter Blueprint. This will cause a crash if you PIE!");
+			static const FName MessageLogName = TEXT("UAlsCameraMovementComponent");
+			
+			FMessageLog(MessageLogName).Error()
+				->AddToken(FUObjectToken::Create(this, FText::FromString(GetNameSafe(this))))
+				->AddToken(FTextToken::Create(Message));
+			
+			FMessageLog(MessageLogName).Open();
+		}
+#endif
+	}
+	else
+	{
+		Character->OnContollerChanged.AddUObject(this, &ThisClass::OnControllerChanged);
+	}
+}
+
+void UAlsCameraMovementComponent::OnControllerChanged_Implementation(AController* PreviousController, AController* NewController)
+{
+	auto* NewPlayer{Cast<APlayerController>(NewController)};
+	if (IsValid(NewPlayer))
+	{
+		Activate(true);
+	}
+	else
+	{
+		Deactivate();
+	}
 }
 
 void UAlsCameraMovementComponent::Activate(const bool bReset)

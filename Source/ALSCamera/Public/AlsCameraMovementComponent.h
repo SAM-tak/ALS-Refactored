@@ -7,8 +7,7 @@ class UCameraComponent;
 class UAlsCameraSettings;
 class AAlsCharacter;
 
-UCLASS(Blueprintable, Meta = (BlueprintSpawnableComponent),
-	   HideCategories = (Object, Mobility, Clothing, Physics, MasterPoseComponent, Collision, AnimationRig, Lighting, Deformer,
+UCLASS(HideCategories = (Object, Mobility, Clothing, Physics, MasterPoseComponent, Collision, AnimationRig, Lighting, Deformer,
 						 Rendering, PathTracing, HLOD, Navigation, VirtualTexture, Materials, LeaderPoseComponent,
 						 Optimization, LOD, MaterialParameters, TextureStreaming, Mobile, RayTracing))
 class ALSCAMERA_API UAlsCameraMovementComponent : public USkeletalMeshComponent
@@ -92,43 +91,47 @@ protected:
 	TObjectPtr<UCameraShakeBase> CurrentADSCameraShake;
 
 public:
-	virtual void OnRegister() override;
-
 	virtual void Activate(bool bReset = false) override;
 
 	virtual void Deactivate() override;
 
-	virtual void BeginPlay() override;
-
 	virtual void RegisterComponentTickFunctions(bool bRegister) override;
+
+protected:
+	virtual void OnRegister() override;
+
+	UFUNCTION(BlueprintNativeEvent, Category = "ALS|Camera Movement")
+	void OnControllerChanged(AController* PreviousController, AController* NewController);
+
+	virtual void BeginPlay() override;
 
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
 	virtual void CompleteParallelAnimationEvaluation(const bool bDoPostAnimationEvaluation) override;
 
 public:
-	UFUNCTION(BlueprintCallable, Category = "ALS|Camera")
+	UFUNCTION(BlueprintCallable, Category = "ALS|Camera Movement")
 	void SetCameraComponent(UCameraComponent* NewCameraComponent);
 
-	UFUNCTION(BlueprintCallable, Category = "ALS|Camera")
+	UFUNCTION(BlueprintCallable, Category = "ALS|Camera Movement")
 	UCameraComponent* GetCameraComponent() const;
 
-	UFUNCTION(BlueprintPure, Category = "ALS|Camera")
+	UFUNCTION(BlueprintPure, Category = "ALS|Camera Movement")
 	bool IsFirstPerson() const;
 
-	UFUNCTION(BlueprintPure, Category = "ALS|Camera", Meta = (ReturnDisplayName = "Camera Location"))
+	UFUNCTION(BlueprintPure, Category = "ALS|Camera Movement", Meta = (ReturnDisplayName = "Camera Location"))
 	FVector GetFirstPersonCameraLocation() const;
 
-	UFUNCTION(BlueprintPure, Category = "ALS|Camera", Meta = (ReturnDisplayName = "Camera Location"))
+	UFUNCTION(BlueprintPure, Category = "ALS|Camera Movement", Meta = (ReturnDisplayName = "Camera Location"))
 	FVector GetEyeCameraLocation() const;
 
-	UFUNCTION(BlueprintPure, Category = "ALS|Camera", Meta = (ReturnDisplayName = "Pivot Location"))
+	UFUNCTION(BlueprintPure, Category = "ALS|Camera Movement", Meta = (ReturnDisplayName = "Pivot Location"))
 	FVector GetThirdPersonPivotLocation() const;
 
-	UFUNCTION(BlueprintPure, Category = "ALS|Camera", Meta = (ReturnDisplayName = "Trace Start"))
+	UFUNCTION(BlueprintPure, Category = "ALS|Camera Movement", Meta = (ReturnDisplayName = "Trace Start"))
 	FVector GetThirdPersonTraceStartLocation() const;
 
-	UFUNCTION(BlueprintPure, Category = "ALS|Camera", Meta = (ReturnDisplayName = "Focus Location"))
+	UFUNCTION(BlueprintPure, Category = "ALS|Camera Movement", Meta = (ReturnDisplayName = "Focus Location"))
 	FVector GetCurrentFocusLocation() const;
 
 private:

@@ -1,5 +1,3 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
 #pragma once
 
 #include "CoreMinimal.h"
@@ -12,7 +10,7 @@
 UCLASS()
 class ALS_API UAlsAbilitySystemComponent : public UAbilitySystemComponent
 {
-	GENERATED_BODY()
+	GENERATED_UCLASS_BODY()
 
 public:
 	inline void CancelAbilitiesBySingleTag(const FGameplayTag& Tag)

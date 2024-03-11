@@ -1,4 +1,4 @@
-#include "AlsCharacterExampleComponent.h"
+#include "AlsCharacterInputComponent.h"
 
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
@@ -6,24 +6,13 @@
 #include "GameFramework/Controller.h"
 #include "GameFramework/PlayerController.h"
 #include "AlsCharacter.h"
-#include "AlsCameraMovementComponent.h"
 #include "AlsAbilitySystemComponent.h"
 #include "Utility/AlsMath.h"
 #include "Utility/AlsLog.h"
 
-#include UE_INLINE_GENERATED_CPP_BY_NAME(AlsCharacterExampleComponent)
+#include UE_INLINE_GENERATED_CPP_BY_NAME(AlsCharacterInputComponent)
 
-void UAlsCharacterExampleComponent::OnRegister()
-{
-	Super::OnRegister();
-
-	if (Character.IsValid())
-	{
-		CameraMovementComponent = Character->FindComponentByClass<UAlsCameraMovementComponent>();
-	}
-}
-
-void UAlsCharacterExampleComponent::OnControllerChanged_Implementation(AController* PreviousController, AController* NewController)
+void UAlsCharacterInputComponent::OnControllerChanged_Implementation(AController* PreviousController, AController* NewController)
 {
 	auto* PreviousPlayerController{Cast<APlayerController>(PreviousController)};
 	if (IsValid(PreviousPlayerController))
@@ -35,7 +24,7 @@ void UAlsCharacterExampleComponent::OnControllerChanged_Implementation(AControll
 		}
 	}
 
-	auto* NewPlayerController{ Cast<APlayerController>(NewController) };
+	auto* NewPlayerController{Cast<APlayerController>(NewController)};
 	if (IsValid(NewPlayerController))
 	{
 		NewPlayerController->InputYawScale_DEPRECATED = 1.0f;
@@ -50,18 +39,12 @@ void UAlsCharacterExampleComponent::OnControllerChanged_Implementation(AControll
 
 			InputSubsystem->AddMappingContext(InputMappingContext, 0, Options);
 		}
-
-		CameraMovementComponent->Activate(true);
-	}
-	else
-	{
-		CameraMovementComponent->Deactivate();
 	}
 
 	Super::OnControllerChanged_Implementation(PreviousController, NewController);
 }
 
-void UAlsCharacterExampleComponent::OnSetupPlayerInputComponent_Implementation(UInputComponent* Input)
+void UAlsCharacterInputComponent::OnSetupPlayerInputComponent_Implementation(UInputComponent* Input)
 {
 	Super::OnSetupPlayerInputComponent_Implementation(Input);
 
@@ -86,7 +69,7 @@ void UAlsCharacterExampleComponent::OnSetupPlayerInputComponent_Implementation(U
 	}
 }
 
-void UAlsCharacterExampleComponent::Input_OnLookMouse(const FInputActionValue& ActionValue)
+void UAlsCharacterInputComponent::Input_OnLookMouse(const FInputActionValue& ActionValue)
 {
 	const auto Value{ActionValue.Get<FVector2D>()};
 
@@ -94,7 +77,7 @@ void UAlsCharacterExampleComponent::Input_OnLookMouse(const FInputActionValue& A
 	Character->AddControllerYawInput(Value.X * LookRightMouseSensitivity);
 }
 
-void UAlsCharacterExampleComponent::Input_OnLook(const FInputActionValue& ActionValue)
+void UAlsCharacterInputComponent::Input_OnLook(const FInputActionValue& ActionValue)
 {
 	const auto Value{ActionValue.Get<FVector2D>()};
 
@@ -102,7 +85,7 @@ void UAlsCharacterExampleComponent::Input_OnLook(const FInputActionValue& Action
 	Character->AddControllerYawInput(Value.X * LookRightRate);
 }
 
-void UAlsCharacterExampleComponent::Input_OnMove(const FInputActionValue& ActionValue)
+void UAlsCharacterInputComponent::Input_OnMove(const FInputActionValue& ActionValue)
 {
 	const auto Value{UAlsMath::ClampMagnitude012D(ActionValue.Get<FVector2D>())};
 
@@ -112,12 +95,12 @@ void UAlsCharacterExampleComponent::Input_OnMove(const FInputActionValue& Action
 	Character->AddMovementInput(ForwardDirection * Value.Y + RightDirection * Value.X);
 }
 
-void UAlsCharacterExampleComponent::Input_OnSprint(const FInputActionValue& ActionValue)
+void UAlsCharacterInputComponent::Input_OnSprint(const FInputActionValue& ActionValue)
 {
 	Character->SetDesiredGait(ActionValue.Get<bool>() ? AlsDesiredGaitTags::Sprinting : AlsDesiredGaitTags::Running);
 }
 
-void UAlsCharacterExampleComponent::Input_OnWalk()
+void UAlsCharacterInputComponent::Input_OnWalk()
 {
 	if (Character->GetDesiredGait() == AlsDesiredGaitTags::Walking)
 	{
@@ -129,7 +112,7 @@ void UAlsCharacterExampleComponent::Input_OnWalk()
 	}
 }
 
-void UAlsCharacterExampleComponent::Input_OnCrouch()
+void UAlsCharacterInputComponent::Input_OnCrouch()
 {
 	if (Character->GetDesiredStance() != AlsDesiredStanceTags::Crouching)
 	{
@@ -141,12 +124,12 @@ void UAlsCharacterExampleComponent::Input_OnCrouch()
 	}
 }
 
-void UAlsCharacterExampleComponent::Input_OnProne()
+void UAlsCharacterInputComponent::Input_OnProne()
 {
 	Character->SetDesiredStance(AlsDesiredStanceTags::LyingFront);
 }
 
-void UAlsCharacterExampleComponent::Input_OnJump(const FInputActionValue& ActionValue)
+void UAlsCharacterInputComponent::Input_OnJump(const FInputActionValue& ActionValue)
 {
 	if (ActionValue.Get<bool>())
 	{
@@ -176,12 +159,12 @@ void UAlsCharacterExampleComponent::Input_OnJump(const FInputActionValue& Action
 	}
 }
 
-void UAlsCharacterExampleComponent::Input_OnAim(const FInputActionValue& ActionValue)
+void UAlsCharacterInputComponent::Input_OnAim(const FInputActionValue& ActionValue)
 {
 	Character->SetAimingMode(ActionValue.Get<bool>() ? AlsAimingModeTags::AimDownSight : FGameplayTag::EmptyTag);
 }
 
-void UAlsCharacterExampleComponent::Input_OnFire(const FInputActionValue& ActionValue)
+void UAlsCharacterInputComponent::Input_OnFire(const FInputActionValue& ActionValue)
 {
 	auto FireTag{FGameplayTag::RequestGameplayTag(FName{TEXT("AlsExtra.Action.Fire")})};
 	if (Character->HasMatchingGameplayTag(FireTag))
@@ -194,7 +177,7 @@ void UAlsCharacterExampleComponent::Input_OnFire(const FInputActionValue& Action
 	}
 }
 
-void UAlsCharacterExampleComponent::Input_OnRagdoll()
+void UAlsCharacterInputComponent::Input_OnRagdoll()
 {
 	if (Character->HasMatchingGameplayTag(AlsLocomotionActionTags::GettingDown))
 	{
@@ -210,26 +193,26 @@ void UAlsCharacterExampleComponent::Input_OnRagdoll()
 	}
 }
 
-void UAlsCharacterExampleComponent::Input_OnRoll()
+void UAlsCharacterInputComponent::Input_OnRoll()
 {
 	Character->GetAlsAbilitySystem()->TryActivateAbilitiesBySingleTag(AlsLocomotionActionTags::Rolling);
 }
 
-void UAlsCharacterExampleComponent::Input_OnRotationMode()
+void UAlsCharacterInputComponent::Input_OnRotationMode()
 {
 	Character->SetDesiredRotationMode(Character->GetDesiredRotationMode() == AlsDesiredRotationModeTags::VelocityDirection
 									  ? AlsDesiredRotationModeTags::ViewDirection
 									  : AlsDesiredRotationModeTags::VelocityDirection);
 }
 
-void UAlsCharacterExampleComponent::Input_OnViewMode()
+void UAlsCharacterInputComponent::Input_OnViewMode()
 {
 	Character->SetDesiredViewMode(Character->GetDesiredViewMode() == AlsDesiredViewModeTags::ThirdPerson
 								  ? AlsDesiredViewModeTags::FirstPerson
 								  : AlsDesiredViewModeTags::ThirdPerson);
 }
 
-void UAlsCharacterExampleComponent::Input_OnSwitchShoulder()
+void UAlsCharacterInputComponent::Input_OnSwitchShoulder()
 {
 	Character->ToggleRightShoulder();
 }

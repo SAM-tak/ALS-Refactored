@@ -56,11 +56,6 @@ AAlsCharacter::AAlsCharacter(const FObjectInitializer& ObjectInitializer) : Supe
 	PhysicalAnimation = CreateDefaultSubobject<UAlsPhysicalAnimationComponent>(PhysicalAnimationComponentName);
 
 	AbilitySystem = CreateOptionalDefaultSubobject<UAlsAbilitySystemComponent>(AbilitySystemComponentName);
-	if (AbilitySystem)
-	{
-		AbilitySystem->SetIsReplicated(true);
-		AbilitySystem->SetReplicationMode(EGameplayEffectReplicationMode::Minimal);
-	}
 
 	// This will prevent the editor from combining component details with actor details.
 	// Component details can still be accessed from the actor's component hierarchy.
@@ -93,7 +88,7 @@ UAbilitySystemComponent* AAlsCharacter::GetAbilitySystemComponent() const
 
 void AAlsCharacter::GetOwnedGameplayTags(FGameplayTagContainer& TagContainer) const
 {
-	if (AbilitySystem)
+	if (IsValid(AbilitySystem))
 	{
 		AbilitySystem->GetOwnedGameplayTags(TagContainer);
 	}
@@ -242,7 +237,10 @@ void AAlsCharacter::PostInitializeComponents()
 
 	PhysicalAnimation->SetSkeletalMeshComponent(GetMesh());
 
-	AbilitySystem->InitAbilityActorInfo(this, this);
+	if (IsValid(AbilitySystem))
+	{
+		AbilitySystem->InitAbilityActorInfo(this, this);
+	}
 
 	Super::PostInitializeComponents();
 }
@@ -290,12 +288,15 @@ void AAlsCharacter::BeginPlay()
 
 	RefreshGait();
 
-	if (HasAuthority() && AbilitySet)
+	if (IsValid(AbilitySystem) && IsValid(AbilitySet))
 	{
-		AbilitySet->GiveToAbilitySystem(AbilitySystem, nullptr);
-	}
+		if (HasAuthority() && AbilitySet)
+		{
+			AbilitySet->GiveToAbilitySystem(AbilitySystem, nullptr);
+		}
 
-	AbilitySystem->TryActivateAbilitiesBySingleTag(InitialOverlayMode);
+		AbilitySystem->TryActivateAbilitiesBySingleTag(InitialOverlayMode);
+	}
 }
 
 void AAlsCharacter::NotifyControllerChanged()
@@ -415,7 +416,7 @@ void AAlsCharacter::Tick(const float DeltaTime)
 	RefreshGroundedRotation(DeltaTime);
 	RefreshInAirRotation(DeltaTime);
 
-	if (LocomotionMode == AlsLocomotionModeTags::InAir && IsLocallyControlled())
+	if (LocomotionMode == AlsLocomotionModeTags::InAir && IsLocallyControlled() && IsValid(AbilitySystem))
 	{
 		AbilitySystem->TryActivateAbilitiesBySingleTag(AlsLocomotionActionTags::Mantling);
 	}
@@ -438,7 +439,10 @@ void AAlsCharacter::PossessedBy(AController* NewController)
 	ViewState.NetworkSmoothing.bEnabled |= IsValid(Settings) && Settings->View.bEnableListenServerNetworkSmoothing &&
 		IsNetMode(NM_ListenServer) && GetRemoteRole() == ROLE_AutonomousProxy;
 
-	AbilitySystem->RefreshAbilityActorInfo();
+	if (IsValid(AbilitySystem))
+	{
+		AbilitySystem->RefreshAbilityActorInfo();
+	}
 }
 
 void AAlsCharacter::Restart()
@@ -551,13 +555,19 @@ void AAlsCharacter::RefreshMovementBase()
 
 FGameplayTag AAlsCharacter::GetOverlayMode() const
 {
-	AbilitySystem->GetOwnedGameplayTags(TempTagContainer);
+	if (IsValid(AbilitySystem))
+	{
+		AbilitySystem->GetOwnedGameplayTags(TempTagContainer);
+	}
 	return TempTagContainer.Filter(Settings->OverlayModeTags).First();
 }
 
 FGameplayTag AAlsCharacter::GetLocomotionAction() const
 {
-	AbilitySystem->GetOwnedGameplayTags(TempTagContainer);
+	if (IsValid(AbilitySystem))
+	{
+		AbilitySystem->GetOwnedGameplayTags(TempTagContainer);
+	}
 	return TempTagContainer.Filter(Settings->ActionTags).First();
 }
 
@@ -625,7 +635,7 @@ void AAlsCharacter::NotifyLocomotionModeChanged(const FGameplayTag& PreviousLoco
 {
 	ApplyDesiredStance();
 
-	if (LocomotionMode == AlsLocomotionModeTags::Grounded && PreviousLocomotionMode == AlsLocomotionModeTags::InAir)
+	if (LocomotionMode == AlsLocomotionModeTags::Grounded && PreviousLocomotionMode == AlsLocomotionModeTags::InAir && IsValid(AbilitySystem))
 	{
 		if (!AbilitySystem->TryActivateAbilitiesBySingleTag(AlsLocomotionActionTags::Landing))
 		{
