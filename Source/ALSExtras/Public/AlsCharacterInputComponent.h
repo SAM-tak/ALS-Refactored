@@ -56,7 +56,7 @@ protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "AlsCharacterInput|Settings", Meta = (DisplayThumbnail = false))
 	TObjectPtr<UInputAction> SwitchShoulderAction;
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "AlsCharacterInput|Settings", Meta = (DisplayThumbnail = false))
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "AlsCharacterInput|Settings")
 	TArray<FAlsInputAction> InputActions;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AlsCharacterInput|Settings", Meta = (ClampMin = 0, ForceUnits = "x"))

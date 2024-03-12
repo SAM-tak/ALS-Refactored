@@ -30,7 +30,7 @@ enum class EAlsInputActionType : uint8
  *	Struct used to map a input action to a gameplay input tag.
  */
 USTRUCT(BlueprintType)
-struct FAlsInputAction
+struct ALSEXTRAS_API FAlsInputAction
 {
 	GENERATED_BODY()
 
