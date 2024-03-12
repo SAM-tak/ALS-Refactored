@@ -4,6 +4,7 @@
 #include "AlsCharacter.h"
 #include "AlsCharacterMovementComponent.h"
 #include "AlsAbilitySystemComponent.h"
+#include "Engine/InputDelegateBinding.h"
 
 #include UE_INLINE_GENERATED_CPP_BY_NAME(AlsGameplayAbility)
 
@@ -13,13 +14,43 @@ AAlsCharacter* UAlsGameplayAbility::GetAlsCharacterFromActorInfo() const
 	{
 		return nullptr;
 	}
-    return Cast<AAlsCharacter>(CurrentActorInfo->AvatarActor.Get());
+	return Cast<AAlsCharacter>(CurrentActorInfo->AvatarActor.Get());
 }
 
 UAlsAbilitySystemComponent* UAlsGameplayAbility::GetAlsAbilitySystemComponentFromActorInfo() const
 {
 	auto* AlsCharacter{GetAlsCharacterFromActorInfo()};
-    return AlsCharacter ? AlsCharacter->GetAlsAbilitySystem() : nullptr;
+	return AlsCharacter ? AlsCharacter->GetAlsAbilitySystem() : nullptr;
+}
+
+void UAlsGameplayAbility::ActivateAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo,
+										  const FGameplayAbilityActivationInfo ActivationInfo, const FGameplayEventData* TriggerEventData)
+{
+	Super::ActivateAbility(Handle, ActorInfo, ActivationInfo, TriggerEventData);
+
+	if (bEnableInputBinding && ActorInfo && ActorInfo->OwnerActor.IsValid())
+	{
+		auto* InputComponent{ActorInfo->OwnerActor->InputComponent.Get()};
+		if (IsValid(InputComponent))
+		{
+			UInputDelegateBinding::BindInputDelegates(GetClass(), InputComponent, this);
+		}
+	}
+}
+
+void UAlsGameplayAbility::EndAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo,
+									 const FGameplayAbilityActivationInfo ActivationInfo, bool bReplicateEndAbility, bool bWasCancelled)
+{
+	if (bEnableInputBinding && ActorInfo && ActorInfo->OwnerActor.IsValid())
+	{
+		auto* InputComponent{ActorInfo->OwnerActor->InputComponent.Get()};
+		if (IsValid(InputComponent))
+		{
+			InputComponent->ClearBindingsForObject(this);
+		}
+	}
+
+	Super::EndAbility(Handle, ActorInfo, ActivationInfo, bReplicateEndAbility, bWasCancelled);
 }
 
 void UAlsGameplayAbility::PlayMontage(const FGameplayAbilityActivationInfo& ActivationInfo, const FGameplayAbilityActorInfo* ActorInfo,

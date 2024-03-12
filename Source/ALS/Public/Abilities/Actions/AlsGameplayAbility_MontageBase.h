@@ -40,7 +40,7 @@ protected:
 private:
 	TArray<struct FActiveGameplayEffectHandle> AppliedEffects;
 
-public:
+protected:
 	virtual void EndAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilityActivationInfo ActivationInfo,
 							bool bReplicateEndAbility, bool bWasCancelled) override;
 
@@ -49,7 +49,6 @@ public:
 
 	void GetGameplayEffectsWhileAnimating(TArray<const UGameplayEffect *> &OutEffects) const;
 
-protected:
 	void PlayMontage(const FGameplayAbilityActivationInfo& ActivationInfo, const FAlsPlayMontageParameter& Parameter,
 					 const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo);
 

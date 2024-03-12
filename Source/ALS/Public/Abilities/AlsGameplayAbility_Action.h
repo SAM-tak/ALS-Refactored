@@ -14,9 +14,9 @@ class UAlsAbilitySystemComponent;
 UCLASS(Abstract)
 class ALS_API UAlsGameplayAbility_Action : public UAlsGameplayAbility
 {
-    GENERATED_BODY()
+	GENERATED_BODY()
 
-public:
-    virtual void EndAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo,
-                            const FGameplayAbilityActivationInfo ActivationInfo, bool bReplicateEndAbility, bool bWasCancelled) override;
+protected:
+	virtual void EndAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo,
+							const FGameplayAbilityActivationInfo ActivationInfo, bool bReplicateEndAbility, bool bWasCancelled) override;
 };

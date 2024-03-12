@@ -19,31 +19,42 @@ struct ALS_API FAlsPlayMontageParameter
 	TObjectPtr<UAnimMontage> MontageToPlay;
 
 	UPROPERTY(EditDefaultsOnly, Category = AlsMontageAbility)
-	float PlayRate{ 1.0f };
+	float PlayRate{1.0f};
 
 	UPROPERTY(EditDefaultsOnly, Category = AlsMontageAbility)
 	FName SectionName;
 
 	UPROPERTY(EditDefaultsOnly, Category = AlsMontageAbility, Meta = (ForceUnit = "s"))
-	float StartTime{ 0.0f };
+	float StartTime{0.0f};
 };
 
 /**
- *
+ * GameplayAbility for ALS
+ * Can bind Input action
  */
 UCLASS(Abstract)
 class ALS_API UAlsGameplayAbility : public UGameplayAbility
 {
-    GENERATED_BODY()
-
-public:
-    UFUNCTION(BlueprintPure, Category = "ALS|Ability")
-    AAlsCharacter* GetAlsCharacterFromActorInfo() const;
-
-    UFUNCTION(BlueprintPure, Category = "ALS|Ability")
-    UAlsAbilitySystemComponent* GetAlsAbilitySystemComponentFromActorInfo() const;
+	GENERATED_BODY()
 
 protected:
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = AlsAbility)
+	uint8 bEnableInputBinding : 1{false};
+
+public:
+	UFUNCTION(BlueprintPure, Category = "ALS|Ability")
+	AAlsCharacter* GetAlsCharacterFromActorInfo() const;
+
+	UFUNCTION(BlueprintPure, Category = "ALS|Ability")
+	UAlsAbilitySystemComponent* GetAlsAbilitySystemComponentFromActorInfo() const;
+
+protected:
+	virtual void ActivateAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo,
+								 const FGameplayAbilityActivationInfo ActivationInfo, const FGameplayEventData* TriggerEventData) override;
+
+	virtual void EndAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo,
+							const FGameplayAbilityActivationInfo ActivationInfo, bool bReplicateEndAbility, bool bWasCancelled) override;
+
 	virtual void PlayMontage(const FGameplayAbilityActivationInfo& ActivationInfo, const FGameplayAbilityActorInfo* ActorInfo, const FAlsPlayMontageParameter& Parameter);
 
 	virtual void PlayMontage(const FAlsPlayMontageParameter& Parameter);

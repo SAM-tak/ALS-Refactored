@@ -166,7 +166,7 @@ void UAlsCharacterInputComponent::Input_OnAim(const FInputActionValue& ActionVal
 
 void UAlsCharacterInputComponent::Input_OnFire(const FInputActionValue& ActionValue)
 {
-	auto FireTag{FGameplayTag::RequestGameplayTag(FName{TEXT("AlsExtra.Action.Fire")})};
+	auto FireTag{FGameplayTag::RequestGameplayTag("AlsExtra.Action.Fire")};
 	if (Character->HasMatchingGameplayTag(FireTag))
 	{
 		Character->GetAlsAbilitySystem()->CancelAbilitiesBySingleTag(FireTag);

@@ -26,7 +26,7 @@ protected:
 	UPROPERTY(EditDefaultsOnly, Category = "AlsAbility|Montage", Meta = (ForceUnit = "s"))
 	float StartTime;
 
-public:
+protected:
 	virtual void ActivateAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* OwnerInfo,
 								 const FGameplayAbilityActivationInfo ActivationInfo, const FGameplayEventData* TriggerEventData) override;
 };

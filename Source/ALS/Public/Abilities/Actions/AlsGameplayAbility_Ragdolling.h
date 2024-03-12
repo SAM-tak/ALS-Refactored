@@ -18,7 +18,7 @@ class ALS_API UAlsGameplayAbility_Ragdolling : public UAlsGameplayAbility_Action
 	friend class UAlsPhysicalAnimationComponent;
 	friend class UAlsRagdollingAnimInstance;
 
-public:
+protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = AlsAbility)
 	TSubclassOf<UAlsLinkedAnimationInstance> OverrideAnimLayersClass;
 
@@ -57,7 +57,6 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = AlsAbility, Meta = (ClampMin = 0, EditCondition = "bAllowFreeze", ForceUnits = "deg"))
 	float AngularSpeedThresholdToFreeze{45.0f};
 
-protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "AlsAbility|State", Transient, Meta = (ForceUnits = "deg"))
 	float LyingDownYawAngleDelta{0.0f};
 
@@ -115,7 +114,7 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "AlsAbility|State", Transient)
 	UAlsRagdollingAnimInstance* RagdollingAnimInstance{nullptr};
 
-public:
+protected:
 	virtual void ActivateAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo,
 								 const FGameplayAbilityActivationInfo ActivationInfo, const FGameplayEventData* TriggerEventData) override;
 
@@ -134,7 +133,6 @@ public:
 	virtual void PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent) override;
 #endif
 
-protected:
 	UFUNCTION()
 	void Tick(const float DeltaTime);
 

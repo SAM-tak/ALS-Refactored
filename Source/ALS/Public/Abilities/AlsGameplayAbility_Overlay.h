@@ -13,13 +13,13 @@ class UAlsLinkedAnimationInstance;
 UCLASS(Abstract)
 class ALS_API UAlsGameplayAbility_Overlay : public UAlsGameplayAbility
 {
-    GENERATED_UCLASS_BODY()
+	GENERATED_UCLASS_BODY()
 
-public:
+protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = AlsAbility)
 	TSubclassOf<UAlsLinkedAnimationInstance> OwnAnimLayersClass;
 
-public:
+protected:
 	virtual void ActivateAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo,
 								 const FGameplayAbilityActivationInfo ActivationInfo, const FGameplayEventData* TriggerEventData) override;
 };

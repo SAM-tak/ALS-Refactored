@@ -11,7 +11,7 @@
 UCLASS()
 class ALS_API UAlsAbilityTask_PlayMontageAndWaitWithNotify : public UAbilityTask_PlayMontageAndWait
 {
-    GENERATED_UCLASS_BODY()
+	GENERATED_UCLASS_BODY()
 
 public:
 	UPROPERTY(BlueprintAssignable)
@@ -20,8 +20,8 @@ public:
 	UPROPERTY(BlueprintAssignable)
 	FOnMontagePlayDelegate OnNotifyEnd;
 
-    UFUNCTION(BlueprintCallable, Category = "ALS|Ability|Tasks", meta = (DisplayName = "PlayMontageAndWaitWithNotify", HidePin = "OwningAbility", DefaultToSelf = "OwningAbility", BlueprintInternalUseOnly = "TRUE"))
-    static UAlsAbilityTask_PlayMontageAndWaitWithNotify* CreatePlayMontageAndWaitWithNotify(UGameplayAbility* OwningAbility,
+	UFUNCTION(BlueprintCallable, Category = "ALS|Ability|Tasks", meta = (DisplayName = "PlayMontageAndWaitWithNotify", HidePin = "OwningAbility", DefaultToSelf = "OwningAbility", BlueprintInternalUseOnly = "TRUE"))
+	static UAlsAbilityTask_PlayMontageAndWaitWithNotify* CreatePlayMontageAndWaitWithNotify(UGameplayAbility* OwningAbility,
 		FName TaskInstanceName, UAnimMontage* _MontageToPlay, float _Rate = 1.f, FName _StartSection = NAME_None, bool _bStopWhenAbilityEnds = true,
 		float _AnimRootMotionTranslationScale = 1.f, float _StartTimeSeconds = 0.f, bool _bAllowInterruptAfterBlendOut = false);
 

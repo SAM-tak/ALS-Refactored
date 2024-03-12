@@ -167,7 +167,7 @@ protected:
 	UFUNCTION(BlueprintNativeEvent, Category = "ALS|Ability|Mantling")
 	UAlsMantlingSettings* SelectMantlingSettings(const FAlsMantlingParameters& Parameters) const;
 
-public:
+protected:
 	virtual bool CanActivateAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo,
 									const FGameplayTagContainer* SourceTags = nullptr, const FGameplayTagContainer* TargetTags = nullptr,
 									OUT FGameplayTagContainer* OptionalRelevantTags = nullptr) const override;
@@ -179,6 +179,7 @@ public:
 							bool bReplicateEndAbility, bool bWasCancelled) override;
 
 #if WITH_EDITOR
+public:
 	virtual void PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent) override;
 #endif
 

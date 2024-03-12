@@ -28,7 +28,7 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS", Meta = (ClampMin = 0, EditCondition = "bStartRollingOnLand", ForceUnits = "cm/s"))
 	float RollingOnLandSpeedThreshold{700.0f};
 
-public:
+protected:
 	virtual bool CanActivateAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo,
 									const FGameplayTagContainer* SourceTags = nullptr, const FGameplayTagContainer* TargetTags = nullptr,
 									OUT FGameplayTagContainer* OptionalRelevantTags = nullptr) const override;
@@ -36,6 +36,5 @@ public:
 	virtual void ActivateAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo,
 								 const FGameplayAbilityActivationInfo ActivationInfo, const FGameplayEventData* TriggerEventData) override;
 
-protected:
 	virtual float CalcTargetYawAngle_Implementation() const override;
 };
