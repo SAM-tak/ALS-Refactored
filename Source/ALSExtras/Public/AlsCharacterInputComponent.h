@@ -1,12 +1,12 @@
 #pragma once
 
 #include "AlsCharacterComponent.h"
+#include "AlsInputAction.h"
 #include "Utility/AlsGameplayTags.h"
 #include "AlsCharacterInputComponent.generated.h"
 
 struct FInputActionValue;
 class UInputMappingContext;
-class UInputAction;
 
 UCLASS(AutoExpandCategories = ("AlsCharacterInput|Settings"))
 class ALSEXTRAS_API UAlsCharacterInputComponent : public UAlsCharacterComponent
@@ -14,53 +14,50 @@ class ALSEXTRAS_API UAlsCharacterInputComponent : public UAlsCharacterComponent
 	GENERATED_BODY()
 
 protected:
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AlsCharacterInput|Settings", Meta = (DisplayThumbnail = false))
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "AlsCharacterInput|Settings", Meta = (DisplayThumbnail = false))
 	TObjectPtr<UInputMappingContext> InputMappingContext;
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AlsCharacterInput|Settings", Meta = (DisplayThumbnail = false))
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "AlsCharacterInput|Settings", Meta = (DisplayThumbnail = false))
 	TObjectPtr<UInputAction> LookMouseAction;
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AlsCharacterInput|Settings", Meta = (DisplayThumbnail = false))
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "AlsCharacterInput|Settings", Meta = (DisplayThumbnail = false))
 	TObjectPtr<UInputAction> LookAction;
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AlsCharacterInput|Settings", Meta = (DisplayThumbnail = false))
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "AlsCharacterInput|Settings", Meta = (DisplayThumbnail = false))
 	TObjectPtr<UInputAction> MoveAction;
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AlsCharacterInput|Settings", Meta = (DisplayThumbnail = false))
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "AlsCharacterInput|Settings", Meta = (DisplayThumbnail = false))
 	TObjectPtr<UInputAction> SprintAction;
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AlsCharacterInput|Settings", Meta = (DisplayThumbnail = false))
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "AlsCharacterInput|Settings", Meta = (DisplayThumbnail = false))
 	TObjectPtr<UInputAction> WalkAction;
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AlsCharacterInput|Settings", Meta = (DisplayThumbnail = false))
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "AlsCharacterInput|Settings", Meta = (DisplayThumbnail = false))
 	TObjectPtr<UInputAction> CrouchAction;
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AlsCharacterInput|Settings", Meta = (DisplayThumbnail = false))
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "AlsCharacterInput|Settings", Meta = (DisplayThumbnail = false))
 	TObjectPtr<UInputAction> ProneAction;
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AlsCharacterInput|Settings", Meta = (DisplayThumbnail = false))
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "AlsCharacterInput|Settings", Meta = (DisplayThumbnail = false))
 	TObjectPtr<UInputAction> JumpAction;
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AlsCharacterInput|Settings", Meta = (DisplayThumbnail = false))
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "AlsCharacterInput|Settings", Meta = (DisplayThumbnail = false))
 	TObjectPtr<UInputAction> AimAction;
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AlsCharacterInput|Settings", Meta = (DisplayThumbnail = false))
-	TObjectPtr<UInputAction> FireAction;
-
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AlsCharacterInput|Settings", Meta = (DisplayThumbnail = false))
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "AlsCharacterInput|Settings", Meta = (DisplayThumbnail = false))
 	TObjectPtr<UInputAction> RagdollAction;
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AlsCharacterInput|Settings", Meta = (DisplayThumbnail = false))
-	TObjectPtr<UInputAction> RollAction;
-
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AlsCharacterInput|Settings", Meta = (DisplayThumbnail = false))
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "AlsCharacterInput|Settings", Meta = (DisplayThumbnail = false))
 	TObjectPtr<UInputAction> RotationModeAction;
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AlsCharacterInput|Settings", Meta = (DisplayThumbnail = false))
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "AlsCharacterInput|Settings", Meta = (DisplayThumbnail = false))
 	TObjectPtr<UInputAction> ViewModeAction;
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AlsCharacterInput|Settings", Meta = (DisplayThumbnail = false))
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "AlsCharacterInput|Settings", Meta = (DisplayThumbnail = false))
 	TObjectPtr<UInputAction> SwitchShoulderAction;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "AlsCharacterInput|Settings", Meta = (DisplayThumbnail = false))
+	TArray<FAlsInputAction> InputActions;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AlsCharacterInput|Settings", Meta = (ClampMin = 0, ForceUnits = "x"))
 	float LookUpMouseSensitivity{1.0f};
@@ -101,11 +98,7 @@ private:
 
 	void Input_OnAim(const FInputActionValue& ActionValue);
 
-	void Input_OnFire(const FInputActionValue& ActionValue);
-
 	void Input_OnRagdoll();
-
-	void Input_OnRoll();
 
 	void Input_OnRotationMode();
 

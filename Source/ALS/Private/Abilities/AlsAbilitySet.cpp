@@ -94,7 +94,6 @@ void UAlsAbilitySet::GiveToAbilitySystem(UAbilitySystemComponent* AlsASC, FAlsAb
 
 		FGameplayAbilitySpec AbilitySpec{AbilityCDO, AbilityToGrant.AbilityLevel};
 		AbilitySpec.SourceObject = SourceObject;
-		AbilitySpec.DynamicAbilityTags.AddTag(AbilityToGrant.InputTag);
 
 		const auto AbilitySpecHandle{AlsASC->GiveAbility(AbilitySpec)};
 

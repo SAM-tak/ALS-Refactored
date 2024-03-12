@@ -9,6 +9,7 @@
 #include "AlsAbilitySystemComponent.h"
 #include "Utility/AlsMath.h"
 #include "Utility/AlsLog.h"
+#include "InputTriggers.h"
 
 #include UE_INLINE_GENERATED_CPP_BY_NAME(AlsCharacterInputComponent)
 
@@ -60,12 +61,16 @@ void UAlsCharacterInputComponent::OnSetupPlayerInputComponent_Implementation(UIn
 		EnhancedInput->BindAction(ProneAction, ETriggerEvent::Triggered, this, &ThisClass::Input_OnProne);
 		EnhancedInput->BindAction(JumpAction, ETriggerEvent::Triggered, this, &ThisClass::Input_OnJump);
 		EnhancedInput->BindAction(AimAction, ETriggerEvent::Triggered, this, &ThisClass::Input_OnAim);
-		EnhancedInput->BindAction(FireAction, ETriggerEvent::Triggered, this, &ThisClass::Input_OnFire);
 		EnhancedInput->BindAction(RagdollAction, ETriggerEvent::Triggered, this, &ThisClass::Input_OnRagdoll);
-		EnhancedInput->BindAction(RollAction, ETriggerEvent::Triggered, this, &ThisClass::Input_OnRoll);
 		EnhancedInput->BindAction(RotationModeAction, ETriggerEvent::Triggered, this, &ThisClass::Input_OnRotationMode);
 		EnhancedInput->BindAction(ViewModeAction, ETriggerEvent::Triggered, this, &ThisClass::Input_OnViewMode);
 		EnhancedInput->BindAction(SwitchShoulderAction, ETriggerEvent::Triggered, this, &ThisClass::Input_OnSwitchShoulder);
+
+		auto* AlsAbilitySystem{Character->GetAlsAbilitySystem()};
+		for(auto& InputAction : InputActions)
+		{
+			InputAction.BindAction(AlsAbilitySystem, EnhancedInput);
+		}
 	}
 }
 
@@ -164,19 +169,6 @@ void UAlsCharacterInputComponent::Input_OnAim(const FInputActionValue& ActionVal
 	Character->SetAimingMode(ActionValue.Get<bool>() ? AlsAimingModeTags::AimDownSight : FGameplayTag::EmptyTag);
 }
 
-void UAlsCharacterInputComponent::Input_OnFire(const FInputActionValue& ActionValue)
-{
-	auto FireTag{FGameplayTag::RequestGameplayTag("AlsExtra.Action.Fire")};
-	if (Character->HasMatchingGameplayTag(FireTag))
-	{
-		Character->GetAlsAbilitySystem()->CancelAbilitiesBySingleTag(FireTag);
-	}
-	else
-	{
-		Character->GetAlsAbilitySystem()->TryActivateAbilitiesBySingleTag(FireTag);
-	}
-}
-
 void UAlsCharacterInputComponent::Input_OnRagdoll()
 {
 	if (Character->HasMatchingGameplayTag(AlsLocomotionActionTags::GettingDown))
@@ -191,11 +183,6 @@ void UAlsCharacterInputComponent::Input_OnRagdoll()
 	{
 		Character->GetAlsAbilitySystem()->TryActivateAbilitiesBySingleTag(RagdollActionTag);
 	}
-}
-
-void UAlsCharacterInputComponent::Input_OnRoll()
-{
-	Character->GetAlsAbilitySystem()->TryActivateAbilitiesBySingleTag(AlsLocomotionActionTags::Rolling);
 }
 
 void UAlsCharacterInputComponent::Input_OnRotationMode()

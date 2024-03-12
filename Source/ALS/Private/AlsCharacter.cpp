@@ -240,6 +240,13 @@ void AAlsCharacter::PostInitializeComponents()
 	if (IsValid(AbilitySystem))
 	{
 		AbilitySystem->InitAbilityActorInfo(this, this);
+
+		if (HasAuthority() && IsValid(AbilitySet))
+		{
+			AbilitySet->GiveToAbilitySystem(AbilitySystem, nullptr);
+		}
+
+		AbilitySystem->TryActivateAbilitiesBySingleTag(InitialOverlayMode);
 	}
 
 	Super::PostInitializeComponents();
@@ -273,8 +280,7 @@ void AAlsCharacter::BeginPlay()
 
 	RefreshMeshProperties();
 
-	ViewState.NetworkSmoothing.bEnabled |= IsValid(Settings) &&
-		Settings->View.bEnableNetworkSmoothing && GetLocalRole() == ROLE_SimulatedProxy;
+	ViewState.NetworkSmoothing.bEnabled |= IsValid(Settings) && Settings->View.bEnableNetworkSmoothing && GetLocalRole() == ROLE_SimulatedProxy;
 
 	// Update states to use the initial desired values.
 
@@ -287,16 +293,6 @@ void AAlsCharacter::BeginPlay()
 	AlsCharacterMovement->SetStance(Stance);
 
 	RefreshGait();
-
-	if (IsValid(AbilitySystem) && IsValid(AbilitySet))
-	{
-		if (HasAuthority() && AbilitySet)
-		{
-			AbilitySet->GiveToAbilitySystem(AbilitySystem, nullptr);
-		}
-
-		AbilitySystem->TryActivateAbilitiesBySingleTag(InitialOverlayMode);
-	}
 }
 
 void AAlsCharacter::NotifyControllerChanged()

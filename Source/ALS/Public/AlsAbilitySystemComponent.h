@@ -1,8 +1,11 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "InputTriggers.h"
 #include "AbilitySystemComponent.h"
 #include "AlsAbilitySystemComponent.generated.h"
+
+class UEnhancedInputComponent;
 
 /**
  * AbilitySystemComponent for ALS Refactored
@@ -23,4 +26,21 @@ public:
 	{
 		return TryActivateAbilitiesByTag(FGameplayTagContainer{Tag}, bAllowRemoteActivation);
 	}
+
+	void BindActivateInput(UEnhancedInputComponent* EnhancedInputComponent, const UInputAction* Action, ETriggerEvent TriggerEvent, const FGameplayTag& InputTag);
+
+	void BindCancelInput(UEnhancedInputComponent* EnhancedInputComponent, const UInputAction* Action, ETriggerEvent TriggerEvent, const FGameplayTag& InputTag);
+
+	void BindToggleInput(UEnhancedInputComponent* EnhancedInputComponent, const UInputAction* Action, ETriggerEvent TriggerEvent, const FGameplayTag& InputTag);
+
+	void UnbindInputs(UEnhancedInputComponent* EnhancedInputComponent, const FGameplayTag& InputTag);
+
+private:
+	TMap<FGameplayTag, TArray<uint32>> BindingHandles;
+
+	void ActivateOnInputAction(FGameplayTag InputTag);
+
+	void CancelOnInputAction(FGameplayTag InputTag);
+
+	void ToggleOnInputAction(FGameplayTag InputTag);
 };
