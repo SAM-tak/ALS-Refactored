@@ -1,4 +1,4 @@
-#include "AlsRagdollingAnimInstance.h"
+#include "LinkedAnimLayers/AlsRagdollingAnimInstance.h"
 #include "Abilities/Actions/AlsGameplayAbility_Ragdolling.h"
 
 #include UE_INLINE_GENERATED_CPP_BY_NAME(AlsRagdollingAnimInstance)

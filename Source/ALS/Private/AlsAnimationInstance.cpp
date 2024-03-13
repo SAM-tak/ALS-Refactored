@@ -2,7 +2,7 @@
 
 #include "AlsAnimationInstanceProxy.h"
 #include "AlsCharacter.h"
-#include "AlsRagdollingAnimInstance.h"
+#include "LinkedAnimLayers/AlsRagdollingAnimInstance.h"
 #include "Settings/AlsAnimationInstanceSettings.h"
 #include "Abilities/Actions/AlsGameplayAbility_Ragdolling.h"
 #include "DrawDebugHelpers.h"

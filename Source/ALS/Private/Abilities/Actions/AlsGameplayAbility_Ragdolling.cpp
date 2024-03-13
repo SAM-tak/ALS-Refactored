@@ -6,7 +6,7 @@
 #include "AlsCharacterMovementComponent.h"
 #include "AlsAnimationInstance.h"
 #include "AlsAbilitySystemComponent.h"
-#include "AlsRagdollingAnimInstance.h"
+#include "LinkedAnimLayers/AlsRagdollingAnimInstance.h"
 #include "Components/CapsuleComponent.h"
 #include "Components/SkeletalMeshComponent.h"
 #include "Net/UnrealNetwork.h"
