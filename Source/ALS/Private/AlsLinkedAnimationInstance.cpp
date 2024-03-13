@@ -52,22 +52,6 @@ FAnimInstanceProxy* UAlsLinkedAnimationInstance::CreateAnimInstanceProxy()
 	return new FAlsAnimationInstanceProxy{this};
 }
 
-void UAlsLinkedAnimationInstance::ReinitializeLook()
-{
-	if (Parent.IsValid())
-	{
-		Parent->ReinitializeLook();
-	}
-}
-
-void UAlsLinkedAnimationInstance::RefreshLook()
-{
-	if (Parent.IsValid())
-	{
-		Parent->RefreshLook();
-	}
-}
-
 FGameplayTag UAlsLinkedAnimationInstance::GetEntryStance() const
 {
 	if (Parent.IsValid())

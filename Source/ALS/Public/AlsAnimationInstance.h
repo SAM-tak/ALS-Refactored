@@ -21,6 +21,7 @@
 struct FAlsFootLimitsSettings;
 class UAlsLinkedAnimationInstance;
 class UAlsRagdollingAnimInstance;
+class UAlsViewAnimInstance;
 class AAlsCharacter;
 
 UCLASS()
@@ -29,6 +30,7 @@ class ALS_API UAlsAnimationInstance : public UAnimInstance
 	GENERATED_BODY()
 
 	friend UAlsLinkedAnimationInstance;
+	friend UAlsViewAnimInstance;
 
 protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings")
@@ -36,6 +38,9 @@ protected:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient)
 	TWeakObjectPtr<AAlsCharacter> Character;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient)
+	TWeakObjectPtr<UAlsViewAnimInstance> ViewAnimInstance;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient)
 	TWeakObjectPtr<UAlsRagdollingAnimInstance> RagdollingAnimInstance;
@@ -156,18 +161,18 @@ public:
 	virtual bool IsSpineRotationAllowed();
 
 private:
-	void RefreshViewOnGameThread();
+	//void RefreshViewOnGameThread();
 
-	void RefreshView(float DeltaTime);
+	//void RefreshView(float DeltaTime);
 
-	void RefreshSpineRotation(float SpineBlendAmount, float DeltaTime);
+	//void RefreshSpineRotation(float SpineBlendAmount, float DeltaTime);
 
-protected:
-	UFUNCTION(BlueprintCallable, Category = "ALS|Animation Instance", Meta = (BlueprintProtected, BlueprintThreadSafe))
-	void ReinitializeLook();
-
-	UFUNCTION(BlueprintCallable, Category = "ALS|Animation Instance", Meta = (BlueprintProtected, BlueprintThreadSafe))
-	void RefreshLook();
+//protected:
+//	UFUNCTION(BlueprintCallable, Category = "ALS|Animation Instance", Meta = (BlueprintProtected, BlueprintThreadSafe))
+//	void ReinitializeLook();
+//
+//	UFUNCTION(BlueprintCallable, Category = "ALS|Animation Instance", Meta = (BlueprintProtected, BlueprintThreadSafe))
+//	void RefreshLook();
 
 	// Locomotion
 

@@ -4,6 +4,7 @@
 #include "AlsLinkedAnimationInstance.generated.h"
 
 class AAlsCharacter;
+class UAlsViewAnimInstance;
 
 UCLASS(Abstract)
 class ALS_API UAlsLinkedAnimationInstance : public UAnimInstance
@@ -11,10 +12,10 @@ class ALS_API UAlsLinkedAnimationInstance : public UAnimInstance
 	GENERATED_UCLASS_BODY()
 
 protected:
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient)
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "ALS|State", Transient)
 	TWeakObjectPtr<UAlsAnimationInstance> Parent;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient)
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "ALS|State", Transient)
 	TWeakObjectPtr<AAlsCharacter> Character;
 
 public:
@@ -36,13 +37,10 @@ protected:
 	UAlsAnimationInstance* GetParentUnsafe() const;
 
 	UFUNCTION(BlueprintPure, Category = "ALS|Linked Animation Instance", Meta = (BlueprintProtected, BlueprintThreadSafe, ReturnDisplayName = "Parent"))
+	UAlsViewAnimInstance* GetViewUnsafe() const;
+
+	UFUNCTION(BlueprintPure, Category = "ALS|Linked Animation Instance", Meta = (BlueprintProtected, BlueprintThreadSafe, ReturnDisplayName = "Parent"))
 	FGameplayTag GetEntryStance() const;
-
-	UFUNCTION(BlueprintCallable, Category = "ALS|Linked Animation Instance", Meta = (BlueprintProtected, BlueprintThreadSafe))
-	void ReinitializeLook();
-
-	UFUNCTION(BlueprintCallable, Category = "ALS|Linked Animation Instance", Meta = (BlueprintProtected, BlueprintThreadSafe))
-	void RefreshLook();
 
 	UFUNCTION(BlueprintCallable, Category = "ALS|Linked Animation Instance", Meta = (BlueprintProtected, BlueprintThreadSafe))
 	void ResetGroundedEntryMode();
@@ -60,4 +58,9 @@ protected:
 inline UAlsAnimationInstance* UAlsLinkedAnimationInstance::GetParentUnsafe() const
 {
 	return Parent.Get();
+}
+
+inline UAlsViewAnimInstance* UAlsLinkedAnimationInstance::GetViewUnsafe() const
+{
+	return Parent->ViewAnimInstance.Get();
 }
