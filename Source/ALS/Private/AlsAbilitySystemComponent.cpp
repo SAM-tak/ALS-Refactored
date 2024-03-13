@@ -9,8 +9,8 @@ UAlsAbilitySystemComponent::UAlsAbilitySystemComponent(const FObjectInitializer&
 	SetReplicationMode(EGameplayEffectReplicationMode::Minimal);
 }
 
-void UAlsAbilitySystemComponent::BindActivateInput(UEnhancedInputComponent* EnhancedInputComponent, const UInputAction* Action, ETriggerEvent TriggerEvent,
-												   const FGameplayTag& InputTag)
+void UAlsAbilitySystemComponent::BindAbilityActivationInput(UEnhancedInputComponent* EnhancedInputComponent, const UInputAction* Action, ETriggerEvent TriggerEvent,
+														    const FGameplayTag& InputTag)
 {
 	auto Handle{EnhancedInputComponent->BindAction(Action, TriggerEvent, this, &ThisClass::ActivateOnInputAction, InputTag).GetHandle()};
 	if (!BindingHandles.Contains(InputTag))
@@ -20,29 +20,7 @@ void UAlsAbilitySystemComponent::BindActivateInput(UEnhancedInputComponent* Enha
 	BindingHandles[InputTag].AddUnique(Handle);
 }
 
-void UAlsAbilitySystemComponent::BindCancelInput(UEnhancedInputComponent* EnhancedInputComponent, const UInputAction* Action, ETriggerEvent TriggerEvent,
-												 const FGameplayTag& InputTag)
-{
-	auto Handle{EnhancedInputComponent->BindAction(Action, TriggerEvent, this, &ThisClass::CancelOnInputAction, InputTag).GetHandle()};
-	if (!BindingHandles.Contains(InputTag))
-	{
-		BindingHandles.Add(InputTag);
-	}
-	BindingHandles[InputTag].AddUnique(Handle);
-}
-
-void UAlsAbilitySystemComponent::BindToggleInput(UEnhancedInputComponent* EnhancedInputComponent, const UInputAction* Action, ETriggerEvent TriggerEvent,
-												 const FGameplayTag& InputTag)
-{
-	auto Handle{EnhancedInputComponent->BindAction(Action, TriggerEvent, this, &ThisClass::ToggleOnInputAction, InputTag).GetHandle()};
-	if (!BindingHandles.Contains(InputTag))
-	{
-		BindingHandles.Add(InputTag);
-	}
-	BindingHandles[InputTag].AddUnique(Handle);
-}
-
-void UAlsAbilitySystemComponent::UnbindInputs(UEnhancedInputComponent* EnhancedInputComponent, const FGameplayTag& InputTag)
+void UAlsAbilitySystemComponent::UnbindAbilityInputs(UEnhancedInputComponent* EnhancedInputComponent, const FGameplayTag& InputTag)
 {
 	if (BindingHandles.Contains(InputTag))
 	{
@@ -57,21 +35,4 @@ void UAlsAbilitySystemComponent::UnbindInputs(UEnhancedInputComponent* EnhancedI
 void UAlsAbilitySystemComponent::ActivateOnInputAction(FGameplayTag InputTag)
 {
 	TryActivateAbilitiesBySingleTag(InputTag);
-}
-
-void UAlsAbilitySystemComponent::CancelOnInputAction(FGameplayTag InputTag)
-{
-	CancelAbilitiesBySingleTag(InputTag);
-}
-
-void UAlsAbilitySystemComponent::ToggleOnInputAction(FGameplayTag InputTag)
-{
-	if (HasMatchingGameplayTag(InputTag))
-	{
-		CancelAbilitiesBySingleTag(InputTag);
-	}
-	else
-	{
-		TryActivateAbilitiesBySingleTag(InputTag);
-	}
 }

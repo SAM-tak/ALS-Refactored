@@ -38,8 +38,10 @@ class ALS_API UAlsGameplayAbility : public UGameplayAbility
 	GENERATED_BODY()
 
 protected:
+	// Bind input actions on activate this ability and unbind when finished. (default : true)
+	// If activates too frequency and no needs to input binding, turn off for better performance.
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = AlsAbility)
-	uint8 bEnableInputBinding : 1{false};
+	uint8 bEnableInputBinding : 1{true};
 
 public:
 	UFUNCTION(BlueprintPure, Category = "ALS|Ability")

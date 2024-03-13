@@ -19,7 +19,4 @@ protected:
 
 	UFUNCTION(BlueprintNativeEvent, Category = "ALS|CharacterComponent")
 	void OnControllerChanged(AController *PreviousController, AController* NewController);
-
-	UFUNCTION(BlueprintNativeEvent, Category = "ALS|CharacterComponent")
-	void OnSetupPlayerInputComponent(UInputComponent* Input);
 };

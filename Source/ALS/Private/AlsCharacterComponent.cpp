@@ -43,10 +43,7 @@ void UAlsCharacterComponent::OnRegister()
 	else
 	{
 		Character->OnContollerChanged.AddUObject(this, &ThisClass::OnControllerChanged);
-		Character->OnSetupPlayerInputComponent.AddUObject(this, &ThisClass::OnSetupPlayerInputComponent);
 	}
 }
 
 void UAlsCharacterComponent::OnControllerChanged_Implementation(AController* PreviousController, AController* NewController) {}
-
-void UAlsCharacterComponent::OnSetupPlayerInputComponent_Implementation(UInputComponent* Input) {}

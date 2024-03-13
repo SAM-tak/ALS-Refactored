@@ -211,7 +211,7 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Als|Character|Camera")
 	void SetRightShoulder(bool bNewRightShoulder);
 
-	UFUNCTION(BlueprintPure, Category = "Als|Character|Camera")
+	UFUNCTION(BlueprintCallable, Category = "Als|Character|Camera")
 	bool ToggleRightShoulder();
 
 	// View Mode
