@@ -1,4 +1,4 @@
-﻿#include "RootMotionSources/AlsRootMotionSource_Mantling.h"
+#include "RootMotionSources/AlsRootMotionSource_Mantling.h"
 
 #include "Abilities/Actions/AlsGameplayAbility_Mantling.h"
 #include "Animation/AnimInstance.h"
@@ -146,8 +146,8 @@ bool FAlsRootMotionSource_Mantling::NetSerialize(FArchive& Archive, UPackageMap*
 	bSuccess = true;
 	auto bSuccessLocal{true};
 
-	Archive << MantlingSettings;
-	Archive << TargetPrimitive;
+	//Archive << MantlingSettings;
+	//Archive << TargetPrimitive;
 
 	bSuccess &= SerializePackedVector<100, 30>(TargetRelativeLocation, Archive);
 
