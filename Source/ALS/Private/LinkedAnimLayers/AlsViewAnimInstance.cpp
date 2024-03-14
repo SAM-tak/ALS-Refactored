@@ -94,7 +94,7 @@ void UAlsViewAnimInstance::ReinitializeLook()
 
 void UAlsViewAnimInstance::RefreshLook()
 {
-	DECLARE_SCOPE_CYCLE_COUNTER(TEXT("UAlsAnimationInstance::RefreshLook()"), STAT_UAlsAnimationInstance_RefreshLook, STATGROUP_Als)
+	DECLARE_SCOPE_CYCLE_COUNTER(TEXT("UAlsViewAnimInstance::RefreshLook()"), STAT_UAlsViewAnimInstance_RefreshLook, STATGROUP_Als)
 
 	if (!Parent.IsValid())
 	{

@@ -2,7 +2,7 @@
 
 #include "Abilities/AlsGameplayAbility_Overlay.h"
 #include "AlsCharacter.h"
-#include "AlsLinkedAnimationInstance.h"
+#include "LinkedAnimLayers/AlsOverlayAnimInstance.h"
 #include "AlsAbilitySystemComponent.h"
 
 #include UE_INLINE_GENERATED_CPP_BY_NAME(AlsGameplayAbility_Overlay)

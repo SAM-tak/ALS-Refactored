@@ -5,7 +5,7 @@
 #include "Abilities/AlsGameplayAbility.h"
 #include "AlsGameplayAbility_Overlay.generated.h"
 
-class UAlsLinkedAnimationInstance;
+class UAlsOverlayAnimInstance;
 
 /**
  *
@@ -17,7 +17,7 @@ class ALS_API UAlsGameplayAbility_Overlay : public UAlsGameplayAbility
 
 protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = AlsAbility)
-	TSubclassOf<UAlsLinkedAnimationInstance> OwnAnimLayersClass;
+	TSubclassOf<UAlsOverlayAnimInstance> OwnAnimLayersClass;
 
 protected:
 	virtual void ActivateAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo,

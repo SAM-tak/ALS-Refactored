@@ -67,10 +67,10 @@ public:
 	float LookTowardsInputYawAngleInterpolationSpeed{8.0f};
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "ALS|State", Transient)
-	FRotator Rotation{ForceInit};
+	FRotator Rotation{ForceInit}; // internal, no AnimBP use, used in AlsAnimationInstance(ex : RefreshMovementDirection)
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "ALS|State", Transient, Meta = (ClampMin = -180, ClampMax = 180, ForceUnits = "deg"))
-	float YawAngle{0.0f};
+	float YawAngle{0.0f}; // internal, no AnimBP use, used in AlsAnimationInstance(ex : RefreshTurnInPlace)
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "ALS|State", Transient, Meta = (ClampMin = 0, ForceUnits = "deg/s"))
 	float YawSpeed{0.0f};

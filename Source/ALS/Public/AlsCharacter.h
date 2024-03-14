@@ -542,9 +542,9 @@ private:
 	static void DisplayDebugHeader(const UCanvas* Canvas, const FText& HeaderText, const FLinearColor& HeaderColor,
 	                               float Scale, float HorizontalLocation, float& VerticalLocation);
 
-	static TSet<FName> CurveNameSet;
+	static TArray<FName> CurveNames;
 
-	static void InitializeCurveNameSet();
+	static void InitializeCurveNames();
 
 	void DisplayDebugCurves(const UCanvas* Canvas, float Scale, float HorizontalLocation, float& VerticalLocation) const;
 

@@ -170,11 +170,11 @@ void AAlsCharacter::DisplayDebugHeader(const UCanvas* Canvas, const FText& Heade
 	VerticalLocation += 15.0f * Scale;
 }
 
-TSet<FName> AAlsCharacter::CurveNameSet;
+TArray<FName> AAlsCharacter::CurveNames;
 
-void AAlsCharacter::InitializeCurveNameSet()
+void AAlsCharacter::InitializeCurveNames()
 {
-	CurveNameSet.Reset();
+	CurveNames.Reset();
 	// gave up
 	//UClass* _Class = UAlsConstants::StaticClass();
 	//for (TFieldIterator<UFunction> FuncIt(_Class); FuncIt; ++FuncIt)
@@ -185,71 +185,71 @@ void AAlsCharacter::InitializeCurveNameSet()
 	//		if (ReturnDisplayName && ReturnDisplayName->Equals("Curve Name"))
 	//		{
 	//			const FName& CurveName = FuncIt->CallStaticFunction();
-	//			CurveNamesSet.Add(CurveName);
+	//			CurveNames.AddUniqueUnique(CurveName);
 	//		}
 	//	}
 	//}
 	
 	// Layering Animation Curves
-	CurveNameSet.Add(UAlsConstants::LayerHeadCurveName());
-	CurveNameSet.Add(UAlsConstants::LayerHeadAdditiveCurveName());
-	CurveNameSet.Add(UAlsConstants::LayerHeadSlotCurveName());
-	CurveNameSet.Add(UAlsConstants::LayerArmLeftCurveName());
-	CurveNameSet.Add(UAlsConstants::LayerArmLeftAdditiveCurveName());
-	CurveNameSet.Add(UAlsConstants::LayerArmLeftLocalSpaceCurveName());
-	CurveNameSet.Add(UAlsConstants::LayerArmLeftSlotCurveName());
-	CurveNameSet.Add(UAlsConstants::LayerArmRightCurveName());
-	CurveNameSet.Add(UAlsConstants::LayerArmRightAdditiveCurveName());
-	CurveNameSet.Add(UAlsConstants::LayerArmRightLocalSpaceCurveName());
-	CurveNameSet.Add(UAlsConstants::LayerArmRightSlotCurveName());
-	CurveNameSet.Add(UAlsConstants::LayerHandLeftCurveName());
-	CurveNameSet.Add(UAlsConstants::LayerHandRightCurveName());
-	CurveNameSet.Add(UAlsConstants::LayerSpineCurveName());
-	CurveNameSet.Add(UAlsConstants::LayerSpineAdditiveCurveName());
-	CurveNameSet.Add(UAlsConstants::LayerSpineSlotCurveName());
-	CurveNameSet.Add(UAlsConstants::LayerPelvisCurveName());
-	CurveNameSet.Add(UAlsConstants::LayerPelvisSlotCurveName());
-	CurveNameSet.Add(UAlsConstants::LayerLegsCurveName());
-	CurveNameSet.Add(UAlsConstants::LayerLegsSlotCurveName());
-	CurveNameSet.Add(UAlsConstants::HandLeftIkCurveName());
-	CurveNameSet.Add(UAlsConstants::HandRightIkCurveName());
-	CurveNameSet.Add(UAlsConstants::ViewBlockCurveName());
-	CurveNameSet.Add(UAlsConstants::AllowAimingCurveName());
-	CurveNameSet.Add(UAlsConstants::HipsDirectionLockCurveName());
+	CurveNames.AddUnique(UAlsConstants::LayerHeadCurveName());
+	CurveNames.AddUnique(UAlsConstants::LayerHeadAdditiveCurveName());
+	CurveNames.AddUnique(UAlsConstants::LayerHeadSlotCurveName());
+	CurveNames.AddUnique(UAlsConstants::LayerArmLeftCurveName());
+	CurveNames.AddUnique(UAlsConstants::LayerArmLeftAdditiveCurveName());
+	CurveNames.AddUnique(UAlsConstants::LayerArmLeftLocalSpaceCurveName());
+	CurveNames.AddUnique(UAlsConstants::LayerArmLeftSlotCurveName());
+	CurveNames.AddUnique(UAlsConstants::LayerArmRightCurveName());
+	CurveNames.AddUnique(UAlsConstants::LayerArmRightAdditiveCurveName());
+	CurveNames.AddUnique(UAlsConstants::LayerArmRightLocalSpaceCurveName());
+	CurveNames.AddUnique(UAlsConstants::LayerArmRightSlotCurveName());
+	CurveNames.AddUnique(UAlsConstants::LayerHandLeftCurveName());
+	CurveNames.AddUnique(UAlsConstants::LayerHandRightCurveName());
+	CurveNames.AddUnique(UAlsConstants::LayerSpineCurveName());
+	CurveNames.AddUnique(UAlsConstants::LayerSpineAdditiveCurveName());
+	CurveNames.AddUnique(UAlsConstants::LayerSpineSlotCurveName());
+	CurveNames.AddUnique(UAlsConstants::LayerPelvisCurveName());
+	CurveNames.AddUnique(UAlsConstants::LayerPelvisSlotCurveName());
+	CurveNames.AddUnique(UAlsConstants::LayerLegsCurveName());
+	CurveNames.AddUnique(UAlsConstants::LayerLegsSlotCurveName());
+	CurveNames.AddUnique(UAlsConstants::HandLeftIkCurveName());
+	CurveNames.AddUnique(UAlsConstants::HandRightIkCurveName());
+	CurveNames.AddUnique(UAlsConstants::ViewBlockCurveName());
+	CurveNames.AddUnique(UAlsConstants::AllowAimingCurveName());
+	CurveNames.AddUnique(UAlsConstants::HipsDirectionLockCurveName());
 
 	// Pose Animation Curves
-	CurveNameSet.Add(UAlsConstants::PoseGaitCurveName());
-	CurveNameSet.Add(UAlsConstants::PoseMovingCurveName());
-	CurveNameSet.Add(UAlsConstants::PoseStandingCurveName());
-	CurveNameSet.Add(UAlsConstants::PoseCrouchingCurveName());
-	CurveNameSet.Add(UAlsConstants::PoseGroundedCurveName());
-	CurveNameSet.Add(UAlsConstants::PoseInAirCurveName());
+	CurveNames.AddUnique(UAlsConstants::PoseGaitCurveName());
+	CurveNames.AddUnique(UAlsConstants::PoseMovingCurveName());
+	CurveNames.AddUnique(UAlsConstants::PoseStandingCurveName());
+	CurveNames.AddUnique(UAlsConstants::PoseCrouchingCurveName());
+	CurveNames.AddUnique(UAlsConstants::PoseGroundedCurveName());
+	CurveNames.AddUnique(UAlsConstants::PoseInAirCurveName());
 
 	// Feet Animation Curves
-	CurveNameSet.Add(UAlsConstants::FootLeftIkCurveName());
-	CurveNameSet.Add(UAlsConstants::FootLeftLockCurveName());
-	CurveNameSet.Add(UAlsConstants::FootRightIkCurveName());
-	CurveNameSet.Add(UAlsConstants::FootRightLockCurveName());
-	CurveNameSet.Add(UAlsConstants::FootPlantedCurveName());
-	CurveNameSet.Add(UAlsConstants::FeetCrossingCurveName());
+	CurveNames.AddUnique(UAlsConstants::FootLeftIkCurveName());
+	CurveNames.AddUnique(UAlsConstants::FootLeftLockCurveName());
+	CurveNames.AddUnique(UAlsConstants::FootRightIkCurveName());
+	CurveNames.AddUnique(UAlsConstants::FootRightLockCurveName());
+	CurveNames.AddUnique(UAlsConstants::FootPlantedCurveName());
+	CurveNames.AddUnique(UAlsConstants::FeetCrossingCurveName());
 
 	// Other Animation Curves
-	CurveNameSet.Add(UAlsConstants::RotationYawSpeedCurveName());
-	CurveNameSet.Add(UAlsConstants::RotationYawOffsetCurveName());
-	CurveNameSet.Add(UAlsConstants::AllowTransitionsCurveName());
-	CurveNameSet.Add(UAlsConstants::SprintBlockCurveName());
-	CurveNameSet.Add(UAlsConstants::GroundPredictionBlockCurveName());
-	CurveNameSet.Add(UAlsConstants::FootstepSoundBlockCurveName());
+	CurveNames.AddUnique(UAlsConstants::RotationYawSpeedCurveName());
+	CurveNames.AddUnique(UAlsConstants::RotationYawOffsetCurveName());
+	CurveNames.AddUnique(UAlsConstants::AllowTransitionsCurveName());
+	CurveNames.AddUnique(UAlsConstants::SprintBlockCurveName());
+	CurveNames.AddUnique(UAlsConstants::GroundPredictionBlockCurveName());
+	CurveNames.AddUnique(UAlsConstants::FootstepSoundBlockCurveName());
 
 	// Physical Animation Curves
-	CurveNameSet.Add(UAlsConstants::PALockArmLeftCurveName());
-	CurveNameSet.Add(UAlsConstants::PALockArmRightCurveName());
-	CurveNameSet.Add(UAlsConstants::PALockLegLeftCurveName());
-	CurveNameSet.Add(UAlsConstants::PALockLegRightCurveName());
-	CurveNameSet.Add(UAlsConstants::PALockHandLeftCurveName());
-	CurveNameSet.Add(UAlsConstants::PALockHandRightCurveName());
-	CurveNameSet.Add(UAlsConstants::PALockFootLeftCurveName());
-	CurveNameSet.Add(UAlsConstants::PALockFootRightCurveName());
+	CurveNames.AddUnique(UAlsConstants::PALockArmLeftCurveName());
+	CurveNames.AddUnique(UAlsConstants::PALockArmRightCurveName());
+	CurveNames.AddUnique(UAlsConstants::PALockLegLeftCurveName());
+	CurveNames.AddUnique(UAlsConstants::PALockLegRightCurveName());
+	CurveNames.AddUnique(UAlsConstants::PALockHandLeftCurveName());
+	CurveNames.AddUnique(UAlsConstants::PALockHandRightCurveName());
+	CurveNames.AddUnique(UAlsConstants::PALockFootLeftCurveName());
+	CurveNames.AddUnique(UAlsConstants::PALockFootRightCurveName());
 }
 
 void AAlsCharacter::DisplayDebugCurves(const UCanvas* Canvas, const float Scale,
@@ -270,22 +270,19 @@ void AAlsCharacter::DisplayDebugCurves(const UCanvas* Canvas, const float Scale,
 	const auto RowOffset{10.0f * Scale};
 	const auto ColumnOffset{145.0f * Scale};
 
-	TArray<FName> CurveNames;
-	GetMesh()->GetSkeletalMeshAsset()->GetSkeleton()->GetCurveMetaDataNames(CurveNames);
-
-	CurveNames.Sort([](const FName& A, const FName& B) { return A.LexicalLess(B); });
-
-	if (CurveNameSet.Num() == 0)
+	if (CurveNames.Num() == 0)
 	{
-		InitializeCurveNameSet();
+		InitializeCurveNames();
 	}
 
 	TStringBuilder<32> CurveValueBuilder;
 
+	TArray<FName> MeshCurveNames;
+	GetMesh()->GetSkeletalMeshAsset()->GetSkeleton()->GetCurveMetaDataNames(MeshCurveNames);
 	for (const auto& CurveName : CurveNames)
 	{
 		// Skip if CurveName doesn't exist in UAlsConstants's Animation Curve Name static members.
-		if (!CurveNameSet.Contains(CurveName))
+		if (!MeshCurveNames.Contains(CurveName))
 		{
 			continue;
 		}

@@ -162,6 +162,8 @@ private:
 public:
 	virtual bool IsSpineRotationAllowed();
 
+	UAlsViewAnimInstance* GetViewAnimInstance() const;
+
 	// Locomotion
 
 private:
@@ -321,6 +323,16 @@ inline UAlsAnimationInstanceSettings* UAlsAnimationInstance::GetSettingsUnsafe()
 	return Settings;
 }
 
+inline UAlsGroundedAnimInstance* UAlsAnimationInstance::GetGroundedAnimInstance() const
+{
+	return GroundedAnimInstance.Get();
+}
+
+inline UAlsViewAnimInstance* UAlsAnimationInstance::GetViewAnimInstance() const
+{
+	return ViewAnimInstance.Get();
+}
+
 inline UAlsRagdollingAnimInstance* UAlsAnimationInstance::GetRagdollingAnimInstance() const
 {
 	return RagdollingAnimInstance.Get();
@@ -334,11 +346,6 @@ inline void UAlsAnimationInstance::MarkPendingUpdate()
 inline void UAlsAnimationInstance::MarkTeleported()
 {
 	TeleportedTime = GetWorld()->GetTimeSeconds();
-}
-
-inline UAlsGroundedAnimInstance* UAlsAnimationInstance::GetGroundedAnimInstance() const
-{
-	return GroundedAnimInstance.Get();
 }
 
 inline const FAlsGroundedState& UAlsAnimationInstance::GetGroundedState() const

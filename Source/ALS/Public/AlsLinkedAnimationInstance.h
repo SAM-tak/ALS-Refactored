@@ -38,10 +38,6 @@ protected:
 	UFUNCTION(BlueprintPure, Category = "ALS|Linked Animation Instance", Meta = (BlueprintProtected, BlueprintThreadSafe, ReturnDisplayName = "Parent"))
 	UAlsAnimationInstance* GetParentUnsafe() const;
 
-	// utility for overlays. overlay accesses View->PitchAmount
-	UFUNCTION(BlueprintPure, Category = "ALS|Linked Animation Instance", Meta = (BlueprintProtected, BlueprintThreadSafe, ReturnDisplayName = "Parent"))
-	UAlsViewAnimInstance* GetViewUnsafe() const;
-
 	UFUNCTION(BlueprintCallable, Category = "ALS|Linked Animation Instance", Meta = (BlueprintProtected, BlueprintThreadSafe))
 	void SetHipsDirection(EAlsHipsDirection NewHipsDirection);
 
@@ -55,9 +51,4 @@ protected:
 inline UAlsAnimationInstance* UAlsLinkedAnimationInstance::GetParentUnsafe() const
 {
 	return Parent.Get();
-}
-
-inline UAlsViewAnimInstance* UAlsLinkedAnimationInstance::GetViewUnsafe() const
-{
-	return Parent->ViewAnimInstance.Get();
 }

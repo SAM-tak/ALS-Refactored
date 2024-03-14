@@ -15,7 +15,7 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "ALS|State", Transient)
 	float StartPositionOverrideForGroundedEntry{0.0f};
 
-	// External reference :
+	// External reference in AnimBP :
 	// CurrentGameplayTags
 	// LocomotionState.bMovingSmooth
 	// RotateInPlaceState.bRotatingLeft
