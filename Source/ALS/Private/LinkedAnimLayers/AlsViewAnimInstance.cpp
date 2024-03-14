@@ -8,12 +8,13 @@
 
 #include UE_INLINE_GENERATED_CPP_BY_NAME(AlsViewAnimInstance)
 
-void UAlsViewAnimInstance::NativeUpdateAnimation(const float DeltaTime)
+//void UAlsViewAnimInstance::NativeUpdateAnimation(const float DeltaTime)
+void UAlsViewAnimInstance::RefreshOnGameThread(const float DeltaTime)
 {
-	DECLARE_SCOPE_CYCLE_COUNTER(TEXT("UAlsViewAnimInstance::NativeUpdateAnimation()"),
-	                            STAT_UAlsViewAnimInstance_NativeUpdateAnimation, STATGROUP_Als)
+	//DECLARE_SCOPE_CYCLE_COUNTER(TEXT("UAlsViewAnimInstance::NativeUpdateAnimation()"),
+	//                            STAT_UAlsViewAnimInstance_NativeUpdateAnimation, STATGROUP_Als)
 
-	Super::NativeUpdateAnimation(DeltaTime);
+	//Super::NativeUpdateAnimation(DeltaTime);
 
 	if (!Parent.IsValid() || !Character.IsValid())
 	{
@@ -26,12 +27,13 @@ void UAlsViewAnimInstance::NativeUpdateAnimation(const float DeltaTime)
 	YawSpeed = View.YawSpeed;
 }
 
-void UAlsViewAnimInstance::NativeThreadSafeUpdateAnimation(const float DeltaTime)
+//void UAlsViewAnimInstance::NativeThreadSafeUpdateAnimation(const float DeltaTime)
+void UAlsViewAnimInstance::Refresh(const float DeltaTime)
 {
-	DECLARE_SCOPE_CYCLE_COUNTER(TEXT("UAlsViewAnimInstance::NativeThreadSafeUpdateAnimation()"),
-	                            STAT_UAlsViewAnimInstance_NativeThreadSafeUpdateAnimation, STATGROUP_Als)
+	//DECLARE_SCOPE_CYCLE_COUNTER(TEXT("UAlsViewAnimInstance::NativeThreadSafeUpdateAnimation()"),
+	//                            STAT_UAlsViewAnimInstance_NativeThreadSafeUpdateAnimation, STATGROUP_Als)
 
-	Super::NativeThreadSafeUpdateAnimation(DeltaTime);
+	//Super::NativeThreadSafeUpdateAnimation(DeltaTime);
 
 	if (!Parent.IsValid() || !Character.IsValid())
 	{
@@ -84,7 +86,6 @@ void UAlsViewAnimInstance::NativeThreadSafeUpdateAnimation(const float DeltaTime
 
 	SpineRotation.YawAngle = UAlsMath::LerpAngle(0.0f, SpineRotation.CurrentYawAngle, ViewAmount * AimingAmount);
 }
-
 
 void UAlsViewAnimInstance::ReinitializeLook()
 {

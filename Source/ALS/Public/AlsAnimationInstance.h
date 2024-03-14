@@ -6,7 +6,6 @@
 #include "State/AlsFeetState.h"
 #include "State/AlsGroundedState.h"
 #include "State/AlsInAirState.h"
-#include "State/AlsLayeringState.h"
 #include "State/AlsLeanState.h"
 #include "State/AlsLocomotionAnimationState.h"
 #include "State/AlsMovementBaseState.h"
@@ -14,14 +13,15 @@
 #include "State/AlsRotateInPlaceState.h"
 #include "State/AlsTransitionsState.h"
 #include "State/AlsTurnInPlaceState.h"
-#include "State/AlsViewAnimationState.h"
 #include "Utility/AlsGameplayTags.h"
 #include "AlsAnimationInstance.generated.h"
 
 struct FAlsFootLimitsSettings;
 class UAlsLinkedAnimationInstance;
-class UAlsRagdollingAnimInstance;
+class UAlsGroundedAnimInstance;
+class UAlsLayeringAnimInstance;
 class UAlsViewAnimInstance;
+class UAlsRagdollingAnimInstance;
 class AAlsCharacter;
 
 UCLASS()
@@ -38,6 +38,12 @@ protected:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient)
 	TWeakObjectPtr<AAlsCharacter> Character;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient)
+	TWeakObjectPtr<UAlsGroundedAnimInstance> GroundedAnimInstance;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient)
+	TWeakObjectPtr<UAlsLayeringAnimInstance> LayeringAnimInstance;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient)
 	TWeakObjectPtr<UAlsViewAnimInstance> ViewAnimInstance;
@@ -62,7 +68,7 @@ protected:
 
 #if WITH_EDITORONLY_DATA
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient)
-	uint8 bDisplayDebugTraces : 1;
+	uint8 bDisplayDebugTraces : 1{false};
 #endif
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient)
@@ -72,22 +78,10 @@ protected:
 	FGameplayTag FaceRotationMode{AlsRotationModeTags::ViewDirection};
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient)
-	FGameplayTag GroundedEntryMode;
-
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient)
-	float StartPositionOverrideForGroundedEntry;
-
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient)
 	FAlsMovementBaseState MovementBase;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient)
-	FAlsLayeringState LayeringState;
-
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient)
 	FAlsPoseState PoseState;
-
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient)
-	FAlsViewAnimationState ViewState;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient)
 	FAlsLeanState LeanState;
@@ -115,6 +109,16 @@ protected:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient)
 	FHitResult GroundHit;
+
+public:
+	//This is in the process of organizing such that things that are only accessed within each LinkedAnimLayer are defined within the LinkedAnimLayer,
+	//and only those that are referenced across multiple LinkedAnimLayers are held in the AlsAnimationInstance.
+
+	// Former ViewState
+	FRotator ViewRotation; // in NativeUpdateAnimation ex ViewState.Rotation
+	float ViewYawAngle; // in NativeThreadSafeUpdateAnimation ex ViewState.YawAngle
+
+	const FGameplayTagContainer& GetCurrentGameplayTags() const;
 
 public:
 	virtual void NativeInitializeAnimation() override;
@@ -151,28 +155,12 @@ public:
 private:
 	void RefreshMovementBaseOnGameThread();
 
-	void RefreshLayering();
-
 	void RefreshPose();
 
 	// View
 
 public:
 	virtual bool IsSpineRotationAllowed();
-
-private:
-	//void RefreshViewOnGameThread();
-
-	//void RefreshView(float DeltaTime);
-
-	//void RefreshSpineRotation(float SpineBlendAmount, float DeltaTime);
-
-//protected:
-//	UFUNCTION(BlueprintCallable, Category = "ALS|Animation Instance", Meta = (BlueprintProtected, BlueprintThreadSafe))
-//	void ReinitializeLook();
-//
-//	UFUNCTION(BlueprintCallable, Category = "ALS|Animation Instance", Meta = (BlueprintProtected, BlueprintThreadSafe))
-//	void RefreshLook();
 
 	// Locomotion
 
@@ -182,14 +170,13 @@ private:
 	// Grounded
 
 public:
+	UAlsGroundedAnimInstance* GetGroundedAnimInstance() const;
+
 	void SetGroundedEntryMode(const FGameplayTag& NewGroundedEntryMode, float STartPosition);
 
 	const FAlsGroundedState& GetGroundedState() const;
 
 protected:
-	UFUNCTION(BlueprintCallable, Category = "ALS|Animation Instance", Meta = (BlueprintProtected, BlueprintThreadSafe))
-	void ResetGroundedEntryMode();
-
 	UFUNCTION(BlueprintCallable, Category = "ALS|Animation Instance", Meta = (BlueprintProtected, BlueprintThreadSafe))
 	void SetHipsDirection(EAlsHipsDirection NewHipsDirection);
 
@@ -324,6 +311,11 @@ public:
 	float GetCurveValueClamped01(const FName& CurveName) const;
 };
 
+inline const FGameplayTagContainer& UAlsAnimationInstance::GetCurrentGameplayTags() const
+{
+	return CurrentGameplayTags;
+}
+
 inline UAlsAnimationInstanceSettings* UAlsAnimationInstance::GetSettingsUnsafe() const
 {
 	return Settings;
@@ -344,20 +336,14 @@ inline void UAlsAnimationInstance::MarkTeleported()
 	TeleportedTime = GetWorld()->GetTimeSeconds();
 }
 
-inline void UAlsAnimationInstance::SetGroundedEntryMode(const FGameplayTag& NewGroundedEntryMode, float NewStartPosition)
+inline UAlsGroundedAnimInstance* UAlsAnimationInstance::GetGroundedAnimInstance() const
 {
-	GroundedEntryMode = NewGroundedEntryMode;
-	StartPositionOverrideForGroundedEntry = NewStartPosition;
+	return GroundedAnimInstance.Get();
 }
 
 inline const FAlsGroundedState& UAlsAnimationInstance::GetGroundedState() const
 {
 	return GroundedState;
-}
-
-inline void UAlsAnimationInstance::ResetGroundedEntryMode()
-{
-	GroundedEntryMode = FGameplayTag::EmptyTag;
 }
 
 inline void UAlsAnimationInstance::SetHipsDirection(const EAlsHipsDirection NewHipsDirection)

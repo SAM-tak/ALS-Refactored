@@ -2,8 +2,10 @@
 
 #include "AlsAnimationInstanceProxy.h"
 #include "AlsCharacter.h"
-#include "LinkedAnimLayers/AlsRagdollingAnimInstance.h"
+#include "LinkedAnimLayers/AlsGroundedAnimInstance.h"
+#include "LinkedAnimLayers/AlsLayeringAnimInstance.h"
 #include "LinkedAnimLayers/AlsViewAnimInstance.h"
+#include "LinkedAnimLayers/AlsRagdollingAnimInstance.h"
 #include "Settings/AlsAnimationInstanceSettings.h"
 #include "Abilities/Actions/AlsGameplayAbility_Ragdolling.h"
 #include "DrawDebugHelpers.h"
@@ -35,14 +37,18 @@ void UAlsAnimationInstance::NativeInitializeAnimation()
 void UAlsAnimationInstance::NativeBeginPlay()
 {
 	Super::NativeBeginPlay();
-	
-	RagdollingAnimInstance = Cast<UAlsRagdollingAnimInstance>(GetLinkedAnimGraphInstanceByTag(FName{TEXT("Ragdolling")}));
+
+	GroundedAnimInstance = Cast<UAlsGroundedAnimInstance>(GetLinkedAnimGraphInstanceByTag(FName{TEXT("Grounded")}));
+	LayeringAnimInstance = Cast<UAlsLayeringAnimInstance>(GetLinkedAnimGraphInstanceByTag(FName{TEXT("Layering")}));
 	ViewAnimInstance = Cast<UAlsViewAnimInstance>(GetLinkedAnimGraphInstanceByTag(FName{TEXT("View")}));
+	RagdollingAnimInstance = Cast<UAlsRagdollingAnimInstance>(GetLinkedAnimGraphInstanceByTag(FName{TEXT("Ragdolling")}));
 
 	ALS_ENSURE(IsValid(Settings));
 	ALS_ENSURE(Character.IsValid());
-	ALS_ENSURE(RagdollingAnimInstance.IsValid());
+	ALS_ENSURE(GroundedAnimInstance.IsValid());
+	ALS_ENSURE(LayeringAnimInstance.IsValid());
 	ALS_ENSURE(ViewAnimInstance.IsValid());
+	ALS_ENSURE(RagdollingAnimInstance.IsValid());
 }
 
 void UAlsAnimationInstance::NativeUpdateAnimation(const float DeltaTime)
@@ -80,7 +86,6 @@ void UAlsAnimationInstance::NativeUpdateAnimation(const float DeltaTime)
 	bDisplayDebugTraces = UAlsUtility::ShouldDisplayDebugForActor(Character.Get(), UAlsConstants::TracesDebugDisplayName());
 #endif
 
-
 	Character->GetOwnedGameplayTags(CurrentGameplayTags);
 	FaceRotationMode = Character->GetRotationMode();
 	if (FaceRotationMode != AlsRotationModeTags::Aiming)
@@ -90,7 +95,14 @@ void UAlsAnimationInstance::NativeUpdateAnimation(const float DeltaTime)
 	bIsActionRunning = Character->GetLocomotionAction().IsValid();
 
 	RefreshMovementBaseOnGameThread();
-	//RefreshViewOnGameThread();
+
+	if (ViewAnimInstance.IsValid())
+	{
+		ViewAnimInstance->RefreshOnGameThread(DeltaTime);
+	}
+	const auto& View{Character->GetViewState()};
+	ViewRotation = View.LookRotation; // same as ViewAnimInstance->Rotation
+
 	RefreshLocomotionOnGameThread();
 	RefreshGroundedOnGameThread();
 	RefreshInAirOnGameThread();
@@ -110,10 +122,19 @@ void UAlsAnimationInstance::NativeThreadSafeUpdateAnimation(const float DeltaTim
 		return;
 	}
 
-	RefreshLayering();
+	if (LayeringAnimInstance.IsValid())
+	{
+		LayeringAnimInstance->Refresh();
+	}
+
 	RefreshPose();
 
-	//RefreshView(DeltaTime);
+	if (ViewAnimInstance.IsValid())
+	{
+		ViewAnimInstance->Refresh(DeltaTime);
+	}
+	ViewYawAngle = ViewAnimInstance.IsValid() ? ViewAnimInstance->YawAngle : 0.0f;
+
 	RefreshGrounded(DeltaTime);
 	RefreshInAir(DeltaTime);
 
@@ -200,53 +221,6 @@ void UAlsAnimationInstance::RefreshMovementBaseOnGameThread()
 		                             : FRotator::ZeroRotator;
 }
 
-void UAlsAnimationInstance::RefreshLayering()
-{
-	const auto& Curves{GetProxyOnAnyThread<FAlsAnimationInstanceProxy>().GetAnimationCurves(EAnimCurveType::AttributeCurve)};
-
-	static const auto GetCurveValue{
-		[](const TMap<FName, float>& Curves, const FName& CurveName) -> float
-		{
-			const auto* Value{Curves.Find(CurveName)};
-
-			return Value != nullptr ? *Value : 0.0f;
-		}
-	};
-
-	LayeringState.HeadBlendAmount = GetCurveValue(Curves, UAlsConstants::LayerHeadCurveName());
-	LayeringState.HeadAdditiveBlendAmount = GetCurveValue(Curves, UAlsConstants::LayerHeadAdditiveCurveName());
-	LayeringState.HeadSlotBlendAmount = GetCurveValue(Curves, UAlsConstants::LayerHeadSlotCurveName());
-
-	// The mesh space blend will always be 1 unless the local space blend is 1.
-
-	LayeringState.ArmLeftBlendAmount = GetCurveValue(Curves, UAlsConstants::LayerArmLeftCurveName());
-	LayeringState.ArmLeftAdditiveBlendAmount = GetCurveValue(Curves, UAlsConstants::LayerArmLeftAdditiveCurveName());
-	LayeringState.ArmLeftSlotBlendAmount = GetCurveValue(Curves, UAlsConstants::LayerArmLeftSlotCurveName());
-	LayeringState.ArmLeftLocalSpaceBlendAmount = GetCurveValue(Curves, UAlsConstants::LayerArmLeftLocalSpaceCurveName());
-	LayeringState.ArmLeftMeshSpaceBlendAmount = !FAnimWeight::IsFullWeight(LayeringState.ArmLeftLocalSpaceBlendAmount);
-
-	// The mesh space blend will always be 1 unless the local space blend is 1.
-
-	LayeringState.ArmRightBlendAmount = GetCurveValue(Curves, UAlsConstants::LayerArmRightCurveName());
-	LayeringState.ArmRightAdditiveBlendAmount = GetCurveValue(Curves, UAlsConstants::LayerArmRightAdditiveCurveName());
-	LayeringState.ArmRightSlotBlendAmount = GetCurveValue(Curves, UAlsConstants::LayerArmRightSlotCurveName());
-	LayeringState.ArmRightLocalSpaceBlendAmount = GetCurveValue(Curves, UAlsConstants::LayerArmRightLocalSpaceCurveName());
-	LayeringState.ArmRightMeshSpaceBlendAmount = !FAnimWeight::IsFullWeight(LayeringState.ArmRightLocalSpaceBlendAmount);
-
-	LayeringState.HandLeftBlendAmount = GetCurveValue(Curves, UAlsConstants::LayerHandLeftCurveName());
-	LayeringState.HandRightBlendAmount = GetCurveValue(Curves, UAlsConstants::LayerHandRightCurveName());
-
-	LayeringState.SpineBlendAmount = GetCurveValue(Curves, UAlsConstants::LayerSpineCurveName());
-	LayeringState.SpineAdditiveBlendAmount = GetCurveValue(Curves, UAlsConstants::LayerSpineAdditiveCurveName());
-	LayeringState.SpineSlotBlendAmount = GetCurveValue(Curves, UAlsConstants::LayerSpineSlotCurveName());
-
-	LayeringState.PelvisBlendAmount = GetCurveValue(Curves, UAlsConstants::LayerPelvisCurveName());
-	LayeringState.PelvisSlotBlendAmount = GetCurveValue(Curves, UAlsConstants::LayerPelvisSlotCurveName());
-
-	LayeringState.LegsBlendAmount = GetCurveValue(Curves, UAlsConstants::LayerLegsCurveName());
-	LayeringState.LegsSlotBlendAmount = GetCurveValue(Curves, UAlsConstants::LayerLegsSlotCurveName());
-}
-
 void UAlsAnimationInstance::RefreshPose()
 {
 	const auto& Curves{GetProxyOnAnyThread<FAlsAnimationInstanceProxy>().GetAnimationCurves(EAnimCurveType::AttributeCurve)};
@@ -284,166 +258,11 @@ void UAlsAnimationInstance::RefreshPose()
 	PoseState.UnweightedGaitRunningAmount = UAlsMath::Clamp01(PoseState.UnweightedGaitAmount - 1.0f);
 	PoseState.UnweightedGaitSprintingAmount = UAlsMath::Clamp01(PoseState.UnweightedGaitAmount - 2.0f);
 }
-//
-//void UAlsAnimationInstance::RefreshViewOnGameThread()
-//{
-//	check(IsInGameThread())
-//
-//	const auto& View{Character->GetViewState()};
-//
-//	ViewState.Rotation = View.LookRotation;
-//	ViewState.YawSpeed = View.YawSpeed;
-//}
 
 bool UAlsAnimationInstance::IsSpineRotationAllowed()
 {
 	return CurrentGameplayTags.HasTag(AlsRotationModeTags::Aiming);
 }
-
-//void UAlsAnimationInstance::RefreshView(const float DeltaTime)
-//{
-//	if (!bIsActionRunning)
-//	{
-//		ViewState.YawAngle = FRotator3f::NormalizeAxis(UE_REAL_TO_FLOAT(ViewState.Rotation.Yaw - LocomotionState.Rotation.Yaw));
-//		ViewState.PitchAngle = FRotator3f::NormalizeAxis(UE_REAL_TO_FLOAT(ViewState.Rotation.Pitch - LocomotionState.Rotation.Pitch));
-//
-//		ViewState.PitchAmount = 0.5f - ViewState.PitchAngle / 180.0f;
-//	}
-//
-//	const auto ViewAmount{1.0f - GetCurveValueClamped01(UAlsConstants::ViewBlockCurveName())};
-//	const auto AimingAmount{GetCurveValueClamped01(UAlsConstants::AllowAimingCurveName())};
-//
-//	ViewState.LookAmount = ViewAmount * (1.0f - AimingAmount);
-//
-//	RefreshSpineRotation(ViewAmount * AimingAmount, DeltaTime);
-//}
-//
-//void UAlsAnimationInstance::RefreshSpineRotation(const float SpineBlendAmount, const float DeltaTime)
-//{
-//	auto& SpineRotation{ViewState.SpineRotation};
-//
-//	if (SpineRotation.bSpineRotationAllowed != IsSpineRotationAllowed())
-//	{
-//		SpineRotation.bSpineRotationAllowed = ~SpineRotation.bSpineRotationAllowed;
-//		SpineRotation.InitialYawAngle = SpineRotation.CurrentYawAngle;
-//	}
-//
-//	if (SpineRotation.bSpineRotationAllowed)
-//	{
-//		static constexpr auto InterpolationSpeed{20.0f};
-//
-//		SpineRotation.SpineAmount = bPendingUpdate
-//			                            ? 1.0f
-//			                            : UAlsMath::ExponentialDecay(SpineRotation.SpineAmount, 1.0f, DeltaTime, InterpolationSpeed);
-//
-//		SpineRotation.TargetYawAngle = ViewState.YawAngle;
-//	}
-//	else
-//	{
-//		static constexpr auto InterpolationSpeed{10.0f};
-//
-//		SpineRotation.SpineAmount = bPendingUpdate
-//			                            ? 0.0f
-//			                            : UAlsMath::ExponentialDecay(SpineRotation.SpineAmount, 0.0f, DeltaTime, InterpolationSpeed);
-//	}
-//
-//	SpineRotation.CurrentYawAngle = UAlsMath::LerpAngle(SpineRotation.InitialYawAngle,
-//	                                                    SpineRotation.TargetYawAngle,
-//	                                                    SpineRotation.SpineAmount);
-//
-//	SpineRotation.YawAngle = UAlsMath::LerpAngle(0.0f, SpineRotation.CurrentYawAngle, SpineBlendAmount);
-//}
-//
-//void UAlsAnimationInstance::ReinitializeLook()
-//{
-//	ViewState.Look.bReinitializationRequired = true;
-//}
-//
-//void UAlsAnimationInstance::RefreshLook()
-//{
-//	DECLARE_SCOPE_CYCLE_COUNTER(TEXT("UAlsAnimationInstance::RefreshLook()"), STAT_UAlsAnimationInstance_RefreshLook, STATGROUP_Als)
-//
-//	if (!IsValid(Settings))
-//	{
-//		return;
-//	}
-//
-//	auto& Look{ViewState.Look};
-//
-//	Look.bReinitializationRequired |= bPendingUpdate;
-//
-//	const auto CharacterYawAngle{UE_REAL_TO_FLOAT(LocomotionState.Rotation.Yaw)};
-//
-//	if (MovementBase.bHasRelativeRotation)
-//	{
-//		// Offset the angle to keep it relative to the movement base.
-//
-//		Look.WorldYawAngle = FRotator3f::NormalizeAxis(Look.WorldYawAngle + MovementBase.DeltaRotation.Yaw);
-//	}
-//
-//	float TargetYawAngle;
-//	float TargetPitchAngle;
-//	float InterpolationSpeed;
-//
-//	if (FaceRotationMode == AlsRotationModeTags::VelocityDirection)
-//	{
-//		// Look towards input direction.
-//
-//		TargetYawAngle = FRotator3f::NormalizeAxis(
-//			(LocomotionState.bHasInput ? LocomotionState.InputYawAngle : LocomotionState.TargetYawAngle) - CharacterYawAngle);
-//
-//		TargetPitchAngle = 0.0f;
-//		InterpolationSpeed = Settings->View.LookTowardsInputYawAngleInterpolationSpeed;
-//	}
-//	else
-//	{
-//		// Look towards view direction.
-//
-//		TargetYawAngle = ViewState.YawAngle;
-//		TargetPitchAngle = ViewState.PitchAngle;
-//		InterpolationSpeed = Settings->View.LookTowardsCameraRotationInterpolationSpeed;
-//	}
-//
-//	if (Look.bReinitializationRequired || InterpolationSpeed <= 0.0f)
-//	{
-//		Look.YawAngle = TargetYawAngle;
-//		Look.PitchAngle = TargetPitchAngle;
-//	}
-//	else
-//	{
-//		const auto YawAngle{FRotator3f::NormalizeAxis(Look.WorldYawAngle - CharacterYawAngle)};
-//		auto DeltaYawAngle{FRotator3f::NormalizeAxis(TargetYawAngle - YawAngle)};
-//
-//		if (DeltaYawAngle > 180.0f - UAlsMath::CounterClockwiseRotationAngleThreshold)
-//		{
-//			DeltaYawAngle -= 360.0f;
-//		}
-//		else if (FMath::Abs(LocomotionState.YawSpeed) > UE_SMALL_NUMBER && FMath::Abs(TargetYawAngle) > 90.0f)
-//		{
-//			// When interpolating yaw angle, favor the character rotation direction, over the shortest rotation
-//			// direction, so that the rotation of the head remains synchronized with the rotation of the body.
-//
-//			DeltaYawAngle = LocomotionState.YawSpeed > 0.0f ? FMath::Abs(DeltaYawAngle) : -FMath::Abs(DeltaYawAngle);
-//		}
-//
-//		const auto InterpolationAmount{UAlsMath::ExponentialDecay(GetDeltaSeconds(), InterpolationSpeed)};
-//
-//		Look.YawAngle = FRotator3f::NormalizeAxis(YawAngle + DeltaYawAngle * InterpolationAmount);
-//		Look.PitchAngle = UAlsMath::LerpAngle(Look.PitchAngle, TargetPitchAngle, InterpolationAmount);
-//	}
-//
-//	Look.WorldYawAngle = FRotator3f::NormalizeAxis(CharacterYawAngle + Look.YawAngle);
-//
-//	// Separate the yaw angle into 3 separate values. These 3 values are used to improve the
-//	// blending of the view when rotating completely around the character. This allows to
-//	// keep the view responsive but still smoothly blend from left to right or right to left.
-//
-//	Look.YawForwardAmount = Look.YawAngle / 360.0f + 0.5f;
-//	Look.YawLeftAmount = 0.5f - FMath::Abs(Look.YawForwardAmount - 0.5f);
-//	Look.YawRightAmount = 0.5f + FMath::Abs(Look.YawForwardAmount - 0.5f);
-//
-//	Look.bReinitializationRequired = false;
-//}
 
 void UAlsAnimationInstance::RefreshLocomotionOnGameThread()
 {
@@ -562,7 +381,7 @@ void UAlsAnimationInstance::RefreshMovementDirection()
 	static constexpr auto ForwardHalfAngle{70.0f};
 
 	GroundedState.MovementDirection = UAlsMath::CalculateMovementDirection(
-		FRotator3f::NormalizeAxis(UE_REAL_TO_FLOAT(LocomotionState.VelocityYawAngle - ViewState.Rotation.Yaw)),
+		FRotator3f::NormalizeAxis(UE_REAL_TO_FLOAT(LocomotionState.VelocityYawAngle - ViewRotation.Yaw)),
 		ForwardHalfAngle, 5.0f);
 }
 
@@ -618,7 +437,7 @@ void UAlsAnimationInstance::RefreshRotationYawOffsets()
 	// animation graph and are used to offset the character's rotation for more natural movement.
 	// The curves allow for fine control over how the offset behaves for each movement direction.
 
-	const auto RotationYawOffset{FRotator3f::NormalizeAxis(UE_REAL_TO_FLOAT(LocomotionState.VelocityYawAngle - ViewState.Rotation.Yaw))};
+	const auto RotationYawOffset{FRotator3f::NormalizeAxis(UE_REAL_TO_FLOAT(LocomotionState.VelocityYawAngle - ViewRotation.Yaw))};
 
 	GroundedState.RotationYawOffsets.ForwardAngle = Settings->Grounded.RotationYawOffsetForwardCurve->GetFloatValue(RotationYawOffset);
 	GroundedState.RotationYawOffsets.BackwardAngle = Settings->Grounded.RotationYawOffsetBackwardCurve->GetFloatValue(RotationYawOffset);
@@ -1601,8 +1420,8 @@ void UAlsAnimationInstance::RefreshRotateInPlace(const float DeltaTime)
 
 	// Check if the character should rotate left or right by checking if the view yaw angle exceeds the threshold.
 
-	RotateInPlaceState.bRotatingLeft = ViewState.YawAngle < -Settings->RotateInPlace.ViewYawAngleThreshold;
-	RotateInPlaceState.bRotatingRight = ViewState.YawAngle > Settings->RotateInPlace.ViewYawAngleThreshold;
+	RotateInPlaceState.bRotatingLeft = ViewYawAngle < -Settings->RotateInPlace.ViewYawAngleThreshold;
+	RotateInPlaceState.bRotatingRight = ViewYawAngle > Settings->RotateInPlace.ViewYawAngleThreshold;
 
 	if (!RotateInPlaceState.bRotatingLeft && !RotateInPlaceState.bRotatingRight)
 	{
@@ -1620,7 +1439,7 @@ void UAlsAnimationInstance::RefreshRotateInPlace(const float DeltaTime)
 
 	const auto PlayRate{
 		FMath::GetMappedRangeValueClamped(Settings->RotateInPlace.ReferenceViewYawSpeed,
-		                                  Settings->RotateInPlace.PlayRate, ViewState.YawSpeed)
+		                                  Settings->RotateInPlace.PlayRate, ViewYawAngle)
 	};
 
 	RotateInPlaceState.PlayRate = bPendingUpdate
@@ -1632,8 +1451,8 @@ void UAlsAnimationInstance::RefreshRotateInPlace(const float DeltaTime)
 
 	RotateInPlaceState.bFootLockInhibited =
 		Settings->RotateInPlace.bDisableFootLock ||
-		FMath::Abs(ViewState.YawAngle) > Settings->RotateInPlace.FootLockInhibitionViewYawAngleThreshold ||
-		ViewState.YawSpeed > Settings->RotateInPlace.FootLockInhibitionViewYawSpeedThreshold;
+		FMath::Abs(ViewYawAngle) > Settings->RotateInPlace.FootLockInhibitionViewYawAngleThreshold ||
+		ViewYawAngle > Settings->RotateInPlace.FootLockInhibitionViewYawSpeedThreshold;
 }
 
 bool UAlsAnimationInstance::IsTurnInPlaceAllowed()
@@ -1663,8 +1482,8 @@ void UAlsAnimationInstance::RefreshTurnInPlace(const float DeltaTime)
 	// threshold. If so, begin counting the activation delay time. If not, reset the activation delay
 	// time. This ensures the conditions remain true for a sustained time before turning in place.
 
-	if (ViewState.YawSpeed >= Settings->TurnInPlace.ViewYawSpeedThreshold ||
-	    FMath::Abs(ViewState.YawAngle) <= Settings->TurnInPlace.ViewYawAngleThreshold)
+	if (ViewYawAngle >= Settings->TurnInPlace.ViewYawSpeedThreshold ||
+	    FMath::Abs(ViewYawAngle) <= Settings->TurnInPlace.ViewYawAngleThreshold)
 	{
 		TurnInPlaceState.ActivationDelay = 0.0f;
 		TurnInPlaceState.bFootLockInhibited = false;
@@ -1678,7 +1497,7 @@ void UAlsAnimationInstance::RefreshTurnInPlace(const float DeltaTime)
 	const auto ActivationDelay{
 		FMath::GetMappedRangeValueClamped({Settings->TurnInPlace.ViewYawAngleThreshold, 180.0f},
 		                                  Settings->TurnInPlace.ViewYawAngleToActivationDelay,
-		                                  FMath::Abs(ViewState.YawAngle))
+		                                  FMath::Abs(ViewYawAngle))
 	};
 
 	// Check if the activation delay time exceeds the set delay (mapped to the view yaw angle). If so, start a turn in place.
@@ -1697,17 +1516,17 @@ void UAlsAnimationInstance::RefreshTurnInPlace(const float DeltaTime)
 	{
 		TurnInPlaceSlotName = UAlsConstants::TurnInPlaceStandingSlotName();
 
-		if (FMath::Abs(ViewState.YawAngle) < Settings->TurnInPlace.Turn180AngleThreshold)
+		if (FMath::Abs(ViewYawAngle) < Settings->TurnInPlace.Turn180AngleThreshold)
 		{
-			TurnInPlaceSettings = ViewState.YawAngle <= 0.0f ||
-			                      ViewState.YawAngle > 180.0f - UAlsMath::CounterClockwiseRotationAngleThreshold
+			TurnInPlaceSettings = ViewYawAngle <= 0.0f ||
+			                      ViewYawAngle > 180.0f - UAlsMath::CounterClockwiseRotationAngleThreshold
 				                      ? Settings->TurnInPlace.StandingTurn90Left
 				                      : Settings->TurnInPlace.StandingTurn90Right;
 		}
 		else
 		{
-			TurnInPlaceSettings = ViewState.YawAngle <= 0.0f ||
-			                      ViewState.YawAngle > 180.0f - UAlsMath::CounterClockwiseRotationAngleThreshold
+			TurnInPlaceSettings = ViewYawAngle <= 0.0f ||
+			                      ViewYawAngle > 180.0f - UAlsMath::CounterClockwiseRotationAngleThreshold
 				                      ? Settings->TurnInPlace.StandingTurn180Left
 				                      : Settings->TurnInPlace.StandingTurn180Right;
 		}
@@ -1716,17 +1535,17 @@ void UAlsAnimationInstance::RefreshTurnInPlace(const float DeltaTime)
 	{
 		TurnInPlaceSlotName = UAlsConstants::TurnInPlaceCrouchingSlotName();
 
-		if (FMath::Abs(ViewState.YawAngle) < Settings->TurnInPlace.Turn180AngleThreshold)
+		if (FMath::Abs(ViewYawAngle) < Settings->TurnInPlace.Turn180AngleThreshold)
 		{
-			TurnInPlaceSettings = ViewState.YawAngle <= 0.0f ||
-			                      ViewState.YawAngle > 180.0f - UAlsMath::CounterClockwiseRotationAngleThreshold
+			TurnInPlaceSettings = ViewYawAngle <= 0.0f ||
+			                      ViewYawAngle > 180.0f - UAlsMath::CounterClockwiseRotationAngleThreshold
 				                      ? Settings->TurnInPlace.CrouchingTurn90Left
 				                      : Settings->TurnInPlace.CrouchingTurn90Right;
 		}
 		else
 		{
-			TurnInPlaceSettings = ViewState.YawAngle <= 0.0f ||
-			                      ViewState.YawAngle > 180.0f - UAlsMath::CounterClockwiseRotationAngleThreshold
+			TurnInPlaceSettings = ViewYawAngle <= 0.0f ||
+			                      ViewYawAngle > 180.0f - UAlsMath::CounterClockwiseRotationAngleThreshold
 				                      ? Settings->TurnInPlace.CrouchingTurn180Left
 				                      : Settings->TurnInPlace.CrouchingTurn180Right;
 		}
@@ -1738,7 +1557,7 @@ void UAlsAnimationInstance::RefreshTurnInPlace(const float DeltaTime)
 
 		TurnInPlaceState.QueuedSettings = TurnInPlaceSettings;
 		TurnInPlaceState.QueuedSlotName = TurnInPlaceSlotName;
-		TurnInPlaceState.QueuedTurnYawAngle = ViewState.YawAngle;
+		TurnInPlaceState.QueuedTurnYawAngle = ViewYawAngle;
 
 		if (IsInGameThread())
 		{
@@ -1779,4 +1598,12 @@ void UAlsAnimationInstance::PlayQueuedTurnInPlaceAnimation()
 float UAlsAnimationInstance::GetCurveValueClamped01(const FName& CurveName) const
 {
 	return UAlsMath::Clamp01(GetCurveValue(CurveName));
+}
+
+void UAlsAnimationInstance::SetGroundedEntryMode(const FGameplayTag& NewGroundedEntryMode, float NewStartPosition)
+{
+	if (GroundedAnimInstance.IsValid())
+	{
+		GroundedAnimInstance->SetGroundedEntryMode(NewGroundedEntryMode, NewStartPosition);
+	}
 }

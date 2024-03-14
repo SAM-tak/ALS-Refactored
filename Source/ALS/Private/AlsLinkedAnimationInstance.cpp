@@ -52,39 +52,9 @@ FAnimInstanceProxy* UAlsLinkedAnimationInstance::CreateAnimInstanceProxy()
 	return new FAlsAnimationInstanceProxy{this};
 }
 
-FGameplayTag UAlsLinkedAnimationInstance::GetEntryStance() const
+TMap<FName, float>& UAlsLinkedAnimationInstance::GetAnimationCurvesFromProxy(EAnimCurveType InCurveType)
 {
-	if (Parent.IsValid())
-	{
-		if (Parent->GroundedEntryMode == AlsGroundedEntryModeTags::StandingToCrouching)
-		{
-			return AlsStanceTags::Standing;
-		}
-		if (Parent->GroundedEntryMode == AlsGroundedEntryModeTags::CrouchingToStanding ||
-			Parent->GroundedEntryMode == AlsGroundedEntryModeTags::CrouchingToLyingFront ||
-			Parent->GroundedEntryMode == AlsGroundedEntryModeTags::CrouchingToLyingBack)
-		{
-			return AlsStanceTags::Crouching;
-		}
-		if (Parent->GroundedEntryMode == AlsGroundedEntryModeTags::LyingFrontToCrouching)
-		{
-			return AlsStanceTags::LyingFront;
-		}
-		if (Parent->GroundedEntryMode == AlsGroundedEntryModeTags::LyingBackToCrouching)
-		{
-			return AlsStanceTags::LyingBack;
-		}
-		return Parent->CurrentGameplayTags.Filter(FGameplayTagContainer{AlsStanceTags::Root}).First();
-	}
-	return AlsStanceTags::Standing;
-}
-
-void UAlsLinkedAnimationInstance::ResetGroundedEntryMode()
-{
-	if (Parent.IsValid())
-	{
-		Parent->ResetGroundedEntryMode();
-	}
+	return GetProxyOnAnyThread<FAlsAnimationInstanceProxy>().GetAnimationCurves(EAnimCurveType::AttributeCurve);
 }
 
 void UAlsLinkedAnimationInstance::SetHipsDirection(const EAlsHipsDirection NewHipsDirection)

@@ -26,6 +26,8 @@ public:
 protected:
 	virtual FAnimInstanceProxy* CreateAnimInstanceProxy() override;
 
+	TMap<FName, float>& GetAnimationCurvesFromProxy(EAnimCurveType InCurveType);
+
 protected:
 	// Be very careful when using this function to read your custom variables using the property access system. It is
 	// safe to use this function to read variables that change only inside UAlsAnimationInstance::NativeUpdateAnimation()
@@ -36,14 +38,9 @@ protected:
 	UFUNCTION(BlueprintPure, Category = "ALS|Linked Animation Instance", Meta = (BlueprintProtected, BlueprintThreadSafe, ReturnDisplayName = "Parent"))
 	UAlsAnimationInstance* GetParentUnsafe() const;
 
+	// utility for overlays. overlay accesses View->PitchAmount
 	UFUNCTION(BlueprintPure, Category = "ALS|Linked Animation Instance", Meta = (BlueprintProtected, BlueprintThreadSafe, ReturnDisplayName = "Parent"))
 	UAlsViewAnimInstance* GetViewUnsafe() const;
-
-	UFUNCTION(BlueprintPure, Category = "ALS|Linked Animation Instance", Meta = (BlueprintProtected, BlueprintThreadSafe, ReturnDisplayName = "Parent"))
-	FGameplayTag GetEntryStance() const;
-
-	UFUNCTION(BlueprintCallable, Category = "ALS|Linked Animation Instance", Meta = (BlueprintProtected, BlueprintThreadSafe))
-	void ResetGroundedEntryMode();
 
 	UFUNCTION(BlueprintCallable, Category = "ALS|Linked Animation Instance", Meta = (BlueprintProtected, BlueprintThreadSafe))
 	void SetHipsDirection(EAlsHipsDirection NewHipsDirection);

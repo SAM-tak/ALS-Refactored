@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 
 #include "AlsFeetSettings.h"
 #include "AlsGeneralAnimationSettings.h"
@@ -7,7 +7,6 @@
 #include "AlsRotateInPlaceSettings.h"
 #include "AlsTransitionsSettings.h"
 #include "AlsTurnInPlaceSettings.h"
-#include "AlsViewAnimationSettings.h"
 #include "Engine/DataAsset.h"
 #include "AlsAnimationInstanceSettings.generated.h"
 
@@ -19,10 +18,6 @@ class ALS_API UAlsAnimationInstanceSettings : public UDataAsset
 public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings")
 	FAlsGeneralAnimationSettings General;
-
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings")
-	FAlsViewAnimationSettings View;
-
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings")
 	FAlsGroundedSettings Grounded;
 
