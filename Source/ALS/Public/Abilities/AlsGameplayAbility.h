@@ -43,6 +43,13 @@ protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = AlsAbility)
 	uint8 bEnableInputBinding : 1{true};
 
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = AlsAbility)
+	uint8 bStopCurrentMontageOnEndAbility : 1{false};
+
+	// A minus value means not override (default)
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = AlsAbility)
+	float OverrideBlendOutTimeOnEndAbility{-1.0f};
+
 public:
 	UFUNCTION(BlueprintPure, Category = "ALS|Ability")
 	AAlsCharacter* GetAlsCharacterFromActorInfo() const;
@@ -61,10 +68,10 @@ protected:
 
 	virtual void PlayMontage(const FAlsPlayMontageParameter& Parameter);
 
-	void StopCurrentMontage(const FGameplayAbilityActorInfo* ActorInfo, float OverrideBlendOutTime = -1.0f);
+	void StopCurrentMontage(const FGameplayAbilityActorInfo* ActorInfo, float OverrideBlendOutTime = -1.0f) const;
 
 	UFUNCTION(BlueprintCallable, Category = "ALS|Ability|Montage")
-	void StopCurrentMontage(float OverrideBlendOutTime = -1.0f);
+	void StopCurrentMontage(float OverrideBlendOutTime = -1.0f) const;
 
 	void SetGameplayTag(const FGameplayTag& Tag) const;
 

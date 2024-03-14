@@ -31,9 +31,10 @@ void UAlsGameplayAbility_MontageBase::EndAbility(const FGameplayAbilitySpecHandl
 	auto* const AbilitySystemComponent = GetAbilitySystemComponentFromActorInfo();
 	if (AbilitySystemComponent)
 	{
-		if (bWasCancelled)
+		if (bWasCancelled && IsValid(GetCurrentMontage()))
 		{
-			AbilitySystemComponent->CurrentMontageStop(BlendOutDurationOnCancel);
+			AbilitySystemComponent->StopMontageIfCurrent(*GetCurrentMontage(), BlendOutDurationOnCancel);
+			bStopCurrentMontageOnEndAbility = false;
 		}
 
 		// Remove any GameplayEffects that we applied

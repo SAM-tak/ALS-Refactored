@@ -50,6 +50,11 @@ void UAlsGameplayAbility::EndAbility(const FGameplayAbilitySpecHandle Handle, co
 		}
 	}
 
+	if (bStopCurrentMontageOnEndAbility)
+	{
+		StopCurrentMontage(OverrideBlendOutTimeOnEndAbility);
+	}
+
 	Super::EndAbility(Handle, ActorInfo, ActivationInfo, bReplicateEndAbility, bWasCancelled);
 }
 
@@ -69,17 +74,19 @@ void UAlsGameplayAbility::PlayMontage(const FAlsPlayMontageParameter& Parameter)
 	PlayMontage(GetCurrentActivationInfo(), GetCurrentActorInfo(), Parameter);
 }
 
-void UAlsGameplayAbility::StopCurrentMontage(const FGameplayAbilityActorInfo* ActorInfo, float OverrideBlendOutTime)
+void UAlsGameplayAbility::StopCurrentMontage(const FGameplayAbilityActorInfo* ActorInfo, float OverrideBlendOutTime) const
 {
-	auto* const AbilitySystemComponent = ActorInfo->AbilitySystemComponent.Get();
-
-	if (AbilitySystemComponent)
+	if (IsValid(GetCurrentMontage()))
 	{
-		AbilitySystemComponent->CurrentMontageStop(OverrideBlendOutTime);
+		auto* const AbilitySystemComponent = ActorInfo->AbilitySystemComponent.Get();
+		if (AbilitySystemComponent)
+		{
+			AbilitySystemComponent->StopMontageIfCurrent(*GetCurrentMontage(), OverrideBlendOutTime);
+		}
 	}
 }
 
-void UAlsGameplayAbility::StopCurrentMontage(float OverrideBlendOutTime)
+void UAlsGameplayAbility::StopCurrentMontage(float OverrideBlendOutTime) const
 {
 	StopCurrentMontage(GetCurrentActorInfo(), OverrideBlendOutTime);
 }
