@@ -3,6 +3,8 @@
 #include "AlsLinkedAnimationInstance.h"
 #include "AlsRagdollingAnimInstance.generated.h"
 
+// Ragdolling Linked Anim Layer
+// Tag : "Ragdolling"
 UCLASS(Abstract)
 class ALS_API UAlsRagdollingAnimInstance : public UAlsLinkedAnimationInstance
 {

@@ -54,6 +54,8 @@ struct ALS_API FAlsSpineRotationState
 	float YawAngle{0.0f};
 };
 
+// View Linked Anim Layer
+// Tag : "View"
 UCLASS(Abstract, AutoExpandCategories = ("ALS|Settings"))
 class ALS_API UAlsViewAnimInstance : public UAlsLinkedAnimationInstance
 {

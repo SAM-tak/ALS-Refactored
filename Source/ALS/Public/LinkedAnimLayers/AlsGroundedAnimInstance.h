@@ -3,6 +3,8 @@
 #include "AlsLinkedAnimationInstance.h"
 #include "AlsGroundedAnimInstance.generated.h"
 
+// Grounded Linked Anim Layer
+// Tag : "Grounded"
 UCLASS(Abstract, AutoExpandCategories = ("ALS|Settings"))
 class ALS_API UAlsGroundedAnimInstance : public UAlsLinkedAnimationInstance
 {
