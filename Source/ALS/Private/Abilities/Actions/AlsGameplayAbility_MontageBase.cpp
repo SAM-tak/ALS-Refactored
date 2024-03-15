@@ -15,7 +15,7 @@
 UAlsGameplayAbility_MontageBase::UAlsGameplayAbility_MontageBase(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer)
 {
-	NetExecutionPolicy = EGameplayAbilityNetExecutionPolicy::ServerInitiated;
+	InstancingPolicy = EGameplayAbilityInstancingPolicy::InstancedPerActor;
 }
 
 void UAlsGameplayAbility_MontageBase::EndAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo,

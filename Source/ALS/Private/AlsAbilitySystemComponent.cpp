@@ -6,7 +6,7 @@
 UAlsAbilitySystemComponent::UAlsAbilitySystemComponent(const FObjectInitializer& ObjectInitializer) : Super(ObjectInitializer)
 {
 	SetIsReplicated(true);
-	SetReplicationMode(EGameplayEffectReplicationMode::Minimal);
+	SetReplicationMode(EGameplayEffectReplicationMode::Mixed);
 }
 
 void UAlsAbilitySystemComponent::BindAbilityActivationInput(UEnhancedInputComponent* EnhancedInputComponent, const UInputAction* Action, ETriggerEvent TriggerEvent,

@@ -1259,7 +1259,7 @@ void UAlsCharacterMovementComponent::Lie(bool bClientSimulation)
 	{
 		if (!bClientSimulation)
 		{
-			GetAlsCharacter()->bIsLied = true;
+			GetAlsCharacter()->SetIsLied(true);
 		}
 		GetAlsCharacter()->OnStartLie(0.f, 0.f);
 		return;
@@ -1284,7 +1284,7 @@ void UAlsCharacterMovementComponent::Lie(bool bClientSimulation)
 
 	if (!bClientSimulation)
 	{
-		GetAlsCharacter()->bIsLied = true;
+		GetAlsCharacter()->SetIsLied(true);
 	}
 
 	bForceNextFloorCheck = true;
@@ -1323,7 +1323,7 @@ void UAlsCharacterMovementComponent::UnLie(bool bClientSimulation)
 	{
 		if (!bClientSimulation)
 		{
-			GetAlsCharacter()->bIsLied = false;
+			GetAlsCharacter()->SetIsLied(false);
 		}
 		GetAlsCharacter()->OnEndLie(0.f, 0.f);
 		return;
@@ -1427,7 +1427,7 @@ void UAlsCharacterMovementComponent::UnLie(bool bClientSimulation)
 			return;
 		}
 
-		GetAlsCharacter()->bIsLied = false;
+		GetAlsCharacter()->SetIsLied(false);
 	}
 	else
 	{
@@ -1496,7 +1496,7 @@ bool UAlsCharacterMovementComponent::CanAttemptJump() const
 bool UAlsCharacterMovementComponent::IsLying() const
 {
 	auto AlsCharacter{GetAlsCharacter()};
-	return AlsCharacter && AlsCharacter->bIsLied;
+	return AlsCharacter && AlsCharacter->IsLied();
 }
 
 bool UAlsCharacterMovementComponent::CanLieInCurrentState() const

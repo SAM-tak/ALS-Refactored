@@ -10,6 +10,8 @@
 UAlsGameplayAbility_Overlay::UAlsGameplayAbility_Overlay(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer)
 {
+	InstancingPolicy = EGameplayAbilityInstancingPolicy::InstancedPerActor;
+
 	CancelAbilitiesWithTag.AddTag(AlsOverlayModeTags::Root);
 }
 
@@ -22,6 +24,8 @@ void UAlsGameplayAbility_Overlay::ActivateAbility(const FGameplayAbilitySpecHand
 	}
 
 	auto* Character{GetAlsCharacterFromActorInfo()};
+
+	UE_LOG(LogTemp, Log, TEXT("UAlsGameplayAbility_Overlay::ActivateAbility %s %d"), *Character->GetName(), bHasBlueprintActivate);
 
 	Character->GetMesh()->LinkAnimClassLayers(OwnAnimLayersClass);
 

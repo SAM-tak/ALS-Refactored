@@ -245,7 +245,7 @@ protected:
 	UFUNCTION(BlueprintNativeEvent, Category = "ALS|Character")
 	void OnLocomotionModeChanged(const FGameplayTag& PreviousLocomotionMode);
 
-	// Desired Aiming
+	// Aiming Mode
 
 public:
 	UFUNCTION(BlueprintPure, Category = "ALS|Character")
@@ -262,6 +262,15 @@ public:
 
 	UFUNCTION(BlueprintNativeEvent, Category = "ALS|Character")
 	void GetSightLocAndRot(FVector& Loc, FRotator& Rot) const;
+
+private:
+	void SetAimingMode(const FGameplayTag& NewAimingMode, bool bSendRpc);
+
+	UFUNCTION(Client, Reliable)
+	void ClientSetAimingMode(const FGameplayTag& NewAimingMode);
+
+	UFUNCTION(Server, Reliable)
+	void ServerSetAimingMode(const FGameplayTag& NewAimingMode);
 
 protected:
 	UFUNCTION(BlueprintNativeEvent, Category = "ALS|Character")
@@ -333,6 +342,15 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = "ALS|Character", Meta = (AutoCreateRefTerm = "NewDesiredGait"))
 	void SetDesiredGait(const FGameplayTag& NewDesiredGait);
+
+private:
+	void SetDesiredGait(const FGameplayTag& NewDesiredGait, bool bSendRpc);
+
+	UFUNCTION(Client, Reliable)
+	void ClientSetDesiredGait(const FGameplayTag& NewDesiredGait);
+
+	UFUNCTION(Server, Reliable)
+	void ServerSetDesiredGait(const FGameplayTag& NewDesiredGait);
 
 	// Gait
 
@@ -499,11 +517,9 @@ public:
 	// Others
 
 public:
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Als Character|Settings", Replicated, Meta = (ForceUnits = "s"))
-	float CapsuleUpdateSpeed;
+	bool IsLied();
 
-	UPROPERTY(BlueprintReadOnly, Category = "Als Character|State", replicatedUsing = OnRep_IsLied)
-	uint32 bIsLied : 1;
+	void SetIsLied(bool bNewIsLied);
 
 	UFUNCTION(BlueprintCallable, Category = Character)
 	virtual bool CanLie() const;
@@ -520,6 +536,13 @@ public:
 
 	UFUNCTION(BlueprintImplementableEvent, Meta = (DisplayName = "OnEndLie", ScriptName = "OnEndLie"))
 	void K2_OnEndLie(float HalfHeightAdjust, float ScaledHalfHeightAdjust);
+
+protected:
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Als Character|Settings", Replicated, Meta = (ForceUnits = "s"))
+	float CapsuleUpdateSpeed;
+
+	UPROPERTY(BlueprintReadOnly, Category = "Als Character|State", replicatedUsing = OnRep_IsLied)
+	uint32 bIsLied : 1;
 
 private:
 	void RefreshCapsuleSize(float DeltaTime);
@@ -642,4 +665,9 @@ inline bool AAlsCharacter::ToggleRightShoulder()
 {
 	bRightShoulder = bRightShoulder ? false : true;
 	return bRightShoulder;
+}
+
+inline bool AAlsCharacter::IsLied()
+{
+	return bIsLied;
 }

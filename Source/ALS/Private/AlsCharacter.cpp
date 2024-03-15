@@ -575,6 +575,8 @@ void AAlsCharacter::SetDesiredViewMode(const FGameplayTag& NewDesiredViewMode)
 	}
 
 	DesiredViewMode = NewDesiredViewMode;
+
+	MARK_PROPERTY_DIRTY_FROM_NAME(ThisClass, DesiredViewMode, this)
 }
 
 void AAlsCharacter::SetViewMode(const FGameplayTag& NewViewMode)
@@ -664,6 +666,11 @@ void AAlsCharacter::OnLocomotionModeChanged_Implementation(const FGameplayTag& P
 
 void AAlsCharacter::SetAimingMode(const FGameplayTag& NewAimingMode)
 {
+	SetAimingMode(NewAimingMode, true);
+}
+
+void AAlsCharacter::SetAimingMode(const FGameplayTag& NewAimingMode, const bool bSendRpc)
+{
 	if (AimingMode == NewAimingMode || GetLocalRole() < ROLE_AutonomousProxy)
 	{
 		return;
@@ -674,6 +681,30 @@ void AAlsCharacter::SetAimingMode(const FGameplayTag& NewAimingMode)
 	AimingMode = NewAimingMode;
 
 	OnAimingModeChanged(PreviousAimingMode);
+
+	MARK_PROPERTY_DIRTY_FROM_NAME(ThisClass, AimingMode, this)
+
+	if(bSendRpc)
+	{
+		if (GetLocalRole() >= ROLE_Authority)
+		{
+			ClientSetAimingMode(AimingMode);
+		}
+		else
+		{
+			ServerSetAimingMode(AimingMode);
+		}
+	}
+}
+
+void AAlsCharacter::ClientSetAimingMode_Implementation(const FGameplayTag& NewAimingMode)
+{
+	SetAimingMode(NewAimingMode, false);
+}
+
+void AAlsCharacter::ServerSetAimingMode_Implementation(const FGameplayTag& NewAimingMode)
+{
+	SetAimingMode(NewAimingMode, false);
 }
 
 void AAlsCharacter::OnAimingModeChanged_Implementation(const FGameplayTag& PreviousAimingMode) {}
@@ -700,6 +731,8 @@ void AAlsCharacter::SetDesiredRotationMode(const FGameplayTag& NewDesiredRotatio
 	}
 
 	DesiredRotationMode = NewDesiredRotationMode;
+
+	MARK_PROPERTY_DIRTY_FROM_NAME(ThisClass, DesiredRotationMode, this)
 }
 
 void AAlsCharacter::SetRotationMode(const FGameplayTag& NewRotationMode)
@@ -817,6 +850,8 @@ void AAlsCharacter::SetDesiredStance(const FGameplayTag& NewDesiredStance)
 	}
 
 	DesiredStance = NewDesiredStance;
+
+	MARK_PROPERTY_DIRTY_FROM_NAME(ThisClass, DesiredStance, this)
 
 	ApplyDesiredStance();
 }
@@ -936,12 +971,41 @@ void AAlsCharacter::OnStanceChanged_Implementation(const FGameplayTag& PreviousS
 
 void AAlsCharacter::SetDesiredGait(const FGameplayTag& NewDesiredGait)
 {
+	SetDesiredGait(NewDesiredGait, true);
+}
+
+void AAlsCharacter::SetDesiredGait(const FGameplayTag& NewDesiredGait, const bool bSendRpc)
+{
 	if (DesiredGait == NewDesiredGait || GetLocalRole() < ROLE_AutonomousProxy)
 	{
 		return;
 	}
 
 	DesiredGait = NewDesiredGait;
+
+	MARK_PROPERTY_DIRTY_FROM_NAME(ThisClass, DesiredGait, this)
+
+	if (bSendRpc)
+	{
+		if (GetLocalRole() >= ROLE_Authority)
+		{
+			ClientSetDesiredGait(DesiredGait);
+		}
+		else
+		{
+			ServerSetDesiredGait(DesiredGait);
+		}
+	}
+}
+
+void AAlsCharacter::ClientSetDesiredGait_Implementation(const FGameplayTag& NewDesiredGait)
+{
+	SetDesiredGait(NewDesiredGait, false);
+}
+
+void AAlsCharacter::ServerSetDesiredGait_Implementation(const FGameplayTag& NewDesiredGait)
+{
+	SetDesiredGait(NewDesiredGait, false);
 }
 
 void AAlsCharacter::SetGait(const FGameplayTag& NewGait)
@@ -1968,6 +2032,15 @@ void AAlsCharacter::UpdateCapsule(float DeltaTime, float EyeHeight, float EyeHei
 	BaseTranslationOffset.Z = FMath::FInterpConstantTo(BaseTranslationOffset.Z, -HalfHeight, DeltaTime, HalfHeightSpeed);
 
 	AlsCharacterMovement->UpdateCapsuleSize(DeltaTime, HalfHeight, HalfHeightSpeed, Radius, RadiusSpeed);
+}
+
+void AAlsCharacter::SetIsLied(bool bNewIsLied)
+{
+	if (bIsLied != bNewIsLied)
+	{
+		bIsLied = bNewIsLied;
+		MARK_PROPERTY_DIRTY_FROM_NAME(ThisClass, bIsLied, this)
+	}
 }
 
 void AAlsCharacter::OnRep_IsLied()

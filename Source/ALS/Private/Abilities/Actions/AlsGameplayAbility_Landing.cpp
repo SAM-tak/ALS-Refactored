@@ -12,6 +12,8 @@
 UAlsGameplayAbility_Landing::UAlsGameplayAbility_Landing(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer)
 {
+	InstancingPolicy = EGameplayAbilityInstancingPolicy::InstancedPerActor;
+
 	AbilityTags.Reset();
 	AbilityTags.AddTag(AlsLocomotionActionTags::Landing);
 	ActivationOwnedTags.Reset();
