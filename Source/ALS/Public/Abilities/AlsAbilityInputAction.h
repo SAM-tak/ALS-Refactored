@@ -14,7 +14,7 @@ class UAlsAbilitySystemComponent;
  *	Struct used to map a input action to a gameplay input tag.
  */
 USTRUCT(BlueprintType)
-struct ALSEXTRAS_API FAlsAbilityInputAction
+struct ALS_API FAlsAbilityInputAction
 {
 	GENERATED_BODY()
 

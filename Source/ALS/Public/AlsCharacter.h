@@ -18,7 +18,6 @@ class UAlsCharacterSettings;
 class UAlsMovementSettings;
 class UAlsAnimationInstance;
 class UAlsMantlingSettings;
-class UAlsPhysicalAnimationComponent;
 class UAlsAbilitySystemComponent;
 
 DECLARE_MULTICAST_DELEGATE_TwoParams(FAlsCharacter_OnContollerChanged, AController*, AController*);
@@ -26,6 +25,8 @@ DECLARE_MULTICAST_DELEGATE_TwoParams(FAlsCharacter_OnContollerChanged, AControll
 DECLARE_MULTICAST_DELEGATE_OneParam(FAlsCharacter_OnSetupPlayerInputComponent, UInputComponent*);
 
 DECLARE_MULTICAST_DELEGATE_FourParams(FAlsCharacter_OnDebugDisplayDelegate, UCanvas*, const FDebugDisplayInfo&, float&, float&);
+
+DECLARE_MULTICAST_DELEGATE_OneParam(FAlsCharacter_OnRefresh, float);
 
 UCLASS(Abstract, AutoExpandCategories = ("Als Character|Settings"))
 class ALS_API AAlsCharacter : public ACharacter, public IAbilitySystemInterface, public IGameplayCueInterface, public IGameplayTagAssetInterface
@@ -165,6 +166,8 @@ public:
 	FAlsCharacter_OnContollerChanged OnContollerChanged;
 
 	FAlsCharacter_OnSetupPlayerInputComponent OnSetupPlayerInputComponent;
+
+	FAlsCharacter_OnRefresh OnRefresh;
 
 	virtual void PostNetReceiveLocationAndRotation() override;
 

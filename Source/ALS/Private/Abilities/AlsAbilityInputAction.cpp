@@ -1,4 +1,4 @@
-#include "AlsAbilityInputAction.h"
+#include "Abilities/AlsAbilityInputAction.h"
 #include "AlsAbilitySystemComponent.h"
 #include "Utility/AlsMacros.h"
 

@@ -124,10 +124,13 @@ protected:
 	UPROPERTY(VisibleAnywhere, Category = "PhysicalAnimation|State", Transient)
 	TArray<FGameplayTag> ActivationRequest;
 
+protected:
+	virtual void OnRegister() override;
+
+	virtual void OnRefresh(float DeltaTime);
+
 public:
 	virtual void BeginPlay() override;
-
-	virtual void Refresh(AAlsCharacter* Character);
 
 	virtual void TickComponent(float DeltaTime, enum ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 

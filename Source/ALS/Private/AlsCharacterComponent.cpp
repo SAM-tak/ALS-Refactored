@@ -43,7 +43,10 @@ void UAlsCharacterComponent::OnRegister()
 	else
 	{
 		Character->OnContollerChanged.AddUObject(this, &ThisClass::OnControllerChanged);
+		Character->OnRefresh.AddUObject(this, &ThisClass::OnRefresh);
 	}
 }
 
 void UAlsCharacterComponent::OnControllerChanged_Implementation(AController* PreviousController, AController* NewController) {}
+
+void UAlsCharacterComponent::OnRefresh_Implementation(float DeltaTime) {}

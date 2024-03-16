@@ -415,12 +415,7 @@ void AAlsCharacter::Tick(const float DeltaTime)
 	RefreshGroundedRotation(DeltaTime);
 	RefreshInAirRotation(DeltaTime);
 
-	if (LocomotionMode == AlsLocomotionModeTags::InAir && IsLocallyControlled() && IsValid(AbilitySystem))
-	{
-		AbilitySystem->TryActivateAbilitiesBySingleTag(AlsLocomotionActionTags::Mantling);
-	}
-
-	PhysicalAnimation->Refresh(this);
+	OnRefresh.Broadcast(DeltaTime);
 
 	Super::Tick(DeltaTime);
 

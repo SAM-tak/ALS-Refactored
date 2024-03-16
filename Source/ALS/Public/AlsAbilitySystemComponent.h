@@ -6,6 +6,7 @@
 
 class UEnhancedInputComponent;
 class UInputAction;
+class AAlsCharacter;
 
 /**
  * AbilitySystemComponent for ALS Refactored
@@ -30,6 +31,12 @@ public:
 	void BindAbilityActivationInput(UEnhancedInputComponent* EnhancedInputComponent, const UInputAction* Action, ETriggerEvent TriggerEvent, const FGameplayTag& InputTag);
 
 	void UnbindAbilityInputs(UEnhancedInputComponent* EnhancedInputComponent, const FGameplayTag& InputTag);
+
+protected:
+	virtual void OnRegister() override;
+
+	UFUNCTION(BlueprintNativeEvent, Category = "ALS|CharacterComponent")
+	void OnRefresh(float DeltaTime);
 
 private:
 	TMap<FGameplayTag, TArray<uint32>> BindingHandles;

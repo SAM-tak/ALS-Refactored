@@ -481,6 +481,16 @@ void UAlsPhysicalAnimationComponent::SelectProfile()
 	}
 }
 
+void UAlsPhysicalAnimationComponent::OnRegister()
+{
+	Super::OnRegister();
+	auto* Character{Cast<AAlsCharacter>(GetOwner())};
+	if (IsValid(Character))
+	{
+		Character->OnRefresh.AddUObject(this, &ThisClass::OnRefresh);
+	}
+}
+
 void UAlsPhysicalAnimationComponent::BeginPlay()
 {
 	Super::BeginPlay();
@@ -497,8 +507,10 @@ void UAlsPhysicalAnimationComponent::OnAbilityActivated(class UGameplayAbility* 
 	}
 }
 
-void UAlsPhysicalAnimationComponent::Refresh(AAlsCharacter* Character)
+void UAlsPhysicalAnimationComponent::OnRefresh(float DeltaTime)
 {
+	auto* Character{Cast<AAlsCharacter>(GetOwner())};
+
 	if (LatestRagdolling.IsValid() && LatestRagdolling->bCancelRequested)
 	{
 		LatestRagdolling->Cancel();

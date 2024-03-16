@@ -1,4 +1,4 @@
-#include "AlsCharacterInputComponent.h"
+#include "Components/AlsCharacterInputComponent.h"
 
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
