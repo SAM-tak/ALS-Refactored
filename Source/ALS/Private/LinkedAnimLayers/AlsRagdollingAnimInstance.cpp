@@ -1,5 +1,6 @@
 #include "LinkedAnimLayers/AlsRagdollingAnimInstance.h"
 #include "Abilities/Actions/AlsGameplayAbility_Ragdolling.h"
+#include "AlsPhysicalAnimationComponent.h"
 
 #include UE_INLINE_GENERATED_CPP_BY_NAME(AlsRagdollingAnimInstance)
 
@@ -34,14 +35,14 @@ void UAlsRagdollingAnimInstance::UnFreeze()
 	}
 }
 
-void UAlsRagdollingAnimInstance::Refresh(const UAlsGameplayAbility_Ragdolling& Ability, bool bNewActive)
+void UAlsRagdollingAnimInstance::Refresh(const FAlsRagdollingState& State, bool bNewActive)
 {
 	check(IsInGameThread())
 
 	//bActive = Ability.IsActive() && !Ability.bIsAbilityEnding; // this is not work. bIsAbilityEnding can be true in Super::EndAbility.
 	bActive = bNewActive;
-	StartBlendTime = Ability.StartBlendTime;
-	bGroundedAndAged = Ability.IsGroundedAndAged();
-	bFacingUpward = Ability.bFacingUpward;
-	LyingDownYawAngleDelta = Ability.LyingDownYawAngleDelta;
+	StartBlendTime = State.Settings->StartBlendTime;
+	bGroundedAndAged = State.IsGroundedAndAged();
+	bFacingUpward = State.bFacingUpward;
+	LyingDownYawAngleDelta = State.LyingDownYawAngleDelta;
 }

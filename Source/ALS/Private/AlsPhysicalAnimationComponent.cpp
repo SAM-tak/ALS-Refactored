@@ -5,13 +5,20 @@
 
 #include "AlsCharacter.h"
 #include "AlsAnimationInstance.h"
+#include "AlsLinkedAnimationInstance.h"
 #include "AlsAbilitySystemComponent.h"
+#include "AlsCharacterMovementComponent.h"
 #include "Abilities/Actions/AlsGameplayAbility_Ragdolling.h"
 #include "Components/SkeletalMeshComponent.h"
 #include "PhysicsEngine/PhysicalAnimationComponent.h"
 #include "PhysicsEngine/PhysicsAsset.h"
+#include "LinkedAnimLayers/AlsRagdollingAnimInstance.h"
 #include "Curves/CurveFloat.h"
 #include "Engine/Canvas.h"
+#include "Components/CapsuleComponent.h"
+#include "Components/SkeletalMeshComponent.h"
+#include "Net/UnrealNetwork.h"
+#include "Net/Core/PushModel/PushModel.h"
 #include "Utility/AlsGameplayTags.h"
 #include "Utility/AlsConstants.h"
 #include "Utility/AlsMacros.h"
@@ -70,9 +77,32 @@ float FAlsPhysicalAnimationCurveValues::GetLockedValue(const FName& BoneName) co
 	return 0.0f;
 }
 
-UAlsPhysicalAnimationComponent::UAlsPhysicalAnimationComponent(const FObjectInitializer& ObjectInitializer)
-	: Super(ObjectInitializer)
+#if WITH_EDITOR
+void FAlsRagdollingSettings::PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent)
 {
+	if (PropertyChangedEvent.GetPropertyName() != GET_MEMBER_NAME_CHECKED(FAlsRagdollingSettings, GroundTraceResponseChannels))
+	{
+		return;
+	}
+
+	GroundTraceResponses.SetAllChannels(ECR_Ignore);
+
+	for (const auto& CollisionChannel : GroundTraceResponseChannels)
+	{
+		GroundTraceResponses.SetResponse(CollisionChannel, ECR_Block);
+	}
+}
+#endif
+
+void UAlsPhysicalAnimationComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+
+	FDoRepLifetimeParams Parameters;
+	Parameters.bIsPushBased = true;
+
+	Parameters.Condition = COND_SkipOwner;
+	DOREPLIFETIME_WITH_PARAMS_FAST(ThisClass, RagdollingTargetLocation, Parameters)
 }
 
 bool UAlsPhysicalAnimationComponent::IsProfileExist(const FName& ProfileName) const
@@ -373,7 +403,7 @@ void UAlsPhysicalAnimationComponent::SelectProfile()
 	TStringBuilder<256> StringBuilder;
 	TStringBuilder<256> AdditionalStringBuilder;
 
-	FName RagdollingModeName{LatestRagdolling.IsValid() ? UAlsUtility::GetSimpleTagName(LatestRagdolling->AbilityTags.First()) : NAME_None};
+	FName RagdollingModeName{CurrentRagdolling.IsValid() ? UAlsUtility::GetSimpleTagName(CurrentRagdolling) : NAME_None};
 
 	FContainer Container;
 
@@ -491,30 +521,9 @@ void UAlsPhysicalAnimationComponent::OnRegister()
 	}
 }
 
-void UAlsPhysicalAnimationComponent::BeginPlay()
-{
-	Super::BeginPlay();
-	auto* Character{Cast<AAlsCharacter>(GetOwner())};
-	Character->GetAbilitySystemComponent()->AbilityActivatedCallbacks.AddUObject(this, &ThisClass::OnAbilityActivated);
-}
-
-void UAlsPhysicalAnimationComponent::OnAbilityActivated(class UGameplayAbility* GameplayAbility)
-{
-	auto Ragdolling{Cast<UAlsGameplayAbility_Ragdolling>(GameplayAbility)};
-	if (Ragdolling)
-	{
-		LatestRagdolling = Ragdolling;
-	}
-}
-
 void UAlsPhysicalAnimationComponent::OnRefresh(float DeltaTime)
 {
 	auto* Character{Cast<AAlsCharacter>(GetOwner())};
-
-	if (LatestRagdolling.IsValid() && LatestRagdolling->bCancelRequested)
-	{
-		LatestRagdolling->Cancel();
-	}
 
 	if (!ActivationRequest.IsEmpty())
 	{
@@ -527,19 +536,39 @@ void UAlsPhysicalAnimationComponent::OnRefresh(float DeltaTime)
 	}
 
 	// Apply special behaviour when changed Ragdolling state
+	
+	auto CurrentAction{Character->GetLocomotionAction()};
+	if (RagdollingSettings.Contains(CurrentAction))
+	{
+		CurrentRagdolling = CurrentAction;
+	}
+	else
+	{
+		CurrentRagdolling = FGameplayTag::EmptyTag;
+	}
 
-	if (LatestRagdolling.IsValid() && LatestRagdolling->IsActive())
+	if (CurrentRagdolling.IsValid())
 	{
 		if (!bRagdolling)
 		{
 			bRagdolling = true;
+
+			RagdollingState.Start(Character, RagdollingSettings[CurrentRagdolling]);
+
 			GetSkeletalMesh()->SetAllBodiesBelowSimulatePhysics(UAlsConstants::PelvisBoneName(), true);
 			GetSkeletalMesh()->SetAllBodiesPhysicsBlendWeight(1.0f);
 			ApplyPhysicalAnimationProfileBelow(NAME_None, NAME_None, true, true);
 		}
-		bRagdollingFreezed = LatestRagdolling->bFreezing;
 
-		if (LatestRagdolling->bGrounded)
+		RagdollingState.TargetLocation = RagdollingTargetLocation;
+		RagdollingState.Tick(DeltaTime);
+		if (RagdollingState.TargetLocation != RagdollingTargetLocation)
+		{
+			RagdollingTargetLocation = RagdollingState.TargetLocation;
+			MARK_PROPERTY_DIRTY_FROM_NAME(ThisClass, RagdollingTargetLocation, this)
+		}
+
+		if (RagdollingState.bGrounded)
 		{
 			Character->SetLocomotionMode(AlsLocomotionModeTags::Grounded);
 		}
@@ -553,6 +582,9 @@ void UAlsPhysicalAnimationComponent::OnRefresh(float DeltaTime)
 		if (bRagdolling)
 		{
 			bRagdolling = false;
+
+			RagdollingState.End();
+
 			CurrentProfileNames.Reset();
 			CurrentMultiplyProfileNames.Reset();
 			ClearGameplayTags();
@@ -566,9 +598,7 @@ void UAlsPhysicalAnimationComponent::OnRefresh(float DeltaTime)
 				GetSkeletalMesh()->SetCollisionEnabled(PrevCollisionEnabled);
 				bActive = false;
 			}
-			bRagdollingFreezed = false;
 		}
-		LatestRagdolling.Reset();
 	}
 
 	FGameplayTagContainer TempContainer;
@@ -617,7 +647,7 @@ void UAlsPhysicalAnimationComponent::TickComponent(float DeltaTime, enum ELevelT
 
 	// Update PhysicsBlendWeight and Collision settings
 
-	if (!bRagdolling || !bRagdollingFreezed)
+	if (!bRagdolling || !RagdollingState.bFreezing)
 	{
 		RefreshBodyState(DeltaTime);
 	}
@@ -676,12 +706,12 @@ void UAlsPhysicalAnimationComponent::DisplayDebug(UCanvas* Canvas, const FDebugD
 
 bool UAlsPhysicalAnimationComponent::IsRagdolling() const
 {
-	return LatestRagdolling.IsValid() && LatestRagdolling->IsActive();
+	return CurrentRagdolling.IsValid();
 }
 
 bool UAlsPhysicalAnimationComponent::IsRagdollingAndGroundedAndAged() const
 {
-	return IsRagdolling() && LatestRagdolling->IsGroundedAndAged();
+	return IsRagdolling() && RagdollingState.IsGroundedAndAged();
 }
 
 void UAlsPhysicalAnimationComponent::RequestActivation(const FGameplayTag& AbilityTag)
@@ -693,4 +723,330 @@ bool UAlsPhysicalAnimationComponent::IsBoneUnderSimulation(const FName& BoneName
 {
 	auto* Body = GetSkeletalMesh()->GetBodyInstance(BoneName);
 	return Body && Body->IsInstanceSimulatingPhysics();
+}
+
+void FAlsRagdollingState::Start(AAlsCharacter *NewCharacter, FAlsRagdollingSettings& NewSettings)
+{
+	Character = NewCharacter;
+	Settings = &NewSettings;
+
+	auto* AnimInstance{Character->GetAlsAnimationInstace()};
+
+	RagdollingAnimInstance = Character->GetAlsAnimationInstace()->GetRagdollingAnimInstance();
+
+	if (!IsValid(RagdollingAnimInstance))
+	{
+		return;
+	}
+
+	OverrideAnimInstance = Cast<UAlsLinkedAnimationInstance>(Character->GetMesh()->GetLinkedAnimLayerInstanceByClass(Settings->OverrideAnimLayersClass));
+
+	if (!OverrideAnimInstance.IsValid())
+	{
+		Character->GetMesh()->LinkAnimClassLayers(Settings->OverrideAnimLayersClass);
+
+		OverrideAnimInstance = Cast<UAlsLinkedAnimationInstance>(Character->GetMesh()->GetLinkedAnimLayerInstanceByClass(Settings->OverrideAnimLayersClass));
+	}
+
+	if(!OverrideAnimInstance.IsValid())
+	{
+		return;
+	}
+
+	bOnGroundedAndAgedFired = false;
+
+	// Ensure freeze flag is off.
+
+	RagdollingAnimInstance->UnFreeze();
+
+	auto* CharacterMovement{Character->GetAlsCharacterMovement()};
+
+	// Initialize bFacingUpward flag by current movement direction. If Velocity is Zero, it is chosen bFacingUpward is true.
+	// And determine target yaw angle of the character.
+
+	const auto Direction = CharacterMovement->Velocity.GetSafeNormal2D();
+
+	if (Direction.SizeSquared2D() > 0.0)
+	{
+		bFacingUpward = Character->GetActorForwardVector().Dot(Direction) < -0.25f;
+		LyingDownYawAngleDelta = UAlsMath::DirectionToAngleXY(bFacingUpward ? -Direction : Direction) - Character->GetActorRotation().Yaw;
+	}
+	else
+	{
+		bFacingUpward = true;
+		LyingDownYawAngleDelta = 0.0;
+	}
+
+	// Stop any active montages.
+
+	static constexpr auto BlendOutDuration{0.2f};
+
+	AnimInstance->Montage_Stop(BlendOutDuration);
+
+	// Disable movement corrections and reset network smoothing.
+
+	CharacterMovement->NetworkSmoothingMode = ENetworkSmoothingMode::Disabled;
+	CharacterMovement->bIgnoreClientMovementErrorChecksAndCorrection = true;
+
+	// Disable capsule collision. other physics states will be changed by physical aniamtion process
+
+	Character->GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+
+	if (Character->IsLocallyControlled() || (Character->GetLocalRole() >= ROLE_Authority && !IsValid(Character->GetController())))
+	{
+		TargetLocation = Character->GetMesh()->GetBoneLocation(UAlsConstants::PelvisBoneName());
+	}
+
+	// Clear the character movement mode and set the locomotion action to ragdolling.
+
+	CharacterMovement->SetMovementMode(MOVE_None);
+	CharacterMovement->SetMovementModeLocked(true);
+
+	ElapsedTime = 0.0f;
+	TimeAfterGrounded = TimeAfterGroundedAndStopped = 0.0f;
+	bFacingUpward = bGrounded = false;
+	bPreviousGrounded = true;
+	bFreezing = false;
+	PrevActorLocation = Character->GetActorLocation();
+
+	RagdollingAnimInstance->Refresh(*this, true);
+}
+
+FVector FAlsRagdollingState::TraceGround()
+{
+	auto* CharacterMovement{Character->GetAlsCharacterMovement()};
+
+	const auto CapsuleHalfHeight{Character->GetCapsuleComponent()->GetScaledCapsuleHalfHeight()};
+
+	const auto TraceStart{!TargetLocation.IsZero() ? FVector{TargetLocation} : Character->GetActorLocation()};
+	const FVector TraceEnd{TraceStart.X, TraceStart.Y, TraceStart.Z - CapsuleHalfHeight};
+
+	FHitResult Hit;
+	Character->GetWorld()->LineTraceSingleByChannel(Hit, TraceStart, TraceEnd, Settings->GroundTraceChannel,
+													{__FUNCTION__, false, Character}, Settings->GroundTraceResponses);
+
+	bGrounded = CharacterMovement->IsWalkable(Hit);
+
+	return {
+		TraceStart.X, TraceStart.Y,
+		bGrounded ? Hit.ImpactPoint.Z + CapsuleHalfHeight + UCharacterMovementComponent::MIN_FLOOR_DIST : TraceStart.Z
+	};
+}
+
+bool FAlsRagdollingState::IsGroundedAndAged() const
+{
+	return bGrounded && ElapsedTime > Settings->StartBlendTime;
+}
+
+void FAlsRagdollingState::Tick(float DeltaTime)
+{
+	if (bFreezing)
+	{
+		return;
+	}
+
+	auto* CharacterMovement{Character->GetAlsCharacterMovement()};
+
+	bool bLocallyControlled{Character->IsLocallyControlled() || (Character->GetLocalRole() >= ROLE_Authority && !IsValid(Character->GetController()))};
+
+	if (bLocallyControlled)
+	{
+		TargetLocation = Character->GetMesh()->GetBoneLocation(UAlsConstants::PelvisBoneName());
+	}
+
+	// Just for info.
+	CharacterMovement->Velocity = DeltaTime > 0.0f ? (Character->GetActorLocation() - PrevActorLocation) / DeltaTime : FVector::Zero();
+	PrevActorLocation = Character->GetActorLocation();
+
+	// Prevent the capsule from going through the ground when the ragdoll is lying on the ground.
+
+	// While we could get rid of the line trace here and just use TargetLocation
+	// as the character's location, we don't do that because the camera depends on the
+	// capsule's bottom location, so its removal will cause the camera to behave erratically.
+
+	Character->SetActorLocation(TraceGround(), true);
+
+	if (IsGroundedAndAged())
+	{
+		// Determine whether the ragdoll is facing upward or downward.
+
+		const auto PelvisRotation{Character->GetMesh()->GetBoneTransform(UAlsConstants::PelvisBoneName()).Rotator()};
+
+		const auto PelvisDirDotUp{PelvisRotation.RotateVector(FVector::RightVector).Dot(FVector::UpVector)};
+
+		if (bFacingUpward)
+		{
+			if (PelvisDirDotUp < -0.5f)
+			{
+				bFacingUpward = false;
+			}
+		}
+		else
+		{
+			if (PelvisDirDotUp > 0.5f)
+			{
+				bFacingUpward = true;
+			}
+		}
+	}
+
+	RagdollingAnimInstance->Refresh(*this, true);
+
+	if (Settings->bAllowFreeze)
+	{
+		RootBoneSpeed = CharacterMovement->Velocity.Size();
+
+		RagdollingAnimInstance->UnFreeze();
+
+		if (bGrounded)
+		{
+			TimeAfterGrounded += DeltaTime;
+
+			if (Settings->TimeAfterGroundedForForceFreezing > 0.0f &&
+				TimeAfterGrounded > Settings->TimeAfterGroundedForForceFreezing)
+			{
+				bFreezing = true;
+			}
+			else if (RootBoneSpeed < Settings->RootBoneSpeedConsideredAsStopped)
+			{
+				TimeAfterGroundedAndStopped += DeltaTime;
+
+				if (Settings->TimeAfterGroundedAndStoppedForForceFreezing > 0.0f &&
+					TimeAfterGroundedAndStopped > Settings->TimeAfterGroundedAndStoppedForForceFreezing)
+				{
+					bFreezing = true;
+				}
+				else
+				{
+					MaxBoneSpeed = 0.0f;
+					MaxBoneAngularSpeed = 0.0f;
+					Character->GetMesh()->ForEachBodyBelow(UAlsConstants::PelvisBoneName(), true, false, [&](FBodyInstance *Body) {
+						float Speed = Body->GetUnrealWorldVelocity().Size();
+						if(Speed > MaxBoneSpeed) MaxBoneSpeed = Speed;
+						Speed = FMath::RadiansToDegrees(Body->GetUnrealWorldAngularVelocityInRadians().Size());
+						if(Speed > MaxBoneAngularSpeed) MaxBoneAngularSpeed = Speed;
+					});
+					bFreezing = MaxBoneSpeed < Settings->SpeedThresholdToFreeze && MaxBoneAngularSpeed < Settings->AngularSpeedThresholdToFreeze;
+				}
+			}
+			else
+			{
+				TimeAfterGroundedAndStopped = 0.0f;
+			}
+
+			if (bFreezing)
+			{
+				RagdollingAnimInstance->Freeze();
+				Character->GetMesh()->SetAllBodiesSimulatePhysics(false);
+			}
+		}
+		else
+		{
+			TimeAfterGrounded = TimeAfterGroundedAndStopped = 0.0f;
+		}
+	}
+
+	if (ElapsedTime <= Settings->StartBlendTime && ElapsedTime + DeltaTime > Settings->StartBlendTime)
+	{
+		// Re-initialize bFacingUpward flag by current movement direction. If Velocity is Zero, it is chosen bFacingUpward is true.
+		bFacingUpward = Character->GetActorForwardVector().Dot(CharacterMovement->Velocity.GetSafeNormal2D()) <= 0.0f;
+	}
+
+	if (bPreviousGrounded != bGrounded)
+	{
+		if (bGrounded)
+		{
+			Character->Crouch();
+		}
+		else
+		{
+			Character->UnCrouch();
+		}
+	}
+	bPreviousGrounded = bGrounded;
+
+	//K2_OnTick(DeltaTime);
+
+	ElapsedTime += DeltaTime;
+
+	if (IsGroundedAndAged())
+	{
+		if (!bOnGroundedAndAgedFired)
+		{
+			bOnGroundedAndAgedFired = true;
+			//K2_OnGroundedAndAged();
+		}
+		Character->Lie();
+	}
+	else
+	{
+		bOnGroundedAndAgedFired = false;
+	}
+}
+
+void FAlsRagdollingState::End()
+{
+	auto CharacterMovement{Character->GetAlsCharacterMovement()};
+
+	RagdollingAnimInstance->Freeze();
+	RagdollingAnimInstance->Refresh(*this, false);
+
+	// Re-enable capsule collision.
+
+	Character->GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+
+	CharacterMovement->NetworkSmoothingMode = ENetworkSmoothingMode::Exponential;
+	CharacterMovement->bIgnoreClientMovementErrorChecksAndCorrection = false;
+
+	if (RagdollingAnimInstance && ElapsedTime > Settings->StartBlendTime)
+	{
+		const auto PelvisTransform{Character->GetMesh()->GetBoneTransform(UAlsConstants::PelvisBoneName())};
+		const auto PelvisRotation{PelvisTransform.Rotator()};
+
+		// Determine yaw angle of the character.
+
+		auto NewActorRotation{Character->GetActorRotation()};
+		NewActorRotation.Yaw = UAlsMath::DirectionToAngleXY(PelvisRotation.RotateVector(
+			FMath::Abs(PelvisRotation.RotateVector(FVector::ForwardVector).GetSafeNormal2D().Dot(FVector::UpVector)) > 0.5f ?
+			(bFacingUpward ? FVector::RightVector : FVector::LeftVector) :
+			(bFacingUpward ? FVector::BackwardVector : FVector::ForwardVector)).GetSafeNormal2D());
+		Character->SetActorRotation(NewActorRotation, ETeleportType::TeleportPhysics);
+
+		// Restore the pelvis transform to the state it was in before we changed
+		// the character and mesh transforms to keep its world transform unchanged.
+
+		const auto& ReferenceSkeleton{Character->GetMesh()->GetSkeletalMeshAsset()->GetRefSkeleton()};
+
+		const auto PelvisBoneIndex{ReferenceSkeleton.FindBoneIndex(UAlsConstants::PelvisBoneName())};
+		auto& FinalRagdollPose{RagdollingAnimInstance->GetFinalPoseSnapshot()};
+		if (ALS_ENSURE(PelvisBoneIndex >= 0) && PelvisBoneIndex < FinalRagdollPose.LocalTransforms.Num())
+		{
+			// We expect the pelvis bone to be the root bone or attached to it, so we can safely use the mesh transform here.
+			FinalRagdollPose.LocalTransforms[PelvisBoneIndex] = PelvisTransform.GetRelativeTransform(Character->GetMesh()->GetComponentTransform());
+		}
+	}
+
+	TargetLocation = FVector::ZeroVector;
+
+	// If the ragdoll is on the ground, set the movement mode to walking and play a get up montage. If not, set
+	// the movement mode to falling and update the character movement velocity to match the last ragdoll velocity.
+
+	CharacterMovement->SetMovementModeLocked(false);
+
+	if (bGrounded)
+	{
+		CharacterMovement->SetMovementMode(MOVE_Walking);
+	}
+	else
+	{
+		CharacterMovement->SetMovementMode(MOVE_Falling);
+	}
+
+	if (IsGroundedAndAged())
+	{
+		auto* AbilitySystem{Character->GetAlsAbilitySystem()};
+		AbilitySystem->SetLooseGameplayTagCount(AlsStateFlagTags::FacingUpward, bFacingUpward ? 1 : 0);
+	}
+
+	Character->GetMesh()->UnlinkAnimClassLayers(Settings->OverrideAnimLayersClass);
 }

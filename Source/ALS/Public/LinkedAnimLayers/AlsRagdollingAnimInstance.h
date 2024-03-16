@@ -36,5 +36,5 @@ public:
 
 	void UnFreeze();
 
-	void Refresh(const class UAlsGameplayAbility_Ragdolling& Ability, bool bNewActive);
+	void Refresh(const struct FAlsRagdollingState& State, bool bNewActive);
 };
