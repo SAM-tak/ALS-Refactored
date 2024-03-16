@@ -20,8 +20,6 @@
 UAlsGameplayAbility_Ragdolling::UAlsGameplayAbility_Ragdolling(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer)
 {
-	InstancingPolicy = EGameplayAbilityInstancingPolicy::InstancedPerActor;
-
 	AbilityTags.AddTag(AlsLocomotionActionTags::BeingKnockedDown);
 	ActivationOwnedTags.AddTag(AlsLocomotionActionTags::BeingKnockedDown);
 	CancelAbilitiesWithTag.AddTag(AlsLocomotionActionTags::Root);

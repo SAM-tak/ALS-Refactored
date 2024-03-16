@@ -12,12 +12,6 @@
 //
 // --------------------------------------------------------------------------------------------------------------------------------------------------------
 
-UAlsGameplayAbility_MontageBase::UAlsGameplayAbility_MontageBase(const FObjectInitializer& ObjectInitializer)
-	: Super(ObjectInitializer)
-{
-	InstancingPolicy = EGameplayAbilityInstancingPolicy::InstancedPerActor;
-}
-
 void UAlsGameplayAbility_MontageBase::EndAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo,
 												 const FGameplayAbilityActivationInfo ActivationInfo, bool bReplicateEndAbility, bool bWasCancelled)
 {

@@ -8,6 +8,11 @@
 
 #include UE_INLINE_GENERATED_CPP_BY_NAME(AlsGameplayAbility)
 
+UAlsGameplayAbility::UAlsGameplayAbility(const FObjectInitializer& ObjectInitializer) : Super(ObjectInitializer)
+{
+	InstancingPolicy = EGameplayAbilityInstancingPolicy::InstancedPerActor;
+}
+
 AAlsCharacter* UAlsGameplayAbility::GetAlsCharacterFromActorInfo() const
 {
 	if (!ensure(CurrentActorInfo))

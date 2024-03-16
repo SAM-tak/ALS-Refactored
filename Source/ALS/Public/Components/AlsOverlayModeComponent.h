@@ -8,7 +8,7 @@ class UAlsOverlayAnimInstance;
 UCLASS(Abstract, AutoExpandCategories = ("AlsOverlayModeComponent|Settings"))
 class ALS_API UAlsOverlayModeComponent : public UAlsCharacterComponent
 {
-	GENERATED_UCLASS_BODY()
+	GENERATED_BODY()
 
 protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "AlsOverlayModeComponent|Settings", Meta = (DisplayThumbnail = false))

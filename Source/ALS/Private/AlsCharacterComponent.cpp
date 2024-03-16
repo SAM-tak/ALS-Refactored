@@ -13,6 +13,7 @@
 
 UAlsCharacterComponent::UAlsCharacterComponent(const FObjectInitializer& ObjectInitializer) : Super(ObjectInitializer)
 {
+	PrimaryComponentTick.bStartWithTickEnabled = false;
 	bTickInEditor = false;
 }
 

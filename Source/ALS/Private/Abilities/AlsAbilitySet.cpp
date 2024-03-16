@@ -69,11 +69,11 @@ UAlsAbilitySet::UAlsAbilitySet(const FObjectInitializer& ObjectInitializer) : Su
 {
 }
 
-void UAlsAbilitySet::GiveToAbilitySystem(UAbilitySystemComponent* AlsASC, FAlsAbilitySet_GrantedHandles* OutGrantedHandles, UObject* SourceObject) const
+void UAlsAbilitySet::GiveToAbilitySystem(UAlsAbilitySystemComponent* AlsAsc, UObject* SourceObject, FAlsAbilitySet_GrantedHandles* OutGrantedHandles) const
 {
-	check(AlsASC);
+	check(AlsAsc);
 
-	if (!AlsASC->IsOwnerActorAuthoritative())
+	if (!AlsAsc->IsOwnerActorAuthoritative())
 	{
 		// Must be authoritative to give or take ability sets.
 		return;
@@ -90,12 +90,12 @@ void UAlsAbilitySet::GiveToAbilitySystem(UAbilitySystemComponent* AlsASC, FAlsAb
 			continue;
 		}
 
-		auto* AbilityCDO{AbilityToGrant.Ability->GetDefaultObject<UAlsGameplayAbility>()};
+		auto* AbilityCdo{AbilityToGrant.Ability->GetDefaultObject<UAlsGameplayAbility>()};
 
-		FGameplayAbilitySpec AbilitySpec{AbilityCDO, AbilityToGrant.AbilityLevel};
+		FGameplayAbilitySpec AbilitySpec{AbilityCdo, AbilityToGrant.AbilityLevel};
 		AbilitySpec.SourceObject = SourceObject;
 
-		const auto AbilitySpecHandle{AlsASC->GiveAbility(AbilitySpec)};
+		const auto AbilitySpecHandle{AlsAsc->GiveAbility(AbilitySpec)};
 
 		if (OutGrantedHandles)
 		{
@@ -115,7 +115,7 @@ void UAlsAbilitySet::GiveToAbilitySystem(UAbilitySystemComponent* AlsASC, FAlsAb
 		}
 
 		const auto* GameplayEffect{EffectToGrant.GameplayEffect->GetDefaultObject<UGameplayEffect>()};
-		const auto GameplayEffectHandle{AlsASC->ApplyGameplayEffectToSelf(GameplayEffect, EffectToGrant.EffectLevel, AlsASC->MakeEffectContext())};
+		const auto GameplayEffectHandle{AlsAsc->ApplyGameplayEffectToSelf(GameplayEffect, EffectToGrant.EffectLevel, AlsAsc->MakeEffectContext())};
 
 		if (OutGrantedHandles)
 		{
@@ -134,8 +134,8 @@ void UAlsAbilitySet::GiveToAbilitySystem(UAbilitySystemComponent* AlsASC, FAlsAb
 			continue;
 		}
 
-		auto* NewSet{NewObject<UAttributeSet>(AlsASC->GetOwner(), SetToGrant.AttributeSet)};
-		AlsASC->AddAttributeSetSubobject(NewSet);
+		auto* NewSet{NewObject<UAttributeSet>(AlsAsc->GetOwner(), SetToGrant.AttributeSet)};
+		AlsAsc->AddAttributeSetSubobject(NewSet);
 
 		if (OutGrantedHandles)
 		{

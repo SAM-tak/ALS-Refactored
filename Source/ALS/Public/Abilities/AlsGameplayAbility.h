@@ -35,7 +35,7 @@ struct ALS_API FAlsPlayMontageParameter
 UCLASS(Abstract)
 class ALS_API UAlsGameplayAbility : public UGameplayAbility
 {
-	GENERATED_BODY()
+	GENERATED_UCLASS_BODY()
 
 protected:
 	// Bind input actions on activate this ability and unbind when finished. (default : true)

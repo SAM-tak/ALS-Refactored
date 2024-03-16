@@ -7,11 +7,6 @@
 
 #include UE_INLINE_GENERATED_CPP_BY_NAME(AlsOverlayModeComponent)
 
-UAlsOverlayModeComponent::UAlsOverlayModeComponent(const FObjectInitializer& ObjectInitializer) : Super(ObjectInitializer)
-{
-	PrimaryComponentTick.bStartWithTickEnabled = false;
-}
-
 void UAlsOverlayModeComponent::OnRefresh_Implementation(float DeltaTime)
 {
 	auto OverlayMode{Character->GetOverlayMode()};

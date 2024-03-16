@@ -15,7 +15,7 @@ class UAbilitySystemComponent;
 UCLASS(Abstract)
 class ALS_API UAlsGameplayAbility_MontageBase : public UAlsGameplayAbility_Action
 {
-	GENERATED_UCLASS_BODY()
+	GENERATED_BODY()
 
 protected:
 	/** GameplayEffects to apply and then remove while the animation is playing */

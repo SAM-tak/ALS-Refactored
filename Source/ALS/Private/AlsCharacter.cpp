@@ -243,7 +243,7 @@ void AAlsCharacter::PostInitializeComponents()
 
 		if (HasAuthority() && IsValid(AbilitySet))
 		{
-			AbilitySet->GiveToAbilitySystem(AbilitySystem, nullptr);
+			AbilitySet->GiveToAbilitySystem(AbilitySystem, this);
 		}
 	}
 
