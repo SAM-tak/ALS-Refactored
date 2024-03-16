@@ -77,22 +77,18 @@ float FAlsPhysicalAnimationCurveValues::GetLockedValue(const FName& BoneName) co
 	return 0.0f;
 }
 
-#if WITH_EDITOR
-void FAlsRagdollingSettings::PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent)
+UAlsPhysicalAnimationComponent::UAlsPhysicalAnimationComponent(const FObjectInitializer& ObjectInitializer) : Super(ObjectInitializer)
 {
-	if (PropertyChangedEvent.GetPropertyName() != GET_MEMBER_NAME_CHECKED(FAlsRagdollingSettings, GroundTraceResponseChannels))
+	for(auto& KeyValue : RagdollingSettings)
 	{
-		return;
-	}
+		KeyValue.Value.GroundTraceResponses.SetAllChannels(ECR_Ignore);
 
-	GroundTraceResponses.SetAllChannels(ECR_Ignore);
-
-	for (const auto& CollisionChannel : GroundTraceResponseChannels)
-	{
-		GroundTraceResponses.SetResponse(CollisionChannel, ECR_Block);
+		for (const auto& CollisionChannel : KeyValue.Value.GroundTraceResponseChannels)
+		{
+			KeyValue.Value.GroundTraceResponses.SetResponse(CollisionChannel, ECR_Block);
+		}
 	}
 }
-#endif
 
 void UAlsPhysicalAnimationComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
 {
@@ -537,14 +533,14 @@ void UAlsPhysicalAnimationComponent::OnRefresh(float DeltaTime)
 
 	// Apply special behaviour when changed Ragdolling state
 	
-	auto CurrentAction{Character->GetLocomotionAction()};
-	if (RagdollingSettings.Contains(CurrentAction))
+	CurrentRagdolling = FGameplayTag::EmptyTag;
+	for(auto& KeyValue : RagdollingSettings)
 	{
-		CurrentRagdolling = CurrentAction;
-	}
-	else
-	{
-		CurrentRagdolling = FGameplayTag::EmptyTag;
+		if (Character->HasMatchingGameplayTag(KeyValue.Key))
+		{
+			CurrentRagdolling = KeyValue.Key;
+			break;
+		}
 	}
 
 	if (CurrentRagdolling.IsValid())
@@ -725,8 +721,22 @@ bool UAlsPhysicalAnimationComponent::IsBoneUnderSimulation(const FName& BoneName
 	return Body && Body->IsInstanceSimulatingPhysics();
 }
 
+FAlsRagdollingSettings::FAlsRagdollingSettings()
+{
+	GroundTraceResponses.WorldStatic = ECR_Block;
+	GroundTraceResponses.WorldDynamic = ECR_Block;
+	GroundTraceResponses.Destructible = ECR_Block;
+}
+
 void FAlsRagdollingState::Start(AAlsCharacter *NewCharacter, FAlsRagdollingSettings& NewSettings)
 {
+	NewSettings.GroundTraceResponses.SetAllChannels(ECR_Ignore);
+
+	for (const auto& CollisionChannel : NewSettings.GroundTraceResponseChannels)
+	{
+		NewSettings.GroundTraceResponses.SetResponse(CollisionChannel, ECR_Block);
+	}
+
 	Character = NewCharacter;
 	Settings = &NewSettings;
 

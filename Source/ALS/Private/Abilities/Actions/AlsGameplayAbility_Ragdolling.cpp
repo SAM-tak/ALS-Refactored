@@ -99,3 +99,11 @@ bool UAlsGameplayAbility_Ragdolling::IsGroundedAndAged() const
 	auto& RagdollingState{PhysicalAnimation->GetRagdollingState()};
 	return RagdollingState.IsGroundedAndAged();
 }
+
+UAlsLinkedAnimationInstance* UAlsGameplayAbility_Ragdolling::GetOverrideAnimInstance() const
+{
+	auto* Character{GetAlsCharacterFromActorInfo()};
+	auto* PhysicalAnimation{Character->GetPhysicalAnimation()};
+	auto& RagdollingState{PhysicalAnimation->GetRagdollingState()};
+	return RagdollingState.OverrideAnimInstance.Get();
+}

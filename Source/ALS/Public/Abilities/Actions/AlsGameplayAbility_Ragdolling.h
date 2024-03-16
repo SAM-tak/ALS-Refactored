@@ -24,6 +24,9 @@ protected:
 	uint8 bOnGroundedAndAgedFired : 1{false};
 
 	UFUNCTION(BlueprintPure, Category = "ALS|Ability|Ragdolling")
+	UAlsLinkedAnimationInstance* GetOverrideAnimInstance() const;
+
+	UFUNCTION(BlueprintPure, Category = "ALS|Ability|Ragdolling")
 	bool IsGroundedAndAged() const;
 
 	UFUNCTION()

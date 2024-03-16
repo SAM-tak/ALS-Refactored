@@ -48,6 +48,8 @@ USTRUCT(BlueprintType)
 struct ALS_API FAlsRagdollingSettings
 {
 	GENERATED_BODY()
+	
+	FAlsRagdollingSettings();
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	TSubclassOf<UAlsLinkedAnimationInstance> OverrideAnimLayersClass;
@@ -58,7 +60,7 @@ struct ALS_API FAlsRagdollingSettings
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	TArray<TEnumAsByte<ECollisionChannel>> GroundTraceResponseChannels{ECC_WorldStatic, ECC_WorldDynamic, ECC_Destructible};
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = AlsAbility)
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = AlsAbility, Transient)
 	FCollisionResponseContainer GroundTraceResponses{ECR_Ignore};
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = AlsAbility, Meta = (ClampMin = 0, ForceUnits = "s"))
@@ -86,10 +88,6 @@ struct ALS_API FAlsRagdollingSettings
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = AlsAbility, Meta = (ClampMin = 0, EditCondition = "bAllowFreeze", ForceUnits = "deg"))
 	float AngularSpeedThresholdToFreeze{45.0f};
-
-#if WITH_EDITOR
-	void PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent);
-#endif
 };
 
 USTRUCT(BlueprintType)
@@ -173,7 +171,7 @@ struct ALS_API FAlsRagdollingState
 UCLASS()
 class ALS_API UAlsPhysicalAnimationComponent : public UPhysicalAnimationComponent
 {
-	GENERATED_BODY()
+	GENERATED_UCLASS_BODY()
 	
 protected:
 	// The blend time Of physics blend Weight on activate physics body.
