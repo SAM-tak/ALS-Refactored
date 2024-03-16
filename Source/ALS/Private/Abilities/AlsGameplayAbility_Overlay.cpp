@@ -22,14 +22,5 @@ void UAlsGameplayAbility_Overlay::ActivateAbility(const FGameplayAbilitySpecHand
 	{
 		return;
 	}
-
-	auto* Character{GetAlsCharacterFromActorInfo()};
-
-	UE_LOG(LogTemp, Log, TEXT("UAlsGameplayAbility_Overlay::ActivateAbility %s %d"), *Character->GetName(), bHasBlueprintActivate);
-
-	Character->GetMesh()->LinkAnimClassLayers(OwnAnimLayersClass);
-
-	auto PreviousOverlayMode{Character->GetOverlayMode()};
-
 	Super::ActivateAbility(Handle, ActorInfo, ActivationInfo, TriggerEventData);
 }

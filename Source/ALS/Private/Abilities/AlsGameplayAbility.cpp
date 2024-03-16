@@ -14,7 +14,7 @@ AAlsCharacter* UAlsGameplayAbility::GetAlsCharacterFromActorInfo() const
 	{
 		return nullptr;
 	}
-	return Cast<AAlsCharacter>(CurrentActorInfo->AvatarActor.Get());
+	return Cast<AAlsCharacter>(CurrentActorInfo->OwnerActor.Get());
 }
 
 UAlsAbilitySystemComponent* UAlsGameplayAbility::GetAlsAbilitySystemComponentFromActorInfo() const

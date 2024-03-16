@@ -169,7 +169,7 @@ void AAlsCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLif
 	DOREPLIFETIME_WITH_PARAMS_FAST(ThisClass, DesiredRotationMode, Parameters)
 	DOREPLIFETIME_WITH_PARAMS_FAST(ThisClass, DesiredViewMode, Parameters)
 	DOREPLIFETIME_WITH_PARAMS_FAST(ThisClass, AimingMode, Parameters)
-
+	
 	DOREPLIFETIME_WITH_PARAMS_FAST(ThisClass, bRightShoulder, Parameters)
 	DOREPLIFETIME_WITH_PARAMS_FAST(ThisClass, ReplicatedViewRotation, Parameters)
 	DOREPLIFETIME_WITH_PARAMS_FAST(ThisClass, InputDirection, Parameters)
@@ -245,8 +245,6 @@ void AAlsCharacter::PostInitializeComponents()
 		{
 			AbilitySet->GiveToAbilitySystem(AbilitySystem, nullptr);
 		}
-
-		AbilitySystem->TryActivateAbilitiesBySingleTag(InitialOverlayMode);
 	}
 
 	Super::PostInitializeComponents();
@@ -293,6 +291,11 @@ void AAlsCharacter::BeginPlay()
 	AlsCharacterMovement->SetStance(Stance);
 
 	RefreshGait();
+
+	if (InitialOverlayMode.IsValid())
+	{
+		AbilitySystem->TryActivateAbilitiesBySingleTag(InitialOverlayMode);
+	}
 }
 
 void AAlsCharacter::NotifyControllerChanged()

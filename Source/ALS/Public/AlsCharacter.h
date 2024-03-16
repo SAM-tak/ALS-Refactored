@@ -154,7 +154,7 @@ public:
 
 	FORCEINLINE UAlsAbilitySystemComponent* GetAlsAbilitySystem() const { return AbilitySystem; }
 
-protected:
+	protected:
 	virtual void BeginPlay() override;
 
 	virtual void NotifyControllerChanged() override;
@@ -199,7 +199,6 @@ private:
 	// Desired View Mode
 
 public:
-	UFUNCTION(BlueprintPure, Category = "ALS|Character")
 	const FGameplayTag& GetDesiredViewMode() const;
 
 	UFUNCTION(BlueprintCallable, Category = "ALS|Character", Meta = (AutoCreateRefTerm = "NewDesiredViewMode"))
@@ -217,7 +216,6 @@ public:
 	// View Mode
 
 public:
-	UFUNCTION(BlueprintPure, Category = "ALS|Character")
 	const FGameplayTag& GetViewMode() const;
 
 protected:
@@ -248,7 +246,6 @@ protected:
 	// Aiming Mode
 
 public:
-	UFUNCTION(BlueprintPure, Category = "ALS|Character")
 	const FGameplayTag& GetAimingMode() const;
 
 	UFUNCTION(BlueprintCallable, Category = "ALS|Character")
@@ -279,7 +276,6 @@ protected:
 	// Desired Rotation Mode
 
 public:
-	UFUNCTION(BlueprintPure, Category = "ALS|Character")
 	const FGameplayTag& GetDesiredRotationMode() const;
 
 	UFUNCTION(BlueprintCallable, Category = "ALS|Character", Meta = (AutoCreateRefTerm = "NewDesiredRotationMode"))
@@ -288,7 +284,6 @@ public:
 	// Rotation Mode
 
 public:
-	UFUNCTION(BlueprintPure, Category = "ALS|Character")
 	const FGameplayTag& GetRotationMode() const;
 
 protected:
@@ -302,7 +297,6 @@ protected:
 	// Desired Stance
 
 public:
-	UFUNCTION(BlueprintPure, Category = "ALS|Character")
 	const FGameplayTag& GetDesiredStance() const;
 
 	UFUNCTION(BlueprintCallable, Category = "ALS|Character", Meta = (AutoCreateRefTerm = "NewDesiredStance"))
@@ -325,7 +319,6 @@ public:
 	virtual void OnEndCrouch(float HalfHeightAdjust, float ScaledHalfHeightAdjust) override;
 
 public:
-	UFUNCTION(BlueprintPure, Category = "ALS|Character")
 	const FGameplayTag& GetStance() const;
 
 protected:
@@ -337,7 +330,6 @@ protected:
 	// Desired Gait
 
 public:
-	UFUNCTION(BlueprintPure, Category = "ALS|Character")
 	const FGameplayTag& GetDesiredGait() const;
 
 	UFUNCTION(BlueprintCallable, Category = "ALS|Character", Meta = (AutoCreateRefTerm = "NewDesiredGait"))

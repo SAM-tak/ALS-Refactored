@@ -16,10 +16,6 @@ class ALS_API UAlsGameplayAbility_Overlay : public UAlsGameplayAbility
 	GENERATED_UCLASS_BODY()
 
 protected:
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = AlsAbility)
-	TSubclassOf<UAlsOverlayAnimInstance> OwnAnimLayersClass;
-
-protected:
 	virtual void ActivateAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo,
 								 const FGameplayAbilityActivationInfo ActivationInfo, const FGameplayEventData* TriggerEventData) override;
 };

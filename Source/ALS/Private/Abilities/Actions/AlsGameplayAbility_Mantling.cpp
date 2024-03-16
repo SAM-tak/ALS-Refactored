@@ -348,17 +348,9 @@ void UAlsGameplayAbility_Mantling::CommitParameter(const FGameplayAbilitySpecHan
 void UAlsGameplayAbility_Mantling::ActivateAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo,
 												   const FGameplayAbilityActivationInfo ActivationInfo, const FGameplayEventData* TriggerEventData)
 {
-	if (!CommitAbility(Handle, ActorInfo, ActivationInfo))
+	if (!CommitAbility(Handle, ActorInfo, ActivationInfo) || !ParameterMap.Contains(Handle))
 	{
 		return;
-	}
-
-	if (!ParameterMap.Contains(Handle))
-	{
-		//UE_LOG(LogTemp, Warning, TEXT("UAlsGameplayAbility_Mantling : No Parameter (maybe replicated)"));
-		FAlsMantlingParameters Params;
-		CanMantle(Handle, *ActorInfo, Params);
-		CommitParameter(Handle, Params);
 	}
 
 	const auto& Parameters = ParameterMap[Handle];
