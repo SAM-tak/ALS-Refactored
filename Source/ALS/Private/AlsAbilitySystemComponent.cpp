@@ -1,6 +1,7 @@
 #include "AlsAbilitySystemComponent.h"
 #include "EnhancedInputComponent.h"
 #include "AlsCharacter.h"
+#include "Abilities/AlsGameplayAbility.h"
 
 #include UE_INLINE_GENERATED_CPP_BY_NAME(AlsAbilitySystemComponent)
 
@@ -17,6 +18,7 @@ void UAlsAbilitySystemComponent::OnRegister()
 	if (IsValid(Character))
 	{
 		Character->OnRefresh.AddUObject(this, &ThisClass::OnRefresh);
+		Character->OnContollerChanged.AddUObject(this, &ThisClass::OnControllerChanged);
 	}
 }
 
@@ -46,6 +48,21 @@ void UAlsAbilitySystemComponent::UnbindAbilityInputs(UEnhancedInputComponent* En
 void UAlsAbilitySystemComponent::ActivateOnInputAction(FGameplayTag InputTag)
 {
 	TryActivateAbilitiesBySingleTag(InputTag);
+}
+
+void UAlsAbilitySystemComponent::OnControllerChanged_Implementation(AController* PreviousController, AController* NewController)
+{
+	for (FGameplayAbilitySpec& Spec : ActivatableAbilities.Items)
+	{
+		if (Spec.IsActive())
+		{
+			auto* AlsAbility{Cast<UAlsGameplayAbility>(Spec.Ability)};
+			if (IsValid(AlsAbility))
+			{
+				AlsAbility->OnControllerChanged(PreviousController, NewController);
+			}
+		}
+	}
 }
 
 void UAlsAbilitySystemComponent::OnRefresh_Implementation(float DeltaTime)

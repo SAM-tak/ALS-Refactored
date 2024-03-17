@@ -16,15 +16,8 @@ class ALS_API UAlsGameplayAbility_Ragdolling : public UAlsGameplayAbility_Action
 protected:
 	virtual void ActivateAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo,
 								 const FGameplayAbilityActivationInfo ActivationInfo, const FGameplayEventData* TriggerEventData) override;
-
-	virtual void EndAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilityActivationInfo ActivationInfo,
-							bool bReplicateEndAbility, bool bWasCancelled) override;
-
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "AlsAbility|State", Transient)
 	uint8 bOnGroundedAndAgedFired : 1{false};
-
-	UFUNCTION(BlueprintPure, Category = "ALS|Ability|Ragdolling")
-	UAlsLinkedAnimationInstance* GetOverrideAnimInstance() const;
 
 	UFUNCTION(BlueprintPure, Category = "ALS|Ability|Ragdolling")
 	bool IsGroundedAndAged() const;

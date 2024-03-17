@@ -2,7 +2,7 @@
 
 #include UE_INLINE_GENERATED_CPP_BY_NAME(AlsAnimationInstanceSettings)
 
-UAlsAnimationInstanceSettings::UAlsAnimationInstanceSettings()
+UAlsAnimationInstanceSettings::UAlsAnimationInstanceSettings(const FObjectInitializer& ObjectInitializer) : Super(ObjectInitializer)
 {
 	InAir.GroundPredictionResponseChannels =
 	{

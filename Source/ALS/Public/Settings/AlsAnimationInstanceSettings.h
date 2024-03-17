@@ -13,7 +13,7 @@
 UCLASS(Blueprintable, BlueprintType)
 class ALS_API UAlsAnimationInstanceSettings : public UDataAsset
 {
-	GENERATED_BODY()
+	GENERATED_UCLASS_BODY()
 
 public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings")
@@ -35,9 +35,6 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings")
 	FAlsGeneralTurnInPlaceSettings TurnInPlace;
-
-public:
-	UAlsAnimationInstanceSettings();
 
 #if WITH_EDITOR
 	virtual void PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent) override;

@@ -37,6 +37,8 @@ class ALS_API UAlsGameplayAbility : public UGameplayAbility
 {
 	GENERATED_UCLASS_BODY()
 
+	friend class UAlsAbilitySystemComponent;
+
 protected:
 	// Bind input actions on activate this ability and unbind when finished. (default : true)
 	// If activates too frequency and no needs to input binding, turn off for better performance.
@@ -49,6 +51,9 @@ protected:
 	// A minus value means not override (default)
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = AlsAbility)
 	float OverrideBlendOutTimeOnEndAbility{-1.0f};
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "AlsAbility|State", Transient)
+	uint8 bInputBinded : 1{false};
 
 public:
 	UFUNCTION(BlueprintPure, Category = "ALS|Ability")
@@ -95,4 +100,10 @@ protected:
 
 	UFUNCTION(BlueprintCallable, Category = "ALS|Ability")
 	void SetInputBlocked(bool bBlocked) const;
+
+	virtual void OnControllerChanged(AController* PreviousController, AController* NewController);
+
+	void BindInput(UInputComponent* InputComponent);
+
+	void UnbindInput(UInputComponent* InputComponent);
 };

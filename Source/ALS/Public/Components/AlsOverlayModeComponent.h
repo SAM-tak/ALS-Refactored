@@ -24,7 +24,7 @@ protected:
 
 	virtual void BeginPlay() override;
 
-	virtual void OnRefresh_Implementation(float DeltaTime);
+	virtual void OnRefresh_Implementation(float DeltaTime) override;
 
 	virtual void OnControllerChanged_Implementation(AController* PreviousController, AController* NewController) override;
 

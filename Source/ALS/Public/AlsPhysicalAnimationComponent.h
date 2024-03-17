@@ -9,6 +9,7 @@
 
 class AAlsCharacter;
 class USkeletalBodySetup;
+class UAlsRagdollingSettings;
 
 USTRUCT(BlueprintType)
 struct ALS_API FAlsPhysicalAnimationCurveValues
@@ -42,52 +43,6 @@ struct ALS_API FAlsPhysicalAnimationCurveValues
 	void Refresh(AAlsCharacter* Character);
 
 	float GetLockedValue(const FName& BoneName) const;
-};
-
-USTRUCT(BlueprintType)
-struct ALS_API FAlsRagdollingSettings
-{
-	GENERATED_BODY()
-	
-	FAlsRagdollingSettings();
-
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
-	TSubclassOf<UAlsLinkedAnimationInstance> OverrideAnimLayersClass;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	TEnumAsByte<ECollisionChannel> GroundTraceChannel{ECC_Visibility};
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	TArray<TEnumAsByte<ECollisionChannel>> GroundTraceResponseChannels{ECC_WorldStatic, ECC_WorldDynamic, ECC_Destructible};
-
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = AlsAbility, Transient)
-	FCollisionResponseContainer GroundTraceResponses{ECR_Ignore};
-
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = AlsAbility, Meta = (ClampMin = 0, ForceUnits = "s"))
-	float StartBlendTime{0.25f};
-
-	// If checked, it stops the physical simulation and returns control of the bone to kinematic
-	// when the conditions mentioned later are met.
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = AlsAbility)
-	uint8 bAllowFreeze : 1{false};
-
-	// The time until it freezes forcibly after landing.
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = AlsAbility, Meta = (ClampMin = 0, EditCondition = "bAllowFreeze", ForceUnits = "s"))
-	float TimeAfterGroundedForForceFreezing{5.0f};
-
-	// The time until it forcibly freezes after the root bone is considered to have stopped when landing.
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = AlsAbility, Meta = (ClampMin = 0, EditCondition = "bAllowFreeze", ForceUnits = "s"))
-	float TimeAfterGroundedAndStoppedForForceFreezing{1.0f};
-
-	// When the speed is below this value, the root bone is considered to be stopped.
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = AlsAbility, Meta = (ClampMin = 0, EditCondition = "bAllowFreeze", ForceUnits = "cm/s"))
-	float RootBoneSpeedConsideredAsStopped{5.0f};
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = AlsAbility, Meta = (ClampMin = 0, EditCondition = "bAllowFreeze", ForceUnits = "cm/s"))
-	float SpeedThresholdToFreeze{5.0f};
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = AlsAbility, Meta = (ClampMin = 0, EditCondition = "bAllowFreeze", ForceUnits = "deg"))
-	float AngularSpeedThresholdToFreeze{45.0f};
 };
 
 USTRUCT(BlueprintType)
@@ -135,26 +90,19 @@ struct ALS_API FAlsRagdollingState
 	float MaxBoneAngularSpeed{0.0f};
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
-	uint8 bOnGroundedAndAgedFired : 1{false};
-
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
-	uint8 bCancelRequested : 1{false};
-
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	uint8 bPreviousGrounded : 1{false};
-
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
-	TWeakObjectPtr<UAlsLinkedAnimationInstance> OverrideAnimInstance;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	UAlsRagdollingAnimInstance* RagdollingAnimInstance{nullptr};
 
+	FVector Velocity;
+
 	FVector_NetQuantize TargetLocation;
 
-	FAlsRagdollingSettings* Settings;
 	AAlsCharacter* Character;
+	UAlsRagdollingSettings* Settings;
 
-	void Start(AAlsCharacter* NewCharacter, FAlsRagdollingSettings& NewSettings);
+	void Start(AAlsCharacter* NewCharacter, UAlsRagdollingSettings* NewSettings);
 
 	void Tick(float DeltaTime);
 
@@ -195,7 +143,7 @@ protected:
 	};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "PhysicalAnimation|Settings")
-	TMap<FGameplayTag, FAlsRagdollingSettings> RagdollingSettings;
+	TMap<FGameplayTag, TObjectPtr<UAlsRagdollingSettings>> RagdollingSettingsMap;
 
 	// Name list of PhysicalAnimationProfile Name for override.
 	// Only bodies with physical animation parameters set in any of the profiles in the list will be subject to physical simulation,
@@ -255,6 +203,11 @@ protected:
 	virtual void OnRegister() override;
 
 	virtual void OnRefresh(float DeltaTime);
+
+	void SetRagdollingTargetLocation(const FVector& NewTargetLocation);
+
+	UFUNCTION(Server, Unreliable)
+	void ServerSetRagdollingTargetLocation(const FVector_NetQuantize& NewTargetLocation);
 
 public:
 	virtual void TickComponent(float DeltaTime, enum ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;

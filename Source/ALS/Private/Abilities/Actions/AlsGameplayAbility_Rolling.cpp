@@ -82,15 +82,6 @@ void UAlsGameplayAbility_Rolling::EndAbility(const FGameplayAbilitySpecHandle Ha
 		PhysicsRotationHandle.Reset();
 	}
 
-	if (Character->GetDesiredStance() == AlsDesiredStanceTags::Crouching)
-	{
-		Character->GetAlsAnimationInstace()->SetGroundedEntryMode(AlsGroundedEntryModeTags::StandingToCrouching, StartPositionOfCrouchingEntry);
-	}
-	else
-	{
-		Character->GetAlsAnimationInstace()->SetGroundedEntryMode(AlsGroundedEntryModeTags::CrouchingToStanding, StartPositionOfStandingEntry);
-	}
-
 	Super::EndAbility(Handle, ActorInfo, ActivationInfo, bReplicateEndAbility, bWasCancelled);
 }
 

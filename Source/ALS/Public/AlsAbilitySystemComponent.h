@@ -35,7 +35,10 @@ public:
 protected:
 	virtual void OnRegister() override;
 
-	UFUNCTION(BlueprintNativeEvent, Category = "ALS|CharacterComponent")
+	UFUNCTION(BlueprintNativeEvent, Category = "ALS|AbilitySystem")
+	void OnControllerChanged(AController* PreviousController, AController* NewController);
+
+	UFUNCTION(BlueprintNativeEvent, Category = "ALS|AbilitySystem")
 	void OnRefresh(float DeltaTime);
 
 private:

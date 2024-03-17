@@ -36,5 +36,12 @@ public:
 
 	void UnFreeze();
 
+	void SetStartBlendTime(float NewStartBlendTime);
+
 	void Refresh(const struct FAlsRagdollingState& State, bool bNewActive);
 };
+
+inline void UAlsRagdollingAnimInstance::SetStartBlendTime(float NewStartBlendTime)
+{
+	StartBlendTime = NewStartBlendTime;
+}

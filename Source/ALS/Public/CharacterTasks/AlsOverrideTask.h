@@ -3,24 +3,24 @@
 #pragma once
 
 #include "AlsCharacterTask.h"
-#include "AlsOverlayTask.generated.h"
+#include "AlsOverrideTask.generated.h"
 
-class UAlsOverlayAnimInstance;
+class UAlsLinkedAnimationInstance;
 
 /**
  *
  */
 UCLASS(Abstract)
-class ALS_API UAlsOverlayTask : public UAlsCharacterTask
+class ALS_API UAlsOverrideTask : public UAlsCharacterTask
 {
 	GENERATED_BODY()
 
 protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Settings")
-	TSubclassOf<UAlsOverlayAnimInstance> OverlayAnimClass;
+	TSubclassOf<UAlsLinkedAnimationInstance> OverrideAnimClass;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient)
-	TWeakObjectPtr<UAlsLinkedAnimationInstance> OverlayAnimInstance;
+	TWeakObjectPtr<UAlsLinkedAnimationInstance> OverrideAnimInstance;
 
 public:
 	virtual void Begin() override;

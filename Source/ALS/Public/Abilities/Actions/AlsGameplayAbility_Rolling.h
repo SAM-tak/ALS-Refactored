@@ -32,12 +32,6 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AlsAbility|Rolling", Meta = (EditCondition = bCancelRollingWhenInAir))
 	FGameplayTag TryActiveWhenCancel{AlsLocomotionActionTags::FreeFalling};
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AlsAbility|Rolling", Meta = (ClampMin = 0, ClampMax = 1))
-	float StartPositionOfStandingEntry{0.6f};
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AlsAbility|Rolling", Meta = (ClampMin = 0, ClampMax = 1))
-	float StartPositionOfCrouchingEntry{0.3f};
-
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "AlsAbility|Rolling|State", Transient, Meta = (ForceUnits = "deg"))
 	float TargetYawAngle{0.0f};
 

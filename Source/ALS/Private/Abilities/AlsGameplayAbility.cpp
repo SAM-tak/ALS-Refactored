@@ -33,26 +33,18 @@ void UAlsGameplayAbility::ActivateAbility(const FGameplayAbilitySpecHandle Handl
 {
 	Super::ActivateAbility(Handle, ActorInfo, ActivationInfo, TriggerEventData);
 
-	if (bEnableInputBinding && ActorInfo && ActorInfo->OwnerActor.IsValid())
+	if (ActorInfo && ActorInfo->OwnerActor.IsValid())
 	{
-		auto* InputComponent{ActorInfo->OwnerActor->InputComponent.Get()};
-		if (IsValid(InputComponent))
-		{
-			UInputDelegateBinding::BindInputDelegates(GetClass(), InputComponent, this);
-		}
+		BindInput(ActorInfo->OwnerActor->InputComponent.Get());
 	}
 }
 
 void UAlsGameplayAbility::EndAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo,
 									 const FGameplayAbilityActivationInfo ActivationInfo, bool bReplicateEndAbility, bool bWasCancelled)
 {
-	if (bEnableInputBinding && ActorInfo && ActorInfo->OwnerActor.IsValid())
+	if (ActorInfo && ActorInfo->OwnerActor.IsValid())
 	{
-		auto* InputComponent{ActorInfo->OwnerActor->InputComponent.Get()};
-		if (IsValid(InputComponent))
-		{
-			InputComponent->ClearBindingsForObject(this);
-		}
+		UnbindInput(ActorInfo->OwnerActor->InputComponent.Get());
 	}
 
 	if (bStopCurrentMontageOnEndAbility)
@@ -143,4 +135,34 @@ void UAlsGameplayAbility::SetInputBlocked(bool bBlocked) const
 	{
 		Character->GetAlsCharacterMovement()->SetInputBlocked(bBlocked);
 	}
+}
+
+void UAlsGameplayAbility::OnControllerChanged(AController* PreviousController, AController* NewController)
+{
+	if (IsValid(PreviousController) && IsValid(PreviousController->InputComponent))
+	{
+		UnbindInput(PreviousController->InputComponent);
+	}
+	if (IsValid(NewController) && IsValid(NewController->InputComponent))
+	{
+		BindInput(NewController->InputComponent);
+	}
+}
+
+void UAlsGameplayAbility::BindInput(UInputComponent* InputComponent)
+{
+	if(bEnableInputBinding && !bInputBinded && IsValid(InputComponent))
+	{
+		UInputDelegateBinding::BindInputDelegates(GetClass(), InputComponent, this);
+		bInputBinded = true;
+	}
+}
+
+void UAlsGameplayAbility::UnbindInput(UInputComponent* InputComponent)
+{
+	if(bInputBinded && IsValid(InputComponent))
+	{
+		InputComponent->ClearBindingsForObject(this);
+	}
+	bInputBinded = false;
 }

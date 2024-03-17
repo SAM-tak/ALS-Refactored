@@ -41,7 +41,6 @@ void UAlsRagdollingAnimInstance::Refresh(const FAlsRagdollingState& State, bool 
 
 	//bActive = Ability.IsActive() && !Ability.bIsAbilityEnding; // this is not work. bIsAbilityEnding can be true in Super::EndAbility.
 	bActive = bNewActive;
-	StartBlendTime = State.Settings->StartBlendTime;
 	bGroundedAndAged = State.IsGroundedAndAged();
 	bFacingUpward = State.bFacingUpward;
 	LyingDownYawAngleDelta = State.LyingDownYawAngleDelta;

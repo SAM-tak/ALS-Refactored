@@ -17,18 +17,6 @@
 
 #include UE_INLINE_GENERATED_CPP_BY_NAME(AlsRagdollingTask)
 
-UAlsRagdollingTask::UAlsRagdollingTask(const FObjectInitializer& ObjectInitializer) : Super(ObjectInitializer)
-{
-	GroundTraceResponses.WorldStatic = ECR_Block;
-	GroundTraceResponses.WorldDynamic = ECR_Block;
-	GroundTraceResponses.Destructible = ECR_Block;
-}
-
-void UAlsRagdollingTask::Begin()
-{
-	Super::Begin();
-}
-
 void UAlsRagdollingTask::Refresh(float DeltaTime)
 {
 	auto* PhysicalAnimation{Character->GetPhysicalAnimation()};
@@ -76,27 +64,3 @@ bool UAlsRagdollingTask::IsGroundedAndAged() const
 	auto& RagdollingState{PhysicalAnimation->GetRagdollingState()};
 	return RagdollingState.IsGroundedAndAged();
 }
-
-UAlsLinkedAnimationInstance* UAlsRagdollingTask::GetOverrideAnimInstance() const
-{
-	auto* PhysicalAnimation{Character->GetPhysicalAnimation()};
-	auto& RagdollingState{PhysicalAnimation->GetRagdollingState()};
-	return RagdollingState.OverrideAnimInstance.Get();
-}
-
-#if WITH_EDITOR
-void UAlsRagdollingTask::PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent)
-{
-	if (PropertyChangedEvent.GetPropertyName() != GET_MEMBER_NAME_CHECKED(FAlsRagdollingSettings, GroundTraceResponseChannels))
-	{
-		return;
-	}
-
-	GroundTraceResponses.SetAllChannels(ECR_Ignore);
-
-	for (const auto& CollisionChannel : GroundTraceResponseChannels)
-	{
-		GroundTraceResponses.SetResponse(CollisionChannel, ECR_Block);
-	}
-}
-#endif
