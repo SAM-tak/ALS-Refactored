@@ -169,6 +169,7 @@ void AAlsCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLif
 	DOREPLIFETIME_WITH_PARAMS_FAST(ThisClass, DesiredRotationMode, Parameters)
 	DOREPLIFETIME_WITH_PARAMS_FAST(ThisClass, DesiredViewMode, Parameters)
 	DOREPLIFETIME_WITH_PARAMS_FAST(ThisClass, AimingMode, Parameters)
+	DOREPLIFETIME_WITH_PARAMS_FAST(ThisClass, OverlayMode, Parameters)
 	
 	DOREPLIFETIME_WITH_PARAMS_FAST(ThisClass, bRightShoulder, Parameters)
 	DOREPLIFETIME_WITH_PARAMS_FAST(ThisClass, ReplicatedViewRotation, Parameters)
@@ -291,11 +292,6 @@ void AAlsCharacter::BeginPlay()
 	AlsCharacterMovement->SetStance(Stance);
 
 	RefreshGait();
-
-	if (InitialOverlayMode.IsValid())
-	{
-		AbilitySystem->TryActivateAbilitiesBySingleTag(InitialOverlayMode);
-	}
 }
 
 void AAlsCharacter::NotifyControllerChanged()
@@ -547,13 +543,52 @@ void AAlsCharacter::RefreshMovementBase()
 								 : FRotator::ZeroRotator;
 }
 
-FGameplayTag AAlsCharacter::GetOverlayMode() const
+void AAlsCharacter::SetOverlayMode(const FGameplayTag& NewOverlayMode)
 {
-	if (IsValid(AbilitySystem))
+	SetOverlayMode(NewOverlayMode, true);
+}
+
+void AAlsCharacter::SetOverlayMode(const FGameplayTag& NewOverlayMode, const bool bSendRpc)
+{
+	if (OverlayMode == NewOverlayMode || GetLocalRole() <= ROLE_SimulatedProxy)
 	{
-		AbilitySystem->GetOwnedGameplayTags(TempTagContainer);
+		return;
 	}
-	return TempTagContainer.Filter(Settings->OverlayModeTags).First();
+
+	const auto PreviousOverlayMode{OverlayMode};
+
+	OverlayMode = NewOverlayMode;
+
+	MARK_PROPERTY_DIRTY_FROM_NAME(ThisClass, OverlayMode, this)
+
+	OnOverlayModeChanged.Broadcast(PreviousOverlayMode);
+
+	if (bSendRpc)
+	{
+		if (GetLocalRole() >= ROLE_Authority)
+		{
+			ClientSetOverlayMode(OverlayMode);
+		}
+		else
+		{
+			ServerSetOverlayMode(OverlayMode);
+		}
+	}
+}
+
+void AAlsCharacter::ClientSetOverlayMode_Implementation(const FGameplayTag& NewOverlayMode)
+{
+	SetOverlayMode(NewOverlayMode, false);
+}
+
+void AAlsCharacter::ServerSetOverlayMode_Implementation(const FGameplayTag& NewOverlayMode)
+{
+	SetOverlayMode(NewOverlayMode, false);
+}
+
+void AAlsCharacter::OnReplicated_OverlayMode(const FGameplayTag& PreviousOverlayMode)
+{
+	OnOverlayModeChanged.Broadcast(PreviousOverlayMode);
 }
 
 FGameplayTag AAlsCharacter::GetLocomotionAction() const

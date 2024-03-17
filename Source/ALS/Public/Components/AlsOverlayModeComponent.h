@@ -3,7 +3,7 @@
 #include "AlsCharacterComponent.h"
 #include "AlsOverlayModeComponent.generated.h"
 
-class UAlsOverlayAnimInstance;
+class UAlsOverlayTask;
 
 UCLASS(Abstract, AutoExpandCategories = ("AlsOverlayModeComponent|Settings"))
 class ALS_API UAlsOverlayModeComponent : public UAlsCharacterComponent
@@ -12,17 +12,24 @@ class ALS_API UAlsOverlayModeComponent : public UAlsCharacterComponent
 
 protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "AlsOverlayModeComponent|Settings", Meta = (DisplayThumbnail = false))
-	TMap<FGameplayTag, TSubclassOf<UAlsOverlayAnimInstance>> OverlayAnimLayerMap;
+	TMap<FGameplayTag, TSubclassOf<UAlsOverlayTask>> OverlayClassMap;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "AlsOverlayModeComponent|State", Transient)
-	FGameplayTag CurrentOverlayMode;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "AlsOverlayModeComponent|State", Transient)
+	TObjectPtr<UAlsOverlayTask> CurrentOverlayTask;
+
+	TMap<TSubclassOf<UAlsOverlayTask>, TObjectPtr<UAlsOverlayTask>> InstancedOverlayTasks;
 
 protected:
-	virtual void OnRefresh_Implementation(float DeltaTime) override;
+	virtual void OnRegister() override;
+
+	virtual void BeginPlay() override;
+
+	virtual void OnRefresh_Implementation(float DeltaTime);
+
+	virtual void OnControllerChanged_Implementation(AController* PreviousController, AController* NewController) override;
+
+	void ChangeOverlayTask(const FGameplayTag& OverlayMode);
 
 	UFUNCTION(BlueprintNativeEvent, Category = "ALS|OverlayModeComponent")
-	void OnChangeOverlayMode(const FGameplayTag& NewOverlayMode);
-
-	UFUNCTION(BlueprintCallable, Category = "ALS|OverlayModeComponent")
-	void LinkAnimLayer(const FGameplayTag& Tag);
+	void OnChangeOverlayMode(const FGameplayTag& PreviousOverlayMode);
 };

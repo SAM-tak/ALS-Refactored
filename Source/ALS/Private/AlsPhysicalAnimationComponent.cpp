@@ -79,6 +79,9 @@ float FAlsPhysicalAnimationCurveValues::GetLockedValue(const FName& BoneName) co
 
 UAlsPhysicalAnimationComponent::UAlsPhysicalAnimationComponent(const FObjectInitializer& ObjectInitializer) : Super(ObjectInitializer)
 {
+	SetNetAddressable(); // Make DSO components net addressable
+	SetIsReplicated(true); // Enable replication by default
+
 	for(auto& KeyValue : RagdollingSettings)
 	{
 		KeyValue.Value.GroundTraceResponses.SetAllChannels(ECR_Ignore);
@@ -549,6 +552,7 @@ void UAlsPhysicalAnimationComponent::OnRefresh(float DeltaTime)
 		{
 			bRagdolling = true;
 
+			RagdollingTargetLocation = FVector::ZeroVector;
 			RagdollingState.Start(Character, RagdollingSettings[CurrentRagdolling]);
 
 			GetSkeletalMesh()->SetAllBodiesBelowSimulatePhysics(UAlsConstants::PelvisBoneName(), true);
@@ -580,6 +584,7 @@ void UAlsPhysicalAnimationComponent::OnRefresh(float DeltaTime)
 			bRagdolling = false;
 
 			RagdollingState.End();
+			RagdollingTargetLocation = FVector::ZeroVector;
 
 			CurrentProfileNames.Reset();
 			CurrentMultiplyProfileNames.Reset();
