@@ -52,6 +52,9 @@ struct ALS_API FAlsRagdollingState
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Meta = (ForceUnits = "deg"))
 	float LyingDownYawAngleDelta{0.0f};
+	
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "ALS", Meta = (ForceUnits = "N"))
+	float PullForce{0.0f};
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
 	uint8 bGrounded : 1{false};
@@ -95,14 +98,12 @@ struct ALS_API FAlsRagdollingState
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	UAlsRagdollingAnimInstance* RagdollingAnimInstance{nullptr};
 
-	FVector Velocity;
-
-	FVector_NetQuantize TargetLocation;
+	FVector_NetQuantize TargetLocation{NAN, NAN, NAN};
 
 	AAlsCharacter* Character;
 	UAlsRagdollingSettings* Settings;
 
-	void Start(AAlsCharacter* NewCharacter, UAlsRagdollingSettings* NewSettings);
+	void Start(UAlsRagdollingSettings* NewSettings);
 
 	void Tick(float DeltaTime);
 
@@ -202,6 +203,8 @@ protected:
 protected:
 	virtual void OnRegister() override;
 
+	virtual void BeginPlay() override;
+
 	virtual void OnRefresh(float DeltaTime);
 
 	void SetRagdollingTargetLocation(const FVector& NewTargetLocation);
@@ -219,12 +222,16 @@ public:
 	UFUNCTION(BlueprintPure, Category = "ALS|PhysicalAnimation")
 	bool IsRagdollingAndGroundedAndAged() const;
 
+	UFUNCTION(BlueprintPure, Category = "ALS|PhysicalAnimation")
+	bool IsRagdollingFacingUpward() const;
+
 	UFUNCTION(BlueprintCallable, Category = "ALS|PhysicalAnimation")
 	void RequestActivation(const FGameplayTag &AbilityTag);
 
 	UFUNCTION(BlueprintPure, Category = "ALS|PhysicalAnimation")
 	bool IsBoneUnderSimulation(const FName& BoneName) const;
 
+	UFUNCTION(BlueprintPure, Category = "ALS|PhysicalAnimation")
 	const FAlsRagdollingState& GetRagdollingState() const
 	{
 		return RagdollingState;

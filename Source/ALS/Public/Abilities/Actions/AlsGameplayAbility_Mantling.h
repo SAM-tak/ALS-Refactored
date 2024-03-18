@@ -47,17 +47,6 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings")
 	TObjectPtr<UAnimMontage> Montage;
 
-	// If checked, mantling will automatically calculate the start time based on how much vertical
-	// distance the character needs to move to reach the object they are about to mantle.
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings", Meta = (ClampMin = 0))
-	uint8 bAutoCalculateStartTime : 1{true};
-
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings", Meta = (ClampMin = 0, EditCondition = "!bAutoCalculateStartTime"))
-	FVector2f StartTimeReferenceHeight{50.0f, 100.0f};
-
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings", Meta = (ClampMin = 0, EditCondition = "!bAutoCalculateStartTime"))
-	FVector2f StartTime{0.5f, 0.0f};
-
 	// Optional mantling time to horizontal correction amount curve.
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings")
 	TObjectPtr<UCurveFloat> HorizontalCorrectionCurve;
@@ -143,9 +132,6 @@ public:
 	FGameplayTag TryActiveOnPrimitiveDestruction{AlsLocomotionActionTags::FreeFalling};
 
 protected:
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "AlsAbility|Mantling|State", Transient)
-	int32 RootMotionSourceId{0};
-
 	float CalculateMantlingStartTime(const UAlsMantlingSettings* MantlingSettings, const float MantlingHeight) const;
 
 	UFUNCTION(BlueprintNativeEvent, Category = "ALS|Ability|Mantling")

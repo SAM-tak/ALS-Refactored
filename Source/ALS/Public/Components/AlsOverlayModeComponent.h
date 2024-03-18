@@ -15,9 +15,10 @@ protected:
 	TMap<FGameplayTag, TSubclassOf<UAlsOverlayTask>> OverlayClassMap;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "AlsOverlayModeComponent|State", Transient)
-	TObjectPtr<UAlsOverlayTask> CurrentOverlayTask;
+	TWeakObjectPtr<UAlsOverlayTask> CurrentOverlayTask;
 
-	TMap<TSubclassOf<UAlsOverlayTask>, TObjectPtr<UAlsOverlayTask>> InstancedOverlayTasks;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "AlsOverrideModeComponent|State", Transient)
+	TMap<FGameplayTag, TObjectPtr<UAlsOverlayTask>> InstancedOverlayTasks;
 
 protected:
 	virtual void OnRegister() override;

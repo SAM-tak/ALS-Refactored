@@ -37,24 +37,12 @@ void UAlsRagdollingTask::Refresh(float DeltaTime)
 			K2_OnGroundedAndAged();
 		}
 		Character->Lie();
+		auto* AbilitySystem{Character->GetAlsAbilitySystem()};
+		AbilitySystem->SetLooseGameplayTagCount(AlsStateFlagTags::FacingUpward, RagdollingState.bFacingUpward ? 1 : 0);
 	}
 	else
 	{
 		bOnGroundedAndAgedFired = false;
-	}
-}
-
-void UAlsRagdollingTask::OnEnd(bool bWasCancelled)
-{
-	Super::OnEnd(bWasCancelled);
-
-	auto* PhysicalAnimation{Character->GetPhysicalAnimation()};
-	auto& RagdollingState{PhysicalAnimation->GetRagdollingState()};
-
-	if (RagdollingState.IsGroundedAndAged())
-	{
-		auto* AbilitySystem{Character->GetAlsAbilitySystem()};
-		AbilitySystem->SetLooseGameplayTagCount(AlsStateFlagTags::FacingUpward, RagdollingState.bFacingUpward ? 1 : 0);
 	}
 }
 

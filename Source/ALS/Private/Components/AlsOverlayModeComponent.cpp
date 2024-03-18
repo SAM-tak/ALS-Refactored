@@ -32,24 +32,24 @@ void UAlsOverlayModeComponent::BeginPlay()
 
 void UAlsOverlayModeComponent::ChangeOverlayTask(const FGameplayTag& OverlayMode)
 {
-	if (IsValid(CurrentOverlayTask))
+	if (CurrentOverlayTask.IsValid())
 	{
 		CurrentOverlayTask->End();
-		CurrentOverlayTask = nullptr;
+		CurrentOverlayTask.Reset();
 	}
 
 	if (OverlayClassMap.Contains(OverlayMode))
 	{
-		auto& TaskClass{OverlayClassMap[OverlayMode]};
-		if (InstancedOverlayTasks.Contains(TaskClass))
+		if (InstancedOverlayTasks.Contains(OverlayMode))
 		{
-			CurrentOverlayTask = InstancedOverlayTasks[TaskClass].Get();
+			CurrentOverlayTask = InstancedOverlayTasks[OverlayMode];
 		}
 		else
 		{
-			CurrentOverlayTask = NewObject<UAlsOverlayTask>(Character.Get(), TaskClass);
-			CurrentOverlayTask->OnRegister();
-			InstancedOverlayTasks.Add(TaskClass, CurrentOverlayTask);
+			auto* NewTask{NewObject<UAlsOverlayTask>(Character.Get(), OverlayClassMap[OverlayMode])};
+			NewTask->OnRegister();
+			InstancedOverlayTasks.Add(OverlayMode, NewTask);
+			CurrentOverlayTask = NewTask;
 		}
 		CurrentOverlayTask->Begin();
 	}
@@ -58,7 +58,7 @@ void UAlsOverlayModeComponent::ChangeOverlayTask(const FGameplayTag& OverlayMode
 void UAlsOverlayModeComponent::OnRefresh_Implementation(float DeltaTime)
 {
 	Super::OnRefresh_Implementation(DeltaTime);
-	if (IsValid(CurrentOverlayTask))
+	if (CurrentOverlayTask.IsValid())
 	{
 		CurrentOverlayTask->Refresh(DeltaTime);
 	}
@@ -67,7 +67,7 @@ void UAlsOverlayModeComponent::OnRefresh_Implementation(float DeltaTime)
 void UAlsOverlayModeComponent::OnControllerChanged_Implementation(AController* PreviousController, AController* NewController)
 {
 	Super::OnControllerChanged_Implementation(PreviousController, NewController);
-	if (IsValid(CurrentOverlayTask))
+	if (CurrentOverlayTask.IsValid())
 	{
 		CurrentOverlayTask->OnControllerChanged(PreviousController, NewController);
 	}

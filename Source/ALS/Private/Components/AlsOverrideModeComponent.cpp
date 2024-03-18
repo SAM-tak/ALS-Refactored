@@ -13,37 +13,43 @@ void UAlsOverrideModeComponent::BeginPlay()
 	Super::BeginPlay();
 
 	InstancedOverrideTasks.Reset();
+	OverrideTagsMask.Reset();
+	for(auto& KeyValue : OverrideClassMap)
+	{
+		OverrideTagsMask.AddTag(KeyValue.Key);
+	}
 }
 
 void UAlsOverrideModeComponent::ChangeOverrideTaskIfNeeded(const FGameplayTag& OverrideMode)
 {
-	if (IsValid(CurrentOverrideTask))
+	if (CurrentOverrideTask.IsValid())
 	{
-		auto* Key{OverrideClassMap.FindKey(CurrentOverrideTask->GetClass())};
-		if (Key && (*Key) == OverrideMode)
+		if (CurrentOverrideTag == OverrideMode)
 		{
 			return;
 		}
 		else
 		{
 			CurrentOverrideTask->End();
-			CurrentOverrideTask = nullptr;
+			CurrentOverrideTask.Reset();
+			CurrentOverrideTag = FGameplayTag::EmptyTag;
 		}
 	}
 
 	if (OverrideClassMap.Contains(OverrideMode))
 	{
-		auto& TaskClass{OverrideClassMap[OverrideMode]};
-		if (InstancedOverrideTasks.Contains(TaskClass))
+		if (InstancedOverrideTasks.Contains(OverrideMode))
 		{
-			CurrentOverrideTask = InstancedOverrideTasks[TaskClass].Get();
+			CurrentOverrideTask = InstancedOverrideTasks[OverrideMode];
 		}
 		else
 		{
-			CurrentOverrideTask = NewObject<UAlsOverrideTask>(Character.Get(), TaskClass);
+			auto* NewTask{NewObject<UAlsOverrideTask>(Character.Get(), OverrideClassMap[OverrideMode])};
+			InstancedOverrideTasks.Add(OverrideMode, NewTask);
+			CurrentOverrideTask = NewTask;
 			CurrentOverrideTask->OnRegister();
-			InstancedOverrideTasks.Add(TaskClass, CurrentOverrideTask);
 		}
+		CurrentOverrideTag = OverrideMode;
 		CurrentOverrideTask->Begin();
 	}
 }
@@ -51,7 +57,14 @@ void UAlsOverrideModeComponent::ChangeOverrideTaskIfNeeded(const FGameplayTag& O
 void UAlsOverrideModeComponent::OnRefresh_Implementation(float DeltaTime)
 {
 	Super::OnRefresh_Implementation(DeltaTime);
-	if (IsValid(CurrentOverrideTask))
+
+	FGameplayTagContainer Container;
+	Character->GetOwnedGameplayTags(Container);
+	auto CurrentOverrideTags{Container.Filter(OverrideTagsMask)};
+
+	ChangeOverrideTaskIfNeeded(CurrentOverrideTags.First());
+
+	if (CurrentOverrideTask.IsValid())
 	{
 		CurrentOverrideTask->Refresh(DeltaTime);
 	}
@@ -60,7 +73,7 @@ void UAlsOverrideModeComponent::OnRefresh_Implementation(float DeltaTime)
 void UAlsOverrideModeComponent::OnControllerChanged_Implementation(AController* PreviousController, AController* NewController)
 {
 	Super::OnControllerChanged_Implementation(PreviousController, NewController);
-	if (IsValid(CurrentOverrideTask))
+	if (CurrentOverrideTask.IsValid())
 	{
 		CurrentOverrideTask->OnControllerChanged(PreviousController, NewController);
 	}

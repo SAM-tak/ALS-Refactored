@@ -26,9 +26,6 @@ public:
 	virtual void Refresh(float DeltaTime) override;
 
 protected:
-	virtual void OnEnd(bool bWasCancelled) override;
-
-protected:
 	UFUNCTION(BlueprintImplementableEvent, Category = "ALS|CharacterTask|Ragdolling", DisplayName = "On Grounded And Aged", Meta = (ScriptName = "OnGroundedAndAged"))
 	void K2_OnGroundedAndAged();
 };

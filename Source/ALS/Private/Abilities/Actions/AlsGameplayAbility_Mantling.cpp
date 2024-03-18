@@ -363,6 +363,7 @@ void UAlsGameplayAbility_Mantling::ActivateAbility(const FGameplayAbilitySpecHan
 	auto* Character{GetAlsCharacterFromActorInfo()};
 	auto* AnimInstance{Character->GetAlsAnimationInstace()};
 	auto* CharacterMovement{Character->GetAlsCharacterMovement()};
+	auto* AbilitySystem{GetAlsAbilitySystemComponentFromActorInfo()};
 	
 	const auto* MantlingSettings{SelectMantlingSettings(Parameters)};
 
@@ -401,38 +402,6 @@ void UAlsGameplayAbility_Mantling::ActivateAbility(const FGameplayAbilitySpecHan
 	const auto ActorFeetLocationOffset{CharacterMovement->GetActorFeetLocation() - TargetTransform.GetLocation()};
 	const auto ActorRotationOffset{TargetTransform.GetRotation().Inverse() * Character->GetActorQuat()};
 
-	// Reset network smoothing.
-
-	CharacterMovement->NetworkSmoothingMode = ENetworkSmoothingMode::Disabled;
-
-	Character->GetMesh()->SetRelativeLocationAndRotation(Character->GetBaseTranslationOffset(),
-														 Character->GetMesh()->IsUsingAbsoluteRotation()
-															? Character->GetActorQuat() * Character->GetBaseRotationOffset()
-															: Character->GetBaseRotationOffset(), false, nullptr, ETeleportType::TeleportPhysics);
-
-	// Clear the character movement mode and set the locomotion action to mantling.
-
-	CharacterMovement->SetMovementMode(MOVE_Custom);
-	CharacterMovement->SetMovementModeLocked(true);
-
-	// CharacterMovement->SetBase(Parameters.TargetPrimitive.Get()); // rises exception
-
-	// Apply mantling root motion.
-
-	const auto RootMotionSource{MakeShared<FAlsRootMotionSource_Mantling>()};
-	RootMotionSource->InstanceName = __FUNCTION__;
-	RootMotionSource->Duration = Duration / PlayRate;
-	RootMotionSource->MantlingSettings = MantlingSettings;
-	RootMotionSource->TargetPrimitive = Parameters.TargetPrimitive;
-	RootMotionSource->TargetRelativeLocation = Parameters.TargetRelativeLocation;
-	RootMotionSource->TargetRelativeRotation = TargetRelativeRotation;
-	RootMotionSource->ActorFeetLocationOffset = ActorFeetLocationOffset;
-	RootMotionSource->ActorRotationOffset = ActorRotationOffset.Rotator();
-	RootMotionSource->TargetAnimationLocation = TargetAnimationLocation;
-	RootMotionSource->MontageStartTime = StartTime;
-
-	RootMotionSourceId = CharacterMovement->ApplyRootMotionSource(RootMotionSource);
-
 	// Play the animation montage if valid.
 	PlayMontage(ActivationInfo, MantlingSettings->Montage, PlayRate, NAME_None, StartTime, Handle, ActorInfo);
 
@@ -440,6 +409,12 @@ void UAlsGameplayAbility_Mantling::ActivateAbility(const FGameplayAbilitySpecHan
 	{
 		return;
 	}
+	
+	// Apply mantling root motion.
+
+	AbilitySystem->SetMantlingRootMotion({
+		MantlingSettings, Parameters.TargetPrimitive, Parameters.TargetRelativeLocation, TargetAnimationLocation, TargetRelativeRotation, StartTime
+	});
 
 	Super::ActivateAbility(Handle, ActorInfo, ActivationInfo, TriggerEventData);
 
@@ -452,7 +427,6 @@ void UAlsGameplayAbility_Mantling::ActivateAbility(const FGameplayAbilitySpecHan
 			TickTask->ReadyForActivation();
 		}
 
-		auto* AbilitySystem{GetAlsAbilitySystemComponentFromActorInfo()};
 		AbilitySystem->SetLooseGameplayTagCount(AlsStateFlagTags::MantleHigh, Parameters.MantlingType == EAlsMantlingType::High ? 1 : 0);
 		AbilitySystem->SetLooseGameplayTagCount(AlsStateFlagTags::MantleMedium, Parameters.MantlingType == EAlsMantlingType::Medium ? 1 : 0);
 		AbilitySystem->SetLooseGameplayTagCount(AlsStateFlagTags::MantleLow, Parameters.MantlingType == EAlsMantlingType::Low ? 1 : 0);
@@ -470,9 +444,8 @@ void UAlsGameplayAbility_Mantling::Tick_Implementation(const float DeltaTime)
 		return;
 	}
 
-	const auto* RootMotionSource{
-		StaticCastSharedPtr<FAlsRootMotionSource_Mantling>(CharacterMovement->GetRootMotionSourceByID(RootMotionSourceId)).Get()
-	};
+	auto* AbilitySystem{GetAlsAbilitySystemComponentFromActorInfo()};
+	const auto* RootMotionSource{AbilitySystem->GetCurrentMantlingRootMotionSource()};
 
 	if (RootMotionSource != nullptr && !RootMotionSource->TargetPrimitive.IsValid())
 	{
@@ -493,17 +466,7 @@ void UAlsGameplayAbility_Mantling::EndAbility(const FGameplayAbilitySpecHandle H
 	auto* Character{GetAlsCharacterFromActorInfo()};
 	auto* AnimInstance{Character->GetAlsAnimationInstace()};
 	auto CharacterMovement{Character->GetAlsCharacterMovement()};
-	
-	auto* RootMotionSource{
-		StaticCastSharedPtr<FAlsRootMotionSource_Mantling>(CharacterMovement->GetRootMotionSourceByID(RootMotionSourceId)).Get()
-	};
-
-	if (RootMotionSource != nullptr)
-	{
-		RootMotionSource->Status.SetFlag(ERootMotionSourceStatusFlags::MarkedForRemoval);
-	}
-
-	RootMotionSourceId = 0;
+	auto* AbilitySystem{GetAlsAbilitySystemComponentFromActorInfo()};
 
 	CharacterMovement->NetworkSmoothingMode = ENetworkSmoothingMode::Exponential;
 
@@ -512,7 +475,6 @@ void UAlsGameplayAbility_Mantling::EndAbility(const FGameplayAbilitySpecHandle H
 
 	Character->ForceNetUpdate();
 
-	auto* AbilitySystem{GetAlsAbilitySystemComponentFromActorInfo()};
 	AbilitySystem->SetLooseGameplayTagCount(AlsStateFlagTags::MantleHigh, 0);
 	AbilitySystem->SetLooseGameplayTagCount(AlsStateFlagTags::MantleMedium, 0);
 	AbilitySystem->SetLooseGameplayTagCount(AlsStateFlagTags::MantleLow, 0);
@@ -520,11 +482,6 @@ void UAlsGameplayAbility_Mantling::EndAbility(const FGameplayAbilitySpecHandle H
 
 float UAlsGameplayAbility_Mantling::CalculateMantlingStartTime(const UAlsMantlingSettings* MantlingSettings, const float MantlingHeight) const
 {
-	if (!MantlingSettings->bAutoCalculateStartTime)
-	{
-		return FMath::GetMappedRangeValueClamped(MantlingSettings->StartTimeReferenceHeight, MantlingSettings->StartTime, MantlingHeight);
-	}
-
 	// https://landelare.github.io/2022/05/15/climbing-with-root-motion.html
 
 	const auto* Montage{MantlingSettings->Montage.Get()};

@@ -20,6 +20,22 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings", Meta = (ClampMin = 0, ForceUnits = "s"))
 	float StartBlendTime{0.25f};
+	
+	// for correction in multiplayer
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Settings|Multiplyer")
+	float TargetPullForce{750.0f};
+
+	// for correction in multiplayer
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Settings|Multiplyer")
+	float PullForceInterpolationSpeed{0.6f};
+
+	// for correction in multiplayer
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Settings|Multiplyer", Meta = (ClampMin = 0, ForceUnits = "cm"))
+	float MinPullForceDistance{5.0f};
+
+	// for correction in multiplayer
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Settings|Multiplyer", Meta = (ClampMin = 0, ForceUnits = "cm"))
+	float MaxPullForceDistance{50.0f};
 
 	// If checked, it stops the physical simulation and returns control of the bone to kinematic
 	// when the conditions mentioned later are met.
@@ -27,21 +43,21 @@ public:
 	uint8 bAllowFreeze : 1{false};
 
 	// The time until it freezes forcibly after landing.
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Settings", Meta = (ClampMin = 0, EditCondition = "bAllowFreeze", ForceUnits = "s"))
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Settings|Freezing", Meta = (ClampMin = 0, EditCondition = "bAllowFreeze", ForceUnits = "s"))
 	float TimeAfterGroundedForForceFreezing{5.0f};
 
 	// The time until it forcibly freezes after the root bone is considered to have stopped when landing.
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Settings", Meta = (ClampMin = 0, EditCondition = "bAllowFreeze", ForceUnits = "s"))
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Settings|Freezing", Meta = (ClampMin = 0, EditCondition = "bAllowFreeze", ForceUnits = "s"))
 	float TimeAfterGroundedAndStoppedForForceFreezing{1.0f};
 
 	// When the speed is below this value, the root bone is considered to be stopped.
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Settings", Meta = (ClampMin = 0, EditCondition = "bAllowFreeze", ForceUnits = "cm/s"))
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Settings|Freezing", Meta = (ClampMin = 0, EditCondition = "bAllowFreeze", ForceUnits = "cm/s"))
 	float RootBoneSpeedConsideredAsStopped{5.0f};
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Settings", Meta = (ClampMin = 0, EditCondition = "bAllowFreeze", ForceUnits = "cm/s"))
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Settings|Freezing", Meta = (ClampMin = 0, EditCondition = "bAllowFreeze", ForceUnits = "cm/s"))
 	float SpeedThresholdToFreeze{5.0f};
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Settings", Meta = (ClampMin = 0, EditCondition = "bAllowFreeze", ForceUnits = "deg"))
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Settings|Freezing", Meta = (ClampMin = 0, EditCondition = "bAllowFreeze", ForceUnits = "deg"))
 	float AngularSpeedThresholdToFreeze{45.0f};
 
 #if WITH_EDITOR
