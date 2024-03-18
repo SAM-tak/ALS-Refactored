@@ -98,9 +98,13 @@ struct ALS_API FAlsRagdollingState
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	UAlsRagdollingAnimInstance* RagdollingAnimInstance{nullptr};
 
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	FVector_NetQuantize TargetLocation{NAN, NAN, NAN};
 
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	AAlsCharacter* Character;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	UAlsRagdollingSettings* Settings;
 
 	void Start(UAlsRagdollingSettings* NewSettings);

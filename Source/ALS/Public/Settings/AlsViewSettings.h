@@ -13,9 +13,6 @@ struct ALS_API FAlsViewSettings
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS", Meta = (ClampMin = 0))
 	float AdjustControllRotationSpeed{15.0f};
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS", Meta = (ClampMin = 0, ForceUnits = "s"))
-	float ViewModeChangeBlockTime{0.08f};
-
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "ALS")
 	uint8 bEnableNetworkSmoothing : 1 {true};
 

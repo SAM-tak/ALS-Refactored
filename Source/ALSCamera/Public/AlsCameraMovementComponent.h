@@ -76,10 +76,13 @@ protected:
 	uint8 bIsFocusPawn : 1 {false};
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "AlsCameraMovement|State", Transient)
-	FGameplayTag PreviousViewMode{AlsViewModeTags::ThirdPerson};
+	FGameplayTag ConfirmedDesiredViewMode{AlsDesiredViewModeTags::ThirdPerson};
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "AlsCameraMovement|State", Transient)
-	uint8 bFPP : 1 {false};
+	FGameplayTag PreviousDesiredViewMode{AlsDesiredViewModeTags::ThirdPerson};
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "AlsCameraMovement|State", Transient, Meta = (ClampMin = 0, ForceUnits = "s"))
+	float ViewModeChangeBlockTime{0.f};
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "AlsCameraMovement|State", Transient)
 	uint8 bInAutoFPP : 1 {false};
@@ -116,9 +119,6 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "ALS|Camera Movement")
 	UCameraComponent* GetCameraComponent() const;
 
-	UFUNCTION(BlueprintPure, Category = "ALS|Camera Movement")
-	bool IsFirstPerson() const;
-
 	UFUNCTION(BlueprintPure, Category = "ALS|Camera Movement", Meta = (ReturnDisplayName = "Camera Location"))
 	FVector GetFirstPersonCameraLocation() const;
 
@@ -133,6 +133,9 @@ public:
 
 	UFUNCTION(BlueprintPure, Category = "ALS|Camera Movement", Meta = (ReturnDisplayName = "Focus Location"))
 	FVector GetCurrentFocusLocation() const;
+
+	UFUNCTION(BlueprintPure, Category = "ALS|Camera Movement", Meta = (ReturnDisplayName = "Desired View Mode"))
+	const FGameplayTag& GetConfirmedDesiredViewMode() const;
 
 private:
 	void TickCamera(float DeltaTime, bool bAllowLag = true);
@@ -185,4 +188,9 @@ inline FVector UAlsCameraMovementComponent::GetCurrentFocusLocation() const
 inline UCameraComponent* UAlsCameraMovementComponent::GetCameraComponent() const
 {
 	return TargetCamera.Get();
+}
+
+inline const FGameplayTag& UAlsCameraMovementComponent::GetConfirmedDesiredViewMode() const
+{
+	return ConfirmedDesiredViewMode;
 }

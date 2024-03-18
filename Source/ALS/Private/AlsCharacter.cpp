@@ -1141,8 +1141,6 @@ FRotator AAlsCharacter::GetViewRotation() const
 	return ViewState.Rotation;
 }
 
-void AAlsCharacter::OnChangedPerspective_Implementation(bool bFirstPersonPerspective) {}
-
 void AAlsCharacter::SetInputDirection(FVector NewInputDirection)
 {
 	NewInputDirection = NewInputDirection.GetSafeNormal();
@@ -1286,20 +1284,6 @@ void AAlsCharacter::TryAdjustControllRotation(float DeltaTime)
 
 void AAlsCharacter::RefreshView(const float DeltaTime)
 {
-	if (ViewModeChangeBlockTime > 0.f)
-	{
-		ViewModeChangeBlockTime -= DeltaTime;
-	}
-	else
-	{
-		const auto& NewViewMode{DesiredToActual(DesiredViewMode)};
-		if (ViewMode != NewViewMode)
-		{
-			SetViewMode(NewViewMode);
-			ViewModeChangeBlockTime = Settings->View.ViewModeChangeBlockTime;
-		}
-	}
-
 	if (MovementBase.bHasRelativeRotation)
 	{
 		// Offset the rotations to keep them relative to the movement base.

@@ -107,9 +107,6 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Als Character|State", Transient)
 	FAlsViewState ViewState;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Als Character|State", Transient, Meta = (ClampMin = 0, ForceUnits = "s"))
-	float ViewModeChangeBlockTime{0.f};
-
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Als Character|State", Transient, Replicated)
 	FVector_NetQuantizeNormal InputDirection;
 
@@ -226,9 +223,10 @@ public:
 public:
 	const FGameplayTag& GetViewMode() const;
 
-protected:
 	UFUNCTION(BlueprintCallable, Category = "ALS|Character")
 	void SetViewMode(const FGameplayTag& NewViewMode);
+
+protected:
 
 	UFUNCTION(BlueprintNativeEvent, Category = "ALS|Character")
 	void OnViewModeChanged(const FGameplayTag& PreviousViewMode);
@@ -426,9 +424,6 @@ private:
 
 public:
 	virtual FRotator GetViewRotation() const override;
-
-	UFUNCTION(BlueprintNativeEvent, Category = "ALS|Character")
-	void OnChangedPerspective(bool bFirstPersonPerspective);
 
 	UFUNCTION(BlueprintCallable, Category = "ALS|Character")
 	void SetLookRotation(const FRotator& NewLookRotation);

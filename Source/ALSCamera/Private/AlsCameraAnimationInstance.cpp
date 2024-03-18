@@ -25,5 +25,9 @@ void UAlsCameraAnimationInstance::NativeUpdateAnimation(const float DeltaTime)
 
 	Character->GetOwnedGameplayTags(CurrentGameplayTags);
 
+	CurrentGameplayTags.RemoveTag(AlsDesiredViewModeTags::FirstPerson);
+	CurrentGameplayTags.RemoveTag(AlsDesiredViewModeTags::ThirdPerson);
+	CurrentGameplayTags.AddTag(CameraMovement->GetConfirmedDesiredViewMode());
+
 	bRightShoulder = Character->IsRightShoulder();
 }

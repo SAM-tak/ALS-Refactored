@@ -123,6 +123,8 @@ void UAlsCameraMovementComponent::RegisterComponentTickFunctions(const bool bReg
 
 void UAlsCameraMovementComponent::BeginPlay()
 {
+	Super::BeginPlay();
+
 	ALS_ENSURE(IsValid(Settings));
 	ALS_ENSURE(IsValid(GetAnimInstance()));
 	ALS_ENSURE(Character.IsValid());
@@ -136,15 +138,18 @@ void UAlsCameraMovementComponent::BeginPlay()
 
 	if (GetAnimInstance())
 	{
-		bFPP = FAnimWeight::IsFullWeight(UAlsMath::Clamp01(GetAnimInstance()->GetCurveValue(UAlsCameraConstants::FirstPersonOverrideCurveName())));
+		if (FAnimWeight::IsFullWeight(UAlsMath::Clamp01(GetAnimInstance()->GetCurveValue(UAlsCameraConstants::FirstPersonOverrideCurveName()))))
+		{
+			Character->SetViewMode(AlsViewModeTags::FirstPerson);
+		}
+		else
+		{
+			Character->SetViewMode(AlsViewModeTags::ThirdPerson);
+		}
 	}
 	bPreviousRightShoulder = Settings->ThirdPerson.bRightShoulder;
 	Character->SetRightShoulder(Settings->ThirdPerson.bRightShoulder);
-	PreviousViewMode = Character->GetViewMode();
-
-	Super::BeginPlay();
-
-	Character->OnChangedPerspective(bFPP);
+	ConfirmedDesiredViewMode = Character->GetDesiredViewMode();
 }
 
 void UAlsCameraMovementComponent::TickComponent(float DeltaTime, const ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
@@ -262,6 +267,22 @@ void UAlsCameraMovementComponent::TickCamera(const float DeltaTime, bool bAllowL
 	};
 #endif
 
+	// Refresh desired view mode information.
+
+	if (ViewModeChangeBlockTime > 0.f)
+	{
+		ViewModeChangeBlockTime -= DeltaTime;
+	}
+	else
+	{
+		auto& CurrentDesiredViewMode = Character->GetDesiredViewMode();
+		if (CurrentDesiredViewMode != ConfirmedDesiredViewMode)
+		{
+			ViewModeChangeBlockTime = Settings->ViewModeChangeBlockTime;
+		}
+		ConfirmedDesiredViewMode = CurrentDesiredViewMode;
+	}
+
 	// Refresh movement base.
 
 	const auto& BasedMovement{Character->GetBasedMovement()};
@@ -342,12 +363,7 @@ void UAlsCameraMovementComponent::TickCamera(const float DeltaTime, bool bAllowL
 			TargetCamera->SetWorldLocationAndRotation(CameraLocation, CameraRotation);
 		}
 
-		if (!bFPP)
-		{
-			bFPP = true;
-			// call Begin FPP Event
-			Character->OnChangedPerspective(true);
-		}
+		Character->SetViewMode(AlsViewModeTags::FirstPerson);
 		return;
 	}
 
@@ -431,11 +447,11 @@ void UAlsCameraMovementComponent::TickCamera(const float DeltaTime, bool bAllowL
 
 	const auto CameraResultLocation{CalculateCameraTrace(CameraTargetLocation, PivotOffset, DeltaTime, bAllowLag)};
 
-	if (PreviousViewMode != Character->GetViewMode())
+	if (PreviousDesiredViewMode != ConfirmedDesiredViewMode)
 	{
 		// Set aim point correction during change FPP/TPP
 		auto FocusLocation{GetCurrentFocusLocation()};
-		if (PreviousViewMode == AlsViewModeTags::FirstPerson)
+		if (PreviousDesiredViewMode == AlsDesiredViewModeTags::FirstPerson)
 		{
 			// FPP -> TPP
 			auto TPPCameraLocation{FVector::PointPlaneProject(CameraResultLocation, PivotLocation, -CameraRotation.Vector())};
@@ -457,7 +473,7 @@ void UAlsCameraMovementComponent::TickCamera(const float DeltaTime, bool bAllowL
 			}
 #endif
 		}
-		else if (PreviousViewMode == AlsViewModeTags::ThirdPerson)
+		else if (PreviousDesiredViewMode == AlsDesiredViewModeTags::ThirdPerson)
 		{
 			// TPP -> FPP
 			auto FocalRotation{(FocusLocation - GetEyeCameraLocation()).Rotation()};
@@ -471,7 +487,7 @@ void UAlsCameraMovementComponent::TickCamera(const float DeltaTime, bool bAllowL
 			}
 #endif
 		}
-		PreviousViewMode = Character->GetViewMode();
+		PreviousDesiredViewMode = ConfirmedDesiredViewMode;
 	}
 
 	bool bRightShoulder{Character->IsRightShoulder()};
@@ -544,12 +560,7 @@ void UAlsCameraMovementComponent::TickCamera(const float DeltaTime, bool bAllowL
 		}
 	}
 
-	if (bFPP != bInAutoFPP)
-	{
-		bFPP = bInAutoFPP;
-		// call Begin/End FPP Event
-		Character->OnChangedPerspective(bFPP);
-	}
+	Character->SetViewMode(bInAutoFPP ? AlsViewModeTags::FirstPerson : AlsViewModeTags::ThirdPerson);
 }
 
 FRotator UAlsCameraMovementComponent::CalculateCameraRotation(const FRotator& CameraTargetRotation,
@@ -909,7 +920,7 @@ void UAlsCameraMovementComponent::UpdateFocalLength()
 
 	auto EyeVec = CameraRotation.Vector();
 	FVector TraceStart = CameraLocation + EyeVec * Settings->MinFocalLength;
-	if (!IsFirstPerson())
+	if (Character->GetViewMode() != AlsViewModeTags::FirstPerson)
 	{
 		auto ProjectedLocation = FVector::PointPlaneProject(CameraLocation, GetFirstPersonCameraLocation(), -EyeVec);
 		auto ProjectedLocationDistance = FVector::Distance(TraceStart, ProjectedLocation);
@@ -969,10 +980,4 @@ void UAlsCameraMovementComponent::UpdateADSCameraShake(float FirstPersonOverride
 			CurrentADSCameraShake = nullptr;
 		}
 	}
-}
-
-bool UAlsCameraMovementComponent::IsFirstPerson() const
-{
-	return FAnimWeight::IsFullWeight(UAlsMath::Clamp01(GetAnimInstance()->GetCurveValue(UAlsCameraConstants::FirstPersonOverrideCurveName())))
-		|| bInAutoFPP;
 }

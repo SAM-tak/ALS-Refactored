@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 
 #include "Engine/DataAsset.h"
 #include "Engine/Scene.h"
@@ -171,6 +171,9 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings")
 	FAlsThirdPersonCameraSettings ThirdPerson;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings", Meta = (ClampMin = 0, ForceUnits = "s"))
+	float ViewModeChangeBlockTime{0.08f};
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings", Meta = (InlineEditConditionToggle))
 	uint8 bEnableCameraLagSubstepping : 1;
