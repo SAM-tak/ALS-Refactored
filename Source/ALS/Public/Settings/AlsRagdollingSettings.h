@@ -6,36 +6,19 @@
 UCLASS(Blueprintable, BlueprintType)
 class ALS_API UAlsRagdollingSettings : public UDataAsset
 {
-	GENERATED_UCLASS_BODY()
+	GENERATED_BODY()
 
 public:
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Settings")
-	TEnumAsByte<ECollisionChannel> GroundTraceChannel{ECC_Visibility};
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Settings")
-	TArray<TEnumAsByte<ECollisionChannel>> GroundTraceResponseChannels{ECC_WorldStatic, ECC_WorldDynamic, ECC_Destructible};
-
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Settings")
-	FCollisionResponseContainer GroundTraceResponses{ECR_Ignore};
-
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings", Meta = (ClampMin = 0, ForceUnits = "s"))
 	float StartBlendTime{0.25f};
 	
 	// for correction in multiplayer
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Settings|Multiplyer")
-	float TargetPullForce{750.0f};
+	float SimulatedProxyInterpolationSpeed{30.0f};
 
 	// for correction in multiplayer
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Settings|Multiplyer")
-	float PullForceInterpolationSpeed{0.6f};
-
-	// for correction in multiplayer
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Settings|Multiplyer", Meta = (ClampMin = 0, ForceUnits = "cm"))
-	float MinPullForceDistance{5.0f};
-
-	// for correction in multiplayer
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Settings|Multiplyer", Meta = (ClampMin = 0, ForceUnits = "cm"))
-	float MaxPullForceDistance{50.0f};
+	float SimulatedProxyMeshInterpolationSpeed{10.0f};
 
 	// If checked, it stops the physical simulation and returns control of the bone to kinematic
 	// when the conditions mentioned later are met.
@@ -59,8 +42,4 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Settings|Freezing", Meta = (ClampMin = 0, EditCondition = "bAllowFreeze", ForceUnits = "deg"))
 	float AngularSpeedThresholdToFreeze{45.0f};
-
-#if WITH_EDITOR
-	void PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent);
-#endif
 };

@@ -1945,6 +1945,14 @@ const FGameplayTag& AAlsCharacter::DesiredToActual(const FGameplayTag& SourceTag
 	return SourceTag;
 }
 
+bool AAlsCharacter::IsCharacterSelf() const
+{
+	auto NetMode{GetWorld()->GetNetMode()};
+	return NetMode == NM_Standalone
+		|| (NetMode == NM_ListenServer && GetLocalRole() == ROLE_Authority)
+		|| (NetMode == NM_Client && GetLocalRole() == ROLE_AutonomousProxy);
+}
+
 bool AAlsCharacter::CanLie() const
 {
 	return true;

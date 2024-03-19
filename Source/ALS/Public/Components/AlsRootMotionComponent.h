@@ -23,16 +23,16 @@ struct ALS_API FAlsMantlingParameters
 	TWeakObjectPtr<UPrimitiveComponent> TargetPrimitive;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS")
-	FVector_NetQuantize100 TargetRelativeLocation{ ForceInit };
+	FVector_NetQuantize100 TargetRelativeLocation{ForceInit};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS")
-	FRotator TargetRelativeRotation{ ForceInit };
+	FRotator TargetRelativeRotation{ForceInit};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS", Meta = (ForceUnits = "cm"))
-	float MantlingHeight{ 0.0f };
+	float MantlingHeight{0.0f};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS")
-	EAlsMantlingType MantlingType{ EAlsMantlingType::High };
+	EAlsMantlingType MantlingType{EAlsMantlingType::High};
 };
 
 UCLASS(Blueprintable, BlueprintType)

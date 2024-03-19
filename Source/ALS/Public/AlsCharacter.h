@@ -530,6 +530,9 @@ public:
 	UFUNCTION(BlueprintPure, Category = "ALS|Character")
 	const FGameplayTag& DesiredToActual(const FGameplayTag& SourceTag) const;
 
+	UFUNCTION(BlueprintPure, Category = "ALS|Character")
+	bool IsCharacterSelf() const;
+
 	// Others
 
 public:

@@ -7,6 +7,7 @@
 
 class UAnimMontage;
 class UCurveFloat;
+class UAlsMantlingSettings;
 class UAlsRootMotionComponent;
 
 USTRUCT(BlueprintType)

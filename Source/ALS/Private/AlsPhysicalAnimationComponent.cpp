@@ -723,7 +723,7 @@ void UAlsPhysicalAnimationComponent::SetRagdollingTargetLocation(const FVector& 
 		MARK_PROPERTY_DIRTY_FROM_NAME(ThisClass, RagdollingTargetLocation, this)
 
 		auto* Character{Cast<AAlsCharacter>(GetOwner())};
-		if (IsValid(Character) && Character->GetLocalRole() == ROLE_AutonomousProxy)
+		if (Character->IsCharacterSelf())
 		{
 			ServerSetRagdollingTargetLocation(RagdollingTargetLocation);
 		}
@@ -797,7 +797,7 @@ void FAlsRagdollingState::Start(UAlsRagdollingSettings* NewSettings)
 
 	// Clear the character movement mode and set the locomotion action to ragdolling.
 
-	CharacterMovement->SetMovementMode(MOVE_None);
+	CharacterMovement->SetMovementMode(MOVE_Custom);
 	CharacterMovement->SetMovementModeLocked(true);
 
 	RagdollingAnimInstance->Refresh(*this, true);
@@ -807,14 +807,17 @@ FVector FAlsRagdollingState::TraceGround()
 {
 	auto* CharacterMovement{Character->GetAlsCharacterMovement()};
 
-	const auto CapsuleHalfHeight{Character->GetCapsuleComponent()->GetScaledCapsuleHalfHeight()};
+	const auto Capsule{Character->GetCapsuleComponent()};
+	const auto CapsuleHalfHeight{Capsule->GetScaledCapsuleHalfHeight()};
 
-	const auto TraceStart{!TargetLocation.IsZero() ? FVector{TargetLocation} : Character->GetActorLocation()};
+	const auto TraceStart{!TargetLocation.IsZero() ? FVector{TargetLocation}: Character->GetActorLocation()};
 	const FVector TraceEnd{TraceStart.X, TraceStart.Y, TraceStart.Z - CapsuleHalfHeight};
 
 	FHitResult Hit;
-	Character->GetWorld()->LineTraceSingleByChannel(Hit, TraceStart, TraceEnd, Settings->GroundTraceChannel,
-													{__FUNCTION__, false, Character}, Settings->GroundTraceResponses);
+
+	Character->GetWorld()->LineTraceSingleByChannel(Hit, TraceStart, TraceEnd, Capsule->GetCollisionObjectType(),
+													{__FUNCTION__, false, Character},
+													Capsule->GetCollisionResponseToChannel(Capsule->GetCollisionObjectType()));
 
 	bGrounded = CharacterMovement->IsWalkable(Hit);
 
@@ -838,9 +841,10 @@ void FAlsRagdollingState::Tick(float DeltaTime)
 
 	auto* CharacterMovement{Character->GetAlsCharacterMovement()};
 
-	bool bLocallyControlled{Character->IsLocallyControlled() || (Character->GetLocalRole() >= ROLE_Authority && !IsValid(Character->GetController()))};
+	auto NetMode{Character->GetWorld()->GetNetMode()};
+	bool bCharacterSelf{Character->IsCharacterSelf()};
 
-	if (bLocallyControlled)
+	if (bCharacterSelf)
 	{
 		TargetLocation = Character->GetMesh()->GetBoneLocation(UAlsConstants::PelvisBoneName());
 	}
@@ -855,47 +859,33 @@ void FAlsRagdollingState::Tick(float DeltaTime)
 	// as the character's location, we don't do that because the camera depends on the
 	// capsule's bottom location, so its removal will cause the camera to behave erratically.
 
-	Character->SetActorLocation(TraceGround(), true);
+	if (bCharacterSelf || NetMode == NM_DedicatedServer)
+	{
+		Character->SetActorLocation(TraceGround(), true);
+	}
+	else
+	{
+		Character->SetActorLocation(FMath::VInterpTo(Character->GetActorLocation(), TraceGround(), DeltaTime, Settings->SimulatedProxyInterpolationSpeed), true);
+	}
 
 	// Zero target location means that it hasn't been replicated yet, so we can't apply the logic below.
 
-	if (!bLocallyControlled && !TargetLocation.IsZero())
+	if (!bCharacterSelf && !TargetLocation.IsZero())
 	{
 		// Apply ragdoll location corrections.
 
-		auto& TargetPullForce{Settings->TargetPullForce};
-		auto& InterpolationSpeed{Settings->PullForceInterpolationSpeed};
+		auto PelvisLocation{Character->GetMesh()->GetBoneLocation(UAlsConstants::PelvisBoneName())};
 
-		PullForce = FMath::FInterpTo(PullForce, TargetPullForce, DeltaTime, InterpolationSpeed);
+		auto NewPelvisLocation{FMath::VInterpTo(PelvisLocation, TargetLocation, DeltaTime, Settings->SimulatedProxyMeshInterpolationSpeed)};
 
-		const auto HorizontalSpeedSquared{CharacterMovement->Velocity.SizeSquared2D()};
+		auto Diff{NewPelvisLocation - PelvisLocation};
 
-		const auto PullForceBoneName{
-			HorizontalSpeedSquared > FMath::Square(300.0f) ? UAlsConstants::Spine03BoneName() : UAlsConstants::PelvisBoneName()
-		};
-
-		auto* PullForceBody{Character->GetMesh()->GetBodyInstance(PullForceBoneName)};
-
-		FPhysicsCommand::ExecuteWrite(PullForceBody->ActorHandle, [this](const FPhysicsActorHandle& ActorHandle)
+		for(auto& Body : Character->GetMesh()->Bodies)
 		{
-			if (!FPhysicsInterface::IsRigidBody(ActorHandle))
-			{
-				return;
-			}
-
-			const auto PullForceVector{
-				TargetLocation - FPhysicsInterface::GetTransform_AssumesLocked(ActorHandle, true).GetLocation()
-			};
-
-			auto& MinPullForceDistance{Settings->MinPullForceDistance};
-			auto& MaxPullForceDistance{Settings->MaxPullForceDistance};
-
-			if (PullForceVector.SizeSquared() > FMath::Square(MinPullForceDistance))
-			{
-				FPhysicsInterface::AddForce_AssumesLocked(
-					ActorHandle, PullForceVector.GetClampedToMaxSize(MaxPullForceDistance) * PullForce, true, true);
-			}
-		});
+			auto Transform{Body->GetUnrealWorldTransform()};
+			Transform.SetLocation(Transform.GetLocation() + Diff);
+			Body->SetBodyTransform(Transform, ETeleportType::TeleportPhysics);
+		}
 	}
 
 	if (IsGroundedAndAged())
