@@ -7,54 +7,7 @@
 
 class UAnimMontage;
 class UCurveFloat;
-
-UENUM(BlueprintType)
-enum class EAlsMantlingType : uint8
-{
-	High,
-	Medium,
-	Low,
-	InAir
-};
-
-USTRUCT(BlueprintType)
-struct ALS_API FAlsMantlingParameters
-{
-	GENERATED_BODY()
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS")
-	TWeakObjectPtr<UPrimitiveComponent> TargetPrimitive;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS")
-	FVector_NetQuantize100 TargetRelativeLocation{ForceInit};
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS")
-	FRotator TargetRelativeRotation{ForceInit};
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS", Meta = (ForceUnits = "cm"))
-	float MantlingHeight{0.0f};
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS")
-	EAlsMantlingType MantlingType{EAlsMantlingType::High};
-};
-
-UCLASS(Blueprintable, BlueprintType)
-class ALS_API UAlsMantlingSettings : public UDataAsset
-{
-	GENERATED_BODY()
-
-public:
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings")
-	TObjectPtr<UAnimMontage> Montage;
-
-	// Optional mantling time to horizontal correction amount curve.
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings")
-	TObjectPtr<UCurveFloat> HorizontalCorrectionCurve;
-
-	// Optional mantling time to vertical correction amount curve.
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings")
-	TObjectPtr<UCurveFloat> VerticalCorrectionCurve;
-};
+class UAlsRootMotionComponent;
 
 USTRUCT(BlueprintType)
 struct ALS_API FAlsMantlingTraceSettings
@@ -131,6 +84,9 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AlsAbility|Mantling", Meta = (EditCondition = "bStartRagdollingOnTargetPrimitiveDestruction"))
 	FGameplayTag TryActiveOnPrimitiveDestruction{AlsLocomotionActionTags::FreeFalling};
 
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "AlsAbility|Mantling|State", Transient)
+	TWeakObjectPtr<UAlsRootMotionComponent> RootMotionComponent;
+
 protected:
 	float CalculateMantlingStartTime(const UAlsMantlingSettings* MantlingSettings, const float MantlingHeight) const;
 
@@ -145,9 +101,6 @@ protected:
 
 	UFUNCTION(BlueprintCallable, Category = "ALS|Ability|Mantling")
 	bool CanMantle(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo& ActorInfo, FAlsMantlingParameters& MantlingParameters) const;
-
-	UFUNCTION(BlueprintNativeEvent, Category = "ALS|Ability|Mantling")
-	UAlsMantlingSettings* SelectMantlingSettings(const FAlsMantlingParameters& Parameters) const;
 
 protected:
 	virtual bool CanActivateAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo,

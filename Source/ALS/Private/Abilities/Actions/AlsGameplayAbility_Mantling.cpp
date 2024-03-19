@@ -7,6 +7,7 @@
 #include "AlsAbilitySystemComponent.h"
 #include "AlsAnimationInstance.h"
 #include "RootMotionSources/AlsRootMotionSource_Mantling.h"
+#include "Components/AlsRootMotionComponent.h"
 #include "Components/CapsuleComponent.h"
 #include "Components/SkeletalMeshComponent.h"
 #include "Net/UnrealNetwork.h"
@@ -348,8 +349,16 @@ void UAlsGameplayAbility_Mantling::CommitParameter(const FGameplayAbilitySpecHan
 void UAlsGameplayAbility_Mantling::ActivateAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo,
 												   const FGameplayAbilityActivationInfo ActivationInfo, const FGameplayEventData* TriggerEventData)
 {
+	Super::ActivateAbility(Handle, ActorInfo, ActivationInfo, TriggerEventData);
+
+	if (!IsActive())
+	{
+		return;
+	}
+
 	if (!CommitAbility(Handle, ActorInfo, ActivationInfo) || !ParameterMap.Contains(Handle))
 	{
+		EndAbility(Handle, ActorInfo, ActivationInfo, true, true);
 		return;
 	}
 
@@ -361,76 +370,34 @@ void UAlsGameplayAbility_Mantling::ActivateAbility(const FGameplayAbilitySpecHan
 	};
 
 	auto* Character{GetAlsCharacterFromActorInfo()};
-	auto* AnimInstance{Character->GetAlsAnimationInstace()};
-	auto* CharacterMovement{Character->GetAlsCharacterMovement()};
+
+	RootMotionComponent = Character->GetComponentByClass<UAlsRootMotionComponent>();
+
+	if (!ALS_ENSURE(RootMotionComponent.IsValid()))
+	{
+		EndAbility(Handle, ActorInfo, ActivationInfo, true, true);
+		return;
+	}
+
+	RootMotionComponent->StartMantling(Parameters);
+	if (!RootMotionComponent->IsMantlingActive())
+	{
+		EndAbility(Handle, ActorInfo, ActivationInfo, true, true);
+		return;
+	}
+	SetUpNotification(ActorInfo->GetAnimInstance(), RootMotionComponent->GetMantlingMontage());
+
+	TickTask = UAlsAbilityTask_Tick::New(this, FName(TEXT("UAlsGameplayAbility_Mantling")));
+	if (TickTask.IsValid())
+	{
+		TickTask->OnTick.AddDynamic(this, &ThisClass::Tick);
+		TickTask->ReadyForActivation();
+	}
+
 	auto* AbilitySystem{GetAlsAbilitySystemComponentFromActorInfo()};
-	
-	const auto* MantlingSettings{SelectMantlingSettings(Parameters)};
-
-	if (!ALS_ENSURE(IsValid(MantlingSettings)) || !ALS_ENSURE(IsValid(MantlingSettings->Montage)))
-	{
-		return;
-	}
-
-	const auto StartTime{CalculateMantlingStartTime(MantlingSettings, Parameters.MantlingHeight)};
-	const auto Duration{MantlingSettings->Montage->GetPlayLength() - StartTime};
-	const auto PlayRate{MantlingSettings->Montage->RateScale};
-
-	const auto TargetAnimationLocation{UAlsUtility::ExtractLastRootTransformFromMontage(MantlingSettings->Montage).GetLocation()};
-
-	if (FMath::IsNearlyZero(TargetAnimationLocation.Z))
-	{
-		UE_LOG(LogAls, Warning, TEXT("Can't start mantling! The %s animation montage has incorrect root motion,")
-		       TEXT(" the final vertical location of the character must be non-zero!"), *MantlingSettings->Montage->GetName());
-		return;
-	}
-
-	// Calculate actor offsets (offsets between actor and target transform).
-
-	bool bUseRelativeLocation{MovementBaseUtility::UseRelativeLocation(Parameters.TargetPrimitive.Get())};
-	const auto TargetRelativeRotation{Parameters.TargetRelativeRotation.GetNormalized()};
-
-	const auto TargetTransform{
-		bUseRelativeLocation
-			? FTransform{
-				TargetRelativeRotation, Parameters.TargetRelativeLocation,
-				Parameters.TargetPrimitive->GetComponentScale()
-			}.GetRelativeTransformReverse(Parameters.TargetPrimitive->GetComponentTransform())
-			: FTransform{TargetRelativeRotation, Parameters.TargetRelativeLocation}
-	};
-
-	const auto ActorFeetLocationOffset{CharacterMovement->GetActorFeetLocation() - TargetTransform.GetLocation()};
-	const auto ActorRotationOffset{TargetTransform.GetRotation().Inverse() * Character->GetActorQuat()};
-
-	// Play the animation montage if valid.
-	PlayMontage(ActivationInfo, MantlingSettings->Montage, PlayRate, NAME_None, StartTime, Handle, ActorInfo);
-
-	if (CurrentMotangeDuration <= 0.0f)
-	{
-		return;
-	}
-	
-	// Apply mantling root motion.
-
-	AbilitySystem->SetMantlingRootMotion({
-		MantlingSettings, Parameters.TargetPrimitive, Parameters.TargetRelativeLocation, TargetAnimationLocation, TargetRelativeRotation, StartTime
-	});
-
-	Super::ActivateAbility(Handle, ActorInfo, ActivationInfo, TriggerEventData);
-
-	if (IsActive())
-	{
-		TickTask = UAlsAbilityTask_Tick::New(this, FName(TEXT("UAlsGameplayAbility_Mantling")));
-		if (TickTask.IsValid())
-		{
-			TickTask->OnTick.AddDynamic(this, &ThisClass::Tick);
-			TickTask->ReadyForActivation();
-		}
-
-		AbilitySystem->SetLooseGameplayTagCount(AlsStateFlagTags::MantleHigh, Parameters.MantlingType == EAlsMantlingType::High ? 1 : 0);
-		AbilitySystem->SetLooseGameplayTagCount(AlsStateFlagTags::MantleMedium, Parameters.MantlingType == EAlsMantlingType::Medium ? 1 : 0);
-		AbilitySystem->SetLooseGameplayTagCount(AlsStateFlagTags::MantleLow, Parameters.MantlingType == EAlsMantlingType::Low ? 1 : 0);
-	}
+	AbilitySystem->SetLooseGameplayTagCount(AlsStateFlagTags::MantleHigh, Parameters.MantlingType == EAlsMantlingType::High ? 1 : 0);
+	AbilitySystem->SetLooseGameplayTagCount(AlsStateFlagTags::MantleMedium, Parameters.MantlingType == EAlsMantlingType::Medium ? 1 : 0);
+	AbilitySystem->SetLooseGameplayTagCount(AlsStateFlagTags::MantleLow, Parameters.MantlingType == EAlsMantlingType::Low ? 1 : 0);
 }
 
 void UAlsGameplayAbility_Mantling::Tick_Implementation(const float DeltaTime)
@@ -444,8 +411,7 @@ void UAlsGameplayAbility_Mantling::Tick_Implementation(const float DeltaTime)
 		return;
 	}
 
-	auto* AbilitySystem{GetAlsAbilitySystemComponentFromActorInfo()};
-	const auto* RootMotionSource{AbilitySystem->GetCurrentMantlingRootMotionSource()};
+	const auto* RootMotionSource{RootMotionComponent->GetCurrentMantlingRootMotionSource()};
 
 	if (RootMotionSource != nullptr && !RootMotionSource->TargetPrimitive.IsValid())
 	{
@@ -462,7 +428,7 @@ void UAlsGameplayAbility_Mantling::EndAbility(const FGameplayAbilitySpecHandle H
 											  const FGameplayAbilityActivationInfo ActivationInfo, bool bReplicateEndAbility, bool bWasCancelled)
 {
 	Super::EndAbility(Handle, ActorInfo, ActivationInfo, bReplicateEndAbility, bWasCancelled);
-	
+
 	auto* Character{GetAlsCharacterFromActorInfo()};
 	auto* AnimInstance{Character->GetAlsAnimationInstace()};
 	auto CharacterMovement{Character->GetAlsCharacterMovement()};
@@ -539,11 +505,6 @@ float UAlsGameplayAbility_Mantling::CalculateMantlingStartTime(const UAlsMantlin
 bool UAlsGameplayAbility_Mantling::CanMantleByParameter_Implementation(const FGameplayAbilityActorInfo& ActorInfo, const FAlsMantlingParameters& Parameter) const
 {
 	return true;
-}
-
-UAlsMantlingSettings* UAlsGameplayAbility_Mantling::SelectMantlingSettings_Implementation(const FAlsMantlingParameters& Parameters) const
-{
-	return nullptr;
 }
 
 #if WITH_EDITOR

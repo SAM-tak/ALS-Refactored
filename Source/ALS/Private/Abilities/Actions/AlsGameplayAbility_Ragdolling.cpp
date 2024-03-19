@@ -75,6 +75,22 @@ void UAlsGameplayAbility_Ragdolling::Tick(const float DeltaTime)
 	}
 }
 
+void UAlsGameplayAbility_Ragdolling::EndAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo,
+												const FGameplayAbilityActivationInfo ActivationInfo, bool bReplicateEndAbility, bool bWasCancelled)
+{
+	auto* Character{GetAlsCharacterFromActorInfo()};
+	auto* PhysicalAnimation{Character->GetPhysicalAnimation()};
+	auto& RagdollingState{PhysicalAnimation->GetRagdollingState()};
+
+	if (RagdollingState.IsGroundedAndAged())
+	{
+		auto* AbilitySystem{GetAlsAbilitySystemComponentFromActorInfo()};
+		AbilitySystem->SetLooseGameplayTagCount(AlsStateFlagTags::FacingUpward, RagdollingState.bFacingUpward ? 1 : 0);
+	}
+
+	Super::EndAbility(Handle, ActorInfo, ActivationInfo, bReplicateEndAbility, bWasCancelled);
+}
+
 bool UAlsGameplayAbility_Ragdolling::IsGroundedAndAged() const
 {
 	auto* Character{GetAlsCharacterFromActorInfo()};

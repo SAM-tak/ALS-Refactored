@@ -114,19 +114,24 @@ void UAlsGameplayAbility_MontageBase::PlayMontage(const FGameplayAbilityActivati
 
 		if (CurrentMotangeDuration > 0.0f)
 		{
-			FOnMontageEnded EndDelegate;
-			EndDelegate.BindUObject(this, &ThisClass::OnEndMontage);
-			AnimInstance->Montage_SetEndDelegate(EndDelegate, Montage);
-
-			if (auto* MontageInstance = AnimInstance->GetActiveInstanceForMontage(Montage))
-			{
-				// AnimInstance's OnPlayMontageNotifyBegin/End fire for all notify. Then stores Montage's InstanceID
-				CurrentMontageInstanceId = MontageInstance->GetInstanceID();
-
-				AnimInstance->OnPlayMontageNotifyBegin.AddDynamic(this, &ThisClass::OnNotifyBeginReceived);
-				AnimInstance->OnPlayMontageNotifyEnd.AddDynamic(this, &ThisClass::OnNotifyEndReceived);
-			}
+			SetUpNotification(AnimInstance, Montage);
 		}
+	}
+}
+
+void UAlsGameplayAbility_MontageBase::SetUpNotification(UAnimInstance* AnimInstance, UAnimMontage* Montage)
+{
+	FOnMontageEnded EndDelegate;
+	EndDelegate.BindUObject(this, &ThisClass::OnEndMontage);
+	AnimInstance->Montage_SetEndDelegate(EndDelegate, Montage);
+
+	if (auto* MontageInstance = AnimInstance->GetActiveInstanceForMontage(Montage))
+	{
+		// AnimInstance's OnPlayMontageNotifyBegin/End fire for all notify. Then stores Montage's InstanceID
+		CurrentMontageInstanceId = MontageInstance->GetInstanceID();
+
+		AnimInstance->OnPlayMontageNotifyBegin.AddDynamic(this, &ThisClass::OnNotifyBeginReceived);
+		AnimInstance->OnPlayMontageNotifyEnd.AddDynamic(this, &ThisClass::OnNotifyEndReceived);
 	}
 }
 

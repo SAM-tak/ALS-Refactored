@@ -37,8 +37,6 @@ void UAlsRagdollingTask::Refresh(float DeltaTime)
 			K2_OnGroundedAndAged();
 		}
 		Character->Lie();
-		auto* AbilitySystem{Character->GetAlsAbilitySystem()};
-		AbilitySystem->SetLooseGameplayTagCount(AlsStateFlagTags::FacingUpward, RagdollingState.bFacingUpward ? 1 : 0);
 	}
 	else
 	{

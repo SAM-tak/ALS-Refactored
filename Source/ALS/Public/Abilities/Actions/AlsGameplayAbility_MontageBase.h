@@ -47,6 +47,8 @@ protected:
 	UFUNCTION(BlueprintNativeEvent, Category = "ALS|Ability|Montage")
 	void OnEndMontage(UAnimMontage *Montage, bool bInterrupted);
 
+	void SetUpNotification(UAnimInstance* AnimInstance, UAnimMontage* Montage);
+
 	void GetGameplayEffectsWhileAnimating(TArray<const UGameplayEffect *> &OutEffects) const;
 
 	void PlayMontage(const FGameplayAbilityActivationInfo& ActivationInfo, const FAlsPlayMontageParameter& Parameter,
