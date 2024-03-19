@@ -155,7 +155,10 @@ public:
 
 	FORCEINLINE UAlsAbilitySystemComponent* GetAlsAbilitySystem() const { return AbilitySystem; }
 
-	protected:
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Als Character|State", Transient)
+	FGameplayTagContainer LocalTags;
+
+protected:
 	virtual void BeginPlay() override;
 
 	virtual void NotifyControllerChanged() override;

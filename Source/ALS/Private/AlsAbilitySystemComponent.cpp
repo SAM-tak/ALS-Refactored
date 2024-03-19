@@ -56,6 +56,8 @@ void UAlsAbilitySystemComponent::ActivateOnInputAction(FGameplayTag InputTag)
 
 void UAlsAbilitySystemComponent::OnControllerChanged_Implementation(AController* PreviousController, AController* NewController)
 {
+	RefreshAbilityActorInfo();
+
 	for (FGameplayAbilitySpec& Spec : ActivatableAbilities.Items)
 	{
 		if (Spec.IsActive())

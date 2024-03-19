@@ -29,7 +29,7 @@ void UAlsRagdollingTask::Refresh(float DeltaTime)
 
 	Super::Refresh(DeltaTime);
 
-	if (IsGroundedAndAged())
+	if (RagdollingState.IsGroundedAndAged())
 	{
 		if (!bOnGroundedAndAgedFired)
 		{
@@ -37,6 +37,15 @@ void UAlsRagdollingTask::Refresh(float DeltaTime)
 			K2_OnGroundedAndAged();
 		}
 		Character->Lie();
+
+		if (RagdollingState.bFacingUpward)
+		{
+			Character->LocalTags.AddTag(AlsStateFlagTags::FacingUpward);
+		}
+		else
+		{
+			Character->LocalTags.RemoveTag(AlsStateFlagTags::FacingUpward);
+		}
 	}
 	else
 	{

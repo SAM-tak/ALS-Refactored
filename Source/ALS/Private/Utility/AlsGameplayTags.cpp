@@ -123,7 +123,6 @@ namespace AlsStateFlagTags
 {
 	UE_DEFINE_GAMEPLAY_TAG(Root, "Als.StateFlag")
 	UE_DEFINE_GAMEPLAY_TAG(FacingUpward, "Als.StateFlag.FacingUpward")
-	UE_DEFINE_GAMEPLAY_TAG(DelayedActivation, "Als.StateFlag.DelayedActivation")
 	UE_DEFINE_GAMEPLAY_TAG(MantleHigh, "Als.StateFlag.MantleHigh")
 	UE_DEFINE_GAMEPLAY_TAG(MantleMedium, "Als.StateFlag.MantleMedium")
 	UE_DEFINE_GAMEPLAY_TAG(MantleLow, "Als.StateFlag.MantleLow")

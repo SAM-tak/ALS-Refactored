@@ -193,9 +193,6 @@ protected:
 	uint8 bRagdolling : 1{false};
 
 	UPROPERTY(VisibleAnywhere, Category = "PhysicalAnimation|State", Transient)
-	TArray<FGameplayTag> ActivationRequest;
-
-	UPROPERTY(VisibleAnywhere, Category = "PhysicalAnimation|State", Transient)
 	FGameplayTag CurrentRagdolling;
 
 	UPROPERTY(VisibleAnywhere, Category = "PhysicalAnimation|State", Transient)
@@ -228,9 +225,6 @@ public:
 
 	UFUNCTION(BlueprintPure, Category = "ALS|PhysicalAnimation")
 	bool IsRagdollingFacingUpward() const;
-
-	UFUNCTION(BlueprintCallable, Category = "ALS|PhysicalAnimation")
-	void RequestActivation(const FGameplayTag &AbilityTag);
 
 	UFUNCTION(BlueprintPure, Category = "ALS|PhysicalAnimation")
 	bool IsBoneUnderSimulation(const FName& BoneName) const;

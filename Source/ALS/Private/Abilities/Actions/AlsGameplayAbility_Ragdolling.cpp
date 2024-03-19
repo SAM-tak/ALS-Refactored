@@ -10,6 +10,7 @@
 #include "LinkedAnimLayers/AlsRagdollingAnimInstance.h"
 #include "Components/CapsuleComponent.h"
 #include "Components/SkeletalMeshComponent.h"
+#include "Components/AlsOverrideModeComponent.h"
 #include "Net/UnrealNetwork.h"
 #include "Utility/AlsGameplayTags.h"
 #include "Utility/AlsConstants.h"
@@ -82,11 +83,14 @@ void UAlsGameplayAbility_Ragdolling::EndAbility(const FGameplayAbilitySpecHandle
 	auto* PhysicalAnimation{Character->GetPhysicalAnimation()};
 	auto& RagdollingState{PhysicalAnimation->GetRagdollingState()};
 
-	if (RagdollingState.IsGroundedAndAged())
-	{
-		auto* AbilitySystem{GetAlsAbilitySystemComponentFromActorInfo()};
-		AbilitySystem->SetLooseGameplayTagCount(AlsStateFlagTags::FacingUpward, RagdollingState.bFacingUpward ? 1 : 0);
-	}
+	//if (RagdollingState.IsGroundedAndAged())
+	//{
+	//	auto* AbilitySystem{GetAlsAbilitySystemComponentFromActorInfo()};
+	//	AbilitySystem->SetLooseGameplayTagCount(AlsStateFlagTags::FacingUpward, RagdollingState.bFacingUpward ? 1 : 0);
+	//}
+
+	auto* OverrideModeComponent{Character->GetComponentByClass<UAlsOverrideModeComponent>()};
+	OverrideModeComponent->EndCurrentRagdollingTask();
 
 	Super::EndAbility(Handle, ActorInfo, ActivationInfo, bReplicateEndAbility, bWasCancelled);
 }

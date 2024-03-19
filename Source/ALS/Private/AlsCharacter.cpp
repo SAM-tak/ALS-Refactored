@@ -428,11 +428,6 @@ void AAlsCharacter::PossessedBy(AController* NewController)
 
 	ViewState.NetworkSmoothing.bEnabled |= IsValid(Settings) && Settings->View.bEnableListenServerNetworkSmoothing &&
 		IsNetMode(NM_ListenServer) && GetRemoteRole() == ROLE_AutonomousProxy;
-
-	if (IsValid(AbilitySystem))
-	{
-		AbilitySystem->RefreshAbilityActorInfo();
-	}
 }
 
 void AAlsCharacter::Restart()

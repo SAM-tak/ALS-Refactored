@@ -3,6 +3,7 @@
 #include "AlsCharacter.h"
 #include "AlsLinkedAnimationInstance.h"
 #include "CharacterTasks/AlsOverrideTask.h"
+#include "CharacterTasks/AlsRagdollingTask.h"
 #include "Utility/AlsMath.h"
 #include "Utility/AlsLog.h"
 
@@ -17,6 +18,16 @@ void UAlsOverrideModeComponent::BeginPlay()
 	for(auto& KeyValue : OverrideClassMap)
 	{
 		OverrideTagsMask.AddTag(KeyValue.Key);
+	}
+}
+
+void UAlsOverrideModeComponent::EndCurrentRagdollingTask()
+{
+	if(CurrentOverrideTask.IsValid() && CurrentOverrideTask->IsA(UAlsRagdollingTask::StaticClass()))
+	{
+		CurrentOverrideTask->End();
+		CurrentOverrideTask.Reset();
+		CurrentOverrideTag = FGameplayTag::EmptyTag;
 	}
 }
 

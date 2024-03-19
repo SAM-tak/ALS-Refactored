@@ -26,6 +26,10 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "AlsOverrideModeComponent|State", Transient)
 	TMap<FGameplayTag, TObjectPtr<UAlsOverrideTask>> InstancedOverrideTasks;
 
+public:
+	UFUNCTION(BlueprintCallable)
+	void EndCurrentRagdollingTask();
+
 protected:
 	virtual void BeginPlay() override;
 

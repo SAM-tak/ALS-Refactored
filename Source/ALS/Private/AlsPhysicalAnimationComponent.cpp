@@ -526,16 +526,6 @@ void UAlsPhysicalAnimationComponent::OnRefresh(float DeltaTime)
 {
 	auto* Character{Cast<AAlsCharacter>(GetOwner())};
 
-	if (!ActivationRequest.IsEmpty())
-	{
-		Character->GetAlsAbilitySystem()->SetLooseGameplayTagCount(AlsStateFlagTags::DelayedActivation, 1);
-		while (!ActivationRequest.IsEmpty())
-		{
-			Character->GetAlsAbilitySystem()->TryActivateAbilitiesBySingleTag(ActivationRequest.Pop());
-		}
-		Character->GetAlsAbilitySystem()->SetLooseGameplayTagCount(AlsStateFlagTags::DelayedActivation, 0);
-	}
-
 	// Apply special behaviour when changed Ragdolling state
 	
 	CurrentRagdolling = FGameplayTag::EmptyTag;
@@ -716,11 +706,6 @@ bool UAlsPhysicalAnimationComponent::IsRagdollingAndGroundedAndAged() const
 bool UAlsPhysicalAnimationComponent::IsRagdollingFacingUpward() const
 {
 	return RagdollingState.bFacingUpward;
-}
-
-void UAlsPhysicalAnimationComponent::RequestActivation(const FGameplayTag& AbilityTag)
-{
-	ActivationRequest.Push(AbilityTag);
 }
 
 bool UAlsPhysicalAnimationComponent::IsBoneUnderSimulation(const FName& BoneName) const
@@ -1071,11 +1056,5 @@ void FAlsRagdollingState::End()
 	else
 	{
 		CharacterMovement->SetMovementMode(MOVE_Falling);
-	}
-
-	if (IsGroundedAndAged())
-	{
-		auto* AbilitySystem{Character->GetAlsAbilitySystem()};
-		AbilitySystem->SetLooseGameplayTagCount(AlsStateFlagTags::FacingUpward, bFacingUpward ? 1 : 0);
 	}
 }
