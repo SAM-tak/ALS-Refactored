@@ -90,7 +90,7 @@ FTransform UAlsUtility::ExtractRootTransformFromMontage(const UAnimMontage* Mont
 	const auto* Segment{Montage->SlotAnimTracks[0].AnimTrack.GetSegmentAtTime(Time)};
 	if (Segment == nullptr && Montage->SlotAnimTracks[0].AnimTrack.AnimSegments.Num() > 0)
 	{
-		if (Time <= 0)
+		if (Time <= Montage->SlotAnimTracks[0].AnimTrack.AnimSegments.Top().AnimStartTime)
 		{
 			Segment = &Montage->SlotAnimTracks[0].AnimTrack.AnimSegments.Top();
 		}

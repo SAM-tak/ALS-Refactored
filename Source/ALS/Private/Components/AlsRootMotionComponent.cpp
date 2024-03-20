@@ -8,6 +8,7 @@
 #include "Utility/AlsMath.h"
 #include "Utility/AlsMacros.h"
 #include "Utility/AlsLog.h"
+#include "Utility/AlsEnumUtility.h"
 
 #include UE_INLINE_GENERATED_CPP_BY_NAME(AlsRootMotionComponent)
 
@@ -22,28 +23,17 @@ void UAlsRootMotionComponent::StartMantling(const FAlsMantlingParameters& Parame
 {
 	ensure(Character->GetLocalRole() > ROLE_SimulatedProxy);
 
-	Character->GetCharacterMovement()->FlushServerMoves();
 	StartMantlingImplementation(Parameters);
 
-	if (Character->GetLocalRole() >= ROLE_Authority)
+	if (Character->HasServerRole())
 	{
 		MulticastStartMantling(Parameters);
 	}
-	else
-	{
-		ServerStartMantling(Parameters);
-	}
-}
-
-void UAlsRootMotionComponent::ServerStartMantling_Implementation(const FAlsMantlingParameters& Parameters)
-{
-	MulticastStartMantling(Parameters);
-	Character->ForceNetUpdate();
 }
 
 void UAlsRootMotionComponent::MulticastStartMantling_Implementation(const FAlsMantlingParameters& Parameters)
 {
-	if(Character->GetLocalRole() <= ROLE_SimulatedProxy)
+	if(Character->GetLocalRole() == ROLE_SimulatedProxy)
 	{
 		StartMantlingImplementation(Parameters);
 	}
@@ -51,23 +41,24 @@ void UAlsRootMotionComponent::MulticastStartMantling_Implementation(const FAlsMa
 
 void UAlsRootMotionComponent::StartMantlingImplementation(const FAlsMantlingParameters& Parameters)
 {
-	const auto* MantlingSettings{SelectMantlingSettings(Parameters)};
+	const auto* Settings{SelectMantlingSettings(Parameters)};
 
-	if (!ALS_ENSURE(IsValid(MantlingSettings)) || !ALS_ENSURE(IsValid(MantlingSettings->Montage)))
+	if (!ALS_ENSURE(IsValid(Settings)) || !ALS_ENSURE(IsValid(Settings->Montage)))
 	{
 		return;
 	}
 
-	const auto StartTime{CalculateMantlingStartTime(MantlingSettings, Parameters.MantlingHeight)};
-	const auto Duration{MantlingSettings->Montage->GetPlayLength() - StartTime};
-	const auto PlayRate{MantlingSettings->Montage->RateScale};
+	const auto StartTime{CalculateMantlingStartTime(Settings, Parameters.MantlingHeight)};
+	const auto Montage{Settings->Montage};
+	const auto Duration{Montage->GetPlayLength() - StartTime};
+	const auto PlayRate{Montage->RateScale};
 
-	const auto TargetAnimationLocation{UAlsUtility::ExtractLastRootTransformFromMontage(MantlingSettings->Montage).GetLocation()};
+	const auto TargetAnimationLocation{UAlsUtility::ExtractLastRootTransformFromMontage(Montage).GetLocation()};
 
 	if (FMath::IsNearlyZero(TargetAnimationLocation.Z))
 	{
 		UE_LOG(LogAls, Warning, TEXT("Can't start mantling! The %s animation montage has incorrect root motion,")
-		       TEXT(" the final vertical location of the character must be non-zero!"), *MantlingSettings->Montage->GetName());
+		       TEXT(" the final vertical location of the character must be non-zero!"), *Montage->GetName());
 		return;
 	}
 
@@ -93,12 +84,13 @@ void UAlsRootMotionComponent::StartMantlingImplementation(const FAlsMantlingPara
 	Character->GetCharacterMovement()->NetworkSmoothingMode = ENetworkSmoothingMode::Disabled;
 
 	Character->GetMesh()->SetRelativeLocationAndRotation(Character->GetBaseTranslationOffset(),
-	                                          Character->GetMesh()->IsUsingAbsoluteRotation()
-		                                          ? Character->GetActorQuat() * Character->GetBaseRotationOffset()
-		                                          : Character->GetBaseRotationOffset(), false, nullptr, ETeleportType::TeleportPhysics);
+														 Character->GetMesh()->IsUsingAbsoluteRotation()
+															? Character->GetActorQuat() * Character->GetBaseRotationOffset()
+															: Character->GetBaseRotationOffset(), false, nullptr, ETeleportType::TeleportPhysics);
 
 	// Clear the character movement mode and set the locomotion action to mantling.
 
+	Character->GetCharacterMovement()->FlushServerMoves();
 	Character->GetCharacterMovement()->SetMovementMode(MOVE_Custom);
 	Character->GetAlsCharacterMovement()->SetMovementModeLocked(true);
 
@@ -106,18 +98,16 @@ void UAlsRootMotionComponent::StartMantlingImplementation(const FAlsMantlingPara
 
 	// Play the animation montage if valid.
 
-	if (Character->GetMesh()->GetAnimInstance()->Montage_Play(MantlingSettings->Montage, 1.0f,
-															  EMontagePlayReturnType::MontageLength,
-															  StartTime, false))
+	if (Character->GetMesh()->GetAnimInstance()->Montage_Play(Montage, 1.0f, EMontagePlayReturnType::MontageLength, StartTime, false))
 	{
-		MantlingMontage = MantlingSettings->Montage;
+		MantlingMontage = Montage;
 
 		// Apply mantling root motion.
 
 		const auto RootMotionSource{MakeShared<FAlsRootMotionSource_Mantling>()};
 		RootMotionSource->InstanceName = __FUNCTION__;
 		RootMotionSource->Duration = Duration / PlayRate;
-		RootMotionSource->MantlingSettings = MantlingSettings;
+		RootMotionSource->MantlingSettings = Settings;
 		RootMotionSource->TargetPrimitive = Parameters.TargetPrimitive;
 		RootMotionSource->TargetRelativeLocation = Parameters.TargetRelativeLocation;
 		RootMotionSource->TargetRelativeRotation = TargetRelativeRotation;

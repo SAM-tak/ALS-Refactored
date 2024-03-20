@@ -80,9 +80,6 @@ protected:
 	void OnTick_Mantling();
 
 private:
-	UFUNCTION(Server, Reliable)
-	void ServerStartMantling(const FAlsMantlingParameters& Parameters);
-
 	UFUNCTION(NetMulticast, Reliable)
 	void MulticastStartMantling(const FAlsMantlingParameters& Parameters);
 

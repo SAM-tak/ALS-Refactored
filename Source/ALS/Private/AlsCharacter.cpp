@@ -1953,6 +1953,12 @@ bool AAlsCharacter::IsCharacterSelf() const
 		|| (NetMode == NM_Client && GetLocalRole() == ROLE_AutonomousProxy);
 }
 
+bool AAlsCharacter::HasServerRole() const
+{
+	auto NetMode{GetWorld()->GetNetMode()};
+	return (NetMode == NM_DedicatedServer || NetMode == NM_ListenServer) && GetLocalRole() == ROLE_Authority;
+}
+
 bool AAlsCharacter::CanLie() const
 {
 	return true;

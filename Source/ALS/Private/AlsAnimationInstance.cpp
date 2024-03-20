@@ -261,7 +261,7 @@ void UAlsAnimationInstance::RefreshPose()
 
 bool UAlsAnimationInstance::IsSpineRotationAllowed()
 {
-	return CurrentGameplayTags.HasTag(AlsRotationModeTags::Aiming);
+	return !CurrentGameplayTags.HasTag(AlsRotationModeTags::VelocityDirection);
 }
 
 void UAlsAnimationInstance::RefreshLocomotionOnGameThread()

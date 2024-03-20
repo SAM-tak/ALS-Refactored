@@ -533,10 +533,13 @@ public:
 	UFUNCTION(BlueprintPure, Category = "ALS|Character")
 	bool IsCharacterSelf() const;
 
+	UFUNCTION(BlueprintPure, Category = "ALS|Character")
+	bool HasServerRole() const;
+
 	// Others
 
 public:
-	bool IsLied();
+	bool IsLied() const;
 
 	void SetIsLied(bool bNewIsLied);
 
@@ -691,7 +694,7 @@ inline bool AAlsCharacter::ToggleRightShoulder()
 	return bRightShoulder;
 }
 
-inline bool AAlsCharacter::IsLied()
+inline bool AAlsCharacter::IsLied() const
 {
 	return bIsLied;
 }
