@@ -98,7 +98,7 @@ void UAlsRootMotionComponent::StartMantlingImplementation(const FAlsMantlingPara
 
 	// Play the animation montage if valid.
 
-	if (Character->GetMesh()->GetAnimInstance()->Montage_Play(Montage, 1.0f, EMontagePlayReturnType::MontageLength, StartTime, false))
+	if (Character->GetMesh()->GetAnimInstance()->Montage_Play(Montage, PlayRate, EMontagePlayReturnType::MontageLength, StartTime, false))
 	{
 		MantlingMontage = Montage;
 

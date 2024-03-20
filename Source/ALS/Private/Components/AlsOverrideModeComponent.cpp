@@ -15,7 +15,7 @@ void UAlsOverrideModeComponent::BeginPlay()
 
 	InstancedOverrideTasks.Reset();
 	OverrideTagsMask.Reset();
-	for(auto& KeyValue : OverrideClassMap)
+	for (auto& KeyValue : OverrideClassMap)
 	{
 		OverrideTagsMask.AddTag(KeyValue.Key);
 	}
@@ -23,7 +23,7 @@ void UAlsOverrideModeComponent::BeginPlay()
 
 void UAlsOverrideModeComponent::EndCurrentRagdollingTask()
 {
-	if(CurrentOverrideTask.IsValid() && CurrentOverrideTask->IsA(UAlsRagdollingTask::StaticClass()))
+	if (CurrentOverrideTask.IsValid() && CurrentOverrideTask->IsA(UAlsRagdollingTask::StaticClass()))
 	{
 		CurrentOverrideTask->End();
 		CurrentOverrideTask.Reset();

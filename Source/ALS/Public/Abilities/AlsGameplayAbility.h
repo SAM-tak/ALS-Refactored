@@ -69,9 +69,9 @@ protected:
 	virtual void EndAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo,
 							const FGameplayAbilityActivationInfo ActivationInfo, bool bReplicateEndAbility, bool bWasCancelled) override;
 
-	virtual void PlayMontage(const FGameplayAbilityActivationInfo& ActivationInfo, const FGameplayAbilityActorInfo* ActorInfo, const FAlsPlayMontageParameter& Parameter);
+	virtual bool PlayMontage(const FGameplayAbilityActivationInfo& ActivationInfo, const FGameplayAbilityActorInfo* ActorInfo, const FAlsPlayMontageParameter& Parameter);
 
-	virtual void PlayMontage(const FAlsPlayMontageParameter& Parameter);
+	virtual bool PlayMontage(const FAlsPlayMontageParameter& Parameter);
 
 	void StopCurrentMontage(const FGameplayAbilityActorInfo* ActorInfo, float OverrideBlendOutTime = -1.0f) const;
 

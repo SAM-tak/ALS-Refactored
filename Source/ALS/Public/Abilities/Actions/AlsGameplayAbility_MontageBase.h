@@ -51,20 +51,20 @@ protected:
 
 	void GetGameplayEffectsWhileAnimating(TArray<const UGameplayEffect *> &OutEffects) const;
 
-	void PlayMontage(const FGameplayAbilityActivationInfo& ActivationInfo, const FAlsPlayMontageParameter& Parameter,
+	bool PlayMontage(const FGameplayAbilityActivationInfo& ActivationInfo, const FAlsPlayMontageParameter& Parameter,
 					 const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo);
 
-	void PlayMontage(const FGameplayAbilityActivationInfo& ActivationInfo, UAnimMontage* Montage, float PlayRate, FName SectionName, float StartTime,
-		const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo);
+	bool PlayMontage(const FGameplayAbilityActivationInfo& ActivationInfo, UAnimMontage* Montage, float PlayRate, FName SectionName, float StartTime,
+					 const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo);
 
-	virtual void PlayMontage(const FGameplayAbilityActivationInfo& ActivationInfo, const FGameplayAbilityActorInfo* ActorInfo,
+	virtual bool PlayMontage(const FGameplayAbilityActivationInfo& ActivationInfo, const FGameplayAbilityActorInfo* ActorInfo,
 							 const FAlsPlayMontageParameter& Parameter) override;
 
-	virtual void PlayMontage(const FAlsPlayMontageParameter& Parameter) override;
+	virtual bool PlayMontage(const FAlsPlayMontageParameter& Parameter) override;
 
 private:
 	UFUNCTION(BlueprintCallable, Category = "ALS|Ability|Montage")
-	void PlayMontage(UAnimMontage* Montage, float PlayRate = 1.0f, FName SectionName = NAME_None, float StartTime = 0.0f);
+	bool PlayMontage(UAnimMontage* Montage, float PlayRate = 1.0f, FName SectionName = NAME_None, float StartTime = 0.0f);
 
 	bool IsNotifyValid(FName NotifyName, const FBranchingPointNotifyPayload& BPNPayload) const;
 

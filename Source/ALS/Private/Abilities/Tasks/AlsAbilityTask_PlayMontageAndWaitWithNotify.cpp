@@ -54,7 +54,7 @@ void UAlsAbilityTask_PlayMontageAndWaitWithNotify::OnDestroy(bool AbilityEnded)
 
 bool UAlsAbilityTask_PlayMontageAndWaitWithNotify::IsNotifyValid(FName NotifyName, const FBranchingPointNotifyPayload& BranchingPointNotifyPayload) const
 {
-	return ((MontageInstanceID != INDEX_NONE) && (BranchingPointNotifyPayload.MontageInstanceID == MontageInstanceID));
+	return MontageInstanceID != INDEX_NONE && BranchingPointNotifyPayload.MontageInstanceID == MontageInstanceID;
 }
 
 void UAlsAbilityTask_PlayMontageAndWaitWithNotify::OnNotifyBeginReceived(FName NotifyName, const FBranchingPointNotifyPayload& BranchingPointNotifyPayload)

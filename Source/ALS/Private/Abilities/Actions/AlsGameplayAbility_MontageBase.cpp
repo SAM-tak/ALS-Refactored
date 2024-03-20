@@ -18,6 +18,8 @@ void UAlsGameplayAbility_MontageBase::EndAbility(const FGameplayAbilitySpecHandl
 	auto* AnimInstance = ActorInfo->GetAnimInstance();
 	if (AnimInstance)
 	{
+		FOnMontageEnded EndDelegate;
+		AnimInstance->Montage_SetEndDelegate(EndDelegate, CurrentMontage.Get());
 		AnimInstance->OnPlayMontageNotifyBegin.RemoveDynamic(this, &ThisClass::OnNotifyBeginReceived);
 		AnimInstance->OnPlayMontageNotifyEnd.RemoveDynamic(this, &ThisClass::OnNotifyEndReceived);
 	}
@@ -62,29 +64,29 @@ void UAlsGameplayAbility_MontageBase::GetGameplayEffectsWhileAnimating(TArray<co
 	}
 }
 
-void UAlsGameplayAbility_MontageBase::PlayMontage(const FGameplayAbilityActivationInfo& ActivationInfo, const FAlsPlayMontageParameter& Parameter,
+bool UAlsGameplayAbility_MontageBase::PlayMontage(const FGameplayAbilityActivationInfo& ActivationInfo, const FAlsPlayMontageParameter& Parameter,
 												  const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo)
 {
-	PlayMontage(ActivationInfo, Parameter.MontageToPlay, Parameter.PlayRate, Parameter.SectionName, Parameter.StartTime, Handle, ActorInfo);
+	return PlayMontage(ActivationInfo, Parameter.MontageToPlay, Parameter.PlayRate, Parameter.SectionName, Parameter.StartTime, Handle, ActorInfo);
 }
 
-void UAlsGameplayAbility_MontageBase::PlayMontage(UAnimMontage* Montage, float PlayRate, FName SectionName, float StartTime)
+bool UAlsGameplayAbility_MontageBase::PlayMontage(UAnimMontage* Montage, float PlayRate, FName SectionName, float StartTime)
 {
-	PlayMontage(GetCurrentActivationInfo(), Montage, PlayRate, SectionName, StartTime, CurrentSpecHandle, GetCurrentActorInfo());
+	return PlayMontage(GetCurrentActivationInfo(), Montage, PlayRate, SectionName, StartTime, CurrentSpecHandle, GetCurrentActorInfo());
 }
 
-void UAlsGameplayAbility_MontageBase::PlayMontage(const FGameplayAbilityActivationInfo& ActivationInfo, const FGameplayAbilityActorInfo* ActorInfo,
+bool UAlsGameplayAbility_MontageBase::PlayMontage(const FGameplayAbilityActivationInfo& ActivationInfo, const FGameplayAbilityActorInfo* ActorInfo,
 												  const FAlsPlayMontageParameter& Parameter)
 {
-	PlayMontage(ActivationInfo, Parameter, CurrentSpecHandle, ActorInfo);
+	return PlayMontage(ActivationInfo, Parameter, CurrentSpecHandle, ActorInfo);
 }
 
-void UAlsGameplayAbility_MontageBase::PlayMontage(const FAlsPlayMontageParameter& Parameter)
+bool UAlsGameplayAbility_MontageBase::PlayMontage(const FAlsPlayMontageParameter& Parameter)
 {
-	PlayMontage(GetCurrentActivationInfo(), Parameter, CurrentSpecHandle, GetCurrentActorInfo());
+	return PlayMontage(GetCurrentActivationInfo(), Parameter, CurrentSpecHandle, GetCurrentActorInfo());
 }
 
-void UAlsGameplayAbility_MontageBase::PlayMontage(const FGameplayAbilityActivationInfo& ActivationInfo,
+bool UAlsGameplayAbility_MontageBase::PlayMontage(const FGameplayAbilityActivationInfo& ActivationInfo,
 												  UAnimMontage* Montage, float PlayRate, FName SectionName, float StartTime,
 												  const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo)
 {
@@ -115,8 +117,10 @@ void UAlsGameplayAbility_MontageBase::PlayMontage(const FGameplayAbilityActivati
 		if (CurrentMotangeDuration > 0.0f)
 		{
 			SetUpNotification(AnimInstance, Montage);
+			return true;
 		}
 	}
+	return false;
 }
 
 void UAlsGameplayAbility_MontageBase::SetUpNotification(UAnimInstance* AnimInstance, UAnimMontage* Montage)
