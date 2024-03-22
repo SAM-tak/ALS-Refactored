@@ -17,7 +17,7 @@ class ALS_API UAlsLocalMontageTask : public UAlsCharacterTask
 	friend class UAlsAbilityTask_PlayLocalMontage;
 
 protected:
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "LocalMontageTask|Settings", Transient)
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "LocalMontageTask|Settings", Transient)
 	uint8 bStopCurrentMontageOnEnd : 1{true};
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "LocalMontageTask|State", Transient)

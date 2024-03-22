@@ -92,46 +92,6 @@ void UAlsGameplayAbility::StopCurrentMontage(float OverrideBlendOutTime) const
 	StopCurrentMontage(GetCurrentActorInfo(), OverrideBlendOutTime);
 }
 
-void UAlsGameplayAbility::SetGameplayTag(const FGameplayTag& Tag) const
-{
-	GetAlsCharacterFromActorInfo()->GetAlsAbilitySystem()->SetLooseGameplayTagCount(Tag, 1);
-}
-
-void UAlsGameplayAbility::ResetGameplayTag(const FGameplayTag& Tag) const
-{
-	GetAlsCharacterFromActorInfo()->GetAlsAbilitySystem()->SetLooseGameplayTagCount(Tag, 0);
-}
-
-void UAlsGameplayAbility::AddGameplayTag(const FGameplayTag& Tag) const
-{
-	GetAlsCharacterFromActorInfo()->GetAlsAbilitySystem()->AddLooseGameplayTag(Tag);
-}
-
-void UAlsGameplayAbility::SubtractGameplayTag(const FGameplayTag& Tag) const
-{
-	GetAlsCharacterFromActorInfo()->GetAlsAbilitySystem()->RemoveLooseGameplayTag(Tag);
-}
-
-void UAlsGameplayAbility::K2_SetGameplayTag(FGameplayTag Tag) const
-{
-	SetGameplayTag(Tag);
-}
-
-void UAlsGameplayAbility::K2_ResetGameplayTag(FGameplayTag Tag) const
-{
-	ResetGameplayTag(Tag);
-}
-
-void UAlsGameplayAbility::K2_AddGameplayTag(FGameplayTag Tag) const
-{
-	AddGameplayTag(Tag);
-}
-
-void UAlsGameplayAbility::K2_SubtractGameplayTag(FGameplayTag Tag) const
-{
-	SubtractGameplayTag(Tag);
-}
-
 void UAlsGameplayAbility::SetInputBlocked(bool bBlocked) const
 {
 	auto* Character{GetAlsCharacterFromActorInfo()};

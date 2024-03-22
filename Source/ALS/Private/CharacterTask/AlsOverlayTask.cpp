@@ -8,26 +8,37 @@
 
 void UAlsOverlayTask::Begin()
 {
-	Super::Begin();
-
-	if (IsValid(OverlayAnimClass))
+	if (!bActive && IsValid(OverlayAnimClass))
 	{
 		OverlayAnimInstance = Cast<UAlsOverlayAnimInstance>(Character->GetMesh()->GetLinkedAnimLayerInstanceByClass(OverlayAnimClass));
+
 		if (!OverlayAnimInstance.IsValid())
 		{
 			Character->GetMesh()->LinkAnimClassLayers(OverlayAnimClass);
 			OverlayAnimInstance = Cast<UAlsOverlayAnimInstance>(Character->GetMesh()->GetLinkedAnimLayerInstanceByClass(OverlayAnimClass));
 		}
+
+		OverlayAnimInstance->Refresh(this);
+	}
+	Super::Begin();
+}
+
+void UAlsOverlayTask::Refresh(float DeltaTime)
+{
+	Super::Refresh(DeltaTime);
+	if (OverlayAnimInstance.IsValid())
+	{
+		OverlayAnimInstance->Refresh(this);
 	}
 }
 
-void UAlsOverlayTask::OnEnd(bool bWasCancelled)
+void UAlsOverlayTask::OnFinished()
 {
-	Super::OnEnd(bWasCancelled);
-
 	if (Character.IsValid() && IsValid(OverlayAnimClass))
 	{
 		Character->GetMesh()->UnlinkAnimClassLayers(OverlayAnimClass);
 		OverlayAnimInstance.Reset();
 	}
+
+	Super::OnFinished();
 }

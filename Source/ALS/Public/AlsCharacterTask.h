@@ -3,6 +3,8 @@
 #include "CoreMinimal.h"
 #include "AlsCharacterTask.generated.h"
 
+class UAlsCharacterComponent;
+
 UCLASS(Abstract, Blueprintable, BlueprintType, AutoExpandCategories = ("Settings"))
 class ALS_API UAlsCharacterTask : public UObject
 {
@@ -21,8 +23,11 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient)
 	uint8 bInputBinded : 1{false};
 
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient)
+	uint8 bEpilogRunningCurrently : 1{false};
+
 public:
-	virtual bool IsActive() { return bActive; }
+	virtual bool IsActive() const { return bActive; }
 
 	virtual void OnRegister();
 
@@ -36,8 +41,18 @@ public:
 
 	void Cancel();
 
+	UFUNCTION(BlueprintPure, BlueprintNativeEvent, Category = "ALS|CharacterTask")
+	bool IsEpilogRunning() const;
+
+	bool HasFinished() const
+	{
+		return !bActive && !bEpilogRunningCurrently;
+	}
+
 protected:
 	virtual void OnEnd(bool bWasCancelled);
+
+	virtual void OnFinished();
 
 	void BindInput(UInputComponent* InputComponent);
 
@@ -51,4 +66,7 @@ protected:
 
 	UFUNCTION(BlueprintImplementableEvent, Category = "ALS|CharacterTask", DisplayName = "OnEnd", Meta = (ScriptName = "OnEnd"))
 	void K2_OnEnd(bool bWasCancelled);
+
+	UFUNCTION(BlueprintImplementableEvent, Category = "ALS|CharacterTask", DisplayName = "OnFinished", Meta = (ScriptName = "OnFinished"))
+	void K2_OnFinished();
 };

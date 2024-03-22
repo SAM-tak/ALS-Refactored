@@ -23,6 +23,7 @@ void UAlsCharacterTask::Begin()
 	if (!bActive)
 	{
 		bActive = true;
+		bEpilogRunningCurrently = false;
 		BindInput(Character->InputComponent.Get());
 		K2_OnBegin();
 	}
@@ -38,25 +39,58 @@ void UAlsCharacterTask::Refresh(float DeltaTime)
 
 void UAlsCharacterTask::OnEnd(bool bWasCancelled)
 {
-	if (bActive)
+	K2_OnEnd(bWasCancelled);
+	if (Character.IsValid())
 	{
-		bActive = false;
-		K2_OnEnd(bWasCancelled);
-		if (Character.IsValid())
-		{
-			UnbindInput(Character->InputComponent.Get());
-		}
+		UnbindInput(Character->InputComponent.Get());
 	}
+}
+
+void UAlsCharacterTask::OnFinished()
+{
+	K2_OnFinished();
 }
 
 void UAlsCharacterTask::End()
 {
-	OnEnd(false);
+	if (bActive)
+	{
+		OnEnd(false);
+		bEpilogRunningCurrently = IsEpilogRunning();
+		bActive = false;
+		if (!bEpilogRunningCurrently)
+		{
+			OnFinished();
+		}
+	}
+	else if(bEpilogRunningCurrently)
+	{
+		bEpilogRunningCurrently = IsEpilogRunning();
+		if (!bEpilogRunningCurrently)
+		{
+			OnFinished();
+		}
+	}
 }
 
 void UAlsCharacterTask::Cancel()
 {
-	OnEnd(true);
+	if (bActive)
+	{
+		OnEnd(true);
+		bActive = false;
+		bEpilogRunningCurrently = IsEpilogRunning();
+		bActive = false;
+		if (!bEpilogRunningCurrently)
+		{
+			OnFinished();
+		}
+	}
+}
+
+bool UAlsCharacterTask::IsEpilogRunning_Implementation() const
+{
+	return false;
 }
 
 void UAlsCharacterTask::OnControllerChanged(AController* PreviousController, AController* NewController)

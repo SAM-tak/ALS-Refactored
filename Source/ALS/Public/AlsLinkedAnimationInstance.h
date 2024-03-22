@@ -4,7 +4,6 @@
 #include "AlsLinkedAnimationInstance.generated.h"
 
 class AAlsCharacter;
-class UAlsViewAnimInstance;
 
 UCLASS(Abstract)
 class ALS_API UAlsLinkedAnimationInstance : public UAnimInstance

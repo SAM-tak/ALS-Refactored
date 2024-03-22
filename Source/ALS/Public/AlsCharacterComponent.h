@@ -15,6 +15,12 @@ protected:
 	TWeakObjectPtr<AAlsCharacter> Character;
 
 protected:
+	template<class T>
+	static T* NewTask(const UClass* Class)
+	{
+		return T::NewTask<T>(Character, this, Class);
+	}
+
 	virtual void OnRegister() override;
 
 	UFUNCTION(BlueprintNativeEvent, Category = "ALS|CharacterComponent")

@@ -120,10 +120,6 @@ void AAlsCharacter::GetOwnedGameplayTags(FGameplayTagContainer& TagContainer) co
 	{
 		TagContainer.AddLeafTag(RotationMode);
 	}
-	if (AimingMode.IsValid())
-	{
-		TagContainer.AddLeafTag(AimingMode);
-	}
 	if (Stance.IsValid())
 	{
 		TagContainer.AddLeafTag(Stance);
@@ -168,10 +164,7 @@ void AAlsCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLif
 	DOREPLIFETIME_WITH_PARAMS_FAST(ThisClass, DesiredGait, Parameters)
 	DOREPLIFETIME_WITH_PARAMS_FAST(ThisClass, DesiredRotationMode, Parameters)
 	DOREPLIFETIME_WITH_PARAMS_FAST(ThisClass, DesiredViewMode, Parameters)
-	DOREPLIFETIME_WITH_PARAMS_FAST(ThisClass, AimingMode, Parameters)
 	DOREPLIFETIME_WITH_PARAMS_FAST(ThisClass, OverlayMode, Parameters)
-	
-	DOREPLIFETIME_WITH_PARAMS_FAST(ThisClass, bRightShoulder, Parameters)
 	DOREPLIFETIME_WITH_PARAMS_FAST(ThisClass, ReplicatedViewRotation, Parameters)
 	DOREPLIFETIME_WITH_PARAMS_FAST(ThisClass, InputDirection, Parameters)
 	DOREPLIFETIME_WITH_PARAMS_FAST(ThisClass, DesiredVelocityYawAngle, Parameters)
@@ -188,7 +181,7 @@ void AAlsCharacter::PreRegisterAllComponents()
 	{
 		ViewMode = DesiredToActual(DesiredViewMode);
 
-		RotationMode = AimingMode.IsValid() ? AlsRotationModeTags::Aiming : DesiredToActual(GetDesiredRotationMode());
+		RotationMode = DesiredToActual(GetDesiredRotationMode());
 
 		Stance = DesiredToActual(DesiredStance);
 
@@ -623,6 +616,18 @@ void AAlsCharacter::SetViewMode(const FGameplayTag& NewViewMode)
 
 void AAlsCharacter::OnViewModeChanged_Implementation(const FGameplayTag& PreviousRotationMode) {}
 
+void AAlsCharacter::SetRightShoulder(const bool bNewRightShoulder)
+{
+	AbilitySystem->SetLooseGameplayTagCount(AlsStateFlagTags::LeftShoulder, bNewRightShoulder ? 0 : 1);
+}
+
+bool AAlsCharacter::ToggleShoulder()
+{
+	bool NewShoulder{!IsRightShoulder()};
+	SetRightShoulder(NewShoulder);
+	return NewShoulder;
+}
+
 void AAlsCharacter::OnMovementModeChanged(const EMovementMode PreviousMovementMode, const uint8 PreviousCustomMode)
 {
 	// Use the character movement mode to set the locomotion mode to the right value. This allows you to have a
@@ -692,51 +697,6 @@ void AAlsCharacter::NotifyLocomotionModeChanged(const FGameplayTag& PreviousLoco
 
 void AAlsCharacter::OnLocomotionModeChanged_Implementation(const FGameplayTag& PreviousLocomotionMode) {}
 
-void AAlsCharacter::SetAimingMode(const FGameplayTag& NewAimingMode)
-{
-	SetAimingMode(NewAimingMode, true);
-}
-
-void AAlsCharacter::SetAimingMode(const FGameplayTag& NewAimingMode, const bool bSendRpc)
-{
-	if (AimingMode == NewAimingMode || GetLocalRole() < ROLE_AutonomousProxy)
-	{
-		return;
-	}
-
-	const auto PreviousAimingMode{AimingMode};
-
-	AimingMode = NewAimingMode;
-
-	OnAimingModeChanged(PreviousAimingMode);
-
-	MARK_PROPERTY_DIRTY_FROM_NAME(ThisClass, AimingMode, this)
-
-	if(bSendRpc)
-	{
-		if (GetLocalRole() >= ROLE_Authority)
-		{
-			ClientSetAimingMode(AimingMode);
-		}
-		else
-		{
-			ServerSetAimingMode(AimingMode);
-		}
-	}
-}
-
-void AAlsCharacter::ClientSetAimingMode_Implementation(const FGameplayTag& NewAimingMode)
-{
-	SetAimingMode(NewAimingMode, false);
-}
-
-void AAlsCharacter::ServerSetAimingMode_Implementation(const FGameplayTag& NewAimingMode)
-{
-	SetAimingMode(NewAimingMode, false);
-}
-
-void AAlsCharacter::OnAimingModeChanged_Implementation(const FGameplayTag& PreviousAimingMode) {}
-
 float AAlsCharacter::GetAimAmount() const
 {
 	return AnimationInstance.IsValid() ? AnimationInstance->GetCurveValueClamped01(UAlsConstants::AllowAimingCurveName()) : 0.0f;
@@ -784,7 +744,7 @@ void AAlsCharacter::OnRotationModeChanged_Implementation(const FGameplayTag& Pre
 void AAlsCharacter::RefreshRotationMode()
 {
 	bool bSprinting{GetGait() == AlsGaitTags::Sprinting};
-	bool bAiming{GetAimingMode().IsValid() || GetDesiredRotationMode() == AlsDesiredRotationModeTags::Aiming};
+	bool bAiming{HasMatchingGameplayTag(AlsAimingModeTags::Root) || GetDesiredRotationMode() == AlsDesiredRotationModeTags::Aiming};
 
 	if (ViewMode == AlsViewModeTags::FirstPerson)
 	{

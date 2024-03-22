@@ -26,8 +26,11 @@ void UAlsOverrideModeComponent::EndCurrentRagdollingTask()
 	if (CurrentOverrideTask.IsValid() && CurrentOverrideTask->IsA(UAlsRagdollingTask::StaticClass()))
 	{
 		CurrentOverrideTask->End();
-		CurrentOverrideTask.Reset();
-		CurrentOverrideTag = FGameplayTag::EmptyTag;
+		if (CurrentOverrideTask->HasFinished())
+		{
+			CurrentOverrideTask.Reset();
+			CurrentOverrideTag = FGameplayTag::EmptyTag;
+		}
 	}
 }
 
@@ -42,12 +45,15 @@ void UAlsOverrideModeComponent::ChangeOverrideTaskIfNeeded(const FGameplayTag& O
 		else
 		{
 			CurrentOverrideTask->End();
-			CurrentOverrideTask.Reset();
-			CurrentOverrideTag = FGameplayTag::EmptyTag;
+			if (CurrentOverrideTask->HasFinished())
+			{
+				CurrentOverrideTask.Reset();
+				CurrentOverrideTag = FGameplayTag::EmptyTag;
+			}
 		}
 	}
 
-	if (OverrideClassMap.Contains(OverrideMode))
+	if (!CurrentOverrideTask.IsValid() && OverrideClassMap.Contains(OverrideMode))
 	{
 		if (InstancedOverrideTasks.Contains(OverrideMode))
 		{
@@ -56,6 +62,7 @@ void UAlsOverrideModeComponent::ChangeOverrideTaskIfNeeded(const FGameplayTag& O
 		else
 		{
 			auto* NewTask{NewObject<UAlsOverrideTask>(Character.Get(), OverrideClassMap[OverrideMode])};
+			NewTask->Component = this;
 			InstancedOverrideTasks.Add(OverrideMode, NewTask);
 			CurrentOverrideTask = NewTask;
 			CurrentOverrideTask->OnRegister();

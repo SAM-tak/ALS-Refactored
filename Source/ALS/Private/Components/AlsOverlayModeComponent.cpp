@@ -35,10 +35,13 @@ void UAlsOverlayModeComponent::ChangeOverlayTask(const FGameplayTag& OverlayMode
 	if (CurrentOverlayTask.IsValid())
 	{
 		CurrentOverlayTask->End();
-		CurrentOverlayTask.Reset();
+		if (CurrentOverlayTask->HasFinished())
+		{
+			CurrentOverlayTask.Reset();
+		}
 	}
 
-	if (OverlayClassMap.Contains(OverlayMode))
+	if (!CurrentOverlayTask.IsValid() && OverlayClassMap.Contains(OverlayMode))
 	{
 		if (InstancedOverlayTasks.Contains(OverlayMode))
 		{
@@ -47,9 +50,10 @@ void UAlsOverlayModeComponent::ChangeOverlayTask(const FGameplayTag& OverlayMode
 		else
 		{
 			auto* NewTask{NewObject<UAlsOverlayTask>(Character.Get(), OverlayClassMap[OverlayMode])};
-			NewTask->OnRegister();
+			NewTask->Component = this;
 			InstancedOverlayTasks.Add(OverlayMode, NewTask);
 			CurrentOverlayTask = NewTask;
+			NewTask->OnRegister();
 		}
 		CurrentOverlayTask->Begin();
 	}

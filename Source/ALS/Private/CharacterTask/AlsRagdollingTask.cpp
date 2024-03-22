@@ -3,7 +3,7 @@
 #include "CharacterTasks/AlsRagdollingTask.h"
 #include "AlsCharacter.h"
 #include "AlsCharacterMovementComponent.h"
-#include "AlsAnimationInstance.h"
+#include "AlsCharacterTaskAnimInstance.h"
 #include "AlsAbilitySystemComponent.h"
 #include "AlsPhysicalAnimationComponent.h"
 #include "LinkedAnimLayers/AlsRagdollingAnimInstance.h"
@@ -22,12 +22,12 @@ void UAlsRagdollingTask::Refresh(float DeltaTime)
 	auto* PhysicalAnimation{Character->GetPhysicalAnimation()};
 	auto& RagdollingState{PhysicalAnimation->GetRagdollingState()};
 
+	Super::Refresh(DeltaTime);
+	
 	if (!IsActive() || RagdollingState.bFreezing)
 	{
 		return;
 	}
-
-	Super::Refresh(DeltaTime);
 
 	if (RagdollingState.IsGroundedAndAged())
 	{
@@ -38,19 +38,26 @@ void UAlsRagdollingTask::Refresh(float DeltaTime)
 		}
 		Character->Lie();
 
-		if (RagdollingState.bFacingUpward)
-		{
-			Character->LocalTags.AddTag(AlsStateFlagTags::FacingUpward);
-		}
-		else
-		{
-			Character->LocalTags.RemoveTag(AlsStateFlagTags::FacingUpward);
-		}
+		// local only. not be replicated.
+		Character->GetAlsAbilitySystem()->SetLooseGameplayTagCount(AlsStateFlagTags::FacingUpward, RagdollingState.bFacingUpward ? 1 : 0);
 	}
 	else
 	{
 		bOnGroundedAndAgedFired = false;
 	}
+}
+
+bool UAlsRagdollingTask::IsEpilogRunning_Implementation() const
+{
+	if (OverrideAnimInstance.IsValid())
+	{
+		bool CharacterTaskActive{OverrideAnimInstance->GetCharacterTaskActive()};
+		float BlendWeight{OverrideAnimInstance->GetObservingFinalBlendWeight()};
+		//UE_LOG(LogTemp, Log, TEXT("bActive:%d ObservingFinalBlendWeight:%0.2f (%d)"), CharacterTaskActive, BlendWeight,
+		//	   CharacterTaskActive || (0.f < BlendWeight && BlendWeight < 1.f));
+		return CharacterTaskActive || (0.f < BlendWeight && BlendWeight < 1.f);
+	}
+	return false;
 }
 
 bool UAlsRagdollingTask::IsGroundedAndAged() const

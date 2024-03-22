@@ -31,6 +31,16 @@ void UAlsCameraMovementComponent::DisplayDebug(UCanvas* Canvas, const FDebugDisp
 	    !DisplayInfo.IsDisplayOn(UAlsCameraConstants::CameraShapesDebugDisplayName()) &&
 	    !DisplayInfo.IsDisplayOn(UAlsCameraConstants::CameraTracesDebugDisplayName()))
 	{
+		if (!DisplayInfo.IsDisplayOn(UAlsConstants::CurvesDebugDisplayName()) &&
+			!DisplayInfo.IsDisplayOn(UAlsConstants::StateDebugDisplayName()) &&
+			!DisplayInfo.IsDisplayOn(UAlsConstants::ShapesDebugDisplayName()) &&
+			!DisplayInfo.IsDisplayOn(UAlsConstants::TracesDebugDisplayName()) &&
+			!DisplayInfo.IsDisplayOn(UAlsConstants::MantlingDebugDisplayName()) &&
+			!DisplayInfo.IsDisplayOn(UAlsConstants::PADebugDisplayName()))
+		{
+			return;
+		}
+
 		DisplayDebugHeader(Canvas, CameraCurvesHeaderText, {0.0f, 0.333333f, 0.0f}, Scale, HorizontalLocation, VerticalLocation);
 		VerticalLocation += RowOffset;
 		DisplayDebugHeader(Canvas, ShapesHeaderText, {0.0f, 0.333333f, 0.0f}, Scale, HorizontalLocation, VerticalLocation);
@@ -263,7 +273,7 @@ void UAlsCameraMovementComponent::DisplayDebugShapes(const UCanvas* Canvas, cons
 
 	VerticalLocation += RowOffset;
 
-
+	
 	bool bRightShoulder{Character->IsRightShoulder()};
 	static const auto RightShoulderText{
 		FText::AsCultureInvariant(FName::NameToDisplayString(TEXT("RightShoulder"), true))

@@ -78,26 +78,6 @@ protected:
 	UFUNCTION(BlueprintCallable, Category = "ALS|Ability|Montage")
 	void StopCurrentMontage(float OverrideBlendOutTime = -1.0f) const;
 
-	void SetGameplayTag(const FGameplayTag& Tag) const;
-
-	void ResetGameplayTag(const FGameplayTag& Tag) const;
-
-	void AddGameplayTag(const FGameplayTag& Tag) const;
-
-	void SubtractGameplayTag(const FGameplayTag& Tag) const;
-
-	UFUNCTION(BlueprintCallable, Category = "ALS|Ability", Meta = (DisplayName = "Set GameplayTag", ScriptName = "SetGameplayTag"))
-	void K2_SetGameplayTag(FGameplayTag Tag) const;
-
-	UFUNCTION(BlueprintCallable, Category = "ALS|Ability", Meta = (DisplayName = "Reset GameplayTag", ScriptName = "ResetGameplayTag"))
-	void K2_ResetGameplayTag(FGameplayTag Tag) const;
-
-	UFUNCTION(BlueprintCallable, Category = "ALS|Ability", Meta = (DisplayName = "Add GameplayTag", ScriptName = "AddGameplayTag"))
-	void K2_AddGameplayTag(FGameplayTag Tag) const;
-
-	UFUNCTION(BlueprintCallable, Category = "ALS|Ability", Meta = (DisplayName = "Subtract GameplayTag", ScriptName = "SubtractGameplayTag"))
-	void K2_SubtractGameplayTag(FGameplayTag Tag) const;
-
 	UFUNCTION(BlueprintCallable, Category = "ALS|Ability")
 	void SetInputBlocked(bool bBlocked) const;
 

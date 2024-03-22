@@ -80,3 +80,71 @@ void UAlsAbilitySystemComponent::OnRefresh_Implementation(float DeltaTime)
 		TryActivateAbilitiesBySingleTag(AlsLocomotionActionTags::Mantling);
 	}
 }
+
+void UAlsAbilitySystemComponent::SetGameplayTag(const FGameplayTag& Tag, bool bShouldReplicate)
+{
+	if (bShouldReplicate)
+	{
+		SetReplicatedLooseGameplayTagCount(Tag, 1);
+	}
+	else
+	{
+		SetLooseGameplayTagCount(Tag, 1);
+	}
+}
+
+void UAlsAbilitySystemComponent::ResetGameplayTag(const FGameplayTag& Tag, bool bShouldReplicate)
+{
+	if (bShouldReplicate)
+	{
+		SetReplicatedLooseGameplayTagCount(Tag, 0);
+	}
+	else
+	{
+		SetLooseGameplayTagCount(Tag, 0);
+	}
+}
+
+void UAlsAbilitySystemComponent::AddGameplayTag(const FGameplayTag& Tag, bool bShouldReplicate)
+{
+	if (bShouldReplicate)
+	{
+		AddReplicatedLooseGameplayTag(Tag);
+	}
+	else
+	{
+		AddLooseGameplayTag(Tag);
+	}
+}
+
+void UAlsAbilitySystemComponent::SubtractGameplayTag(const FGameplayTag& Tag, bool bShouldReplicate)
+{
+	if (bShouldReplicate)
+	{
+		RemoveReplicatedLooseGameplayTag(Tag);
+	}
+	else
+	{
+		RemoveLooseGameplayTag(Tag);
+	}
+}
+
+void UAlsAbilitySystemComponent::K2_SetGameplayTag(FGameplayTag Tag, bool bShouldReplicate)
+{
+	SetGameplayTag(Tag, bShouldReplicate);
+}
+
+void UAlsAbilitySystemComponent::K2_ResetGameplayTag(FGameplayTag Tag, bool bShouldReplicate)
+{
+	ResetGameplayTag(Tag, bShouldReplicate);
+}
+
+void UAlsAbilitySystemComponent::K2_AddGameplayTag(FGameplayTag Tag, bool bShouldReplicate)
+{
+	AddGameplayTag(Tag, bShouldReplicate);
+}
+
+void UAlsAbilitySystemComponent::K2_SubtractGameplayTag(FGameplayTag Tag, bool bShouldReplicate)
+{
+	SubtractGameplayTag(Tag, bShouldReplicate);
+}

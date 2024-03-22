@@ -359,18 +359,6 @@ void AAlsCharacter::DisplayDebugState(const UCanvas* Canvas, const float Scale,
 
 	VerticalLocation += RowOffset;
 
-	static const auto DesiredAimingText{
-		FText::AsCultureInvariant(FName::NameToDisplayString(GET_MEMBER_NAME_STRING_CHECKED(ThisClass, AimingMode), true))
-	};
-
-	Text.Text = DesiredAimingText;
-	Text.Draw(Canvas->Canvas, {HorizontalLocation, VerticalLocation});
-
-	Text.Text = FText::AsCultureInvariant(FName::NameToDisplayString(UAlsUtility::GetSimpleTagName(AimingMode).ToString(), false));
-	Text.Draw(Canvas->Canvas, {HorizontalLocation + ColumnOffset, VerticalLocation});
-
-	VerticalLocation += RowOffset;
-
 	static const auto DesiredRotationModeText{
 		FText::AsCultureInvariant(FName::NameToDisplayString(GET_MEMBER_NAME_STRING_CHECKED(ThisClass, DesiredRotationMode), false))
 	};

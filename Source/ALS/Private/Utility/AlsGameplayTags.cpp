@@ -110,6 +110,7 @@ namespace AlsLocomotionActionTags
 {
 	UE_DEFINE_GAMEPLAY_TAG(Root, "Als.LocomotionAction")
 	UE_DEFINE_GAMEPLAY_TAG(Mantling, "Als.LocomotionAction.Mantling")
+	UE_DEFINE_GAMEPLAY_TAG(Vaulting, "Als.LocomotionAction.Vaulting")
 	UE_DEFINE_GAMEPLAY_TAG(GettingUp, "Als.LocomotionAction.GettingUp")
 	UE_DEFINE_GAMEPLAY_TAG(GettingDown, "Als.LocomotionAction.GettingDown")
 	UE_DEFINE_GAMEPLAY_TAG(Rolling, "Als.LocomotionAction.Rolling")
@@ -122,6 +123,7 @@ namespace AlsLocomotionActionTags
 namespace AlsStateFlagTags
 {
 	UE_DEFINE_GAMEPLAY_TAG(Root, "Als.StateFlag")
+	UE_DEFINE_GAMEPLAY_TAG(LeftShoulder, "Als.StateFlag.LeftShoulder")
 	UE_DEFINE_GAMEPLAY_TAG(FacingUpward, "Als.StateFlag.FacingUpward")
 	UE_DEFINE_GAMEPLAY_TAG(MantleHigh, "Als.StateFlag.MantleHigh")
 	UE_DEFINE_GAMEPLAY_TAG(MantleMedium, "Als.StateFlag.MantleMedium")

@@ -25,6 +25,8 @@ protected:
 public:
 	virtual void Refresh(float DeltaTime) override;
 
+	virtual bool IsEpilogRunning_Implementation() const override;
+
 protected:
 	UFUNCTION(BlueprintImplementableEvent, Category = "ALS|CharacterTask|Ragdolling", DisplayName = "On Grounded And Aged", Meta = (ScriptName = "OnGroundedAndAged"))
 	void K2_OnGroundedAndAged();

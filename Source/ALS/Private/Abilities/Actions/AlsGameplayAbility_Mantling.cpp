@@ -393,11 +393,6 @@ void UAlsGameplayAbility_Mantling::ActivateAbility(const FGameplayAbilitySpecHan
 		TickTask->OnTick.AddDynamic(this, &ThisClass::Tick);
 		TickTask->ReadyForActivation();
 	}
-
-	auto* AbilitySystem{GetAlsAbilitySystemComponentFromActorInfo()};
-	AbilitySystem->SetLooseGameplayTagCount(AlsStateFlagTags::MantleHigh, Parameters.MantlingType == EAlsMantlingType::High ? 1 : 0);
-	AbilitySystem->SetLooseGameplayTagCount(AlsStateFlagTags::MantleMedium, Parameters.MantlingType == EAlsMantlingType::Medium ? 1 : 0);
-	AbilitySystem->SetLooseGameplayTagCount(AlsStateFlagTags::MantleLow, Parameters.MantlingType == EAlsMantlingType::Low ? 1 : 0);
 }
 
 void UAlsGameplayAbility_Mantling::Tick_Implementation(const float DeltaTime)

@@ -6,6 +6,7 @@
 #include "AlsOverlayTask.generated.h"
 
 class UAlsOverlayAnimInstance;
+class UAlsOverlayModeComponent;
 
 /**
  *
@@ -15,16 +16,23 @@ class ALS_API UAlsOverlayTask : public UAlsCharacterTask
 {
 	GENERATED_BODY()
 
+	friend UAlsOverlayModeComponent;
+
 protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Settings")
 	TSubclassOf<UAlsOverlayAnimInstance> OverlayAnimClass;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient)
-	TWeakObjectPtr<UAlsLinkedAnimationInstance> OverlayAnimInstance;
+	TWeakObjectPtr<UAlsOverlayModeComponent> Component;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient)
+	TWeakObjectPtr<UAlsOverlayAnimInstance> OverlayAnimInstance;
 
 public:
 	virtual void Begin() override;
 
+	virtual void Refresh(float DeltaTime) override;
+
 protected:
-	virtual void OnEnd(bool bWasCancelled) override;
+	virtual void OnFinished() override;
 };

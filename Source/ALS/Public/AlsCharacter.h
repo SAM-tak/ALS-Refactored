@@ -69,17 +69,11 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Als Character|Settings|Desired State", Replicated)
 	FGameplayTag DesiredGait{AlsDesiredGaitTags::Running};
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Als Character|Settings|Desired State", ReplicatedUsing = OnAimingModeChanged)
-	FGameplayTag AimingMode{FGameplayTag::EmptyTag};
-
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Als Character|Settings|Desired State", ReplicatedUsing = OnReplicated_OverlayMode)
 	FGameplayTag OverlayMode{AlsOverlayModeTags::Default};
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Als Character|Settings|Camera", Replicated)
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Als Character|Settings|Desired State", Replicated)
 	FGameplayTag DesiredViewMode{AlsDesiredViewModeTags::ThirdPerson};
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Als Character|Settings|Camera", Replicated)
-	uint32 bRightShoulder : 1{true};
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Als Character|State", Transient)
 	FGameplayTag LocomotionMode{AlsLocomotionModeTags::Grounded};
@@ -155,9 +149,6 @@ public:
 
 	FORCEINLINE UAlsAbilitySystemComponent* GetAlsAbilitySystem() const { return AbilitySystem; }
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Als Character|State", Transient)
-	FGameplayTagContainer LocalTags;
-
 protected:
 	virtual void BeginPlay() override;
 
@@ -219,7 +210,7 @@ public:
 	void SetRightShoulder(bool bNewRightShoulder);
 
 	UFUNCTION(BlueprintCallable, Category = "Als|Character|Camera")
-	bool ToggleRightShoulder();
+	bool ToggleShoulder();
 
 	// View Mode
 
@@ -251,36 +242,6 @@ protected:
 
 	UFUNCTION(BlueprintNativeEvent, Category = "ALS|Character")
 	void OnLocomotionModeChanged(const FGameplayTag& PreviousLocomotionMode);
-
-	// Aiming Mode
-
-public:
-	const FGameplayTag& GetAimingMode() const;
-
-	UFUNCTION(BlueprintCallable, Category = "ALS|Character")
-	void SetAimingMode(const FGameplayTag& NewAimingMode);
-
-	UFUNCTION(BlueprintPure, Category = "ALS|Character")
-	float GetAimAmount() const;
-
-	UFUNCTION(BlueprintNativeEvent, Category = "ALS|Character")
-	bool HasSight() const;
-
-	UFUNCTION(BlueprintNativeEvent, Category = "ALS|Character")
-	void GetSightLocAndRot(FVector& Loc, FRotator& Rot) const;
-
-private:
-	void SetAimingMode(const FGameplayTag& NewAimingMode, bool bSendRpc);
-
-	UFUNCTION(Client, Reliable)
-	void ClientSetAimingMode(const FGameplayTag& NewAimingMode);
-
-	UFUNCTION(Server, Reliable)
-	void ServerSetAimingMode(const FGameplayTag& NewAimingMode);
-
-protected:
-	UFUNCTION(BlueprintNativeEvent, Category = "ALS|Character")
-	void OnAimingModeChanged(const FGameplayTag& PreviousAimingMode);
 
 	// Desired Rotation Mode
 
@@ -536,6 +497,15 @@ public:
 	UFUNCTION(BlueprintPure, Category = "ALS|Character")
 	bool HasServerRole() const;
 
+	UFUNCTION(BlueprintPure, Category = "ALS|Character")
+	float GetAimAmount() const;
+
+	UFUNCTION(BlueprintNativeEvent, Category = "ALS|Character")
+	bool HasSight() const;
+
+	UFUNCTION(BlueprintNativeEvent, Category = "ALS|Character")
+	void GetSightLocAndRot(FVector& Loc, FRotator& Rot) const;
+
 	// Others
 
 public:
@@ -643,11 +613,6 @@ inline const FGameplayTag& AAlsCharacter::GetRotationMode() const
 	return RotationMode;
 }
 
-inline const FGameplayTag& AAlsCharacter::GetAimingMode() const
-{
-	return AimingMode;
-}
-
 inline const FGameplayTag& AAlsCharacter::GetStance() const
 {
 	return Stance;
@@ -680,18 +645,7 @@ inline const FAlsLocomotionState& AAlsCharacter::GetLocomotionState() const
 
 inline bool AAlsCharacter::IsRightShoulder() const
 {
-	return bRightShoulder;
-}
-
-inline void AAlsCharacter::SetRightShoulder(const bool bNewRightShoulder)
-{
-	bRightShoulder = bNewRightShoulder;
-}
-
-inline bool AAlsCharacter::ToggleRightShoulder()
-{
-	bRightShoulder = bRightShoulder ? false : true;
-	return bRightShoulder;
+	return !HasMatchingGameplayTag(AlsStateFlagTags::LeftShoulder);
 }
 
 inline bool AAlsCharacter::IsLied() const

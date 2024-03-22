@@ -2,6 +2,7 @@
 
 #include "AlsCharacter.h"
 #include "AlsCharacterMovementComponent.h"
+#include "AlsAbilitySystemComponent.h"
 #include "RootMotionSources/AlsRootMotionSource_Mantling.h"
 #include "Net/UnrealNetwork.h"
 #include "Utility/AlsUtility.h"
@@ -101,6 +102,11 @@ void UAlsRootMotionComponent::StartMantlingImplementation(const FAlsMantlingPara
 	if (Character->GetMesh()->GetAnimInstance()->Montage_Play(Montage, PlayRate, EMontagePlayReturnType::MontageLength, StartTime, false))
 	{
 		MantlingMontage = Montage;
+
+		auto* AbilitySystem{Character->GetAlsAbilitySystem()};
+		AbilitySystem->SetLooseGameplayTagCount(AlsStateFlagTags::MantleHigh, Parameters.MantlingType == EAlsMantlingType::High ? 1 : 0);
+		AbilitySystem->SetLooseGameplayTagCount(AlsStateFlagTags::MantleMedium, Parameters.MantlingType == EAlsMantlingType::Medium ? 1 : 0);
+		AbilitySystem->SetLooseGameplayTagCount(AlsStateFlagTags::MantleLow, Parameters.MantlingType == EAlsMantlingType::Low ? 1 : 0);
 
 		// Apply mantling root motion.
 
@@ -211,6 +217,11 @@ void UAlsRootMotionComponent::OnTick_Mantling()
 
 		CharacterMovement->SetMovementModeLocked(false);
 		CharacterMovement->SetMovementMode(MOVE_Walking);
+
+		auto* AbilitySystem{Character->GetAlsAbilitySystem()};
+		AbilitySystem->SetLooseGameplayTagCount(AlsStateFlagTags::MantleHigh, 0);
+		AbilitySystem->SetLooseGameplayTagCount(AlsStateFlagTags::MantleMedium, 0);
+		AbilitySystem->SetLooseGameplayTagCount(AlsStateFlagTags::MantleLow, 0);
 
 		Character->ForceNetUpdate();
 	}
