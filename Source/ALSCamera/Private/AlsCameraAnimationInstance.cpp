@@ -2,6 +2,7 @@
 
 #include "AlsCameraMovementComponent.h"
 #include "AlsCharacter.h"
+#include "AlsCharacterMovementComponent.h"
 #include "Engine/World.h"
 
 #include UE_INLINE_GENERATED_CPP_BY_NAME(AlsCameraAnimationInstance)
@@ -30,4 +31,5 @@ void UAlsCameraAnimationInstance::NativeUpdateAnimation(const float DeltaTime)
 	CurrentGameplayTags.AddTag(CameraMovement->GetConfirmedDesiredViewMode());
 
 	bRightShoulder = Character->IsRightShoulder();
+	bFalling = Character->GetLocomotionMode() == AlsLocomotionModeTags::InAir && Character->GetCharacterMovement()->Velocity.Z < -700.f;
 }

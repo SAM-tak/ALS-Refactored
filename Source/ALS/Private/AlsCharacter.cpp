@@ -618,7 +618,14 @@ void AAlsCharacter::OnViewModeChanged_Implementation(const FGameplayTag& Previou
 
 void AAlsCharacter::SetRightShoulder(const bool bNewRightShoulder)
 {
-	AbilitySystem->SetLooseGameplayTagCount(AlsStateFlagTags::LeftShoulder, bNewRightShoulder ? 0 : 1);
+	if (bNewRightShoulder)
+	{
+		AbilitySystem->ResetGameplayTag(AlsStateFlagTags::LeftShoulder, true);
+	}
+	else
+	{
+		AbilitySystem->SetGameplayTag(AlsStateFlagTags::LeftShoulder, true);
+	}
 }
 
 bool AAlsCharacter::ToggleShoulder()

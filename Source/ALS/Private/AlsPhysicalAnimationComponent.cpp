@@ -693,6 +693,11 @@ void UAlsPhysicalAnimationComponent::DisplayDebug(UCanvas* Canvas, const FDebugD
 	}
 }
 
+bool UAlsPhysicalAnimationComponent::HasRagdollingSettings(const FGameplayTag& Tag) const
+{
+	return RagdollingSettingsMap.Contains(Tag);
+}
+
 bool UAlsPhysicalAnimationComponent::IsRagdolling() const
 {
 	return CurrentRagdolling.IsValid();
@@ -850,7 +855,9 @@ void FAlsRagdollingState::Tick(float DeltaTime)
 	}
 
 	// just for info.
-	CharacterMovement->Velocity = DeltaTime > 0.0f ? (Character->GetActorLocation() - PrevActorLocation) / DeltaTime : FVector::Zero();
+	CharacterMovement->Velocity = FMath::VInterpTo(CharacterMovement->Velocity,
+												   DeltaTime > 0.0f ? (Character->GetActorLocation() - PrevActorLocation) / DeltaTime : FVector::Zero(),
+												   DeltaTime, Settings->VelocityInterpolationSpeed);
 	PrevActorLocation = Character->GetActorLocation();
 
 	// Prevent the capsule from going through the ground when the ragdoll is lying on the ground.
@@ -885,6 +892,17 @@ void FAlsRagdollingState::Tick(float DeltaTime)
 			auto Transform{Body->GetUnrealWorldTransform()};
 			Transform.SetLocation(Transform.GetLocation() + Diff);
 			Body->SetBodyTransform(Transform, ETeleportType::TeleportPhysics);
+		}
+	}
+
+	// Clip velocity each body
+
+	if (Settings->MaxBodySpeed > 0.0f)
+	{
+		for (auto& Body : Character->GetMesh()->Bodies)
+		{
+			auto Vel{Body->GetUnrealWorldVelocity()};
+			Body->SetLinearVelocity(Vel.GetClampedToMaxSize(Settings->MaxBodySpeed) - Vel, true);
 		}
 	}
 

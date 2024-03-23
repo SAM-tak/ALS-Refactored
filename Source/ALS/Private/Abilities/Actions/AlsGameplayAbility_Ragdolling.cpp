@@ -15,6 +15,7 @@
 #include "Utility/AlsGameplayTags.h"
 #include "Utility/AlsConstants.h"
 #include "Utility/AlsMath.h"
+#include "Utility/AlsLog.h"
 #include "Utility/AlsMacros.h"
 
 #include UE_INLINE_GENERATED_CPP_BY_NAME(AlsGameplayAbility_Ragdolling)
@@ -27,9 +28,45 @@ UAlsGameplayAbility_Ragdolling::UAlsGameplayAbility_Ragdolling(const FObjectInit
 	BlockAbilitiesWithTag.AddTag(AlsLocomotionActionTags::BeingKnockedDown);
 }
 
-void UAlsGameplayAbility_Ragdolling::ActivateAbility(const FGameplayAbilitySpecHandle Handle,
-	const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilityActivationInfo ActivationInfo,
-	const FGameplayEventData* TriggerEventData)
+bool UAlsGameplayAbility_Ragdolling::CanActivateAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo,
+														const FGameplayTagContainer* SourceTags, const FGameplayTagContainer* TargetTags,
+														OUT FGameplayTagContainer* OptionalRelevantTags) const
+{
+	if (!Super::CanActivateAbility(Handle, ActorInfo, SourceTags, TargetTags, OptionalRelevantTags))
+	{
+		return false;
+	}
+
+	auto Character{GetAlsCharacterFromActorInfo()};
+	if (IsValid(Character))
+	{
+		auto* PhysicalAnimation{Character->GetPhysicalAnimation()};
+		if (IsValid(PhysicalAnimation))
+		{
+			const auto& Tag{AbilityTags.First()};
+			if (PhysicalAnimation->HasRagdollingSettings(Tag))
+			{
+				return true;
+			}
+			else
+			{
+				UE_LOG(LogAls, Error, TEXT("PhysicalAnimationComponent Has no Ragdolling Settings for '%s'."), *Tag.ToString());
+			}
+		}
+		else
+		{
+			UE_LOG(LogAls, Error, TEXT("PhysicalAnimationComponent is Invalid."));
+		}
+	}
+	else
+	{
+		UE_LOG(LogAls, Error, TEXT("AlsCharacter is Invalid."));
+	}
+	return false;
+}
+
+void UAlsGameplayAbility_Ragdolling::ActivateAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo,
+													 const FGameplayAbilityActivationInfo ActivationInfo, const FGameplayEventData* TriggerEventData)
 {
 	if (!CommitAbility(Handle, ActorInfo, ActivationInfo))
 	{
@@ -82,12 +119,6 @@ void UAlsGameplayAbility_Ragdolling::EndAbility(const FGameplayAbilitySpecHandle
 	auto* Character{GetAlsCharacterFromActorInfo()};
 	auto* PhysicalAnimation{Character->GetPhysicalAnimation()};
 	auto& RagdollingState{PhysicalAnimation->GetRagdollingState()};
-
-	//if (RagdollingState.IsGroundedAndAged())
-	//{
-	//	auto* AbilitySystem{GetAlsAbilitySystemComponentFromActorInfo()};
-	//	AbilitySystem->SetLooseGameplayTagCount(AlsStateFlagTags::FacingUpward, RagdollingState.bFacingUpward ? 1 : 0);
-	//}
 
 	auto* OverrideModeComponent{Character->GetComponentByClass<UAlsOverrideModeComponent>()};
 	OverrideModeComponent->EndCurrentRagdollingTask();

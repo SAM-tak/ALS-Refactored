@@ -218,6 +218,10 @@ public:
 
 	virtual void DisplayDebug(UCanvas* Canvas, const FDebugDisplayInfo& DisplayInfo, float& Unused, float& VerticalLocation);
 
+	UFUNCTION(BlueprintPure, Category = "ALS|PhysicalAnimation")
+	bool HasRagdollingSettings(const FGameplayTag& Tag) const;
+
+	UFUNCTION(BlueprintPure, Category = "ALS|PhysicalAnimation")
 	bool IsRagdolling() const;
 
 	UFUNCTION(BlueprintPure, Category = "ALS|PhysicalAnimation")

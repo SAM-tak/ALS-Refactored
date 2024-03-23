@@ -83,49 +83,37 @@ void UAlsAbilitySystemComponent::OnRefresh_Implementation(float DeltaTime)
 
 void UAlsAbilitySystemComponent::SetGameplayTag(const FGameplayTag& Tag, bool bShouldReplicate)
 {
+	SetLooseGameplayTagCount(Tag, 1);
 	if (bShouldReplicate)
 	{
 		SetReplicatedLooseGameplayTagCount(Tag, 1);
-	}
-	else
-	{
-		SetLooseGameplayTagCount(Tag, 1);
 	}
 }
 
 void UAlsAbilitySystemComponent::ResetGameplayTag(const FGameplayTag& Tag, bool bShouldReplicate)
 {
+	SetLooseGameplayTagCount(Tag, 0);
 	if (bShouldReplicate)
 	{
 		SetReplicatedLooseGameplayTagCount(Tag, 0);
-	}
-	else
-	{
-		SetLooseGameplayTagCount(Tag, 0);
 	}
 }
 
 void UAlsAbilitySystemComponent::AddGameplayTag(const FGameplayTag& Tag, bool bShouldReplicate)
 {
+	AddLooseGameplayTag(Tag);
 	if (bShouldReplicate)
 	{
 		AddReplicatedLooseGameplayTag(Tag);
-	}
-	else
-	{
-		AddLooseGameplayTag(Tag);
 	}
 }
 
 void UAlsAbilitySystemComponent::SubtractGameplayTag(const FGameplayTag& Tag, bool bShouldReplicate)
 {
+	RemoveLooseGameplayTag(Tag);
 	if (bShouldReplicate)
 	{
 		RemoveReplicatedLooseGameplayTag(Tag);
-	}
-	else
-	{
-		RemoveLooseGameplayTag(Tag);
 	}
 }
 
