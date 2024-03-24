@@ -310,7 +310,7 @@ void UAlsCameraMovementComponent::TickCamera(const float DeltaTime, bool bAllowL
 			CameraMovementBaseRelativeRotation = FQuat::Identity;
 		}
 	}
-	
+
 	const auto FirstPersonOverride{
 		UAlsMath::Clamp01(GetAnimInstance()->GetCurveValue(UAlsCameraConstants::FirstPersonOverrideCurveName()))
 	};
@@ -347,6 +347,7 @@ void UAlsCameraMovementComponent::TickCamera(const float DeltaTime, bool bAllowL
 		}
 
 		Character->SetViewMode(AlsViewModeTags::FirstPerson);
+		RefreshTanHalfFov(DeltaTime);
 		return;
 	}
 
@@ -544,6 +545,7 @@ void UAlsCameraMovementComponent::TickCamera(const float DeltaTime, bool bAllowL
 	}
 
 	Character->SetViewMode(bInAutoFPP ? AlsViewModeTags::FirstPerson : AlsViewModeTags::ThirdPerson);
+	RefreshTanHalfFov(DeltaTime);
 }
 
 FRotator UAlsCameraMovementComponent::CalculateCameraRotation(const FRotator& CameraTargetRotation,
@@ -724,7 +726,7 @@ FVector UAlsCameraMovementComponent::CalculateCameraTrace(const FVector& CameraT
 
 	// Auto FPP processing
 
-	if (bInAutoFPP || Settings->ThirdPerson.AutoFPPStartDistance > 0.0f)
+	if (bInAutoFPP || (Settings->ThirdPerson.AutoFPPStartDistance > 0.0f && !Character->GetLocomotionAction().IsValid() && Hit.IsValidBlockingHit()))
 	{
 		auto Distance{FVector::Dist(TraceStart, TraceResult)};
 		if (bInAutoFPP)
@@ -961,6 +963,23 @@ void UAlsCameraMovementComponent::UpdateADSCameraShake(float FirstPersonOverride
 		{
 			CameraManager->StopCameraShake(CurrentADSCameraShake);
 			CurrentADSCameraShake = nullptr;
+		}
+	}
+}
+
+void UAlsCameraMovementComponent::RefreshTanHalfFov(float DeltaTime)
+{
+	if (Character.IsValid())
+	{
+		auto* Camera{GetCameraComponent()};
+		auto* PlayerController{Cast<APlayerController>(Character->GetController())};
+		if (IsValid(Camera) && IsValid(PlayerController))
+		{
+			int32 SizeX, SizeY;
+			PlayerController->GetViewportSize(SizeX, SizeY);
+			float AspectRatio{SizeX * (1 - Camera->PanoramaSideViewRate * 2 / 3) / (float)SizeY};
+			TanHalfHfov = FMath::Tan(FMath::DegreesToRadians(Camera->FieldOfView) * 0.5f);
+			TanHalfVfov = TanHalfHfov / AspectRatio;
 		}
 	}
 }

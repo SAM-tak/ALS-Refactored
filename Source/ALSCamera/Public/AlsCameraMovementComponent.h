@@ -87,6 +87,12 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "AlsCameraMovement|State", Transient)
 	TObjectPtr<UCameraShakeBase> CurrentADSCameraShake;
 
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "AlsCameraMovement|State", Transient)
+	float TanHalfHfov{0.57f}; // ≒tan(60°/2)
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "AlsCameraMovement|State", Transient)
+	float TanHalfVfov{0.57f}; // ≒tan(60°/2)
+
 public:
 	virtual void Activate(bool bReset = false) override;
 
@@ -105,6 +111,8 @@ protected:
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
 	virtual void CompleteParallelAnimationEvaluation(const bool bDoPostAnimationEvaluation) override;
+
+	void RefreshTanHalfFov(float DeltaTime);
 
 public:
 	UFUNCTION(BlueprintCallable, Category = "ALS|Camera Movement")
@@ -130,6 +138,12 @@ public:
 
 	UFUNCTION(BlueprintPure, Category = "ALS|Camera Movement", Meta = (ReturnDisplayName = "Desired View Mode"))
 	const FGameplayTag& GetConfirmedDesiredViewMode() const;
+
+	UFUNCTION(BlueprintPure, Category = "ALS|Camera Movement")
+	float GetTanHalfHfov() const;
+
+	UFUNCTION(BlueprintPure, Category = "ALS|Camera Movement")
+	float GetTanHalfVfov() const;
 
 private:
 	void TickCamera(float DeltaTime, bool bAllowLag = true);
@@ -187,4 +201,14 @@ inline UCameraComponent* UAlsCameraMovementComponent::GetCameraComponent() const
 inline const FGameplayTag& UAlsCameraMovementComponent::GetConfirmedDesiredViewMode() const
 {
 	return ConfirmedDesiredViewMode;
+}
+
+inline float UAlsCameraMovementComponent::GetTanHalfHfov() const
+{
+	return TanHalfHfov;
+}
+
+inline float UAlsCameraMovementComponent::GetTanHalfVfov() const
+{
+	return TanHalfVfov;
 }

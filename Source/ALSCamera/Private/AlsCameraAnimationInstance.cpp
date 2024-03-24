@@ -3,6 +3,7 @@
 #include "AlsCameraMovementComponent.h"
 #include "AlsCharacter.h"
 #include "AlsCharacterMovementComponent.h"
+#include "Camera/CameraComponent.h"
 #include "Engine/World.h"
 
 #include UE_INLINE_GENERATED_CPP_BY_NAME(AlsCameraAnimationInstance)
@@ -30,6 +31,8 @@ void UAlsCameraAnimationInstance::NativeUpdateAnimation(const float DeltaTime)
 	CurrentGameplayTags.RemoveTag(AlsDesiredViewModeTags::ThirdPerson);
 	CurrentGameplayTags.AddTag(CameraMovement->GetConfirmedDesiredViewMode());
 
+	TanHalfHfov = CameraMovement->GetTanHalfHfov();
+	TanHalfVfov = CameraMovement->GetTanHalfVfov();
 	bRightShoulder = Character->IsRightShoulder();
 	bFalling = Character->GetLocomotionMode() == AlsLocomotionModeTags::InAir && Character->GetCharacterMovement()->Velocity.Z < -700.f;
 }
