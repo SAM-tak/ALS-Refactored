@@ -88,9 +88,6 @@ protected:
 	TObjectPtr<UCameraShakeBase> CurrentADSCameraShake;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "AlsCameraMovement|State", Transient)
-	float TanHalfHfov{0.57f}; // ≒tan(60°/2)
-
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "AlsCameraMovement|State", Transient)
 	float TanHalfVfov{0.57f}; // ≒tan(60°/2)
 
 public:
@@ -138,9 +135,6 @@ public:
 
 	UFUNCTION(BlueprintPure, Category = "ALS|Camera Movement", Meta = (ReturnDisplayName = "Desired View Mode"))
 	const FGameplayTag& GetConfirmedDesiredViewMode() const;
-
-	UFUNCTION(BlueprintPure, Category = "ALS|Camera Movement")
-	float GetTanHalfHfov() const;
 
 	UFUNCTION(BlueprintPure, Category = "ALS|Camera Movement")
 	float GetTanHalfVfov() const;
@@ -201,11 +195,6 @@ inline UCameraComponent* UAlsCameraMovementComponent::GetCameraComponent() const
 inline const FGameplayTag& UAlsCameraMovementComponent::GetConfirmedDesiredViewMode() const
 {
 	return ConfirmedDesiredViewMode;
-}
-
-inline float UAlsCameraMovementComponent::GetTanHalfHfov() const
-{
-	return TanHalfHfov;
 }
 
 inline float UAlsCameraMovementComponent::GetTanHalfVfov() const

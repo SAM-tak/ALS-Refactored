@@ -23,9 +23,6 @@ protected:
 	FGameplayTagContainer CurrentGameplayTags;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient)
-	float TanHalfHfov{0.57f}; // ≒tan(60°/2)
-
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient)
 	float TanHalfVfov{0.57f}; // ≒tan(60°/2)
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient)
