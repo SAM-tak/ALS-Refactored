@@ -412,16 +412,14 @@ void UAlsGameplayAbility_Vaulting::ActivateAbility(const FGameplayAbilitySpecHan
 	//MotionWarping->AddOrUpdateReplicatedWarpTarget(WarpingTarget);
 	MotionWarping->AddOrUpdateReplicatedWarpTargetFromLocationAndRotation(FName{"Uprise"}, TargetTransform.GetLocation(), TargetTransform.GetRotation().Rotator());
 
-	MotionWarping->AddOrUpdateReplicatedWarpTargetFromLocationAndRotation(FName{"Slide"},
-		TargetTransform.GetLocation() + TargetTransform.GetRotation().RotateVector(FVector::ForwardVector) * 100.0f,
-		TargetTransform.GetRotation().Rotator());
+	//MotionWarping->AddOrUpdateReplicatedWarpTargetFromLocationAndRotation(FName{"Slide"},
+	//	TargetTransform.GetLocation() + TargetTransform.GetRotation().RotateVector(FVector::ForwardVector) * 100.0f,
+	//	TargetTransform.GetRotation().Rotator());
 
-	auto P{TargetTransform.GetLocation() + TargetTransform.GetRotation().RotateVector(FVector::ForwardVector) * 160.0f};
-	P.Z = Character->GetActorLocation().Z;
+	auto Pos{TargetTransform.GetLocation() + TargetTransform.GetRotation().RotateVector(FVector::ForwardVector) * ReleaseDistance};
+	Pos.Z = Character->GetCharacterMovement()->GetActorFeetLocation().Z;
 
-	MotionWarping->AddOrUpdateReplicatedWarpTargetFromLocationAndRotation(FName{"Release"},
-		P,
-		TargetTransform.GetRotation().Rotator());
+	MotionWarping->AddOrUpdateReplicatedWarpTargetFromLocationAndRotation(FName{"Release"}, Pos, TargetTransform.GetRotation().Rotator());
 
 	auto PlayMontageParameter{SelectMontage(Parameters)};
 

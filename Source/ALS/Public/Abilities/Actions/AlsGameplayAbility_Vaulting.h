@@ -82,6 +82,9 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "AlsAbility|Vaulting", AdvancedDisplay)
 	FCollisionResponseContainer VaultingTraceResponses{ECR_Ignore};
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AlsAbility|Vaulting", Meta = (ForceUnits = "cm"))
+	float ReleaseDistance{100.0f};
+
 protected:
 	UFUNCTION(BlueprintNativeEvent, Category = "ALS|Ability|Vaulting")
 	void Tick(const float DeltaTime);
