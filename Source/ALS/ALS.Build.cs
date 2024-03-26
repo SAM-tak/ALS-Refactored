@@ -16,7 +16,7 @@ public class ALS : ModuleRules
 
 		PrivateDependencyModuleNames.AddRange(new[]
 		{
-			"EngineSettings", "NetCore", "PhysicsCore", "Niagara", "AnimGraphRuntime", "RigVM", "ControlRig", "Chaos"
+			"EngineSettings", "NetCore", "PhysicsCore", "Niagara", "AnimGraphRuntime", "RigVM", "ControlRig", "Chaos", "MotionWarping"
 		});
 
 		if (Target.Type == TargetRules.TargetType.Editor)

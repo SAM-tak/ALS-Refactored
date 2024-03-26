@@ -63,6 +63,14 @@ void UAlsRootMotionComponent::StartMantlingImplementation(const FAlsMantlingPara
 		return;
 	}
 
+	// Play the animation montage if valid.
+
+	if (Character->GetMesh()->GetAnimInstance()->Montage_Play(Montage, PlayRate, EMontagePlayReturnType::MontageLength, StartTime, false) <= 0.0f)
+	{
+		UE_LOG(LogAls, Warning, TEXT("Can't start mantling! The %s animation can not play"), *Montage->GetName());
+		return;
+	}
+
 	// Calculate actor offsets (offsets between actor and target transform).
 
 	const auto bUseRelativeLocation{MovementBaseUtility::UseRelativeLocation(Parameters.TargetPrimitive.Get())};
@@ -85,7 +93,7 @@ void UAlsRootMotionComponent::StartMantlingImplementation(const FAlsMantlingPara
 	Character->GetCharacterMovement()->NetworkSmoothingMode = ENetworkSmoothingMode::Disabled;
 
 	Character->GetMesh()->SetRelativeLocationAndRotation(Character->GetBaseTranslationOffset(),
-														 Character->GetMesh()->IsUsingAbsoluteRotation()
+														Character->GetMesh()->IsUsingAbsoluteRotation()
 															? Character->GetActorQuat() * Character->GetBaseRotationOffset()
 															: Character->GetBaseRotationOffset(), false, nullptr, ETeleportType::TeleportPhysics);
 
@@ -97,33 +105,28 @@ void UAlsRootMotionComponent::StartMantlingImplementation(const FAlsMantlingPara
 
 	Character->GetCharacterMovement()->SetBase(Parameters.TargetPrimitive.Get());
 
-	// Play the animation montage if valid.
+	MantlingMontage = Montage;
 
-	if (Character->GetMesh()->GetAnimInstance()->Montage_Play(Montage, PlayRate, EMontagePlayReturnType::MontageLength, StartTime, false))
-	{
-		MantlingMontage = Montage;
+	auto* AbilitySystem{Character->GetAlsAbilitySystem()};
+	AbilitySystem->SetLooseGameplayTagCount(AlsStateFlagTags::MantleHigh, Parameters.MantlingType == EAlsMantlingType::High ? 1 : 0);
+	AbilitySystem->SetLooseGameplayTagCount(AlsStateFlagTags::MantleMedium, Parameters.MantlingType == EAlsMantlingType::Medium ? 1 : 0);
+	AbilitySystem->SetLooseGameplayTagCount(AlsStateFlagTags::MantleLow, Parameters.MantlingType == EAlsMantlingType::Low ? 1 : 0);
 
-		auto* AbilitySystem{Character->GetAlsAbilitySystem()};
-		AbilitySystem->SetLooseGameplayTagCount(AlsStateFlagTags::MantleHigh, Parameters.MantlingType == EAlsMantlingType::High ? 1 : 0);
-		AbilitySystem->SetLooseGameplayTagCount(AlsStateFlagTags::MantleMedium, Parameters.MantlingType == EAlsMantlingType::Medium ? 1 : 0);
-		AbilitySystem->SetLooseGameplayTagCount(AlsStateFlagTags::MantleLow, Parameters.MantlingType == EAlsMantlingType::Low ? 1 : 0);
+	// Apply mantling root motion.
 
-		// Apply mantling root motion.
+	const auto RootMotionSource{MakeShared<FAlsRootMotionSource_Mantling>()};
+	RootMotionSource->InstanceName = __FUNCTION__;
+	RootMotionSource->Duration = Duration / PlayRate;
+	RootMotionSource->MantlingSettings = Settings;
+	RootMotionSource->TargetPrimitive = Parameters.TargetPrimitive;
+	RootMotionSource->TargetRelativeLocation = Parameters.TargetRelativeLocation;
+	RootMotionSource->TargetRelativeRotation = TargetRelativeRotation;
+	RootMotionSource->ActorFeetLocationOffset = ActorFeetLocationOffset;
+	RootMotionSource->ActorRotationOffset = ActorRotationOffset.Rotator();
+	RootMotionSource->TargetAnimationLocation = TargetAnimationLocation;
+	RootMotionSource->MontageStartTime = StartTime;
 
-		const auto RootMotionSource{MakeShared<FAlsRootMotionSource_Mantling>()};
-		RootMotionSource->InstanceName = __FUNCTION__;
-		RootMotionSource->Duration = Duration / PlayRate;
-		RootMotionSource->MantlingSettings = Settings;
-		RootMotionSource->TargetPrimitive = Parameters.TargetPrimitive;
-		RootMotionSource->TargetRelativeLocation = Parameters.TargetRelativeLocation;
-		RootMotionSource->TargetRelativeRotation = TargetRelativeRotation;
-		RootMotionSource->ActorFeetLocationOffset = ActorFeetLocationOffset;
-		RootMotionSource->ActorRotationOffset = ActorRotationOffset.Rotator();
-		RootMotionSource->TargetAnimationLocation = TargetAnimationLocation;
-		RootMotionSource->MontageStartTime = StartTime;
-
-		MantlingRootMotionSourceId = Character->GetCharacterMovement()->ApplyRootMotionSource(RootMotionSource);
-	}
+	MantlingRootMotionSourceId = Character->GetCharacterMovement()->ApplyRootMotionSource(RootMotionSource);
 }
 
 float UAlsRootMotionComponent::CalculateMantlingStartTime(const UAlsMantlingSettings* MantlingSettings, const float MantlingHeight) const

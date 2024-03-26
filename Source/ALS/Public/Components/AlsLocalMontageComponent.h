@@ -28,7 +28,7 @@ protected:
 	TMap<FGameplayTag, TObjectPtr<UAlsLocalMontageTask>> InstancedLocalMontageTasks;
 
 public:
-	UAlsLocalMontageTask* ChangeLocalMontageTaskIfNeeded(const FGameplayTag& Tag);
+	UAlsLocalMontageTask* Play(const FGameplayTag& LocalMontageTag);
 
 	void OnEndTask(class UAlsLocalMontageTask *Task);
 
@@ -39,4 +39,15 @@ protected:
 
 	virtual void OnControllerChanged_Implementation(AController* PreviousController, AController* NewController) override;
 
+	UFUNCTION(BlueprintCallable, Category = "AlsLocalMontageModeComponent")
+	void AddOrUpdateReplicatedWarpTargetFromLocationAndRotation(FName WarpTargetName, FVector TargetLocation, FRotator TargetRotation);
+
+private:
+	UFUNCTION(NetMulticast, Reliable)
+	void MulticastPlay(const FGameplayTag& LocalMontageTag);
+
+	UAlsLocalMontageTask* PlayImplementation(const FGameplayTag& LocalMontageTag);
+
+	UFUNCTION(NetMulticast, Reliable)
+	void MulticastAddOrUpdateWarpTargetFromLocationAndRotation(FName WarpTargetName, FVector_NetQuantize TargetLocation, FRotator TargetRotation);
 };

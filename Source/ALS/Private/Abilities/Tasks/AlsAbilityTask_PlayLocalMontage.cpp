@@ -24,7 +24,7 @@ void UAlsAbilityTask_PlayLocalMontage::Activate()
 	auto* Character{Cast<AAlsCharacter>(ActorInfo->OwnerActor)};
 	auto* Component{Character->FindComponentByClass<UAlsLocalMontageComponent>()};
 
-	LocalMontageTask = Component->ChangeLocalMontageTaskIfNeeded(LocalMontageTag);
+	LocalMontageTask = Component->Play(LocalMontageTag);
 	if (LocalMontageTask.IsValid())
 	{
 		LocalMontageTask->CurrentAbilityTask = this;

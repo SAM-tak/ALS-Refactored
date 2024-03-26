@@ -92,7 +92,7 @@ void UAlsGameplayAbility_Ragdolling::Tick(const float DeltaTime)
 	auto* PhysicalAnimation{Character->GetPhysicalAnimation()};
 	auto& RagdollingState{PhysicalAnimation->GetRagdollingState()};
 
-	if (!IsActive() || RagdollingState.bFreezing)
+	if (!IsActive())
 	{
 		return;
 	}

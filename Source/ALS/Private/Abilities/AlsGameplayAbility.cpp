@@ -4,6 +4,7 @@
 #include "AlsCharacter.h"
 #include "AlsCharacterMovementComponent.h"
 #include "AlsAbilitySystemComponent.h"
+#include "AlsMotionWarpingComponent.h"
 #include "Engine/InputDelegateBinding.h"
 
 #include UE_INLINE_GENERATED_CPP_BY_NAME(AlsGameplayAbility)
@@ -26,6 +27,27 @@ UAlsAbilitySystemComponent* UAlsGameplayAbility::GetAlsAbilitySystemComponentFro
 {
 	auto* AlsCharacter{GetAlsCharacterFromActorInfo()};
 	return AlsCharacter ? AlsCharacter->GetAlsAbilitySystem() : nullptr;
+}
+
+UWorld* UAlsGameplayAbility::GetWorld() const
+{
+	auto* RetVal{Super::GetWorld()};
+	if (IsValid(RetVal))
+	{
+		return RetVal;
+	}
+	else if (CurrentActorInfo)
+	{
+		if (CurrentActorInfo->AvatarActor.IsValid())
+		{
+			return CurrentActorInfo->AvatarActor->GetWorld();
+		}
+		if (CurrentActorInfo->OwnerActor.IsValid())
+		{
+			return CurrentActorInfo->OwnerActor->GetWorld();
+		}
+	}
+	return nullptr;
 }
 
 void UAlsGameplayAbility::ActivateAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo,
@@ -90,6 +112,24 @@ void UAlsGameplayAbility::StopCurrentMontage(const FGameplayAbilityActorInfo* Ac
 void UAlsGameplayAbility::StopCurrentMontage(float OverrideBlendOutTime) const
 {
 	StopCurrentMontage(GetCurrentActorInfo(), OverrideBlendOutTime);
+}
+
+void UAlsGameplayAbility::AddOrUpdateWarpTargetFromLocationAndRotation(FName WarpTargetName, FVector TargetLocation, FRotator TargetRotation)
+{
+	auto* Character{GetAlsCharacterFromActorInfo()};
+	if (Character->GetLocalRole() < ROLE_Authority)
+	{
+		Character->GetMotionWarping()->AddOrUpdateReplicatedWarpTargetFromLocationAndRotation(WarpTargetName, TargetLocation, TargetRotation);
+	}
+}
+
+void UAlsGameplayAbility::AddOrUpdateWarpTarget(const FMotionWarpingTarget& WarpTarget)
+{
+	auto* Character{GetAlsCharacterFromActorInfo()};
+	if (Character->GetLocalRole() < ROLE_Authority)
+	{
+		Character->GetMotionWarping()->AddOrUpdateReplicatedWarpTarget(WarpTarget);
+	}
 }
 
 void UAlsGameplayAbility::SetInputBlocked(bool bBlocked) const

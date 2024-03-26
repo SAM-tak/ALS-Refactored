@@ -20,6 +20,7 @@ class UAlsMovementSettings;
 class UAlsAnimationInstance;
 class UAlsMantlingSettings;
 class UAlsAbilitySystemComponent;
+class UAlsMotionWarpingComponent;
 
 DECLARE_EVENT_TwoParams(AAlsCharacter, FAlsCharacter_OnContollerChanged, AController*, AController*);
 
@@ -50,6 +51,9 @@ protected:
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Als Character")
 	TObjectPtr<UAlsAbilitySystemComponent> AbilitySystem;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Als Character")
+	TObjectPtr<UAlsMotionWarpingComponent> MotionWarping;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Als Character|Settings")
 	TObjectPtr<UAlsCharacterSettings> Settings;
@@ -148,6 +152,11 @@ public:
 	static FName AbilitySystemComponentName;
 
 	FORCEINLINE UAlsAbilitySystemComponent* GetAlsAbilitySystem() const { return AbilitySystem; }
+
+	/** Name of the MotionWarpingComponent. */
+	static FName MotionWarpingComponentName;
+
+	FORCEINLINE UAlsMotionWarpingComponent* GetMotionWarping() const { return MotionWarping; }
 
 protected:
 	virtual void BeginPlay() override;

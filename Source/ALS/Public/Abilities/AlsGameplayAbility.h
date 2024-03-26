@@ -62,6 +62,8 @@ public:
 	UFUNCTION(BlueprintPure, Category = "ALS|Ability")
 	UAlsAbilitySystemComponent* GetAlsAbilitySystemComponentFromActorInfo() const;
 
+	virtual UWorld* GetWorld() const override;
+
 protected:
 	virtual void ActivateAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo,
 								 const FGameplayAbilityActivationInfo ActivationInfo, const FGameplayEventData* TriggerEventData) override;
@@ -80,6 +82,12 @@ protected:
 
 	UFUNCTION(BlueprintCallable, Category = "ALS|Ability")
 	void SetInputBlocked(bool bBlocked) const;
+
+	UFUNCTION(BlueprintCallable, Category = "ALS|Ability|MotionWarping")
+	void AddOrUpdateWarpTargetFromLocationAndRotation(FName WarpTargetName, FVector TargetLocation, FRotator TargetRotation);
+
+	UFUNCTION(BlueprintCallable, Category = "ALS|Ability|MotionWarping")
+	void AddOrUpdateWarpTarget(const FMotionWarpingTarget& WarpTarget);
 
 	virtual void OnControllerChanged(AController* PreviousController, AController* NewController);
 

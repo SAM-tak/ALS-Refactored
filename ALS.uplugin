@@ -74,6 +74,10 @@
 		{
 			"Name": "PropertyAccessNode",
 			"Enabled": true
+		},
+		{
+			"Name": "MotionWarping",
+			"Enabled": true
 		}
 	]
 }

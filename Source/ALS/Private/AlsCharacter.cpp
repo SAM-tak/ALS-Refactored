@@ -4,6 +4,7 @@
 #include "AlsCharacterMovementComponent.h"
 #include "AlsPhysicalAnimationComponent.h"
 #include "AlsAbilitySystemComponent.h"
+#include "AlsMotionWarpingComponent.h"
 #include "TimerManager.h"
 #include "Components/CapsuleComponent.h"
 #include "Components/SkeletalMeshComponent.h"
@@ -27,6 +28,7 @@ namespace AlsCharacterConstants
 
 FName AAlsCharacter::PhysicalAnimationComponentName(TEXT("PhysicalAnimComp"));
 FName AAlsCharacter::AbilitySystemComponentName(TEXT("AbilitySystemComp"));
+FName AAlsCharacter::MotionWarpingComponentName(TEXT("MotionWarpComp"));
 
 AAlsCharacter::AAlsCharacter(const FObjectInitializer& ObjectInitializer) : Super{
 	ObjectInitializer.SetDefaultSubobjectClass<UAlsCharacterMovementComponent>(CharacterMovementComponentName)
@@ -56,6 +58,8 @@ AAlsCharacter::AAlsCharacter(const FObjectInitializer& ObjectInitializer) : Supe
 	PhysicalAnimation = CreateDefaultSubobject<UAlsPhysicalAnimationComponent>(PhysicalAnimationComponentName);
 
 	AbilitySystem = CreateOptionalDefaultSubobject<UAlsAbilitySystemComponent>(AbilitySystemComponentName);
+
+	MotionWarping = CreateDefaultSubobject<UAlsMotionWarpingComponent>(MotionWarpingComponentName);
 
 	// This will prevent the editor from combining component details with actor details.
 	// Component details can still be accessed from the actor's component hierarchy.

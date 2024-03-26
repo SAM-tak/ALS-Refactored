@@ -1,6 +1,7 @@
 #include "Components/AlsLocalMontageComponent.h"
 
 #include "AlsCharacter.h"
+#include "AlsMotionWarpingComponent.h"
 #include "CharacterTasks/AlsLocalMontageTask.h"
 #include "Utility/AlsMath.h"
 #include "Utility/AlsLog.h"
@@ -19,20 +20,33 @@ void UAlsLocalMontageComponent::BeginPlay()
 	}
 }
 
-UAlsLocalMontageTask* UAlsLocalMontageComponent::ChangeLocalMontageTaskIfNeeded(const FGameplayTag& LocalMontageTag)
+UAlsLocalMontageTask* UAlsLocalMontageComponent::Play(const FGameplayTag& LocalMontageTag)
+{
+	ensure(Character->GetLocalRole() > ROLE_SimulatedProxy);
+	
+	if (Character->HasServerRole())
+	{
+		MulticastPlay(LocalMontageTag);
+	}
+
+	return PlayImplementation(LocalMontageTag);
+}
+
+void UAlsLocalMontageComponent::MulticastPlay_Implementation(const FGameplayTag& LocalMontageTag)
+{
+	if (Character->GetLocalRole() == ROLE_SimulatedProxy)
+	{
+		PlayImplementation(LocalMontageTag);
+	}
+}
+
+UAlsLocalMontageTask* UAlsLocalMontageComponent::PlayImplementation(const FGameplayTag& LocalMontageTag)
 {
 	if (CurrentLocalMontageTask.IsValid())
 	{
-		if (CurrentLocalMontageTag == LocalMontageTag)
-		{
-			return CurrentLocalMontageTask.Get();
-		}
-		else
-		{
-			CurrentLocalMontageTask->Cancel();
-			CurrentLocalMontageTask.Reset();
-			CurrentLocalMontageTag = FGameplayTag::EmptyTag;
-		}
+		CurrentLocalMontageTask->Cancel();
+		CurrentLocalMontageTask.Reset();
+		CurrentLocalMontageTag = FGameplayTag::EmptyTag;
 	}
 
 	if (LocalMontageTaskClassMap.Contains(LocalMontageTag))
@@ -49,8 +63,16 @@ UAlsLocalMontageTask* UAlsLocalMontageComponent::ChangeLocalMontageTaskIfNeeded(
 			CurrentLocalMontageTask = NewTask;
 			CurrentLocalMontageTask->OnRegister();
 		}
-		CurrentLocalMontageTag = LocalMontageTag;
-		CurrentLocalMontageTask->Begin();
+
+		if (CurrentLocalMontageTask.IsValid())
+		{
+			CurrentLocalMontageTag = LocalMontageTag;
+			CurrentLocalMontageTask->Begin();
+		}
+		else
+		{
+			UE_LOG(LogAls, Error, TEXT("UAlsLocalMontageComponent : Correspond Local Montage Task was not found for '%s'"), *LocalMontageTag.ToString());
+		}
 	}
 
 	return CurrentLocalMontageTask.Get();
@@ -69,12 +91,6 @@ void UAlsLocalMontageComponent::OnRefresh_Implementation(float DeltaTime)
 {
 	Super::OnRefresh_Implementation(DeltaTime);
 
-	FGameplayTagContainer Container;
-	Character->GetOwnedGameplayTags(Container);
-	auto CurrentOverrideTags{Container.Filter(LocalMontageTagsMask)};
-
-	ChangeLocalMontageTaskIfNeeded(CurrentOverrideTags.First());
-
 	if (CurrentLocalMontageTask.IsValid())
 	{
 		CurrentLocalMontageTask->Refresh(DeltaTime);
@@ -87,5 +103,27 @@ void UAlsLocalMontageComponent::OnControllerChanged_Implementation(AController* 
 	if (CurrentLocalMontageTask.IsValid())
 	{
 		CurrentLocalMontageTask->OnControllerChanged(PreviousController, NewController);
+	}
+}
+
+void UAlsLocalMontageComponent::AddOrUpdateReplicatedWarpTargetFromLocationAndRotation(FName WarpTargetName, FVector TargetLocation,
+																									  FRotator TargetRotation)
+{
+	ensure(Character->GetLocalRole() > ROLE_SimulatedProxy);
+
+	Character->GetMotionWarping()->AddOrUpdateWarpTargetFromLocationAndRotation(WarpTargetName, TargetLocation, TargetRotation);
+
+	if (Character->HasServerRole())
+	{
+		MulticastAddOrUpdateWarpTargetFromLocationAndRotation(WarpTargetName, TargetLocation, TargetRotation);
+	}
+}
+
+void UAlsLocalMontageComponent::MulticastAddOrUpdateWarpTargetFromLocationAndRotation_Implementation(FName WarpTargetName, FVector_NetQuantize TargetLocation,
+																									 FRotator TargetRotation)
+{
+	if (Character->GetLocalRole() == ROLE_SimulatedProxy)
+	{
+		Character->GetMotionWarping()->AddOrUpdateWarpTargetFromLocationAndRotation(WarpTargetName, TargetLocation, TargetRotation);
 	}
 }
