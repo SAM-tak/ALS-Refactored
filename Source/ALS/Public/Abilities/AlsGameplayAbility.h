@@ -87,7 +87,7 @@ protected:
 	void AddOrUpdateWarpTargetFromLocationAndRotation(FName WarpTargetName, FVector TargetLocation, FRotator TargetRotation);
 
 	UFUNCTION(BlueprintCallable, Category = "ALS|Ability|MotionWarping")
-	void AddOrUpdateWarpTarget(const FMotionWarpingTarget& WarpTarget);
+	void AddOrUpdateWarpTargetFromComponent(FName WarpTargetName, const USceneComponent* Component, FName BoneName, bool bFollowComponent);
 
 	virtual void OnControllerChanged(AController* PreviousController, AController* NewController);
 

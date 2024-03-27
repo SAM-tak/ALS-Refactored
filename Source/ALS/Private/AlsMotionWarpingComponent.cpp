@@ -48,68 +48,48 @@ void UAlsMotionWarpingComponent::MulticastAddOrUpdateWarpTargetFromLocationAndRo
 	}
 }
 
-void UAlsMotionWarpingComponent::AddOrUpdateReplicatedWarpTarget(const FMotionWarpingTarget& WarpTarget)
+void UAlsMotionWarpingComponent::AddOrUpdateReplicatedWarpTargetFromComponent(FName WarpTargetName, const USceneComponent* Component, FName BoneName,
+																			  bool bFollowComponent)
 {
 	auto* Character{Cast<AAlsCharacter>(GetOwner())};
 	ensure(Character->GetLocalRole() > ROLE_SimulatedProxy);
 
-	AddOrUpdateWarpTarget(WarpTarget);
+	AddOrUpdateWarpTargetFromComponent(WarpTargetName, Component, BoneName, bFollowComponent);
 
 	if (Character->HasServerRole())
 	{
-		FAlsMotionWarpingTargetSmall MotionWarpingTargetSmall{
-			WarpTarget.Name,
-			WarpTarget.Location,
-			WarpTarget.Rotation,
-			WarpTarget.Component
-		};
-		MulticastAddOrUpdateWarpTarget(MotionWarpingTargetSmall);
+		MulticastAddOrUpdateWarpTargetFromComponent(WarpTargetName, Component, BoneName, bFollowComponent);
 	}
 }
 
-void UAlsMotionWarpingComponent::AutonomousAddOrUpdateReplicatedWarpTarget(const FMotionWarpingTarget& WarpTarget)
+void UAlsMotionWarpingComponent::AutonomousAddOrUpdateReplicatedWarpTargetFromComponent(FName WarpTargetName, const USceneComponent* Component, FName BoneName,
+																						bool bFollowComponent)
 {
 	auto* Character{Cast<AAlsCharacter>(GetOwner())};
 	ensure(Character->GetLocalRole() > ROLE_SimulatedProxy);
 
-	AddOrUpdateWarpTarget(WarpTarget);
+	AddOrUpdateWarpTargetFromComponent(WarpTargetName, Component, BoneName, bFollowComponent);
 
 	if (Character->IsCharacterSelf())
 	{
-		FAlsMotionWarpingTargetSmall MotionWarpingTargetSmall{
-			WarpTarget.Name,
-			WarpTarget.Location,
-			WarpTarget.Rotation,
-			WarpTarget.Component
-		};
-		ServerAddOrUpdateWarpTarget(MotionWarpingTargetSmall);
+		ServerAddOrUpdateWarpTargetFromComponent(WarpTargetName, Component, BoneName, bFollowComponent);
 	}
 }
 
-void UAlsMotionWarpingComponent::ServerAddOrUpdateWarpTarget_Implementation(const FAlsMotionWarpingTargetSmall& WarpTarget)
+void UAlsMotionWarpingComponent::ServerAddOrUpdateWarpTargetFromComponent_Implementation(FName WarpTargetName, const USceneComponent* Component, FName BoneName,
+																						 bool bFollowComponent)
 {
-	FMotionWarpingTarget MotionWarpingTarget;
-	MotionWarpingTarget.Name = WarpTarget.Name;
-	MotionWarpingTarget.Location = WarpTarget.Location;
-	MotionWarpingTarget.Rotation = WarpTarget.Rotation;
-	MotionWarpingTarget.Component = WarpTarget.Component;
-	MotionWarpingTarget.bFollowComponent = true;
-	AddOrUpdateWarpTarget(MotionWarpingTarget);
+	AddOrUpdateWarpTargetFromComponent(WarpTargetName, Component, BoneName, bFollowComponent);
 
-	MulticastAddOrUpdateWarpTarget(WarpTarget);
+	MulticastAddOrUpdateWarpTargetFromComponent(WarpTargetName, Component, BoneName, bFollowComponent);
 }
 
-void UAlsMotionWarpingComponent::MulticastAddOrUpdateWarpTarget_Implementation(const FAlsMotionWarpingTargetSmall& WarpTarget)
+void UAlsMotionWarpingComponent::MulticastAddOrUpdateWarpTargetFromComponent_Implementation(FName WarpTargetName, const USceneComponent* Component, FName BoneName,
+																							bool bFollowComponent)
 {
 	auto* Character{Cast<AAlsCharacter>(GetOwner())};
 	if (Character->GetLocalRole() == ROLE_SimulatedProxy)
 	{
-		FMotionWarpingTarget MotionWarpingTarget;
-		MotionWarpingTarget.Name = WarpTarget.Name;
-		MotionWarpingTarget.Location = WarpTarget.Location;
-		MotionWarpingTarget.Rotation = WarpTarget.Rotation;
-		MotionWarpingTarget.Component = WarpTarget.Component;
-		MotionWarpingTarget.bFollowComponent = true;
-		AddOrUpdateWarpTarget(MotionWarpingTarget);
+		AddOrUpdateWarpTargetFromComponent(WarpTargetName, Component, BoneName, bFollowComponent);
 	}
 }

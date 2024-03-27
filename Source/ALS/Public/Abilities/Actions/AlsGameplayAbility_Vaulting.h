@@ -14,13 +14,13 @@ struct ALS_API FAlsVaultingParameters
 	TWeakObjectPtr<UPrimitiveComponent> TargetPrimitive;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS")
-	FVector_NetQuantize100 TargetRelativeLocation{ForceInit};
+	FVector TargetRelativeLocation{ForceInit};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS")
 	FRotator TargetRelativeRotation{ForceInit};
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS", Meta = (ForceUnits = "cm"))
-	float VaultingHeight{0.0f};
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS")
+	FVector EndTargetLocation{ForceInit};
 };
 
 USTRUCT(BlueprintType)
@@ -29,7 +29,7 @@ struct ALS_API FAlsVaultingTraceSettings
 	GENERATED_BODY()
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS", Meta = (ClampMin = 0))
-	FVector2f LedgeHeight{50.0f, 225.0f};
+	FVector2f LedgeHeight{50.0f, 125.0f};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS", Meta = (ClampMin = 0, ForceUnits = "cm"))
 	float ReachDistance{75.0f};
@@ -54,10 +54,10 @@ class ALS_API UAlsGameplayAbility_Vaulting : public UAlsGameplayAbility_MontageB
 
 public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AlsAbility|Vaulting", Meta = (ClampMin = 0, ClampMax = 180, ForceUnits = "deg"))
-	float TraceAngleThreshold{110.0f};
+	float TraceAngleThreshold{120.0f};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AlsAbility|Vaulting", Meta = (ClampMin = 0, ClampMax = 180, ForceUnits = "deg"))
-	float MaxReachAngle{50.0f};
+	float MaxReachAngle{100.0f};
 
 	// Prevents mantling on surfaces whose slope angle exceeds this value.
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AlsAbility|Vaulting", Meta = (ClampMin = 0, ClampMax = 90, ForceUnits = "deg"))
@@ -82,10 +82,22 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "AlsAbility|Vaulting", AdvancedDisplay)
 	FCollisionResponseContainer VaultingTraceResponses{ECR_Ignore};
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AlsAbility|Vaulting", Meta = (ForceUnits = "cm"))
-	float ReleaseDistance{100.0f};
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AlsAbility|Vaulting", Meta = (ClampMin = 0, ForceUnits = "cm"))
+	float ReleaseDistance{120.0f};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AlsAbility|Vaulting", Meta = (ClampMin = 0, ForceUnits = "cm"))
+	float MinimumSpace{50.0f};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AlsAbility|Vaulting", Meta = (ClampMin = 0, ForceUnits = "cm"))
+	float EndLocationMinimumDepth{50.0f};
 
 protected:
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AlsAbility|Vaulting|State", Meta = (ClampMin = 0, ForceUnits = "cm"))
+	FVector PreviousLocation{ForceInit};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AlsAbility|Vaulting|State", Meta = (ClampMin = 0, ForceUnits = "cm"))
+	FVector LastVelocity{ForceInit};
+
 	UFUNCTION(BlueprintNativeEvent, Category = "ALS|Ability|Vaulting")
 	void Tick(const float DeltaTime);
 

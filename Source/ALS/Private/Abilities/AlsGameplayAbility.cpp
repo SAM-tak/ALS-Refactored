@@ -123,12 +123,12 @@ void UAlsGameplayAbility::AddOrUpdateWarpTargetFromLocationAndRotation(FName War
 	}
 }
 
-void UAlsGameplayAbility::AddOrUpdateWarpTarget(const FMotionWarpingTarget& WarpTarget)
+void UAlsGameplayAbility::AddOrUpdateWarpTargetFromComponent(FName WarpTargetName, const USceneComponent* Component, FName BoneName, bool bFollowComponent)
 {
 	auto* Character{GetAlsCharacterFromActorInfo()};
 	if (Character->GetLocalRole() < ROLE_Authority)
 	{
-		Character->GetMotionWarping()->AddOrUpdateReplicatedWarpTarget(WarpTarget);
+		Character->GetMotionWarping()->AddOrUpdateReplicatedWarpTargetFromComponent(WarpTargetName, Component, BoneName, bFollowComponent);
 	}
 }
 

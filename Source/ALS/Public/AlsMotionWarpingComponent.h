@@ -47,10 +47,10 @@ public:
 	void AutonomousAddOrUpdateReplicatedWarpTargetFromLocationAndRotation(FName WarpTargetName, FVector TargetLocation, FRotator TargetRotation);
 
 	UFUNCTION(BlueprintCallable, Category = "ALS|Motion Warping")
-	void AddOrUpdateReplicatedWarpTarget(const FMotionWarpingTarget& WarpTarget);
+	void AddOrUpdateReplicatedWarpTargetFromComponent(FName WarpTargetName, const USceneComponent* Component, FName BoneName, bool bFollowComponent);
 
 	UFUNCTION(BlueprintCallable, Category = "ALS|Motion Warping")
-	void AutonomousAddOrUpdateReplicatedWarpTarget(const FMotionWarpingTarget& WarpTarget);
+	void AutonomousAddOrUpdateReplicatedWarpTargetFromComponent(FName WarpTargetName, const USceneComponent* Component, FName BoneName, bool bFollowComponent);
 
 private:
 	UFUNCTION(Server, Reliable)
@@ -60,8 +60,8 @@ private:
 	void MulticastAddOrUpdateWarpTargetFromLocationAndRotation(FName WarpTargetName, FVector_NetQuantize TargetLocation, FRotator TargetRotation);
 
 	UFUNCTION(Server, Reliable)
-	void ServerAddOrUpdateWarpTarget(const FAlsMotionWarpingTargetSmall& WarpTarget);
+	void ServerAddOrUpdateWarpTargetFromComponent(FName WarpTargetName, const USceneComponent* Component, FName BoneName, bool bFollowComponent);
 
 	UFUNCTION(NetMulticast, Reliable)
-	void MulticastAddOrUpdateWarpTarget(const FAlsMotionWarpingTargetSmall& WarpTarget);
+	void MulticastAddOrUpdateWarpTargetFromComponent(FName WarpTargetName, const USceneComponent* Component, FName BoneName, bool bFollowComponent);
 };

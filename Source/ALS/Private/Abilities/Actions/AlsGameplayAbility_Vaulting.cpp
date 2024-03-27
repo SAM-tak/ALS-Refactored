@@ -294,7 +294,6 @@ bool UAlsGameplayAbility_Vaulting::CanVault(const FGameplayAbilitySpecHandle Han
 			                 FLinearColor{1.0f, 0.5f, 0.0f}.ToFColor(true), false, TraceSettings.bDrawFailedTraces ? 10.0f : 0.0f);
 		}
 #endif
-
 		return false;
 	}
 
@@ -311,20 +310,68 @@ bool UAlsGameplayAbility_Vaulting::CanVault(const FGameplayAbilitySpecHandle Han
 	}
 #endif
 
+	static const FName MidSpaceTraceTag{FString::Printf(TEXT("%hs (Mid Space Trace)"), __FUNCTION__) };
+
+	const FVector MidSpaceTraceStart{TargetLocation + FVector{0.f, 0.f, TraceCapsuleRadius + UCharacterMovementComponent::MIN_FLOOR_DIST}};
+	const FVector MidSpaceTraceEnd{MidSpaceTraceStart + TargetDirection * ReleaseDistance};
+
+	FHitResult MidSpaceTestHit;
+	World->SweepSingleByChannel(MidSpaceTestHit, MidSpaceTraceStart, MidSpaceTraceEnd, FQuat::Identity,
+								VaultingTraceChannel, FCollisionShape::MakeSphere(TraceCapsuleRadius),
+								{MidSpaceTraceTag, false, Character}, VaultingTraceResponses);
+
+#if ENABLE_DRAW_DEBUG
+	if (bDisplayDebug)
+	{
+		UAlsUtility::DrawDebugSweepSingleSphere(World, MidSpaceTraceStart, MidSpaceTraceEnd, TraceCapsuleRadius,
+			                                    MidSpaceTestHit.IsValidBlockingHit(), MidSpaceTestHit, {0.25f, 0.0f, 1.0f}, {0.75f, 0.0f, 1.0f},
+			                                    MidSpaceTestHit.IsValidBlockingHit() || TraceSettings.bDrawFailedTraces ? 7.5f : 0.0f);
+	}
+#endif
+
+	auto Distance{ReleaseDistance};
+
+	if (MidSpaceTestHit.IsValidBlockingHit())
+	{
+		if (MidSpaceTestHit.Distance < MinimumSpace)
+		{
+			return false;
+		}
+		Distance = MidSpaceTestHit.Distance;
+	}
+
+	static const FName EndLocationTraceTag{FString::Printf(TEXT("%hs (End Location Overlap)"), __FUNCTION__)};
+
+	const FVector EndLocationTraceStart{TargetLocation + TargetDirection * Distance + FVector{0.f, 0.f, TraceCapsuleRadius + UCharacterMovementComponent::MIN_FLOOR_DIST}};
+
+	const FVector EndLocationTraceEnd{
+		EndLocationTraceStart.X,
+		EndLocationTraceStart.Y,
+		Character->GetCharacterMovement()->GetActorFeetLocation().Z
+	};
+
+	FHitResult EndLocationTraceHit;
+	World->SweepSingleByChannel(EndLocationTraceHit, EndLocationTraceStart, EndLocationTraceEnd, FQuat::Identity,
+								VaultingTraceChannel, FCollisionShape::MakeSphere(TraceCapsuleRadius),
+								{EndLocationTraceTag, false, Character}, VaultingTraceResponses);
+
+#if ENABLE_DRAW_DEBUG
+	if (bDisplayDebug)
+	{
+		UAlsUtility::DrawDebugSweepSingleSphere(World, EndLocationTraceStart, EndLocationTraceEnd, TraceCapsuleRadius,
+			                                    EndLocationTraceHit.IsValidBlockingHit(), EndLocationTraceHit, {0.25f, 0.0f, 1.0f}, {0.75f, 0.0f, 1.0f},
+			                                    EndLocationTraceHit.IsValidBlockingHit() || TraceSettings.bDrawFailedTraces ? 7.5f : 0.0f);
+	}
+#endif
+
+	if (EndLocationTraceHit.IsValidBlockingHit() && EndLocationTraceHit.Distance < EndLocationMinimumDepth)
+	{
+		return false;
+	}
+
 	const auto TargetRotation{TargetDirection.ToOrientationQuat()};
-	const auto VaultingHeight{UE_REAL_TO_FLOAT((TargetLocation.Z - CapsuleBottomLocation.Z) / CapsuleScale)};
 
 	Params.TargetPrimitive = TargetPrimitive;
-	Params.VaultingHeight = VaultingHeight;
-
-	//// Determine the mantling type by checking the movement mode and mantling height.
-
-	//Params.VaultingType = bInAir ? EAlsVaultingType::InAir
-	//							 : VaultingHeight > VaultingHighHeightThreshold
-	//								? EAlsVaultingType::High
-	//								: VaultingHeight > VaultingMediumHeightThreshold
-	//									? EAlsVaultingType::Medium
-	//									: EAlsVaultingType::Low;
 
 	// If the target primitive can't move, then use world coordinates to save
 	// some performance by skipping some coordinate space transformations later.
@@ -342,6 +389,15 @@ bool UAlsGameplayAbility_Vaulting::CanVault(const FGameplayAbilitySpecHandle Han
 	{
 		Params.TargetRelativeLocation = TargetLocation;
 		Params.TargetRelativeRotation = TargetRotation.Rotator();
+	}
+
+	if (EndLocationTraceHit.IsValidBlockingHit())
+	{
+		Params.EndTargetLocation = EndLocationTraceHit.ImpactPoint;
+	}
+	else
+	{
+		Params.EndTargetLocation = EndLocationTraceEnd;
 	}
 
 	return true;
@@ -400,26 +456,9 @@ void UAlsGameplayAbility_Vaulting::ActivateAbility(const FGameplayAbilitySpecHan
 			: FTransform{TargetRelativeRotation, Parameters.TargetRelativeLocation}
 	};
 
-	//const auto ActorFeetLocationOffset{Character->GetCharacterMovement()->GetActorFeetLocation() - TargetTransform.GetLocation()};
-	//const auto ActorRotationOffset{TargetTransform.GetRotation().Inverse() * Character->GetActorQuat()};
-
-	//FMotionWarpingTarget WarpingTarget;
-	//WarpingTarget.Name = FName{"Uprise"};
-	//WarpingTarget.Location = TargetTransform.GetLocation() /* + FVector{0.0f, 0.0f, CapsuleHalfHeight}*/;
-	//WarpingTarget.Rotation = TargetTransform.GetRotation().Rotator();
-	//WarpingTarget.Component = Parameters.TargetPrimitive;
-	//WarpingTarget.bFollowComponent = true;
-	//MotionWarping->AddOrUpdateReplicatedWarpTarget(WarpingTarget);
 	MotionWarping->AddOrUpdateReplicatedWarpTargetFromLocationAndRotation(FName{"Uprise"}, TargetTransform.GetLocation(), TargetTransform.GetRotation().Rotator());
 
-	//MotionWarping->AddOrUpdateReplicatedWarpTargetFromLocationAndRotation(FName{"Slide"},
-	//	TargetTransform.GetLocation() + TargetTransform.GetRotation().RotateVector(FVector::ForwardVector) * 100.0f,
-	//	TargetTransform.GetRotation().Rotator());
-
-	auto Pos{TargetTransform.GetLocation() + TargetTransform.GetRotation().RotateVector(FVector::ForwardVector) * ReleaseDistance};
-	Pos.Z = Character->GetCharacterMovement()->GetActorFeetLocation().Z;
-
-	MotionWarping->AddOrUpdateReplicatedWarpTargetFromLocationAndRotation(FName{"Release"}, Pos, TargetTransform.GetRotation().Rotator());
+	MotionWarping->AddOrUpdateReplicatedWarpTargetFromLocationAndRotation(FName{"Release"}, Parameters.EndTargetLocation, TargetTransform.GetRotation().Rotator());
 
 	auto PlayMontageParameter{SelectMontage(Parameters)};
 
@@ -441,10 +480,15 @@ void UAlsGameplayAbility_Vaulting::ActivateAbility(const FGameplayAbilitySpecHan
 	// Clear the character movement mode and set the locomotion action to mantling.
 
 	Character->GetCharacterMovement()->FlushServerMoves();
-	Character->GetCharacterMovement()->SetMovementMode(MOVE_Flying);
+	Character->GetCharacterMovement()->SetMovementMode(MOVE_Custom);
 	Character->GetAlsCharacterMovement()->SetMovementModeLocked(true);
 
 	Character->GetCharacterMovement()->SetBase(Parameters.TargetPrimitive.Get());
+
+	Character->GetCharacterMovement()->Velocity = FVector::ZeroVector;
+
+	PreviousLocation = Character->GetActorLocation();
+	LastVelocity = FVector::ZeroVector;
 
 	TickTask = UAlsAbilityTask_Tick::New(this, FName(TEXT("UAlsGameplayAbility_Vaulting")));
 	if (TickTask.IsValid())
@@ -459,7 +503,15 @@ void UAlsGameplayAbility_Vaulting::Tick_Implementation(const float DeltaTime)
 	auto* Character{GetAlsCharacterFromActorInfo()};
 	auto* CharacterMovement{Character->GetAlsCharacterMovement()};
 
-	if (CharacterMovement->MovementMode != MOVE_Flying)
+	auto CurrentLocation{Character->GetActorLocation()};
+
+	auto Velocity = (CurrentLocation - PreviousLocation) / DeltaTime;
+
+	LastVelocity = FMath::VInterpTo(LastVelocity, Velocity, DeltaTime, 10.0f);
+
+	PreviousLocation = CurrentLocation;
+
+	if (CharacterMovement->MovementMode != MOVE_Custom)
 	{
 		EndAbility(CurrentSpecHandle, GetCurrentActorInfo(), GetCurrentActivationInfo(), true, true);
 		return;
@@ -475,11 +527,23 @@ void UAlsGameplayAbility_Vaulting::EndAbility(const FGameplayAbilitySpecHandle H
 	auto* AnimInstance{Character->GetAlsAnimationInstace()};
 	auto CharacterMovement{Character->GetAlsCharacterMovement()};
 	auto* AbilitySystem{GetAlsAbilitySystemComponentFromActorInfo()};
+	const auto* Capsule{Character->GetCapsuleComponent()};
+
+	CharacterMovement->Velocity = LastVelocity;
 
 	CharacterMovement->NetworkSmoothingMode = ENetworkSmoothingMode::Exponential;
 
 	CharacterMovement->SetMovementModeLocked(false);
-	CharacterMovement->SetMovementMode(MOVE_Walking);
+
+	FHitResult Hit;
+	auto FeetLocation{Character->GetCharacterMovement()->GetActorFeetLocation()};
+	Character->GetWorld()->LineTraceSingleByChannel(Hit, Character->GetActorLocation(),
+													FeetLocation - FVector{0.f, 0.f, UCharacterMovementComponent::MIN_FLOOR_DIST},
+													Capsule->GetCollisionObjectType(),
+													{__FUNCTION__, false, Character},
+													Capsule->GetCollisionResponseToChannel(Capsule->GetCollisionObjectType()));
+
+	CharacterMovement->SetMovementMode(CharacterMovement->IsWalkable(Hit) ? MOVE_Walking : MOVE_Falling);
 
 	Character->ForceNetUpdate();
 }
