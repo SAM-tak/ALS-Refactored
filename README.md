@@ -8,6 +8,11 @@ The main goal of this ALS version is a complete and high-quality refactoring of 
 
 ## Features
 
+- Integrated Gameplay Ability System support.
+  - All actions were defined as Gameplay Ability.
+- Integrated Physical Animation support.
+- Included the Blender file with the rig that was used for the FBX export.
+
 - Reworked plugin structure. Content is separated into 3 categories: `ALS` - main content, `ALSCamera` - camera-related content, and `ALSExtras` - other optional content
 - Use of multiple linked animation blueprints instead of a single monolithic animation blueprint.
 - Use of animation layer interfaces to dynamically switch overlay states at runtime instead of directly referencing them in animation blueprints.
