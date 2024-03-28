@@ -1,4 +1,4 @@
-<img src="Resources/Icon128.png" align="right" width="110">
+<img src="Resources/Icon128.png" alt="Banner" align="right" width="110">
 
 # Advanced Locomotion System Refactored
 
