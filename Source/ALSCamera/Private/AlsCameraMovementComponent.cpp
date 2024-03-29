@@ -975,11 +975,11 @@ void UAlsCameraMovementComponent::RefreshTanHalfFov(float DeltaTime)
 		auto* PlayerController{Cast<APlayerController>(Character->GetController())};
 		if (IsValid(Camera) && IsValid(PlayerController))
 		{
-			int32 SizeX, SizeY;
-			PlayerController->GetViewportSize(SizeX, SizeY);
 			TanHalfVfov = FMath::Tan(FMath::DegreesToRadians(Camera->FieldOfView) * 0.5f);
 			if (Camera->bPanoramic)
 			{
+				int32 SizeX, SizeY;
+				PlayerController->GetViewportSize(SizeX, SizeY);
 				float AspectRatio{SizeX * (1 - Camera->PanoramaSideViewRate * 2 / 3) / (float)SizeY};
 				TanHalfVfov /= AspectRatio;
 			}
