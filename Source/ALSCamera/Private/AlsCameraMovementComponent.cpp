@@ -340,9 +340,6 @@ void UAlsCameraMovementComponent::TickCamera(const float DeltaTime, bool bAllowL
 		if (TargetCamera.IsValid())
 		{
 			TargetCamera->FieldOfView = Settings->FirstPerson.FOV;
-			TargetCamera->bPanoramic = Settings->FirstPerson.bPanoramic;
-			TargetCamera->PanoramicFieldOfView = Settings->FirstPerson.PanoramaFOV;
-			TargetCamera->PanoramaSideViewRate = Settings->FirstPerson.PanoramaSideViewRate;
 			TargetCamera->SetWorldLocationAndRotation(CameraLocation, CameraRotation);
 		}
 
@@ -508,9 +505,6 @@ void UAlsCameraMovementComponent::TickCamera(const float DeltaTime, bool bAllowL
 		{
 			TargetCamera->SetWorldLocationAndRotation(CameraLocation, CameraRotation);
 			TargetCamera->FieldOfView = Settings->FirstPerson.FOV;
-			TargetCamera->bPanoramic = Settings->FirstPerson.bPanoramic;
-			TargetCamera->PanoramicFieldOfView = Settings->FirstPerson.PanoramaFOV;
-			TargetCamera->PanoramaSideViewRate = Settings->FirstPerson.PanoramaSideViewRate;
 		}
 	}
 	else if (!FAnimWeight::IsRelevant(FirstPersonOverride))
@@ -523,9 +517,6 @@ void UAlsCameraMovementComponent::TickCamera(const float DeltaTime, bool bAllowL
 		if (TargetCamera.IsValid())
 		{
 			TargetCamera->FieldOfView = Settings->ThirdPerson.FOV;
-			TargetCamera->bPanoramic = Settings->ThirdPerson.bPanoramic;
-			TargetCamera->PanoramicFieldOfView = Settings->ThirdPerson.PanoramaFOV;
-			TargetCamera->PanoramaSideViewRate = Settings->ThirdPerson.PanoramaSideViewRate;
 			TargetCamera->SetWorldLocationAndRotation(CameraLocation, CameraRotation);
 		}
 	}
@@ -537,9 +528,6 @@ void UAlsCameraMovementComponent::TickCamera(const float DeltaTime, bool bAllowL
 		if (TargetCamera.IsValid())
 		{
 			TargetCamera->FieldOfView = FMath::Lerp(Settings->ThirdPerson.FOV, Settings->FirstPerson.FOV, FirstPersonOverride);
-			TargetCamera->bPanoramic = Settings->ThirdPerson.bPanoramic | Settings->FirstPerson.bPanoramic;
-			TargetCamera->PanoramicFieldOfView = FMath::Lerp(Settings->ThirdPerson.PanoramaFOV, Settings->FirstPerson.PanoramaFOV, FirstPersonOverride);
-			TargetCamera->PanoramaSideViewRate = FMath::Lerp(Settings->ThirdPerson.PanoramaSideViewRate, Settings->FirstPerson.PanoramaSideViewRate, FirstPersonOverride);
 			TargetCamera->SetWorldLocationAndRotation(CameraLocation, CameraRotation);
 		}
 	}
@@ -975,14 +963,9 @@ void UAlsCameraMovementComponent::RefreshTanHalfFov(float DeltaTime)
 		auto* PlayerController{Cast<APlayerController>(Character->GetController())};
 		if (IsValid(Camera) && IsValid(PlayerController))
 		{
+			int32 SizeX, SizeY;
+			PlayerController->GetViewportSize(SizeX, SizeY);
 			TanHalfVfov = FMath::Tan(FMath::DegreesToRadians(Camera->FieldOfView) * 0.5f);
-			if (Camera->bPanoramic)
-			{
-				int32 SizeX, SizeY;
-				PlayerController->GetViewportSize(SizeX, SizeY);
-				float AspectRatio{SizeX * (1 - Camera->PanoramaSideViewRate * 2 / 3) / (float)SizeY};
-				TanHalfVfov /= AspectRatio;
-			}
 		}
 	}
 }
