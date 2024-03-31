@@ -43,16 +43,16 @@ protected:
 	UPROPERTY(BlueprintReadOnly, Category = "Als Character|State", Transient)
 	TObjectPtr<UAlsCharacterMovementComponent> AlsCharacterMovement;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Als Character|State", Transient)
+	UPROPERTY(BlueprintReadOnly, Category = "Als Character|State", Transient)
 	TWeakObjectPtr<UAlsAnimationInstance> AnimationInstance;
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Als Character")
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Als Character")
 	TObjectPtr<UAlsPhysicalAnimationComponent> PhysicalAnimation;
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Als Character")
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Als Character")
 	TObjectPtr<UAlsAbilitySystemComponent> AbilitySystem;
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Als Character")
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Als Character")
 	TObjectPtr<UAlsMotionWarpingComponent> MotionWarping;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Als Character|Settings")
