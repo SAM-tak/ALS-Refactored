@@ -90,6 +90,15 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "AlsCameraMovement|State", Transient)
 	float TanHalfVfov{0.57f}; // ≒tan(60°/2)
 
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "AlsCameraMovement|State", Transient)
+	FRotator LastFullAimSightRot;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "AlsCameraMovement|State", Transient)
+	uint8 bFullAim : 1{false};
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "AlsCameraMovement|State", Transient)
+	FRotator SightRotOffset;
+
 public:
 	virtual void Activate(bool bReset = false) override;
 

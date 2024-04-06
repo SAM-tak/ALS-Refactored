@@ -136,6 +136,10 @@ void AAlsCharacter::GetOwnedGameplayTags(FGameplayTagContainer& TagContainer) co
 	{
 		TagContainer.AddLeafTag(ViewMode);
 	}
+	if (OverlayMode.IsValid())
+	{
+		TagContainer.AddLeafTag(OverlayMode);
+	}
 }
 
 bool AAlsCharacter::HasMatchingGameplayTag(FGameplayTag TagToCheck) const

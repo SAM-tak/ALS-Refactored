@@ -2,6 +2,7 @@
 
 #include "Animation/AnimNotifies/AnimNotify.h"
 #include "Templates/SubclassOf.h"
+#include "GameplayTagContainer.h"
 #include "AlsAnimNotify_CameraShake.generated.h"
 
 class UCameraShakeBase;
@@ -17,6 +18,18 @@ protected:
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings", Meta = (ClampMin = 0, ForceUnits = "x"))
 	float CameraShakeScale{1.0f};
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings")
+	ECameraShakePlaySpace PlaySpace{ECameraShakePlaySpace::CameraLocal};
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings")
+	FRotator UserPlaySpaceRot{FRotator::ZeroRotator};
+
+	UPROPERTY(EditAnywhere, Category = Settings, Meta = (FoldProperty))
+	FGameplayTagContainer AnyMatchTags;
+
+	UPROPERTY(EditAnywhere, Category = Settings, Meta = (FoldProperty))
+	FGameplayTagContainer AllMatchTags;
 
 public:
 	virtual FString GetNotifyName_Implementation() const override;

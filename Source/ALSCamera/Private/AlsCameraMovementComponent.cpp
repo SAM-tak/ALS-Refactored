@@ -873,6 +873,8 @@ void UAlsCameraMovementComponent::UpdateAimingFirstPersonCamera(float AimingAmou
 		{
 			CameraLocation = SightLoc - SightRot.Vector() * Settings->FirstPerson.RetreatDistance;
 			CameraRotation = SightRot;
+			LastFullAimSightRot = SightRot;
+			bFullAim = true;
 			return;
 		}
 		else
@@ -880,10 +882,16 @@ void UAlsCameraMovementComponent::UpdateAimingFirstPersonCamera(float AimingAmou
 			auto EyeAlpha = UAlsMath::Clamp01(AimingAmount / Settings->FirstPerson.ADSThreshold);
 			auto SightAlpha = UAlsMath::Clamp01((AimingAmount - Settings->FirstPerson.ADSThreshold) /
 				(1.0f - Settings->FirstPerson.ADSThreshold));
-			CameraRotation = FRotator(FQuat::Slerp(TargetRotation.Quaternion(), SightRot.Quaternion(), SightAlpha));
-			auto Offset = CameraRotation.Vector() * Settings->FirstPerson.RetreatDistance;
+			if (bFullAim)
+			{
+				SightRotOffset = LastFullAimSightRot - TargetRotation;
+			}
+			auto RotOffset{FMath::Lerp(FRotator::ZeroRotator, SightRotOffset, EyeAlpha)};
+			CameraRotation = FRotator(FQuat::Slerp((TargetRotation + RotOffset).Quaternion(), SightRot.Quaternion(), SightAlpha));
+			auto LocOffset = CameraRotation.Vector() * Settings->FirstPerson.RetreatDistance;
 			auto EyeLoc = FMath::Lerp(GetFirstPersonCameraLocation(), EyeCameraLocation, EyeAlpha);
-			CameraLocation = FMath::Lerp(EyeLoc, SightLoc, SightAlpha) - Offset;
+			CameraLocation = FMath::Lerp(EyeLoc, SightLoc, SightAlpha) - LocOffset;
+			bFullAim = false;
 			return;
 		}
 	}
@@ -891,6 +899,8 @@ void UAlsCameraMovementComponent::UpdateAimingFirstPersonCamera(float AimingAmou
 	auto Offset = TargetRotation.Vector() * Settings->FirstPerson.RetreatDistance;
 	CameraLocation = GetFirstPersonCameraLocation() - Offset;
 	CameraRotation = TargetRotation;
+	SightRotOffset = FRotator::ZeroRotator;
+	bFullAim = false;
 }
 
 void UAlsCameraMovementComponent::UpdateFocalLength()
