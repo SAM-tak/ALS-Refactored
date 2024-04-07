@@ -238,6 +238,9 @@ void UAlsPhysicalAnimationComponent::RefreshBodyState(float DeltaTime)
 		Mesh->SetCollisionObjectType(ECC_PhysicsBody);
 		Mesh->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
 		bActive = true;
+
+		OriginalUpdateMode = Mesh->PhysicsTransformUpdateMode;
+		Mesh->PhysicsTransformUpdateMode = EPhysicsTransformUpdateMode::ComponentTransformIsKinematic; // avoid feedback loop
 	}
 
 	if (!bActiveAny && bActive)
@@ -245,6 +248,7 @@ void UAlsPhysicalAnimationComponent::RefreshBodyState(float DeltaTime)
 		Mesh->SetCollisionObjectType(PrevCollisionObjectType);
 		Mesh->SetCollisionEnabled(PrevCollisionEnabled);
 		bActive = false;
+		Mesh->PhysicsTransformUpdateMode = OriginalUpdateMode;
 	}
 }
 

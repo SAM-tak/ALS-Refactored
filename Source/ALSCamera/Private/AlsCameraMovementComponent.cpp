@@ -868,6 +868,7 @@ void UAlsCameraMovementComponent::UpdateAimingFirstPersonCamera(float AimingAmou
 		FVector SightLoc;
 		FRotator SightRot;
 		Character->GetSightLocAndRot(SightLoc, SightRot);
+		SightRot.Roll = TargetRotation.Roll;
 		SightLoc = FVector::PointPlaneProject(SightLoc, EyeCameraLocation, SightRot.Vector());
 		if (AimingAmount >= 1.0f)
 		{
@@ -881,7 +882,7 @@ void UAlsCameraMovementComponent::UpdateAimingFirstPersonCamera(float AimingAmou
 		{
 			auto EyeAlpha = UAlsMath::Clamp01(AimingAmount / Settings->FirstPerson.ADSThreshold);
 			auto SightAlpha = UAlsMath::Clamp01((AimingAmount - Settings->FirstPerson.ADSThreshold) /
-				(1.0f - Settings->FirstPerson.ADSThreshold));
+												(1.0f - Settings->FirstPerson.ADSThreshold));
 			if (bFullAim)
 			{
 				SightRotOffset = LastFullAimSightRot - TargetRotation;

@@ -171,6 +171,9 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "PhysicalAnimation|State", Transient)
 	TEnumAsByte<ECollisionEnabled::Type> PrevCollisionEnabled{ECollisionEnabled::QueryOnly};
 
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "PhysicalAnimation|State", Transient)
+	TEnumAsByte<EPhysicsTransformUpdateMode::Type> OriginalUpdateMode;
+
 	UPROPERTY(VisibleAnywhere, Category = "PhysicalAnimation|State", Transient)
 	TArray<FName> CurrentProfileNames;
 
