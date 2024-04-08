@@ -26,9 +26,6 @@ protected:
 	float TanHalfVfov{0.57f}; // ≒tan(60°/2)
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient)
-	uint8 bRightShoulder : 1{true};
-
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient)
 	uint8 bFalling : 1{false};
 
 public:

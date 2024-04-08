@@ -58,7 +58,6 @@ public:
 		{AlsDesiredViewModeTags::ThirdPerson, AlsViewModeTags::ThirdPerson},
 		{AlsDesiredRotationModeTags::VelocityDirection, AlsRotationModeTags::VelocityDirection},
 		{AlsDesiredRotationModeTags::ViewDirection, AlsRotationModeTags::ViewDirection},
-		{AlsDesiredRotationModeTags::Aiming, AlsRotationModeTags::Aiming},
 		{AlsDesiredStanceTags::Standing, AlsStanceTags::Standing},
 		{AlsDesiredStanceTags::Crouching, AlsStanceTags::Crouching},
 		{AlsDesiredStanceTags::LyingFront, AlsStanceTags::LyingFront},

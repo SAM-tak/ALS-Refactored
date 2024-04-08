@@ -10,6 +10,8 @@
 #include "GameFramework/WorldSettings.h"
 #include "Curves/CurveFloat.h"
 #include "Misc/UObjectToken.h"
+#include "Net/UnrealNetwork.h"
+#include "Net/Core/PushModel/PushModel.h"
 #include "Utility/AlsCameraConstants.h"
 #include "Utility/AlsMacros.h"
 #include "Utility/AlsMath.h"
@@ -27,10 +29,22 @@ UAlsCameraMovementComponent::UAlsCameraMovementComponent(const FObjectInitialize
 	bTickInEditor = false;
 	bHiddenInGame = true;
 
+	SetIsReplicatedByDefault(true);
 	SetGenerateOverlapEvents(false);
 	SetCanEverAffectNavigation(false);
 	SetAllowClothActors(false);
 	SetCastShadow(false);
+}
+
+void UAlsCameraMovementComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+
+	FDoRepLifetimeParams Parameters;
+	Parameters.bIsPushBased = true;
+
+	Parameters.Condition = COND_SkipOwner;
+	DOREPLIFETIME_WITH_PARAMS_FAST(ThisClass, ShoulderMode, Parameters)
 }
 
 void UAlsCameraMovementComponent::OnRegister()
@@ -65,14 +79,17 @@ void UAlsCameraMovementComponent::OnRegister()
 
 void UAlsCameraMovementComponent::OnControllerChanged_Implementation(AController* PreviousController, AController* NewController)
 {
-	auto* NewPlayer{Cast<APlayerController>(NewController)};
-	if (IsValid(NewPlayer))
+	if (!bAutoActivate)
 	{
-		Activate(true);
-	}
-	else
-	{
-		Deactivate();
+		auto* NewPlayer{Cast<APlayerController>(NewController)};
+		if (IsValid(NewPlayer))
+		{
+			Activate(true);
+		}
+		else
+		{
+			Deactivate();
+		}
 	}
 }
 
@@ -80,7 +97,10 @@ void UAlsCameraMovementComponent::Activate(const bool bReset)
 {
 	Super::Activate(bReset);
 #if !UE_BUILD_SHIPPING
-	Character->OnDisplayDebug.AddUObject(this, &ThisClass::DisplayDebug);
+	if (Character.IsValid())
+	{
+		Character->OnDisplayDebug.AddUObject(this, &ThisClass::DisplayDebug);
+	}
 #endif
 	SetComponentTickEnabled(true);
 
@@ -95,6 +115,8 @@ void UAlsCameraMovementComponent::Activate(const bool bReset)
 		return;
 	}
 
+	PreviousShoulderMode = ShoulderMode;
+
 	TickCamera(0.0f, false);
 }
 
@@ -107,7 +129,10 @@ void UAlsCameraMovementComponent::Deactivate()
 		TargetCamera->Deactivate();
 	}
 #if !UE_BUILD_SHIPPING
-	Character->OnDisplayDebug.RemoveAll(this);
+	if (Character.IsValid())
+	{
+		Character->OnDisplayDebug.RemoveAll(this);
+	}
 #endif
 	Super::Deactivate();
 }
@@ -147,8 +172,7 @@ void UAlsCameraMovementComponent::BeginPlay()
 			Character->SetViewMode(AlsViewModeTags::ThirdPerson);
 		}
 	}
-	bPreviousRightShoulder = Settings->ThirdPerson.bRightShoulder;
-	Character->SetRightShoulder(Settings->ThirdPerson.bRightShoulder);
+	PreviousShoulderMode = ShoulderMode = Settings->ThirdPerson.ShoulderMode;
 	ConfirmedDesiredViewMode = Character->GetDesiredViewMode();
 }
 
@@ -234,7 +258,7 @@ FVector UAlsCameraMovementComponent::GetThirdPersonPivotLocation() const
 
 FVector UAlsCameraMovementComponent::GetThirdPersonTraceStartLocation() const
 {
-	return Character->GetMesh()->GetSocketLocation(Character->IsRightShoulder()
+	return Character->GetMesh()->GetSocketLocation(ShoulderMode == AlsCameraShoulderModeTags::Right
 		                                           ? Settings->ThirdPerson.TraceShoulderRightSocketName
 		                                           : Settings->ThirdPerson.TraceShoulderLeftSocketName);
 }
@@ -474,8 +498,7 @@ void UAlsCameraMovementComponent::TickCamera(const float DeltaTime, bool bAllowL
 		PreviousDesiredViewMode = ConfirmedDesiredViewMode;
 	}
 
-	bool bRightShoulder{Character->IsRightShoulder()};
-	if (bPreviousRightShoulder != bRightShoulder)
+	if (PreviousShoulderMode != ShoulderMode)
 	{
 		if (Character->GetViewMode() == AlsViewModeTags::ThirdPerson && Character->GetRotationMode() != AlsRotationModeTags::VelocityDirection &&
 			bIsFocusPawn)
@@ -495,7 +518,7 @@ void UAlsCameraMovementComponent::TickCamera(const float DeltaTime, bool bAllowL
 			}
 #endif
 		}
-		bPreviousRightShoulder = bRightShoulder;
+		PreviousShoulderMode = ShoulderMode;
 	}
 
 	if (bInAutoFPP)
@@ -995,5 +1018,35 @@ void UAlsCameraMovementComponent::RefreshTanHalfFov(float DeltaTime)
 				TanHalfVfov /= AspectRatio;
 			}
 		}
+	}
+}
+
+void UAlsCameraMovementComponent::SetShoulderMode(const FGameplayTag& NewShoulderMode)
+{
+	if (ShoulderMode == NewShoulderMode || Character->GetLocalRole() < ROLE_AutonomousProxy)
+	{
+		return;
+	}
+
+	ShoulderMode = NewShoulderMode;
+
+	MARK_PROPERTY_DIRTY_FROM_NAME(ThisClass, ShoulderMode, this)
+
+	if (Character->GetLocalRole() == ROLE_AutonomousProxy)
+	{
+		ServerSetShoulderMode(NewShoulderMode);
+	}
+}
+
+void UAlsCameraMovementComponent::ServerSetShoulderMode_Implementation(const FGameplayTag& NewShoulderMode)
+{
+	SetShoulderMode(NewShoulderMode);
+}
+
+void UAlsCameraMovementComponent::ToggleShoulder()
+{
+	if (ShoulderMode != AlsCameraShoulderModeTags::Center)
+	{
+		SetShoulderMode(ShoulderMode == AlsCameraShoulderModeTags::Right ? AlsCameraShoulderModeTags::Left : AlsCameraShoulderModeTags::Right);
 	}
 }

@@ -6,6 +6,7 @@
 #include "Camera/CameraComponent.h"
 #include "Engine/Canvas.h"
 #include "Engine/Engine.h"
+#include "Utility/AlsConstants.h"
 #include "Utility/AlsCameraConstants.h"
 #include "Utility/AlsMath.h"
 #include "Utility/AlsUtility.h"
@@ -274,15 +275,14 @@ void UAlsCameraMovementComponent::DisplayDebugShapes(const UCanvas* Canvas, cons
 	VerticalLocation += RowOffset;
 
 	
-	bool bRightShoulder{Character->IsRightShoulder()};
 	static const auto RightShoulderText{
-		FText::AsCultureInvariant(FName::NameToDisplayString(TEXT("RightShoulder"), true))
+		FText::AsCultureInvariant(FName::NameToDisplayString(GET_MEMBER_NAME_STRING_CHECKED(ThisClass, ShoulderMode), false))
 	};
 
 	Text.Text = RightShoulderText;
 	Text.Draw(Canvas->Canvas, {HorizontalLocation, VerticalLocation});
 
-	Text.Text = FText::AsCultureInvariant(FName::NameToDisplayString(FString{UAlsUtility::BoolToString(bRightShoulder)}, false));
+	Text.Text = FText::AsCultureInvariant(FName::NameToDisplayString(UAlsUtility::GetSimpleTagName(ShoulderMode).ToString(), false));
 	Text.Draw(Canvas->Canvas, {HorizontalLocation + ColumnOffset, VerticalLocation});
 
 	VerticalLocation += RowOffset;

@@ -22,7 +22,6 @@ namespace AlsDesiredRotationModeTags
 	UE_DEFINE_GAMEPLAY_TAG(Root, "Als.Desired.RotationMode")
 	UE_DEFINE_GAMEPLAY_TAG(VelocityDirection, "Als.Desired.RotationMode.VelocityDirection")
 	UE_DEFINE_GAMEPLAY_TAG(ViewDirection, "Als.Desired.RotationMode.ViewDirection")
-	UE_DEFINE_GAMEPLAY_TAG(Aiming, "Als.Desired.RotationMode.Aiming")
 }
 
 namespace AlsDesiredStanceTags
