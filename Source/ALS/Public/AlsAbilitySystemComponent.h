@@ -25,6 +25,20 @@ protected:
 	UFUNCTION(BlueprintNativeEvent, Category = "ALS|AbilitySystem")
 	void OnRefresh(float DeltaTime);
 
+	UFUNCTION(BlueprintCallable, Category = "ALS|AbilitySystem", DisplayName = "CancelAbilityByTags",
+			  Meta = (ScriptName = "CancelAbilityByTags", AutoCreateRefTerm = "Tags"))
+	void K2_CancelAbilityByTags(const FGameplayTagContainer& Tags)
+	{
+		CancelAbilities(&Tags);
+	}
+
+	UFUNCTION(BlueprintCallable, Category = "ALS|AbilitySystem", DisplayName = "CancelAbilityBySingleTag",
+			  Meta = (ScriptName = "CancelAbilityBySingleTag", AutoCreateRefTerm = "Tag"))
+	void K2_CancelAbilityBySingleTag(const FGameplayTag& Tag)
+	{
+		CancelAbilitiesBySingleTag(Tag);
+	}
+
 	// Utility
 
 public:
