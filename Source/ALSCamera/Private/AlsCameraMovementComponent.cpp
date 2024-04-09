@@ -44,6 +44,7 @@ void UAlsCameraMovementComponent::GetLifetimeReplicatedProps(TArray<FLifetimePro
 	Parameters.bIsPushBased = true;
 
 	Parameters.Condition = COND_SkipOwner;
+	DOREPLIFETIME_WITH_PARAMS_FAST(ThisClass, ConfirmedDesiredViewMode, Parameters)
 	DOREPLIFETIME_WITH_PARAMS_FAST(ThisClass, ShoulderMode, Parameters)
 }
 
@@ -173,7 +174,8 @@ void UAlsCameraMovementComponent::BeginPlay()
 		}
 	}
 	PreviousShoulderMode = ShoulderMode = Settings->ThirdPerson.ShoulderMode;
-	ConfirmedDesiredViewMode = Character->GetDesiredViewMode();
+	PreviousConfirmedDesiredViewMode = DesiredViewMode;
+	SetConfirmedDesiredViewMode(DesiredViewMode);
 }
 
 void UAlsCameraMovementComponent::TickComponent(float DeltaTime, const ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
@@ -288,18 +290,20 @@ void UAlsCameraMovementComponent::TickCamera(const float DeltaTime, bool bAllowL
 
 	// Refresh desired view mode information.
 
-	if (ViewModeChangeBlockTime > 0.f)
+	if (Character->IsCharacterSelf())
 	{
-		ViewModeChangeBlockTime -= DeltaTime;
-	}
-	else
-	{
-		auto& CurrentDesiredViewMode = Character->GetDesiredViewMode();
-		if (CurrentDesiredViewMode != ConfirmedDesiredViewMode)
+		if (ViewModeChangeBlockTime > 0.f)
 		{
-			ViewModeChangeBlockTime = Settings->ViewModeChangeBlockTime;
+			ViewModeChangeBlockTime -= DeltaTime;
 		}
-		ConfirmedDesiredViewMode = CurrentDesiredViewMode;
+		else
+		{
+			if (DesiredViewMode != ConfirmedDesiredViewMode)
+			{
+				ViewModeChangeBlockTime = Settings->ViewModeChangeBlockTime;
+			}
+			SetConfirmedDesiredViewMode(DesiredViewMode);
+		}
 	}
 
 	// Refresh movement base.
@@ -455,11 +459,11 @@ void UAlsCameraMovementComponent::TickCamera(const float DeltaTime, bool bAllowL
 
 	const auto CameraResultLocation{CalculateCameraTrace(CameraTargetLocation, PivotOffset, DeltaTime, bAllowLag)};
 
-	if (PreviousDesiredViewMode != ConfirmedDesiredViewMode)
+	if (PreviousConfirmedDesiredViewMode != ConfirmedDesiredViewMode)
 	{
 		// Set aim point correction during change FPP/TPP
 		auto FocusLocation{GetCurrentFocusLocation()};
-		if (PreviousDesiredViewMode == AlsDesiredViewModeTags::FirstPerson)
+		if (PreviousConfirmedDesiredViewMode == AlsCameraViewModeTags::FirstPerson)
 		{
 			// FPP -> TPP
 			auto TPPCameraLocation{FVector::PointPlaneProject(CameraResultLocation, PivotLocation, -CameraRotation.Vector())};
@@ -481,7 +485,7 @@ void UAlsCameraMovementComponent::TickCamera(const float DeltaTime, bool bAllowL
 			}
 #endif
 		}
-		else if (PreviousDesiredViewMode == AlsDesiredViewModeTags::ThirdPerson)
+		else if (PreviousConfirmedDesiredViewMode == AlsCameraViewModeTags::ThirdPerson)
 		{
 			// TPP -> FPP
 			auto FocalRotation{(FocusLocation - GetEyeCameraLocation()).Rotation()};
@@ -495,7 +499,7 @@ void UAlsCameraMovementComponent::TickCamera(const float DeltaTime, bool bAllowL
 			}
 #endif
 		}
-		PreviousDesiredViewMode = ConfirmedDesiredViewMode;
+		PreviousConfirmedDesiredViewMode = ConfirmedDesiredViewMode;
 	}
 
 	if (PreviousShoulderMode != ShoulderMode)
@@ -571,8 +575,7 @@ void UAlsCameraMovementComponent::TickCamera(const float DeltaTime, bool bAllowL
 	RefreshTanHalfFov(DeltaTime);
 }
 
-FRotator UAlsCameraMovementComponent::CalculateCameraRotation(const FRotator& CameraTargetRotation,
-																  const float DeltaTime, const bool bAllowLag) const
+FRotator UAlsCameraMovementComponent::CalculateCameraRotation(const FRotator& CameraTargetRotation, const float DeltaTime, const bool bAllowLag) const
 {
 	if (!bAllowLag)
 	{
@@ -1019,6 +1022,33 @@ void UAlsCameraMovementComponent::RefreshTanHalfFov(float DeltaTime)
 			}
 		}
 	}
+}
+
+void UAlsCameraMovementComponent::SetDesiredViewMode(const FGameplayTag& NewDesiredViewMode)
+{
+	DesiredViewMode = NewDesiredViewMode;
+}
+
+void UAlsCameraMovementComponent::SetConfirmedDesiredViewMode(const FGameplayTag& NewConfirmedDesiredViewMode)
+{
+	if (ConfirmedDesiredViewMode == NewConfirmedDesiredViewMode || Character->GetLocalRole() < ROLE_AutonomousProxy)
+	{
+		return;
+	}
+
+	ConfirmedDesiredViewMode = NewConfirmedDesiredViewMode;
+
+	MARK_PROPERTY_DIRTY_FROM_NAME(ThisClass, ConfirmedDesiredViewMode, this)
+
+	if (Character->GetLocalRole() == ROLE_AutonomousProxy)
+	{
+		ServerSetConfirmedDesiredViewMode(NewConfirmedDesiredViewMode);
+	}
+}
+
+void UAlsCameraMovementComponent::ServerSetConfirmedDesiredViewMode_Implementation(const FGameplayTag& NewViewMode)
+{
+	SetConfirmedDesiredViewMode(NewViewMode);
 }
 
 void UAlsCameraMovementComponent::SetShoulderMode(const FGameplayTag& NewShoulderMode)

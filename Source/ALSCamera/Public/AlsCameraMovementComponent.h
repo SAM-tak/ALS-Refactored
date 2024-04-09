@@ -25,6 +25,9 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AlsCameraMovement|Settings", Meta = (ClampMin = 0, ClampMax = 1))
 	float ADSCameraShakeScale{0.2f};
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AlsCameraMovement|Settings")
+	FGameplayTag DesiredViewMode{AlsCameraViewModeTags::ThirdPerson};
+
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "AlsCameraMovement|State", Transient)
 	TWeakObjectPtr<AAlsCharacter> Character;
 
@@ -70,11 +73,11 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "AlsCameraMovement|State", Transient)
 	uint8 bIsFocusPawn : 1 {false};
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "AlsCameraMovement|State", Transient)
-	FGameplayTag ConfirmedDesiredViewMode{AlsDesiredViewModeTags::ThirdPerson};
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "AlsCameraMovement|State", Transient, Replicated)
+	FGameplayTag ConfirmedDesiredViewMode{AlsCameraViewModeTags::ThirdPerson};
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "AlsCameraMovement|State", Transient)
-	FGameplayTag PreviousDesiredViewMode{AlsDesiredViewModeTags::ThirdPerson};
+	FGameplayTag PreviousConfirmedDesiredViewMode{AlsCameraViewModeTags::ThirdPerson};
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "AlsCameraMovement|State", Transient, Meta = (ClampMin = 0, ForceUnits = "s"))
 	float ViewModeChangeBlockTime{0.f};
@@ -148,9 +151,23 @@ public:
 	UFUNCTION(BlueprintPure, Category = "ALS|Camera Movement", Meta = (ReturnDisplayName = "Focus Location"))
 	FVector GetCurrentFocusLocation() const;
 
+	float GetTanHalfVfov() const;
+
+	// Desired View Mode
+
+public:
+	const FGameplayTag& GetDesiredViewMode() const;
+
+	void SetDesiredViewMode(const FGameplayTag& NewDesiredViewMode);
+
 	const FGameplayTag& GetConfirmedDesiredViewMode() const;
 
-	float GetTanHalfVfov() const;
+protected:
+	void SetConfirmedDesiredViewMode(const FGameplayTag& NewDesiredViewMode);
+
+private:
+	UFUNCTION(Server, Unreliable)
+	void ServerSetConfirmedDesiredViewMode(const FGameplayTag& NewDesiredViewMode);
 
 	// ShoulderMode
 
@@ -218,6 +235,11 @@ inline FVector UAlsCameraMovementComponent::GetCurrentFocusLocation() const
 inline UCameraComponent* UAlsCameraMovementComponent::GetCameraComponent() const
 {
 	return TargetCamera.Get();
+}
+
+inline const FGameplayTag& UAlsCameraMovementComponent::GetDesiredViewMode() const
+{
+	return DesiredViewMode;
 }
 
 inline const FGameplayTag& UAlsCameraMovementComponent::GetConfirmedDesiredViewMode() const

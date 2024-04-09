@@ -3,6 +3,8 @@
 #include "CoreMinimal.h"
 #include "AlsCharacterTask.generated.h"
 
+class UWorld;
+class AActor;
 class UAlsCharacterComponent;
 
 UCLASS(Abstract, Blueprintable, BlueprintType, AutoExpandCategories = ("Settings"))
@@ -48,6 +50,8 @@ public:
 	{
 		return !bActive && !bEpilogRunningCurrently;
 	}
+
+	virtual UWorld* GetWorld() const override final;
 
 protected:
 	virtual void OnEnd(bool bWasCancelled);

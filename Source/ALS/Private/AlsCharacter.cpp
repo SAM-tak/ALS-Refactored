@@ -112,10 +112,6 @@ void AAlsCharacter::GetOwnedGameplayTags(FGameplayTagContainer& TagContainer) co
 	{
 		TagContainer.AddLeafTag(DesiredGait);
 	}
-	if (DesiredViewMode.IsValid())
-	{
-		TagContainer.AddLeafTag(DesiredViewMode);
-	}
 	if (LocomotionMode.IsValid())
 	{
 		TagContainer.AddLeafTag(LocomotionMode);
@@ -171,7 +167,6 @@ void AAlsCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLif
 	DOREPLIFETIME_WITH_PARAMS_FAST(ThisClass, DesiredStance, Parameters)
 	DOREPLIFETIME_WITH_PARAMS_FAST(ThisClass, DesiredGait, Parameters)
 	DOREPLIFETIME_WITH_PARAMS_FAST(ThisClass, DesiredRotationMode, Parameters)
-	DOREPLIFETIME_WITH_PARAMS_FAST(ThisClass, DesiredViewMode, Parameters)
 	DOREPLIFETIME_WITH_PARAMS_FAST(ThisClass, OverlayMode, Parameters)
 	DOREPLIFETIME_WITH_PARAMS_FAST(ThisClass, ReplicatedViewRotation, Parameters)
 	DOREPLIFETIME_WITH_PARAMS_FAST(ThisClass, InputDirection, Parameters)
@@ -186,12 +181,8 @@ void AAlsCharacter::PreRegisterAllComponents()
 
 	if (IsValid(Settings))
 	{
-		ViewMode = DesiredToActual(DesiredViewMode);
-
-		RotationMode = DesiredToActual(GetDesiredRotationMode());
-
+		RotationMode = DesiredToActual(DesiredRotationMode);
 		Stance = DesiredToActual(DesiredStance);
-
 		Gait = DesiredToActual(DesiredGait);
 	}
 
@@ -593,28 +584,6 @@ FGameplayTag AAlsCharacter::GetLocomotionAction() const
 		AbilitySystem->GetOwnedGameplayTags(TempTagContainer);
 	}
 	return TempTagContainer.Filter(Settings->ActionTags).First();
-}
-
-void AAlsCharacter::SetDesiredViewMode(const FGameplayTag& NewDesiredViewMode)
-{
-	if (DesiredViewMode == NewDesiredViewMode || GetLocalRole() < ROLE_AutonomousProxy)
-	{
-		return;
-	}
-
-	DesiredViewMode = NewDesiredViewMode;
-
-	MARK_PROPERTY_DIRTY_FROM_NAME(ThisClass, DesiredViewMode, this)
-
-	if (GetLocalRole() == ROLE_AutonomousProxy)
-	{
-		ServerSetDesiredViewMode(NewDesiredViewMode);
-	}
-}
-
-void AAlsCharacter::ServerSetDesiredViewMode_Implementation(const FGameplayTag& NewViewMode)
-{
-	SetDesiredViewMode(NewViewMode);
 }
 
 void AAlsCharacter::SetViewMode(const FGameplayTag& NewViewMode)

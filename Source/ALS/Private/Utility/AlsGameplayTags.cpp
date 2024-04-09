@@ -10,13 +10,6 @@ namespace AlsDesiredStateTags
 	UE_DEFINE_GAMEPLAY_TAG(Root, "Als.Desired")
 }
 
-namespace AlsDesiredViewModeTags
-{
-	UE_DEFINE_GAMEPLAY_TAG(Root, "Als.Desired.ViewMode")
-	UE_DEFINE_GAMEPLAY_TAG(FirstPerson, "Als.Desired.ViewMode.FirstPerson")
-	UE_DEFINE_GAMEPLAY_TAG(ThirdPerson, "Als.Desired.ViewMode.ThirdPerson")
-}
-
 namespace AlsDesiredRotationModeTags
 {
 	UE_DEFINE_GAMEPLAY_TAG(Root, "Als.Desired.RotationMode")

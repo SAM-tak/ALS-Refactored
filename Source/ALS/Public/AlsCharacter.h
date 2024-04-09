@@ -73,9 +73,6 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Als Character|Settings|Desired State", Replicated)
 	FGameplayTag DesiredGait{AlsDesiredGaitTags::Running};
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Als Character|Settings|Desired State", Replicated)
-	FGameplayTag DesiredViewMode{AlsDesiredViewModeTags::ThirdPerson};
-
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Als Character|Settings|Desired State", ReplicatedUsing = OnReplicated_OverlayMode)
 	FGameplayTag OverlayMode{AlsOverlayModeTags::Default};
 
@@ -92,7 +89,7 @@ protected:
 	FGameplayTag Gait{AlsGaitTags::Walking};
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Als Character|State", Transient)
-	FGameplayTag ViewMode{AlsDesiredViewModeTags::ThirdPerson};
+	FGameplayTag ViewMode{AlsViewModeTags::ThirdPerson};
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Als Character|State", Transient)
 	FAlsMovementBaseState MovementBase;
@@ -201,18 +198,6 @@ private:
 	void RefreshMeshProperties() const;
 
 	void RefreshMovementBase();
-
-	// Desired View Mode
-
-public:
-	const FGameplayTag& GetDesiredViewMode() const;
-
-	UFUNCTION(BlueprintCallable, Category = "ALS|Character", Meta = (AutoCreateRefTerm = "NewDesiredViewMode"))
-	void SetDesiredViewMode(const FGameplayTag& NewDesiredViewMode);
-
-private:
-	UFUNCTION(Server, Unreliable)
-	void ServerSetDesiredViewMode(const FGameplayTag& NewViewMode);
 
 	// View Mode
 
@@ -576,11 +561,6 @@ private:
 inline void AAlsCharacter::ReplaceAlsAbilitySystem(UAlsAbilitySystemComponent* NewAbilitySystem)
 {
 	AbilitySystem = NewAbilitySystem;
-}
-
-inline const FGameplayTag& AAlsCharacter::GetDesiredViewMode() const
-{
-	return DesiredViewMode;
 }
 
 inline const FGameplayTag& AAlsCharacter::GetDesiredRotationMode() const
