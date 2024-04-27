@@ -9,6 +9,7 @@
 #include "Camera/CameraComponent.h"
 #include "GameFramework/WorldSettings.h"
 #include "Curves/CurveFloat.h"
+#include "Engine/OverlapResult.h"
 #include "Misc/UObjectToken.h"
 #include "Net/UnrealNetwork.h"
 #include "Net/Core/PushModel/PushModel.h"
