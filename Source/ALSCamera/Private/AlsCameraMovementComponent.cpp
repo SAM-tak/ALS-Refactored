@@ -706,7 +706,7 @@ FVector UAlsCameraMovementComponent::CalculateCameraTrace(const FVector& CameraT
 	};
 #endif
 
-	const auto MeshScale{Character->GetMesh()->GetComponentScale().Z};
+	const auto MeshScale{UE_REAL_TO_FLOAT(Character->GetMesh()->GetComponentScale().Z)};
 
 	static const FName MainTraceTag{FString::Printf(TEXT("%hs (Main Trace)"), __FUNCTION__)};
 
@@ -746,7 +746,7 @@ FVector UAlsCameraMovementComponent::CalculateCameraTrace(const FVector& CameraT
 #if ENABLE_DRAW_DEBUG
 	if (bDisplayDebugCameraTraces)
 	{
-		UAlsUtility::DrawDebugSweepSphere(GetWorld(), TraceStart, TraceResult, Settings->ThirdPerson.TraceRadius * MeshScale,
+		UAlsUtility::DrawDebugSweepSphere(GetWorld(), TraceStart, TraceResult, CollisionShape.GetCapsuleRadius(),
 		                                  Hit.IsValidBlockingHit() ? FLinearColor::Red : FLinearColor::Green);
 	}
 #endif
@@ -811,7 +811,7 @@ bool UAlsCameraMovementComponent::TryAdjustLocationBlockedByGeometry(FVector& Lo
 {
 	// Based on ComponentEncroachesBlockingGeometry_WithAdjustment().
 
-	const auto MeshScale{Character->GetMesh()->GetComponentScale().Z};
+	const auto MeshScale{UE_REAL_TO_FLOAT(Character->GetMesh()->GetComponentScale().Z)};
 	const auto CollisionShape{FCollisionShape::MakeSphere((Settings->ThirdPerson.TraceRadius + 1.0f) * MeshScale)};
 
 	check(Overlaps.IsEmpty())
