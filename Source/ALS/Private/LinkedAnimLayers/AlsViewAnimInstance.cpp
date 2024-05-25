@@ -42,8 +42,8 @@ void UAlsViewAnimInstance::Refresh(const float DeltaTime)
 
 	if (!Parent->bIsActionRunning)
 	{
-		YawAngle = FRotator3f::NormalizeAxis(UE_REAL_TO_FLOAT(Rotation.Yaw - Parent->LocomotionState.Rotation.Yaw));
-		PitchAngle = FRotator3f::NormalizeAxis(UE_REAL_TO_FLOAT(Rotation.Pitch - Parent->LocomotionState.Rotation.Pitch));
+		YawAngle = FMath::UnwindDegrees(UE_REAL_TO_FLOAT(Rotation.Yaw - Parent->LocomotionState.Rotation.Yaw));
+		PitchAngle = FMath::UnwindDegrees(UE_REAL_TO_FLOAT(Rotation.Pitch - Parent->LocomotionState.Rotation.Pitch));
 
 		PitchAmount = 0.5f - PitchAngle / 180.0f;
 	}
@@ -109,7 +109,7 @@ void UAlsViewAnimInstance::RefreshLook()
 	{
 		// Offset the angle to keep it relative to the movement base.
 
-		Look.WorldYawAngle = FRotator3f::NormalizeAxis(Look.WorldYawAngle + Parent->MovementBase.DeltaRotation.Yaw);
+		Look.WorldYawAngle = FMath::UnwindDegrees(Look.WorldYawAngle + Parent->MovementBase.DeltaRotation.Yaw);
 	}
 
 	float TargetYawAngle;
@@ -120,7 +120,7 @@ void UAlsViewAnimInstance::RefreshLook()
 	{
 		// Look towards input direction.
 
-		TargetYawAngle = FRotator3f::NormalizeAxis(
+		TargetYawAngle = FMath::UnwindDegrees(
 			(Parent->LocomotionState.bHasInput ? Parent->LocomotionState.InputYawAngle : Parent->LocomotionState.TargetYawAngle) - CharacterYawAngle);
 
 		TargetPitchAngle = 0.0f;
@@ -142,14 +142,10 @@ void UAlsViewAnimInstance::RefreshLook()
 	}
 	else
 	{
-		const auto CurrentYawAngle{FRotator3f::NormalizeAxis(Look.WorldYawAngle - CharacterYawAngle)};
-		auto DeltaYawAngle{FRotator3f::NormalizeAxis(TargetYawAngle - CurrentYawAngle)};
+		const auto CurrentYawAngle{FMath::UnwindDegrees(Look.WorldYawAngle - CharacterYawAngle)};
+		auto DeltaYawAngle{FMath::UnwindDegrees(TargetYawAngle - CurrentYawAngle)};
 
-		if (DeltaYawAngle > 180.0f - UAlsMath::CounterClockwiseRotationAngleThreshold)
-		{
-			DeltaYawAngle -= 360.0f;
-		}
-		else if (FMath::Abs(Parent->LocomotionState.YawSpeed) > UE_SMALL_NUMBER && FMath::Abs(TargetYawAngle) > 90.0f)
+		if (FMath::Abs(Parent->LocomotionState.YawSpeed) > UE_SMALL_NUMBER && FMath::Abs(TargetYawAngle) > 90.0f)
 		{
 			// When interpolating yaw angle, favor the character rotation direction, over the shortest rotation
 			// direction, so that the rotation of the head remains synchronized with the rotation of the body.
@@ -159,11 +155,11 @@ void UAlsViewAnimInstance::RefreshLook()
 
 		const auto InterpolationAmount{UAlsMath::ExponentialDecay(GetDeltaSeconds(), InterpolationSpeed)};
 
-		Look.YawAngle = FRotator3f::NormalizeAxis(CurrentYawAngle + DeltaYawAngle * InterpolationAmount);
+		Look.YawAngle = FMath::UnwindDegrees(CurrentYawAngle + DeltaYawAngle * InterpolationAmount);
 		Look.PitchAngle = UAlsMath::LerpAngle(Look.PitchAngle, TargetPitchAngle, InterpolationAmount);
 	}
 
-	Look.WorldYawAngle = FRotator3f::NormalizeAxis(CharacterYawAngle + Look.YawAngle);
+	Look.WorldYawAngle = FMath::UnwindDegrees(CharacterYawAngle + Look.YawAngle);
 
 	// Separate the yaw angle into 3 separate values. These 3 values are used to improve the
 	// blending of the view when rotating completely around the character. This allows to

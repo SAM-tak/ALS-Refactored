@@ -117,6 +117,7 @@ public:
 	// Former ViewState
 	FRotator ViewRotation; // in NativeUpdateAnimation ex ViewState.Rotation
 	float ViewYawAngle; // in NativeThreadSafeUpdateAnimation ex ViewState.YawAngle
+	float ViewYawSpeed; // in NativeThreadSafeUpdateAnimation ex ViewState.YawSpeed
 
 	const FGameplayTagContainer& GetCurrentGameplayTags() const;
 
