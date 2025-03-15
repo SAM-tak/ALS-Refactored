@@ -519,28 +519,19 @@ void UAlsCharacterMovementComponent::PhysWalking(const float DeltaTime, int32 It
 					HandleWalkingOffLedge(OldFloor.HitResult.ImpactNormal, OldFloor.HitResult.Normal, OldLocation, TimeTick);
 					if (IsMovingOnGround())
 					{
-						// TODO Start of custom ALS code block.
-
-						ApplyPendingPenetrationAdjustment();
-
-						// TODO End of custom ALS code block.
-
 						// If still walking, then fall. If not, assume the user set a different mode they want to keep.
 						StartFalling(Iterations, RemainingTime, TimeTick, Delta, OldLocation);
 					}
 					return;
 				}
 
-				// TODO Start of custom ALS code block.
-
-				ApplyPendingPenetrationAdjustment();
-
-				// TODO End of custom ALS code block.
-
 				AdjustFloorHeight();
 				SetBase(CurrentFloor.HitResult.Component.Get(), CurrentFloor.HitResult.BoneName);
 			}
-			else if (CurrentFloor.HitResult.bStartPenetrating && RemainingTime <= 0.f)
+
+			// Always resolve penetration, even if the floor is walkable.
+
+			if (CurrentFloor.IsWalkableFloor() && CurrentFloor.HitResult.bStartPenetrating && RemainingTime <= 0.f)
 			{
 				// The floor check failed because it started in penetration
 				// We do not want to try to move downward because the downward sweep failed, rather we'd like to try to pop out of the floor.
@@ -731,12 +722,6 @@ void UAlsCharacterMovementComponent::ComputeFloorDist(const FVector& CapsuleLoca
 		FHitResult Hit(1.f);
 		bBlockingHit = FloorSweepTest(Hit, CapsuleLocation, CapsuleLocation + TraceDist * GetGravityDirection(), CollisionChannel, CapsuleShape, QueryParams, ResponseParam);
 
-		// TODO Start of custom ALS code block.
-
-		const_cast<ThisClass*>(this)->SavePenetrationAdjustment(Hit);
-
-		// TODO End of custom ALS code block.
-
 		if (bBlockingHit)
 		{
 			// Reject hits adjacent to us, we only care about hits on the bottom portion of our capsule.
@@ -807,7 +792,22 @@ void UAlsCharacterMovementComponent::ComputeFloorDist(const FVector& CapsuleLoca
 				OutFloorResult.bBlockingHit = true;
 				if (LineResult <= LineDistance && IsWalkable(Hit))
 				{
+					// Keep the data from the previous sweep test, which will be required later to properly resolve
+					// penetration in the USCCharacterMovementComponentGravity::PhysWalking() function. By default,
+					// penetration is only resolved when line trace starts in penetration and the sweep test is ignored.
+
+					const auto NormalPrevious{OutFloorResult.HitResult.Normal};
+					const auto PenetrationDepthPrevious{OutFloorResult.HitResult.PenetrationDepth};
+					const auto bStartPenetratingPrevious{OutFloorResult.HitResult.bStartPenetrating};
+					const auto HitObjectHandlePrevious{OutFloorResult.HitResult.HitObjectHandle};
+
 					OutFloorResult.SetFromLineTrace(Hit, OutFloorResult.FloorDist, LineResult, true);
+
+					OutFloorResult.HitResult.Normal = NormalPrevious;
+					OutFloorResult.HitResult.PenetrationDepth = PenetrationDepthPrevious;
+					OutFloorResult.HitResult.bStartPenetrating = bStartPenetratingPrevious;
+					OutFloorResult.HitResult.HitObjectHandle = HitObjectHandlePrevious;
+
 					return;
 				}
 			}
@@ -907,27 +907,6 @@ void UAlsCharacterMovementComponent::MoveAutonomous(const float ClientTimeStamp,
 
 		PreviousControlRotation = NewControlRotation;
 	}
-}
-
-void UAlsCharacterMovementComponent::SavePenetrationAdjustment(const FHitResult& Hit)
-{
-	if (Hit.bStartPenetrating)
-	{
-		PendingPenetrationAdjustment = Hit.Normal * Hit.PenetrationDepth;
-	}
-}
-
-void UAlsCharacterMovementComponent::ApplyPendingPenetrationAdjustment()
-{
-	if (PendingPenetrationAdjustment.IsNearlyZero())
-	{
-		return;
-	}
-
-	ResolvePenetration(ConstrainDirectionToPlane(PendingPenetrationAdjustment),
-					   CurrentFloor.HitResult, UpdatedComponent->GetComponentQuat());
-
-	PendingPenetrationAdjustment = FVector::ZeroVector;
 }
 
 void UAlsCharacterMovementComponent::SetMovementSettings(UAlsMovementSettings* NewMovementSettings)

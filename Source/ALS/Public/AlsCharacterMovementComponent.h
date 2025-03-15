@@ -135,11 +135,8 @@ protected:
 	uint8 bInputBlocked : 1 {false};
 
 	// Valid only on locally controlled characters.
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "AlsCharacterMovement|State", Transient)
-	FRotator PreviousControlRotation{NAN, NAN, NAN};
-
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "AlsCharacterMovement|State", Transient)
-	FVector PendingPenetrationAdjustment;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient)
+	FRotator PreviousControlRotation{ForceInit};
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "AlsCharacterMovement|State", Transient)
 	FVector PrePenetrationAdjustmentVelocity;
@@ -205,11 +202,6 @@ protected:
 	virtual void SmoothClientPosition(float DeltaTime) override;
 
 	virtual void MoveAutonomous(float ClientTimeStamp, float DeltaTime, uint8 CompressedFlags, const FVector& NewAcceleration) override;
-
-private:
-	void SavePenetrationAdjustment(const FHitResult& Hit);
-
-	void ApplyPendingPenetrationAdjustment();
 
 public:
 	UFUNCTION(BlueprintCallable, Category = "ALS|Character Movement")
