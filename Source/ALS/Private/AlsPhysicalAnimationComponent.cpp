@@ -12,6 +12,8 @@
 #include "Components/SkeletalMeshComponent.h"
 #include "PhysicsEngine/PhysicalAnimationComponent.h"
 #include "PhysicsEngine/PhysicsAsset.h"
+#include "PhysicsEngine/BodySetup.h"
+#include "PhysicsEngine/SkeletalBodySetup.h"
 #include "LinkedAnimLayers/AlsRagdollingAnimInstance.h"
 #include "Settings/AlsRagdollingSettings.h"
 #include "Curves/CurveFloat.h"
