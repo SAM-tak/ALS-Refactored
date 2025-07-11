@@ -24,7 +24,7 @@ TMap<FGameplayAbilitySpecHandle, FAlsVaultingParameters> UAlsGameplayAbility_Vau
 UAlsGameplayAbility_Vaulting::UAlsGameplayAbility_Vaulting(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer)
 {
-	AbilityTags.AddTag(AlsLocomotionActionTags::Vaulting);
+	SetAssetTags(FGameplayTagContainer(AlsLocomotionActionTags::Vaulting));
 	ActivationOwnedTags.AddTag(AlsLocomotionActionTags::Vaulting);
 	CancelAbilitiesWithTag.AddTag(AlsLocomotionActionTags::Root);
 	BlockAbilitiesWithTag.AddTag(AlsLocomotionActionTags::Vaulting);

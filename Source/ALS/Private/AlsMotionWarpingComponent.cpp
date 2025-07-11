@@ -54,7 +54,7 @@ void UAlsMotionWarpingComponent::AddOrUpdateReplicatedWarpTargetFromComponent(FN
 	auto* Character{Cast<AAlsCharacter>(GetOwner())};
 	ensure(Character->GetLocalRole() > ROLE_SimulatedProxy);
 
-	AddOrUpdateWarpTargetFromComponent(WarpTargetName, Component, BoneName, bFollowComponent);
+	AddOrUpdateWarpTargetFromComponent(WarpTargetName, Component, BoneName, bFollowComponent, EWarpTargetLocationOffsetDirection::TargetsForwardVector);
 
 	if (Character->HasServerRole())
 	{
@@ -68,7 +68,7 @@ void UAlsMotionWarpingComponent::AutonomousAddOrUpdateReplicatedWarpTargetFromCo
 	auto* Character{Cast<AAlsCharacter>(GetOwner())};
 	ensure(Character->GetLocalRole() > ROLE_SimulatedProxy);
 
-	AddOrUpdateWarpTargetFromComponent(WarpTargetName, Component, BoneName, bFollowComponent);
+	AddOrUpdateWarpTargetFromComponent(WarpTargetName, Component, BoneName, bFollowComponent, EWarpTargetLocationOffsetDirection::TargetsForwardVector);
 
 	if (Character->IsCharacterSelf())
 	{
@@ -79,7 +79,7 @@ void UAlsMotionWarpingComponent::AutonomousAddOrUpdateReplicatedWarpTargetFromCo
 void UAlsMotionWarpingComponent::ServerAddOrUpdateWarpTargetFromComponent_Implementation(FName WarpTargetName, const USceneComponent* Component, FName BoneName,
 																						 bool bFollowComponent)
 {
-	AddOrUpdateWarpTargetFromComponent(WarpTargetName, Component, BoneName, bFollowComponent);
+	AddOrUpdateWarpTargetFromComponent(WarpTargetName, Component, BoneName, bFollowComponent, EWarpTargetLocationOffsetDirection::TargetsForwardVector);
 
 	MulticastAddOrUpdateWarpTargetFromComponent(WarpTargetName, Component, BoneName, bFollowComponent);
 }
@@ -90,6 +90,6 @@ void UAlsMotionWarpingComponent::MulticastAddOrUpdateWarpTargetFromComponent_Imp
 	auto* Character{Cast<AAlsCharacter>(GetOwner())};
 	if (Character->GetLocalRole() == ROLE_SimulatedProxy)
 	{
-		AddOrUpdateWarpTargetFromComponent(WarpTargetName, Component, BoneName, bFollowComponent);
+		AddOrUpdateWarpTargetFromComponent(WarpTargetName, Component, BoneName, bFollowComponent, EWarpTargetLocationOffsetDirection::TargetsForwardVector);
 	}
 }

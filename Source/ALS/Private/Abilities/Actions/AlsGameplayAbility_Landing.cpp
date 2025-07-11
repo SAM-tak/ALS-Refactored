@@ -12,8 +12,7 @@
 UAlsGameplayAbility_Landing::UAlsGameplayAbility_Landing(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer)
 {
-	AbilityTags.Reset();
-	AbilityTags.AddTag(AlsLocomotionActionTags::Landing);
+	SetAssetTags(FGameplayTagContainer(AlsLocomotionActionTags::Landing));
 	ActivationOwnedTags.Reset();
 	ActivationOwnedTags.AddTag(AlsLocomotionActionTags::Landing);
 	BlockAbilitiesWithTag.Reset();

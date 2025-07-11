@@ -22,7 +22,7 @@
 
 UAlsGameplayAbility_Ragdolling::UAlsGameplayAbility_Ragdolling(const FObjectInitializer& ObjectInitializer) : Super(ObjectInitializer)
 {
-	AbilityTags.AddTag(AlsLocomotionActionTags::BeingKnockedDown);
+	SetAssetTags(FGameplayTagContainer(AlsLocomotionActionTags::BeingKnockedDown));
 	ActivationOwnedTags.AddTag(AlsLocomotionActionTags::BeingKnockedDown);
 	CancelAbilitiesWithTag.AddTag(AlsLocomotionActionTags::Root);
 	BlockAbilitiesWithTag.AddTag(AlsLocomotionActionTags::BeingKnockedDown);
@@ -43,7 +43,7 @@ bool UAlsGameplayAbility_Ragdolling::CanActivateAbility(const FGameplayAbilitySp
 		auto* PhysicalAnimation{Character->GetPhysicalAnimation()};
 		if (IsValid(PhysicalAnimation))
 		{
-			const auto& Tag{AbilityTags.First()};
+			const auto& Tag{GetAssetTags().First()};
 			if (PhysicalAnimation->HasRagdollingSettings(Tag))
 			{
 				return true;

@@ -14,7 +14,7 @@
 UAlsGameplayAbility_Rolling::UAlsGameplayAbility_Rolling(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer)
 {
-	AbilityTags.AddTag(AlsLocomotionActionTags::Rolling);
+	SetAssetTags(FGameplayTagContainer(AlsLocomotionActionTags::Rolling));
 	ActivationOwnedTags.AddTag(AlsLocomotionActionTags::Rolling);
 	CancelAbilitiesWithTag.AddTag(AlsLocomotionActionTags::Root);
 	BlockAbilitiesWithTag.AddTag(AlsLocomotionActionTags::Rolling);
