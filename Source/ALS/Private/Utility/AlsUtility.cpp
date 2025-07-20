@@ -110,7 +110,7 @@ FTransform UAlsUtility::ExtractRootTransformFromMontage(const UAnimMontage* Mont
 		return FTransform::Identity;
 	}
 
-	return Sequence->ExtractRootTrackTransform(Segment->ConvertTrackPosToAnimPos(Time), nullptr);
+	return Sequence->ExtractRootTrackTransform(FAnimExtractContext((double)Segment->ConvertTrackPosToAnimPos(Time)), nullptr);
 }
 
 FTransform UAlsUtility::ExtractLastRootTransformFromMontage(const UAnimMontage* Montage)
@@ -131,7 +131,7 @@ FTransform UAlsUtility::ExtractLastRootTransformFromMontage(const UAnimMontage* 
 		return FTransform::Identity;
 	}
 
-	return Sequence->ExtractRootTrackTransform(Segment.GetEndPos(), nullptr);
+	return Sequence->ExtractRootTrackTransform(FAnimExtractContext((double)Segment.GetEndPos()), nullptr);
 }
 
 bool UAlsUtility::ShouldDisplayDebugForActor(const AActor* Actor, const FName& DisplayName)

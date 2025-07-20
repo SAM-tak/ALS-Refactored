@@ -54,11 +54,8 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Settings|GameplayTag")
 	TMap<FGameplayTag, FGameplayTag> DesiredToActualMap{
-		{AlsDesiredViewModeTags::FirstPerson, AlsViewModeTags::FirstPerson},
-		{AlsDesiredViewModeTags::ThirdPerson, AlsViewModeTags::ThirdPerson},
 		{AlsDesiredRotationModeTags::VelocityDirection, AlsRotationModeTags::VelocityDirection},
 		{AlsDesiredRotationModeTags::ViewDirection, AlsRotationModeTags::ViewDirection},
-		{AlsDesiredRotationModeTags::Aiming, AlsRotationModeTags::Aiming},
 		{AlsDesiredStanceTags::Standing, AlsStanceTags::Standing},
 		{AlsDesiredStanceTags::Crouching, AlsStanceTags::Crouching},
 		{AlsDesiredStanceTags::LyingFront, AlsStanceTags::LyingFront},

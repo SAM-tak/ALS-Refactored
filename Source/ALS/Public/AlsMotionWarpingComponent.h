@@ -24,7 +24,7 @@ struct ALS_API FAlsMotionWarpingTargetSmall
 
 	/** When the warp target is created from a component this stores the rotation of the component at the time of creation, otherwise its the rotation supplied by the user */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Defaults")
-	FRotator Rotation;
+	FRotator Rotation{ForceInitToZero};
 
 	/** Optional component used to calculate the final target transform */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Defaults")

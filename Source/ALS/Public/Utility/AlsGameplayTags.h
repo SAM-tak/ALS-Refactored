@@ -12,19 +12,11 @@ namespace AlsDesiredStateTags
 	ALS_API UE_DECLARE_GAMEPLAY_TAG_EXTERN(Root)
 }
 
-namespace AlsDesiredViewModeTags
-{
-	ALS_API UE_DECLARE_GAMEPLAY_TAG_EXTERN(Root)
-	ALS_API UE_DECLARE_GAMEPLAY_TAG_EXTERN(FirstPerson)
-	ALS_API UE_DECLARE_GAMEPLAY_TAG_EXTERN(ThirdPerson)
-}
-
 namespace AlsDesiredRotationModeTags
 {
 	ALS_API UE_DECLARE_GAMEPLAY_TAG_EXTERN(Root)
 	ALS_API UE_DECLARE_GAMEPLAY_TAG_EXTERN(VelocityDirection)
 	ALS_API UE_DECLARE_GAMEPLAY_TAG_EXTERN(ViewDirection)
-	ALS_API UE_DECLARE_GAMEPLAY_TAG_EXTERN(Aiming)
 }
 
 namespace AlsDesiredStanceTags

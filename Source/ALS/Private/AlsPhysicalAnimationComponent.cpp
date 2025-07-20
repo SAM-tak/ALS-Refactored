@@ -12,6 +12,8 @@
 #include "Components/SkeletalMeshComponent.h"
 #include "PhysicsEngine/PhysicalAnimationComponent.h"
 #include "PhysicsEngine/PhysicsAsset.h"
+#include "PhysicsEngine/BodySetup.h"
+#include "PhysicsEngine/SkeletalBodySetup.h"
 #include "LinkedAnimLayers/AlsRagdollingAnimInstance.h"
 #include "Settings/AlsRagdollingSettings.h"
 #include "Curves/CurveFloat.h"
@@ -238,6 +240,9 @@ void UAlsPhysicalAnimationComponent::RefreshBodyState(float DeltaTime)
 		Mesh->SetCollisionObjectType(ECC_PhysicsBody);
 		Mesh->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
 		bActive = true;
+
+		OriginalUpdateMode = Mesh->PhysicsTransformUpdateMode;
+		Mesh->PhysicsTransformUpdateMode = EPhysicsTransformUpdateMode::ComponentTransformIsKinematic; // avoid feedback loop
 	}
 
 	if (!bActiveAny && bActive)
@@ -245,6 +250,7 @@ void UAlsPhysicalAnimationComponent::RefreshBodyState(float DeltaTime)
 		Mesh->SetCollisionObjectType(PrevCollisionObjectType);
 		Mesh->SetCollisionEnabled(PrevCollisionEnabled);
 		bActive = false;
+		Mesh->PhysicsTransformUpdateMode = OriginalUpdateMode;
 	}
 }
 

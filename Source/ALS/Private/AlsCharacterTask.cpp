@@ -122,3 +122,8 @@ void UAlsCharacterTask::UnbindInput(UInputComponent* InputComponent)
 	}
 	bInputBinded = false;
 }
+
+UWorld* UAlsCharacterTask::GetWorld() const
+{
+	return Character.IsValid() ? Character->GetWorld() : nullptr;
+}

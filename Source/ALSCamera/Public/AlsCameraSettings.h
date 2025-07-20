@@ -3,6 +3,7 @@
 #include "Engine/DataAsset.h"
 #include "Engine/Scene.h"
 #include "Utility/AlsConstants.h"
+#include "Utility/AlsCameraGameplayTags.h"
 #include "AlsCameraSettings.generated.h"
 
 class UCurveFloat;
@@ -81,7 +82,7 @@ struct ALSCAMERA_API FAlsThirdPersonCameraSettings
 
 	// Initial Value
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS")
-	uint8 bRightShoulder : 1 {true};
+	FGameplayTag ShoulderMode{AlsCameraShoulderModeTags::Right};
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS", Meta = (InlineEditConditionToggle))
 	uint8 bEnableTraceDistanceSmoothing : 1 {true};

@@ -24,7 +24,7 @@ TMap<FGameplayAbilitySpecHandle, FAlsVaultingParameters> UAlsGameplayAbility_Vau
 UAlsGameplayAbility_Vaulting::UAlsGameplayAbility_Vaulting(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer)
 {
-	AbilityTags.AddTag(AlsLocomotionActionTags::Vaulting);
+	SetAssetTags(FGameplayTagContainer(AlsLocomotionActionTags::Vaulting));
 	ActivationOwnedTags.AddTag(AlsLocomotionActionTags::Vaulting);
 	CancelAbilitiesWithTag.AddTag(AlsLocomotionActionTags::Root);
 	BlockAbilitiesWithTag.AddTag(AlsLocomotionActionTags::Vaulting);
@@ -193,37 +193,6 @@ bool UAlsGameplayAbility_Vaulting::CanVault(const FGameplayAbilitySpecHandle Han
 	                            VaultingTraceChannel, FCollisionShape::MakeSphere(TraceCapsuleRadius),
 	                            {DownwardTraceTag, false, Character}, VaultingTraceResponses);
 
-	const auto SlopeAngleCos{UE_REAL_TO_FLOAT(DownwardTraceHit.ImpactNormal.Z)};
-
-	// The approximate slope angle is used in situations where the normal slope angle cannot convey
-	// the true nature of the surface slope, for example, for a 45 degree staircase the slope
-	// angle will always be 90 degrees, while the approximate slope angle will be ~45 degrees.
-
-	auto ApproximateSlopeNormal{DownwardTraceHit.Location - DownwardTraceHit.ImpactPoint};
-	ApproximateSlopeNormal.Normalize();
-
-	const auto ApproximateSlopeAngleCos{UE_REAL_TO_FLOAT(ApproximateSlopeNormal.Z)};
-
-	if (SlopeAngleCos < SlopeAngleThresholdCos ||
-	    ApproximateSlopeAngleCos < SlopeAngleThresholdCos ||
-	    !Character->GetCharacterMovement()->IsWalkable(DownwardTraceHit))
-	{
-#if ENABLE_DRAW_DEBUG
-		if (bDisplayDebug)
-		{
-			UAlsUtility::DrawDebugSweepSingleCapsuleAlternative(World, ForwardTraceStart, ForwardTraceEnd, TraceCapsuleRadius,
-			                                                    ForwardTraceCapsuleHalfHeight, true, ForwardTraceHit, {0.0f, 0.25f, 1.0f},
-			                                                    {0.0f, 0.75f, 1.0f}, TraceSettings.bDrawFailedTraces ? 5.0f : 0.0f);
-
-			UAlsUtility::DrawDebugSweepSingleSphere(World, DownwardTraceStart, DownwardTraceEnd, TraceCapsuleRadius,
-			                                        false, DownwardTraceHit, {0.25f, 0.0f, 1.0f}, {0.75f, 0.0f, 1.0f},
-			                                        TraceSettings.bDrawFailedTraces ? 7.5f : 0.0f);
-		}
-#endif
-
-		return false;
-	}
-
 	// Check that there is enough free space for the capsule at the target location.
 
 	static const FName TargetLocationTraceTag{FString::Printf(TEXT("%hs (Target Location Overlap)"), __FUNCTION__)};
@@ -237,8 +206,8 @@ bool UAlsGameplayAbility_Vaulting::CanVault(const FGameplayAbilitySpecHandle Han
 	const FVector TargetCapsuleLocation{TargetLocation.X, TargetLocation.Y, TargetLocation.Z + CapsuleHalfHeight};
 
 	if (World->OverlapBlockingTestByChannel(TargetCapsuleLocation, FQuat::Identity, VaultingTraceChannel,
-	                                             FCollisionShape::MakeCapsule(CapsuleRadius, CapsuleHalfHeight),
-	                                             {TargetLocationTraceTag, false, Character}, VaultingTraceResponses))
+	                                        FCollisionShape::MakeCapsule(CapsuleRadius, CapsuleHalfHeight),
+	                                        {TargetLocationTraceTag, false, Character}, VaultingTraceResponses))
 	{
 #if ENABLE_DRAW_DEBUG
 		if (bDisplayDebug)
@@ -556,11 +525,7 @@ bool UAlsGameplayAbility_Vaulting::CanVaultByParameter_Implementation(const FGam
 #if WITH_EDITOR
 void UAlsGameplayAbility_Vaulting::PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent)
 {
-	if (PropertyChangedEvent.GetPropertyName() == GET_MEMBER_NAME_CHECKED(ThisClass, SlopeAngleThreshold))
-	{
-		SlopeAngleThresholdCos = FMath::Cos(FMath::DegreesToRadians(SlopeAngleThreshold));
-	}
-	else if (PropertyChangedEvent.GetPropertyName() != GET_MEMBER_NAME_CHECKED(ThisClass, VaultingTraceResponseChannels))
+	if (PropertyChangedEvent.GetPropertyName() != GET_MEMBER_NAME_CHECKED(ThisClass, VaultingTraceResponseChannels))
 	{
 		return;
 	}

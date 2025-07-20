@@ -7,24 +7,24 @@ public class ALSEditor : ModuleRules
 		PCHUsage = PCHUsageMode.UseExplicitOrSharedPCHs;
 		IncludeOrderVersion = EngineIncludeOrderVersion.Latest;
 
-		bEnableNonInlinedGenCppWarnings = true;
+		CppCompileWarningSettings.NonInlinedGenCppWarningLevel = WarningLevel.Warning;
 
-		PublicDependencyModuleNames.AddRange(new[]
-		{
+		PublicDependencyModuleNames.AddRange(
+		[
 			"Core", "CoreUObject", "Engine", "AnimationModifiers", "AnimationBlueprintLibrary", "ALS"
-		});
+		]);
 
 		if (Target.bBuildEditor)
 		{
-			PublicDependencyModuleNames.AddRange(new[]
-			{
+			PublicDependencyModuleNames.AddRange(
+			[
 				"AnimGraph"
-			});
+			]);
 
-			PrivateDependencyModuleNames.AddRange(new[]
-			{
+			PrivateDependencyModuleNames.AddRange(
+			[
 				"BlueprintGraph", "Slate", "SlateCore"
-			});
+			]);
 		}
 	}
 }

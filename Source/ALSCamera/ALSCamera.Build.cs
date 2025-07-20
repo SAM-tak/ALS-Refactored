@@ -7,16 +7,16 @@ public class ALSCamera : ModuleRules
 		PCHUsage = PCHUsageMode.UseExplicitOrSharedPCHs;
 		IncludeOrderVersion = EngineIncludeOrderVersion.Latest;
 
-		bEnableNonInlinedGenCppWarnings = true;
+		CppCompileWarningSettings.NonInlinedGenCppWarningLevel = WarningLevel.Warning;
 
-		PublicDependencyModuleNames.AddRange(new[]
-		{
+		PublicDependencyModuleNames.AddRange(
+		[
 			"Core", "CoreUObject", "Engine", "EngineSettings", "GameplayTags", "ALS"
-		});
+		]);
 
-		PrivateDependencyModuleNames.AddRange(new[]
-		{
-			"EngineSettings", "GameplayAbilities"
-        });
+		PrivateDependencyModuleNames.AddRange(
+		[
+			"EngineSettings", "GameplayAbilities", "NetCore"
+		]);
 	}
 }

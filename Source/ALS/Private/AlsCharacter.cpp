@@ -112,10 +112,6 @@ void AAlsCharacter::GetOwnedGameplayTags(FGameplayTagContainer& TagContainer) co
 	{
 		TagContainer.AddLeafTag(DesiredGait);
 	}
-	if (DesiredViewMode.IsValid())
-	{
-		TagContainer.AddLeafTag(DesiredViewMode);
-	}
 	if (LocomotionMode.IsValid())
 	{
 		TagContainer.AddLeafTag(LocomotionMode);
@@ -135,6 +131,10 @@ void AAlsCharacter::GetOwnedGameplayTags(FGameplayTagContainer& TagContainer) co
 	if (ViewMode.IsValid())
 	{
 		TagContainer.AddLeafTag(ViewMode);
+	}
+	if (OverlayMode.IsValid())
+	{
+		TagContainer.AddLeafTag(OverlayMode);
 	}
 }
 
@@ -167,12 +167,10 @@ void AAlsCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLif
 	DOREPLIFETIME_WITH_PARAMS_FAST(ThisClass, DesiredStance, Parameters)
 	DOREPLIFETIME_WITH_PARAMS_FAST(ThisClass, DesiredGait, Parameters)
 	DOREPLIFETIME_WITH_PARAMS_FAST(ThisClass, DesiredRotationMode, Parameters)
-	DOREPLIFETIME_WITH_PARAMS_FAST(ThisClass, DesiredViewMode, Parameters)
 	DOREPLIFETIME_WITH_PARAMS_FAST(ThisClass, OverlayMode, Parameters)
 	DOREPLIFETIME_WITH_PARAMS_FAST(ThisClass, ReplicatedViewRotation, Parameters)
 	DOREPLIFETIME_WITH_PARAMS_FAST(ThisClass, InputDirection, Parameters)
 	DOREPLIFETIME_WITH_PARAMS_FAST(ThisClass, DesiredVelocityYawAngle, Parameters)
-	DOREPLIFETIME_WITH_PARAMS_FAST(ThisClass, CapsuleUpdateSpeed, Parameters)
 	DOREPLIFETIME_WITH_PARAMS_FAST(ThisClass, bIsLied, Parameters)
 }
 
@@ -183,12 +181,8 @@ void AAlsCharacter::PreRegisterAllComponents()
 
 	if (IsValid(Settings))
 	{
-		ViewMode = DesiredToActual(DesiredViewMode);
-
-		RotationMode = DesiredToActual(GetDesiredRotationMode());
-
+		RotationMode = DesiredToActual(DesiredRotationMode);
 		Stance = DesiredToActual(DesiredStance);
-
 		Gait = DesiredToActual(DesiredGait);
 	}
 
@@ -592,18 +586,6 @@ FGameplayTag AAlsCharacter::GetLocomotionAction() const
 	return TempTagContainer.Filter(Settings->ActionTags).First();
 }
 
-void AAlsCharacter::SetDesiredViewMode(const FGameplayTag& NewDesiredViewMode)
-{
-	if (DesiredViewMode == NewDesiredViewMode || GetLocalRole() < ROLE_AutonomousProxy)
-	{
-		return;
-	}
-
-	DesiredViewMode = NewDesiredViewMode;
-
-	MARK_PROPERTY_DIRTY_FROM_NAME(ThisClass, DesiredViewMode, this)
-}
-
 void AAlsCharacter::SetViewMode(const FGameplayTag& NewViewMode)
 {
 	if (ViewMode == NewViewMode)
@@ -619,25 +601,6 @@ void AAlsCharacter::SetViewMode(const FGameplayTag& NewViewMode)
 }
 
 void AAlsCharacter::OnViewModeChanged_Implementation(const FGameplayTag& PreviousRotationMode) {}
-
-void AAlsCharacter::SetRightShoulder(const bool bNewRightShoulder)
-{
-	if (bNewRightShoulder)
-	{
-		AbilitySystem->ResetGameplayTag(AlsStateFlagTags::LeftShoulder, true);
-	}
-	else
-	{
-		AbilitySystem->SetGameplayTag(AlsStateFlagTags::LeftShoulder, true);
-	}
-}
-
-bool AAlsCharacter::ToggleShoulder()
-{
-	bool NewShoulder{!IsRightShoulder()};
-	SetRightShoulder(NewShoulder);
-	return NewShoulder;
-}
 
 void AAlsCharacter::OnMovementModeChanged(const EMovementMode PreviousMovementMode, const uint8 PreviousCustomMode)
 {
@@ -708,20 +671,6 @@ void AAlsCharacter::NotifyLocomotionModeChanged(const FGameplayTag& PreviousLoco
 
 void AAlsCharacter::OnLocomotionModeChanged_Implementation(const FGameplayTag& PreviousLocomotionMode) {}
 
-float AAlsCharacter::GetAimAmount() const
-{
-	return AnimationInstance.IsValid() ? AnimationInstance->GetCurveValueClamped01(UAlsConstants::AllowAimingCurveName()) : 0.0f;
-}
-
-bool AAlsCharacter::HasSight_Implementation() const
-{
-	return false;
-}
-
-void AAlsCharacter::GetSightLocAndRot_Implementation(FVector& Loc, FRotator& Rot) const
-{
-}
-
 void AAlsCharacter::SetDesiredRotationMode(const FGameplayTag& NewDesiredRotationMode)
 {
 	if (DesiredRotationMode == NewDesiredRotationMode || GetLocalRole() < ROLE_AutonomousProxy)
@@ -754,8 +703,8 @@ void AAlsCharacter::OnRotationModeChanged_Implementation(const FGameplayTag& Pre
 
 void AAlsCharacter::RefreshRotationMode()
 {
-	bool bSprinting{GetGait() == AlsGaitTags::Sprinting};
-	bool bAiming{HasMatchingGameplayTag(AlsAimingModeTags::Root) || GetDesiredRotationMode() == AlsDesiredRotationModeTags::Aiming};
+	bool bSprinting{Gait == AlsGaitTags::Sprinting};
+	bool bAiming{HasMatchingGameplayTag(AlsAimingModeTags::Root)};
 
 	if (ViewMode == AlsViewModeTags::FirstPerson)
 	{
@@ -970,11 +919,6 @@ void AAlsCharacter::OnStanceChanged_Implementation(const FGameplayTag& PreviousS
 
 void AAlsCharacter::SetDesiredGait(const FGameplayTag& NewDesiredGait)
 {
-	SetDesiredGait(NewDesiredGait, true);
-}
-
-void AAlsCharacter::SetDesiredGait(const FGameplayTag& NewDesiredGait, const bool bSendRpc)
-{
 	if (DesiredGait == NewDesiredGait || GetLocalRole() < ROLE_AutonomousProxy)
 	{
 		return;
@@ -984,27 +928,15 @@ void AAlsCharacter::SetDesiredGait(const FGameplayTag& NewDesiredGait, const boo
 
 	MARK_PROPERTY_DIRTY_FROM_NAME(ThisClass, DesiredGait, this)
 
-	if (bSendRpc)
+	if (GetLocalRole() == ROLE_AutonomousProxy)
 	{
-		if (GetLocalRole() >= ROLE_Authority)
-		{
-			ClientSetDesiredGait(DesiredGait);
-		}
-		else
-		{
-			ServerSetDesiredGait(DesiredGait);
-		}
+		ServerSetDesiredGait(DesiredGait);
 	}
-}
-
-void AAlsCharacter::ClientSetDesiredGait_Implementation(const FGameplayTag& NewDesiredGait)
-{
-	SetDesiredGait(NewDesiredGait, false);
 }
 
 void AAlsCharacter::ServerSetDesiredGait_Implementation(const FGameplayTag& NewDesiredGait)
 {
-	SetDesiredGait(NewDesiredGait, false);
+	SetDesiredGait(NewDesiredGait);
 }
 
 void AAlsCharacter::SetGait(const FGameplayTag& NewGait)
@@ -1901,6 +1833,20 @@ void AAlsCharacter::RefreshTargetYawAngle(const float TargetYawAngle)
 void AAlsCharacter::RefreshViewRelativeTargetYawAngle()
 {
 	LocomotionState.ViewRelativeTargetYawAngle = FRotator3f::NormalizeAxis(UE_REAL_TO_FLOAT(ViewState.Rotation.Yaw - LocomotionState.TargetYawAngle));
+}
+
+float AAlsCharacter::GetAimAmount() const
+{
+	return AnimationInstance.IsValid() ? AnimationInstance->GetCurveValueClamped01(UAlsConstants::AllowAimingCurveName()) : 0.0f;
+}
+
+bool AAlsCharacter::HasSight_Implementation() const
+{
+	return false;
+}
+
+void AAlsCharacter::GetSightLocAndRot_Implementation(FVector& Loc, FRotator& Rot) const
+{
 }
 
 const FGameplayTag& AAlsCharacter::DesiredToActual(const FGameplayTag& SourceTag) const

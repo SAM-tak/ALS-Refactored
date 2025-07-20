@@ -25,7 +25,7 @@ TMap<FGameplayAbilitySpecHandle, FAlsMantlingParameters> UAlsGameplayAbility_Man
 UAlsGameplayAbility_Mantling::UAlsGameplayAbility_Mantling(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer)
 {
-	AbilityTags.AddTag(AlsLocomotionActionTags::Mantling);
+	SetAssetTags(FGameplayTagContainer(AlsLocomotionActionTags::Mantling));
 	ActivationOwnedTags.AddTag(AlsLocomotionActionTags::Mantling);
 	CancelAbilitiesWithTag.AddTag(AlsLocomotionActionTags::Root);
 	BlockAbilitiesWithTag.AddTag(AlsLocomotionActionTags::Mantling);

@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 
 #include "Misc/AssertionMacros.h"
 
@@ -14,32 +14,10 @@
 
 #if DO_ENSURE && !USING_CODE_ANALYSIS
 
-namespace AlsEnsure
-{
-	ALS_API bool UE_DEBUG_SECTION VARARGS Execute(bool& bExecuted, bool bEnsureAlways, const ANSICHAR* Expression,
-	                                              const TCHAR* StaticMessage, const TCHAR* Format, ...);
-}
-
-#define ALS_ENSURE_IMPLEMENTATION(Capture, bEnsureAlways, Expression, Format, ...) \
-	(LIKELY(Expression) || [Capture]() UE_DEBUG_SECTION \
-	{ \
-		static constexpr auto StaticMessage{TEXT("Ensure failed: " #Expression ", File: " __FILE__ ", Line: " ALS_STRINGIFY(__LINE__) ".")}; \
-		static auto bExecuted{false}; \
-		\
-		FValidateArgsInternal(__VA_ARGS__); \
-		\
-		if (AlsEnsure::Execute(bExecuted, bEnsureAlways, #Expression, StaticMessage, Format, ##__VA_ARGS__)) \
-		{ \
-			PLATFORM_BREAK(); \
-		} \
-		\
-		return false; \
-	}())
-
-#define ALS_ENSURE(Expression) ALS_ENSURE_IMPLEMENTATION( , false, Expression, TEXT(""))
-#define ALS_ENSURE_MESSAGE(Expression, Format, ...) ALS_ENSURE_IMPLEMENTATION(&, false, Expression, Format, ##__VA_ARGS__)
-#define ALS_ENSURE_ALWAYS(Expression) ALS_ENSURE_IMPLEMENTATION( , true, Expression, TEXT(""))
-#define ALS_ENSURE_ALWAYS_MESSAGE(Expression, Format, ...) ALS_ENSURE_IMPLEMENTATION(&, true, Expression, Format, ##__VA_ARGS__)
+#define ALS_ENSURE(Expression) ensure(Expression)
+#define ALS_ENSURE_MESSAGE(Expression, Format, ...) ensureMsgf(Expression, Format, ##__VA_ARGS__)
+#define ALS_ENSURE_ALWAYS(Expression) ensureAlways(Expression)
+#define ALS_ENSURE_ALWAYS_MESSAGE(Expression, Format, ...) ensureAlwaysMsgf(Expression, Format, ##__VA_ARGS__)
 
 #else
 

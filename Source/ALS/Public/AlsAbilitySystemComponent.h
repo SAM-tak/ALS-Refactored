@@ -25,6 +25,20 @@ protected:
 	UFUNCTION(BlueprintNativeEvent, Category = "ALS|AbilitySystem")
 	void OnRefresh(float DeltaTime);
 
+	UFUNCTION(BlueprintCallable, Category = "ALS|AbilitySystem", DisplayName = "CancelAbilityByTags",
+			  Meta = (ScriptName = "CancelAbilityByTags", AutoCreateRefTerm = "Tags"))
+	void K2_CancelAbilityByTags(const FGameplayTagContainer& Tags)
+	{
+		CancelAbilities(&Tags);
+	}
+
+	UFUNCTION(BlueprintCallable, Category = "ALS|AbilitySystem", DisplayName = "CancelAbilityBySingleTag",
+			  Meta = (ScriptName = "CancelAbilityBySingleTag", AutoCreateRefTerm = "Tag"))
+	void K2_CancelAbilityBySingleTag(const FGameplayTag& Tag)
+	{
+		CancelAbilitiesBySingleTag(Tag);
+	}
+
 	// Utility
 
 public:
@@ -38,26 +52,6 @@ public:
 	{
 		return TryActivateAbilitiesByTag(FGameplayTagContainer{Tag}, bAllowRemoteActivation);
 	}
-
-	void SetGameplayTag(const FGameplayTag& Tag, bool bShouldReplicate = false);
-
-	void ResetGameplayTag(const FGameplayTag& Tag, bool bShouldReplicate = false);
-
-	void AddGameplayTag(const FGameplayTag& Tag, bool bShouldReplicate = false);
-
-	void SubtractGameplayTag(const FGameplayTag& Tag, bool bShouldReplicate = false);
-
-	UFUNCTION(BlueprintCallable, Category = "ALS|Ability", Meta = (DisplayName = "Set GameplayTag", ScriptName = "SetGameplayTag"))
-	void K2_SetGameplayTag(FGameplayTag Tag, bool bShouldReplicate);
-
-	UFUNCTION(BlueprintCallable, Category = "ALS|Ability", Meta = (DisplayName = "Reset GameplayTag", ScriptName = "ResetGameplayTag"))
-	void K2_ResetGameplayTag(FGameplayTag Tag, bool bShouldReplicate);
-
-	UFUNCTION(BlueprintCallable, Category = "ALS|Ability", Meta = (DisplayName = "Add GameplayTag", ScriptName = "AddGameplayTag"))
-	void K2_AddGameplayTag(FGameplayTag Tag, bool bShouldReplicate);
-
-	UFUNCTION(BlueprintCallable, Category = "ALS|Ability", Meta = (DisplayName = "Subtract GameplayTag", ScriptName = "SubtractGameplayTag"))
-	void K2_SubtractGameplayTag(FGameplayTag Tag, bool bShouldReplicate);
 
 	// Input binding
 

@@ -9,7 +9,10 @@
 #include "Camera/CameraComponent.h"
 #include "GameFramework/WorldSettings.h"
 #include "Curves/CurveFloat.h"
+#include "Engine/OverlapResult.h"
 #include "Misc/UObjectToken.h"
+#include "Net/UnrealNetwork.h"
+#include "Net/Core/PushModel/PushModel.h"
 #include "Utility/AlsCameraConstants.h"
 #include "Utility/AlsMacros.h"
 #include "Utility/AlsMath.h"
@@ -27,10 +30,23 @@ UAlsCameraMovementComponent::UAlsCameraMovementComponent(const FObjectInitialize
 	bTickInEditor = false;
 	bHiddenInGame = true;
 
+	SetIsReplicatedByDefault(true);
 	SetGenerateOverlapEvents(false);
 	SetCanEverAffectNavigation(false);
 	SetAllowClothActors(false);
 	SetCastShadow(false);
+}
+
+void UAlsCameraMovementComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+
+	FDoRepLifetimeParams Parameters;
+	Parameters.bIsPushBased = true;
+
+	Parameters.Condition = COND_SkipOwner;
+	DOREPLIFETIME_WITH_PARAMS_FAST(ThisClass, ConfirmedDesiredViewMode, Parameters)
+	DOREPLIFETIME_WITH_PARAMS_FAST(ThisClass, ShoulderMode, Parameters)
 }
 
 void UAlsCameraMovementComponent::OnRegister()
@@ -65,14 +81,17 @@ void UAlsCameraMovementComponent::OnRegister()
 
 void UAlsCameraMovementComponent::OnControllerChanged_Implementation(AController* PreviousController, AController* NewController)
 {
-	auto* NewPlayer{Cast<APlayerController>(NewController)};
-	if (IsValid(NewPlayer))
+	if (!bAutoActivate)
 	{
-		Activate(true);
-	}
-	else
-	{
-		Deactivate();
+		auto* NewPlayer{Cast<APlayerController>(NewController)};
+		if (IsValid(NewPlayer))
+		{
+			Activate(true);
+		}
+		else
+		{
+			Deactivate();
+		}
 	}
 }
 
@@ -80,7 +99,10 @@ void UAlsCameraMovementComponent::Activate(const bool bReset)
 {
 	Super::Activate(bReset);
 #if !UE_BUILD_SHIPPING
-	Character->OnDisplayDebug.AddUObject(this, &ThisClass::DisplayDebug);
+	if (Character.IsValid())
+	{
+		Character->OnDisplayDebug.AddUObject(this, &ThisClass::DisplayDebug);
+	}
 #endif
 	SetComponentTickEnabled(true);
 
@@ -95,6 +117,8 @@ void UAlsCameraMovementComponent::Activate(const bool bReset)
 		return;
 	}
 
+	PreviousShoulderMode = ShoulderMode;
+
 	TickCamera(0.0f, false);
 }
 
@@ -107,7 +131,10 @@ void UAlsCameraMovementComponent::Deactivate()
 		TargetCamera->Deactivate();
 	}
 #if !UE_BUILD_SHIPPING
-	Character->OnDisplayDebug.RemoveAll(this);
+	if (Character.IsValid())
+	{
+		Character->OnDisplayDebug.RemoveAll(this);
+	}
 #endif
 	Super::Deactivate();
 }
@@ -147,9 +174,9 @@ void UAlsCameraMovementComponent::BeginPlay()
 			Character->SetViewMode(AlsViewModeTags::ThirdPerson);
 		}
 	}
-	bPreviousRightShoulder = Settings->ThirdPerson.bRightShoulder;
-	Character->SetRightShoulder(Settings->ThirdPerson.bRightShoulder);
-	ConfirmedDesiredViewMode = Character->GetDesiredViewMode();
+	PreviousShoulderMode = ShoulderMode = Settings->ThirdPerson.ShoulderMode;
+	PreviousConfirmedDesiredViewMode = DesiredViewMode;
+	SetConfirmedDesiredViewMode(DesiredViewMode);
 }
 
 void UAlsCameraMovementComponent::TickComponent(float DeltaTime, const ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
@@ -234,7 +261,7 @@ FVector UAlsCameraMovementComponent::GetThirdPersonPivotLocation() const
 
 FVector UAlsCameraMovementComponent::GetThirdPersonTraceStartLocation() const
 {
-	return Character->GetMesh()->GetSocketLocation(Character->IsRightShoulder()
+	return Character->GetMesh()->GetSocketLocation(ShoulderMode == AlsCameraShoulderModeTags::Right
 		                                           ? Settings->ThirdPerson.TraceShoulderRightSocketName
 		                                           : Settings->ThirdPerson.TraceShoulderLeftSocketName);
 }
@@ -264,18 +291,20 @@ void UAlsCameraMovementComponent::TickCamera(const float DeltaTime, bool bAllowL
 
 	// Refresh desired view mode information.
 
-	if (ViewModeChangeBlockTime > 0.f)
+	if (Character->IsCharacterSelf())
 	{
-		ViewModeChangeBlockTime -= DeltaTime;
-	}
-	else
-	{
-		auto& CurrentDesiredViewMode = Character->GetDesiredViewMode();
-		if (CurrentDesiredViewMode != ConfirmedDesiredViewMode)
+		if (ViewModeChangeBlockTime > 0.f)
 		{
-			ViewModeChangeBlockTime = Settings->ViewModeChangeBlockTime;
+			ViewModeChangeBlockTime -= DeltaTime;
 		}
-		ConfirmedDesiredViewMode = CurrentDesiredViewMode;
+		else
+		{
+			if (DesiredViewMode != ConfirmedDesiredViewMode)
+			{
+				ViewModeChangeBlockTime = Settings->ViewModeChangeBlockTime;
+			}
+			SetConfirmedDesiredViewMode(DesiredViewMode);
+		}
 	}
 
 	// Refresh movement base.
@@ -428,11 +457,11 @@ void UAlsCameraMovementComponent::TickCamera(const float DeltaTime, bool bAllowL
 
 	const auto CameraResultLocation{CalculateCameraTrace(CameraTargetLocation, PivotOffset, DeltaTime, bAllowLag)};
 
-	if (PreviousDesiredViewMode != ConfirmedDesiredViewMode)
+	if (PreviousConfirmedDesiredViewMode != ConfirmedDesiredViewMode)
 	{
 		// Set aim point correction during change FPP/TPP
 		auto FocusLocation{GetCurrentFocusLocation()};
-		if (PreviousDesiredViewMode == AlsDesiredViewModeTags::FirstPerson)
+		if (PreviousConfirmedDesiredViewMode == AlsCameraViewModeTags::FirstPerson)
 		{
 			// FPP -> TPP
 			auto TPPCameraLocation{FVector::PointPlaneProject(CameraResultLocation, PivotLocation, -CameraRotation.Vector())};
@@ -454,7 +483,7 @@ void UAlsCameraMovementComponent::TickCamera(const float DeltaTime, bool bAllowL
 			}
 #endif
 		}
-		else if (PreviousDesiredViewMode == AlsDesiredViewModeTags::ThirdPerson)
+		else if (PreviousConfirmedDesiredViewMode == AlsCameraViewModeTags::ThirdPerson)
 		{
 			// TPP -> FPP
 			auto FocalRotation{(FocusLocation - GetEyeCameraLocation()).Rotation()};
@@ -468,11 +497,10 @@ void UAlsCameraMovementComponent::TickCamera(const float DeltaTime, bool bAllowL
 			}
 #endif
 		}
-		PreviousDesiredViewMode = ConfirmedDesiredViewMode;
+		PreviousConfirmedDesiredViewMode = ConfirmedDesiredViewMode;
 	}
 
-	bool bRightShoulder{Character->IsRightShoulder()};
-	if (bPreviousRightShoulder != bRightShoulder)
+	if (PreviousShoulderMode != ShoulderMode)
 	{
 		if (Character->GetViewMode() == AlsViewModeTags::ThirdPerson && Character->GetRotationMode() != AlsRotationModeTags::VelocityDirection &&
 			bIsFocusPawn)
@@ -492,7 +520,7 @@ void UAlsCameraMovementComponent::TickCamera(const float DeltaTime, bool bAllowL
 			}
 #endif
 		}
-		bPreviousRightShoulder = bRightShoulder;
+		PreviousShoulderMode = ShoulderMode;
 	}
 
 	if (bInAutoFPP)
@@ -536,8 +564,7 @@ void UAlsCameraMovementComponent::TickCamera(const float DeltaTime, bool bAllowL
 	RefreshTanHalfFov(DeltaTime);
 }
 
-FRotator UAlsCameraMovementComponent::CalculateCameraRotation(const FRotator& CameraTargetRotation,
-																  const float DeltaTime, const bool bAllowLag) const
+FRotator UAlsCameraMovementComponent::CalculateCameraRotation(const FRotator& CameraTargetRotation, const float DeltaTime, const bool bAllowLag) const
 {
 	if (!bAllowLag)
 	{
@@ -856,22 +883,31 @@ void UAlsCameraMovementComponent::UpdateAimingFirstPersonCamera(float AimingAmou
 		FVector SightLoc;
 		FRotator SightRot;
 		Character->GetSightLocAndRot(SightLoc, SightRot);
+		SightRot.Roll = TargetRotation.Roll;
 		SightLoc = FVector::PointPlaneProject(SightLoc, EyeCameraLocation, SightRot.Vector());
 		if (AimingAmount >= 1.0f)
 		{
 			CameraLocation = SightLoc - SightRot.Vector() * Settings->FirstPerson.RetreatDistance;
 			CameraRotation = SightRot;
+			LastFullAimSightRot = SightRot;
+			bFullAim = true;
 			return;
 		}
 		else
 		{
 			auto EyeAlpha = UAlsMath::Clamp01(AimingAmount / Settings->FirstPerson.ADSThreshold);
 			auto SightAlpha = UAlsMath::Clamp01((AimingAmount - Settings->FirstPerson.ADSThreshold) /
-				(1.0f - Settings->FirstPerson.ADSThreshold));
-			CameraRotation = FRotator(FQuat::Slerp(TargetRotation.Quaternion(), SightRot.Quaternion(), SightAlpha));
-			auto Offset = CameraRotation.Vector() * Settings->FirstPerson.RetreatDistance;
+												(1.0f - Settings->FirstPerson.ADSThreshold));
+			if (bFullAim)
+			{
+				SightRotOffset = LastFullAimSightRot - TargetRotation;
+			}
+			auto RotOffset{FMath::Lerp(FRotator::ZeroRotator, SightRotOffset, EyeAlpha)};
+			CameraRotation = FRotator(FQuat::Slerp((TargetRotation + RotOffset).Quaternion(), SightRot.Quaternion(), SightAlpha));
+			auto LocOffset = CameraRotation.Vector() * Settings->FirstPerson.RetreatDistance;
 			auto EyeLoc = FMath::Lerp(GetFirstPersonCameraLocation(), EyeCameraLocation, EyeAlpha);
-			CameraLocation = FMath::Lerp(EyeLoc, SightLoc, SightAlpha) - Offset;
+			CameraLocation = FMath::Lerp(EyeLoc, SightLoc, SightAlpha) - LocOffset;
+			bFullAim = false;
 			return;
 		}
 	}
@@ -879,6 +915,8 @@ void UAlsCameraMovementComponent::UpdateAimingFirstPersonCamera(float AimingAmou
 	auto Offset = TargetRotation.Vector() * Settings->FirstPerson.RetreatDistance;
 	CameraLocation = GetFirstPersonCameraLocation() - Offset;
 	CameraRotation = TargetRotation;
+	SightRotOffset = FRotator::ZeroRotator;
+	bFullAim = false;
 }
 
 void UAlsCameraMovementComponent::UpdateFocalLength()
@@ -967,5 +1005,62 @@ void UAlsCameraMovementComponent::RefreshTanHalfFov(float DeltaTime)
 			PlayerController->GetViewportSize(SizeX, SizeY);
 			TanHalfVfov = FMath::Tan(FMath::DegreesToRadians(Camera->FieldOfView) * 0.5f);
 		}
+	}
+}
+
+void UAlsCameraMovementComponent::SetDesiredViewMode(const FGameplayTag& NewDesiredViewMode)
+{
+	DesiredViewMode = NewDesiredViewMode;
+}
+
+void UAlsCameraMovementComponent::SetConfirmedDesiredViewMode(const FGameplayTag& NewConfirmedDesiredViewMode)
+{
+	if (ConfirmedDesiredViewMode == NewConfirmedDesiredViewMode || Character->GetLocalRole() < ROLE_AutonomousProxy)
+	{
+		return;
+	}
+
+	ConfirmedDesiredViewMode = NewConfirmedDesiredViewMode;
+
+	MARK_PROPERTY_DIRTY_FROM_NAME(ThisClass, ConfirmedDesiredViewMode, this)
+
+	if (Character->GetLocalRole() == ROLE_AutonomousProxy)
+	{
+		ServerSetConfirmedDesiredViewMode(NewConfirmedDesiredViewMode);
+	}
+}
+
+void UAlsCameraMovementComponent::ServerSetConfirmedDesiredViewMode_Implementation(const FGameplayTag& NewViewMode)
+{
+	SetConfirmedDesiredViewMode(NewViewMode);
+}
+
+void UAlsCameraMovementComponent::SetShoulderMode(const FGameplayTag& NewShoulderMode)
+{
+	if (ShoulderMode == NewShoulderMode || Character->GetLocalRole() < ROLE_AutonomousProxy)
+	{
+		return;
+	}
+
+	ShoulderMode = NewShoulderMode;
+
+	MARK_PROPERTY_DIRTY_FROM_NAME(ThisClass, ShoulderMode, this)
+
+	if (Character->GetLocalRole() == ROLE_AutonomousProxy)
+	{
+		ServerSetShoulderMode(NewShoulderMode);
+	}
+}
+
+void UAlsCameraMovementComponent::ServerSetShoulderMode_Implementation(const FGameplayTag& NewShoulderMode)
+{
+	SetShoulderMode(NewShoulderMode);
+}
+
+void UAlsCameraMovementComponent::ToggleShoulder()
+{
+	if (ShoulderMode != AlsCameraShoulderModeTags::Center)
+	{
+		SetShoulderMode(ShoulderMode == AlsCameraShoulderModeTags::Right ? AlsCameraShoulderModeTags::Left : AlsCameraShoulderModeTags::Right);
 	}
 }
