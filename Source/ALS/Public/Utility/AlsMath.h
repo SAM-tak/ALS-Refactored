@@ -124,10 +124,10 @@ public:
 	static FVector AngleToDirectionXY(float Angle);
 
 	UFUNCTION(BlueprintPure, Category = "ALS|Math|Vector", Meta = (AutoCreateRefTerm = "Direction", ReturnDisplayName = "Angle"))
-	static double DirectionToAngle(const FVector2D& Direction);
+	static double DirectionToAngle(const FVector2D& PoleDirection);
 
 	UFUNCTION(BlueprintPure, Category = "ALS|Math|Vector", Meta = (AutoCreateRefTerm = "Direction", ReturnDisplayName = "Angle"))
-	static double DirectionToAngleXY(const FVector& Direction);
+	static double DirectionToAngleXY(const FVector& PoleDirection);
 
 	UFUNCTION(BlueprintPure, Category = "ALS|Math|Vector", Meta = (AutoCreateRefTerm = "Vector", ReturnDisplayName = "Vector"))
 	static FVector PerpendicularClockwiseXY(const FVector& Vector);
@@ -150,7 +150,7 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "ALS|Math|Input",
 		Meta = (AutoCreateRefTerm = "ALocation, BLocation, CLocation", ExpandBoolAsExecs = "ReturnValue"))
 	static bool TryCalculatePoleVector(const FVector& ALocation, const FVector& BLocation, const FVector& CLocation,
-	                                   FVector& ProjectionLocation, FVector& Direction);
+	                                   FVector& ProjectionLocation, FVector& PoleDirection);
 };
 
 template <typename ValueType> requires std::is_floating_point_v<ValueType>
@@ -399,14 +399,14 @@ inline FVector UAlsMath::AngleToDirectionXY(const float Angle)
 	return RadianToDirectionXY(FMath::DegreesToRadians(Angle));
 }
 
-inline double UAlsMath::DirectionToAngle(const FVector2D& Direction)
+inline double UAlsMath::DirectionToAngle(const FVector2D& PoleDirection)
 {
-	return FMath::RadiansToDegrees(FMath::Atan2(Direction.Y, Direction.X));
+	return FMath::RadiansToDegrees(FMath::Atan2(PoleDirection.Y, PoleDirection.X));
 }
 
-inline double UAlsMath::DirectionToAngleXY(const FVector& Direction)
+inline double UAlsMath::DirectionToAngleXY(const FVector& PoleDirection)
 {
-	return FMath::RadiansToDegrees(FMath::Atan2(Direction.Y, Direction.X));
+	return FMath::RadiansToDegrees(FMath::Atan2(PoleDirection.Y, PoleDirection.X));
 }
 
 inline FVector UAlsMath::PerpendicularClockwiseXY(const FVector& Vector)

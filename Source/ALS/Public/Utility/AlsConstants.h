@@ -223,23 +223,25 @@ public:
 
 	// Debug
 
-	UFUNCTION(BlueprintPure, Category = "ALS|Constants", Meta = (ReturnDisplayName = "Display Name"))
+	UFUNCTION(BlueprintPure, Category = "ALS|Constants|Debug", Meta = (ReturnDisplayName = "Display Name"))
 	static const FName& CurvesDebugDisplayName();
 
-	UFUNCTION(BlueprintPure, Category = "ALS|Constants", Meta = (ReturnDisplayName = "Display Name"))
+	UFUNCTION(BlueprintPure, Category = "ALS|Constants|Debug", Meta = (ReturnDisplayName = "Display Name"))
 	static const FName& StateDebugDisplayName();
 
-	UFUNCTION(BlueprintPure, Category = "ALS|Constants", Meta = (ReturnDisplayName = "Display Name"))
+	UFUNCTION(BlueprintPure, Category = "ALS|Constants|Debug", Meta = (ReturnDisplayName = "Display Name"))
 	static const FName& ShapesDebugDisplayName();
 
-	UFUNCTION(BlueprintPure, Category = "ALS|Constants", Meta = (ReturnDisplayName = "Display Name"))
+	UFUNCTION(BlueprintPure, Category = "ALS|Constants|Debug", Meta = (ReturnDisplayName = "Display Name"))
 	static const FName& TracesDebugDisplayName();
 
-	UFUNCTION(BlueprintPure, Category = "ALS|Constants", Meta = (ReturnDisplayName = "Display Name"))
+	UFUNCTION(BlueprintPure, Category = "ALS|Constants|Debug", Meta = (ReturnDisplayName = "Display Name"))
 	static const FName& MantlingDebugDisplayName();
 
-	UFUNCTION(BlueprintPure, Category = "ALS|Constants", Meta = (ReturnDisplayName = "Display Name"))
+	UFUNCTION(BlueprintPure, Category = "ALS|Constants|Debug", Meta = (ReturnDisplayName = "Display Name"))
 	static const FName& PADebugDisplayName();
+
+	// GameplayTag
 
 	UFUNCTION(BlueprintPure, Category = "ALS|Constants", Meta = (ReturnDisplayName = "Display Name"))
 	static const FGameplayTagContainer& ViewModeRoot();

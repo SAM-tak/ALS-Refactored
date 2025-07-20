@@ -39,7 +39,7 @@ void UAlsSkeletonUtility::AddAnimationCurves(USkeleton* Skeleton, const TArray<F
 
 	FMessageLog MessageLog{AlsLog::MessageLogName};
 
-	for (auto CurveName : CurveNames)
+	for (FName CurveName : CurveNames)
 	{
 		CurveName = *CurveName.ToString().TrimStartAndEnd();
 		if (CurveName.IsNone())

@@ -774,12 +774,12 @@ void FAlsRagdollingState::Start(UAlsRagdollingSettings* NewSettings)
 	// Initialize bFacingUpward flag by current movement direction. If Velocity is Zero, it is chosen bFacingUpward is true.
 	// And determine target yaw angle of the character.
 
-	const auto Direction = CharacterMovement->Velocity.GetSafeNormal2D();
+	const auto PoleDirection = CharacterMovement->Velocity.GetSafeNormal2D();
 
-	if (Direction.SizeSquared2D() > 0.0)
+	if (PoleDirection.SizeSquared2D() > 0.0)
 	{
-		bFacingUpward = Character->GetActorForwardVector().Dot(Direction) < -0.25f;
-		LyingDownYawAngleDelta = UAlsMath::DirectionToAngleXY(bFacingUpward ? -Direction : Direction) - Character->GetActorRotation().Yaw;
+		bFacingUpward = Character->GetActorForwardVector().Dot(PoleDirection) < -0.25f;
+		LyingDownYawAngleDelta = UAlsMath::DirectionToAngleXY(bFacingUpward ? -PoleDirection : PoleDirection) - Character->GetActorRotation().Yaw;
 	}
 	else
 	{

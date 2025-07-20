@@ -49,13 +49,13 @@ public:
 
 	// Debug
 
-	UFUNCTION(BlueprintPure, Category = "ALS|Camera Constants", Meta = (ReturnDisplayName = "Display Name"))
+	UFUNCTION(BlueprintPure, Category = "ALS|Camera Constants|Debug", Meta = (ReturnDisplayName = "Display Name"))
 	static const FName& CameraCurvesDebugDisplayName();
 
-	UFUNCTION(BlueprintPure, Category = "ALS|Camera Constants", Meta = (ReturnDisplayName = "Display Name"))
+	UFUNCTION(BlueprintPure, Category = "ALS|Camera Constants|Debug", Meta = (ReturnDisplayName = "Display Name"))
 	static const FName& CameraShapesDebugDisplayName();
 
-	UFUNCTION(BlueprintPure, Category = "ALS|Camera Constants", Meta = (ReturnDisplayName = "Display Name"))
+	UFUNCTION(BlueprintPure, Category = "ALS|Camera Constants|Debug", Meta = (ReturnDisplayName = "Display Name"))
 	static const FName& CameraTracesDebugDisplayName();
 };
 

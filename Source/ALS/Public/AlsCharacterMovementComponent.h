@@ -99,7 +99,7 @@ public:
 	virtual FSavedMovePtr AllocateNewMove() override;
 };
 
-UCLASS()
+UCLASS(ClassGroup = "ALS")
 class ALS_API UAlsCharacterMovementComponent : public UCharacterMovementComponent
 {
 	GENERATED_UCLASS_BODY()
