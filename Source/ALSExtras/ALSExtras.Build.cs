@@ -7,16 +7,16 @@ public class ALSExtras : ModuleRules
 		PCHUsage = PCHUsageMode.UseExplicitOrSharedPCHs;
 		IncludeOrderVersion = EngineIncludeOrderVersion.Latest;
 
-		bEnableNonInlinedGenCppWarnings = true;
+		CppCompileWarningSettings.NonInlinedGenCppWarningLevel = WarningLevel.Warning;
 
-		PublicDependencyModuleNames.AddRange(new[]
-		{
+		PublicDependencyModuleNames.AddRange(
+		[
 			"Core", "CoreUObject", "Engine", "AIModule", "ALS", "ALSCamera"
-		});
+		]);
 
-		PrivateDependencyModuleNames.AddRange(new[]
-		{
+		PrivateDependencyModuleNames.AddRange(
+		[
 			"EnhancedInput", "GameplayTags", "GameplayAbilities"
-		});
+		]);
 	}
 }

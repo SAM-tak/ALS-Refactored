@@ -2,26 +2,26 @@ using UnrealBuildTool;
 
 public class ALS : ModuleRules
 {
-	public ALS(ReadOnlyTargetRules Target) : base(Target)
-	{
-		PCHUsage = PCHUsageMode.UseExplicitOrSharedPCHs;
-		IncludeOrderVersion = EngineIncludeOrderVersion.Latest;
+    public ALS(ReadOnlyTargetRules Target) : base(Target)
+    {
+        PCHUsage = PCHUsageMode.UseExplicitOrSharedPCHs;
+        IncludeOrderVersion = EngineIncludeOrderVersion.Latest;
 
-		bEnableNonInlinedGenCppWarnings = true;
+        CppCompileWarningSettings.NonInlinedGenCppWarningLevel = WarningLevel.Warning;
 
-		PublicDependencyModuleNames.AddRange(new[]
-		{
-			"Core", "CoreUObject", "Engine", "EnhancedInput", "GameplayTags", "GameplayAbilities", "GameplayTasks", "ModularGameplay"
-		});
+        PublicDependencyModuleNames.AddRange(
+		[
+			"Core", "CoreUObject", "Engine", "EnhancedInput", "GameplayTags", "GameplayAbilities", "GameplayTasks", "ModularGameplay", "Mover"
+		]);
 
-		PrivateDependencyModuleNames.AddRange(new[]
-		{
+        PrivateDependencyModuleNames.AddRange(
+		[
 			"EngineSettings", "NetCore", "PhysicsCore", "Niagara", "AnimGraphRuntime", "RigVM", "ControlRig", "Chaos", "MotionWarping"
-		});
+		]);
 
-		if (Target.Type == TargetRules.TargetType.Editor)
-		{
-			PrivateDependencyModuleNames.AddRange(new[] {"MessageLog"});
-		}
-	}
+        if (Target.Type == TargetRules.TargetType.Editor)
+        {
+            PrivateDependencyModuleNames.AddRange(["MessageLog"]);
+        }
+    }
 }
