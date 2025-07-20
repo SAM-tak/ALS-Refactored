@@ -1,7 +1,8 @@
-﻿#pragma once
+#pragma once
 
 #include "Containers/UnrealString.h"
 #include "UObject/ReflectedTypeAccessors.h"
+#include "Templates/IsUEnumClass.h"
 
 namespace AlsEnumUtility
 {

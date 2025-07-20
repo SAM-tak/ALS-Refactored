@@ -23,7 +23,7 @@ public class ALSEditor : ModuleRules
 
 			PrivateDependencyModuleNames.AddRange(
 			[
-				"BlueprintGraph", "Slate", "SlateCore"
+				"BlueprintGraph", "Slate", "SlateCore", "Projects"
 			]);
 		}
 	}
