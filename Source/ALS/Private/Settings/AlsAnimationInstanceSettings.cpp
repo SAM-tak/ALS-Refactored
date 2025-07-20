@@ -17,17 +17,13 @@ UAlsAnimationInstanceSettings::UAlsAnimationInstanceSettings(const FObjectInitia
 }
 
 #if WITH_EDITOR
-void UAlsAnimationInstanceSettings::PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent)
+void UAlsAnimationInstanceSettings::PostEditChangeProperty(FPropertyChangedEvent& ChangedEvent)
 {
-	if (PropertyChangedEvent.GetMemberPropertyName() == GET_MEMBER_NAME_CHECKED(ThisClass, InAir))
+	if (ChangedEvent.GetMemberPropertyName() == GET_MEMBER_NAME_STRING_VIEW_CHECKED(ThisClass, InAir))
 	{
-		InAir.PostEditChangeProperty(PropertyChangedEvent);
-	}
-	else if (PropertyChangedEvent.GetMemberPropertyName() == GET_MEMBER_NAME_CHECKED(ThisClass, Feet))
-	{
-		Feet.PostEditChangeProperty(PropertyChangedEvent);
+		InAir.PostEditChangeProperty(ChangedEvent);
 	}
 
-	Super::PostEditChangeProperty(PropertyChangedEvent);
+	Super::PostEditChangeProperty(ChangedEvent);
 }
 #endif

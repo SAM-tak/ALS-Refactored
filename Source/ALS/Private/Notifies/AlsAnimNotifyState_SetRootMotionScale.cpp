@@ -11,8 +11,6 @@ UAlsAnimNotifyState_SetRootMotionScale::UAlsAnimNotifyState_SetRootMotionScale()
 #if WITH_EDITORONLY_DATA
 	bShouldFireInEditor = false;
 #endif
-
-	bIsNativeBranchingPoint = true;
 }
 
 FString UAlsAnimNotifyState_SetRootMotionScale::GetNotifyName_Implementation() const
@@ -24,10 +22,10 @@ FString UAlsAnimNotifyState_SetRootMotionScale::GetNotifyName_Implementation() c
 	return FString{NotifyNameBuilder};
 }
 
-void UAlsAnimNotifyState_SetRootMotionScale::NotifyBegin(USkeletalMeshComponent* Mesh, UAnimSequenceBase* Animation,
-                                                         const float Duration, const FAnimNotifyEventReference& EventReference)
+void UAlsAnimNotifyState_SetRootMotionScale::NotifyBegin(USkeletalMeshComponent* Mesh, UAnimSequenceBase* Sequence,
+                                                         const float Duration, const FAnimNotifyEventReference& NotifyEventReference)
 {
-	Super::NotifyBegin(Mesh, Animation, Duration, EventReference);
+	Super::NotifyBegin(Mesh, Sequence, Duration, NotifyEventReference);
 
 	auto* Character{Cast<ACharacter>(Mesh->GetOwner())};
 
@@ -37,10 +35,10 @@ void UAlsAnimNotifyState_SetRootMotionScale::NotifyBegin(USkeletalMeshComponent*
 	}
 }
 
-void UAlsAnimNotifyState_SetRootMotionScale::NotifyEnd(USkeletalMeshComponent* Mesh, UAnimSequenceBase* Animation,
-                                                       const FAnimNotifyEventReference& EventReference)
+void UAlsAnimNotifyState_SetRootMotionScale::NotifyEnd(USkeletalMeshComponent* Mesh, UAnimSequenceBase* Sequence,
+                                                       const FAnimNotifyEventReference& NotifyEventReference)
 {
-	Super::NotifyEnd(Mesh, Animation, EventReference);
+	Super::NotifyEnd(Mesh, Sequence, NotifyEventReference);
 
 	auto* Character{Cast<ACharacter>(Mesh->GetOwner())};
 
@@ -52,8 +50,8 @@ void UAlsAnimNotifyState_SetRootMotionScale::NotifyEnd(USkeletalMeshComponent* M
 		}
 		else
 		{
-			UE_LOG(LogAls, Warning, TEXT("%hs: The current translation scale does not match the translation scale from the")
-			       TEXT(" animation notify! Probably something changed it before the animation notify ended."), __FUNCTION__);
+			UE_LOG(LogAls, Warning, TEXT("%hs: The current translation scale does not match the translation scale from the ")
+			       TEXT("animation notify! Probably something changed it before the animation notify ended."), __FUNCTION__);
 		}
 	}
 }

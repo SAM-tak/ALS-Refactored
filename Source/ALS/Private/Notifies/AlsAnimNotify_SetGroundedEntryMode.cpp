@@ -12,8 +12,6 @@ UAlsAnimNotify_SetGroundedEntryMode::UAlsAnimNotify_SetGroundedEntryMode()
 #if WITH_EDITORONLY_DATA
 	bShouldFireInEditor = false;
 #endif
-
-	bIsNativeBranchingPoint = true;
 }
 
 FString UAlsAnimNotify_SetGroundedEntryMode::GetNotifyName_Implementation() const
@@ -21,10 +19,10 @@ FString UAlsAnimNotify_SetGroundedEntryMode::GetNotifyName_Implementation() cons
 	return TEXT("Als Set Grounded Entry Mode");
 }
 
-void UAlsAnimNotify_SetGroundedEntryMode::Notify(USkeletalMeshComponent* Mesh, UAnimSequenceBase* Animation,
-                                                 const FAnimNotifyEventReference& EventReference)
+void UAlsAnimNotify_SetGroundedEntryMode::Notify(USkeletalMeshComponent* Mesh, UAnimSequenceBase* Sequence,
+                                                 const FAnimNotifyEventReference& NotifyEventReference)
 {
-	Super::Notify(Mesh, Animation, EventReference);
+	Super::Notify(Mesh, Sequence, NotifyEventReference);
 
 	auto* Character{Cast<AAlsCharacter>(Mesh->GetOwner())};
 	auto* AnimationInstance{Cast<UAlsAnimationInstance>(Mesh->GetAnimInstance())};

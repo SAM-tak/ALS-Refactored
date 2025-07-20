@@ -41,7 +41,7 @@ public:
 	const TArray<FAlsGameplayTagContainerMatch>& GetTagMatches() const;
 
 #if WITH_EDITOR
-	void RefreshPoses();
+	void RefreshPosePins();
 
 	static FText GetPosePinName(const FAlsGameplayTagContainerMatch& Match);
 #endif
