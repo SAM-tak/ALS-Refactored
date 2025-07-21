@@ -40,21 +40,6 @@ struct ALSCAMERA_API FAlsFirstPersonCameraSettings
 	// The warp threshold distance in trasitioning to first person view from third person view.
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS", Meta = (ClampMin = 0, ForceUnits = "cm"))
 	float HeadSize{30.0f};
-
-	// If bPanoramic is true, renders panoramic with partial multi-view.
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS")
-	uint8 bPanoramic : 1 {false};
-
-	// The horizontal field of view (in degrees) in panoramic rendering.
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS", Meta = (ClampMin = 180, ClampMax = 360, ForceUnits = "deg"))
-	float PanoramaFOV{180.0f};
-
-	/**
-	 * This specifies the proportion of the side view within the range of 0 to 1.
-	 * A value of 0 means no side view, and a value of 1 means the side view takes up one third of the entire screen.
-	 */
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS", Meta = (ClampMin = 0, ClampMax = 1))
-	float PanoramaSideViewRate{0.5f};
 };
 
 USTRUCT(BlueprintType)
@@ -117,21 +102,6 @@ struct ALSCAMERA_API FAlsThirdPersonCameraSettings
 	// The horizontal field of view (in degrees) in panoramic rendering.
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS", Meta = (ClampMin = 0, ForceUnits = "cm"))
 	float FocusTraceStartOffset{10.0f};
-
-	// If bPanoramic is true, renders panoramic with partial multi-view.
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS")
-	uint8 bPanoramic : 1 {false};
-
-	// The horizontal field of view (in degrees) in panoramic rendering.
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS", Meta = (ClampMin = 180, ClampMax = 360, ForceUnits = "deg"))
-	float PanoramaFOV{180.0f};
-
-	/**
-	 * This specifies the proportion of the side view within the range of 0 to 1.
-	 * A value of 0 means no side view, and a value of 1 means the side view takes up one third of the entire screen.
-	 */
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS", Meta = (ClampMin = 0, ClampMax = 1))
-	float PanoramaSideViewRate{0.5f};
 };
 
 UCLASS(Blueprintable, BlueprintType)
