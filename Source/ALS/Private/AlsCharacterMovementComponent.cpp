@@ -206,8 +206,8 @@ void UAlsCharacterMovementComponent::TickComponent(float DeltaTime, ELevelTick T
 		auto ClampedPitch{FMath::Clamp(FMath::FindDeltaAngleDegrees(PreviousControlRotation.Pitch, CurrentControlRotation.Pitch), -MaxDelta, MaxDelta)};
 		auto ClampedYaw{FMath::Clamp(FMath::FindDeltaAngleDegrees(PreviousControlRotation.Yaw, CurrentControlRotation.Yaw), -MaxDelta, MaxDelta)};
 		Controller->SetControlRotation(FRotator{
-			(PreviousControlRotation.Pitch + ClampedPitch),
-			(PreviousControlRotation.Yaw + ClampedYaw),
+			PreviousControlRotation.Pitch + ClampedPitch,
+			PreviousControlRotation.Yaw + ClampedYaw,
 			CurrentControlRotation.Roll}.Clamp());
 	}
 
