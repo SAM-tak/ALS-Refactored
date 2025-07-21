@@ -36,3 +36,5 @@ void FALSEditorModule::ShutdownModule()
 }
 
 IMPLEMENT_MODULE(FALSEditorModule, ALSEditor);
+
+#undef LOCTEXT_NAMESPACE
