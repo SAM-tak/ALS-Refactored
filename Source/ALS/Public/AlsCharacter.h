@@ -337,7 +337,7 @@ private:
 	void ServerSetOverlayMode(const FGameplayTag& NewOverlayMode);
 
 	UFUNCTION()
-	void OnReplicated_OverlayMode(const FGameplayTag& PreviousOverlayMode);
+	void OnReplicated_OverlayMode(const FGameplayTag& PreviousOverlayMode) const;
 
 protected:
 

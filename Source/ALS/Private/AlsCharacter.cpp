@@ -572,7 +572,7 @@ void AAlsCharacter::ServerSetOverlayMode_Implementation(const FGameplayTag& NewO
 	SetOverlayMode(NewOverlayMode, false);
 }
 
-void AAlsCharacter::OnReplicated_OverlayMode(const FGameplayTag& PreviousOverlayMode)
+void AAlsCharacter::OnReplicated_OverlayMode(const FGameplayTag& PreviousOverlayMode) const
 {
 	OnOverlayModeChanged.Broadcast(PreviousOverlayMode);
 }
