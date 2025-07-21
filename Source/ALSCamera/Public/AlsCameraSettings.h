@@ -134,15 +134,6 @@ struct ALSCAMERA_API FAlsThirdPersonCameraSettings
 	float PanoramaSideViewRate{0.5f};
 };
 
-USTRUCT(BlueprintType)
-struct ALSCAMERA_API FAlsCameraLagSubsteppingSettings
-{
-	GENERATED_BODY()
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS", Meta = (ClampMin = 0.005, ClampMax = 0.5, ForceUnits = "s"))
-	float LagSubstepDeltaTime{1.0f / 60.0f};
-};
-
 UCLASS(Blueprintable, BlueprintType)
 class ALSCAMERA_API UAlsCameraSettings : public UDataAsset
 {
@@ -165,13 +156,6 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings", Meta = (ClampMin = 0, ForceUnits = "s"))
 	float ViewModeChangeBlockTime{0.08f};
-
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings", Meta = (InlineEditConditionToggle))
-	uint8 bEnableCameraLagSubstepping : 1;
-
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings", DisplayName = "Enable Camera Lag Substepping",
-		Meta = (EditCondition = "bEnableCameraLagSubstepping"))
-	FAlsCameraLagSubsteppingSettings CameraLagSubstepping;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Settings")
 	TEnumAsByte<ECollisionChannel> FocusTraceChannel{ECC_Visibility};
