@@ -672,6 +672,11 @@ FVector UAlsCameraMovementComponent::CalculateCameraTrace(const FVector& CameraT
 				TraceResult = Hit.Location;
 			}
 		}
+		else
+		{
+			// Note that TraceStart may be changed even if TryAdjustLocationBlockedByGeometry() returned false.
+			TraceResult = TraceStart;
+		}
 	}
 
 #if ENABLE_DRAW_DEBUG
