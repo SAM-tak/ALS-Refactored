@@ -24,7 +24,7 @@ float UAlsGameplayAbility_Landing::CalcTargetYawAngle_Implementation() const
 	auto* Character{GetAlsCharacterFromActorInfo()};
 	return Character->GetLocomotionState().bHasSpeed
 		   ? Character->GetLocomotionState().VelocityYawAngle
-		   : UE_REAL_TO_FLOAT(FRotator::NormalizeAxis(Character->GetActorRotation().Yaw));
+		   : UE_REAL_TO_FLOAT(FMath::UnwindDegrees(Character->GetActorRotation().Yaw));
 }
 
 bool UAlsGameplayAbility_Landing::CanActivateAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo,

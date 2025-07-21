@@ -194,10 +194,10 @@ inline float UAlsMath::LerpClamped(const float From, const float To, const float
 
 inline float UAlsMath::LerpAngle(const float From, const float To, const float Alpha)
 {
-	auto Delta{FRotator3f::NormalizeAxis(To - From)};
+	auto Delta{FMath::UnwindDegrees(To - From)};
 	Delta = RemapAngleForCounterClockwiseRotation(Delta);
 
-	return FRotator3f::NormalizeAxis(From + Delta * Alpha);
+	return FMath::UnwindDegrees(From + Delta * Alpha);
 }
 
 inline FRotator UAlsMath::LerpRotator(const FRotator& From, const FRotator& To, const float Alpha)
@@ -295,12 +295,12 @@ inline float UAlsMath::InterpolateAngleConstant(const float Current, const float
 		return Target;
 	}
 
-	auto Delta{FRotator3f::NormalizeAxis(Target - Current)};
+	auto Delta{FMath::UnwindDegrees(Target - Current)};
 	Delta = RemapAngleForCounterClockwiseRotation(Delta);
 
 	const auto Alpha{InterpolationSpeed * DeltaTime};
 
-	return FRotator3f::NormalizeAxis(Current + FMath::Clamp(Delta, -Alpha, Alpha));
+	return FMath::UnwindDegrees(Current + FMath::Clamp(Delta, -Alpha, Alpha));
 }
 
 template <typename ValueType, typename StateType>

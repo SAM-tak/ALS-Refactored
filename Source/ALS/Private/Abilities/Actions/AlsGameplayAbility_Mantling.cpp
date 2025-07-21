@@ -74,7 +74,7 @@ bool UAlsGameplayAbility_Mantling::CanMantle(const FGameplayAbilitySpecHandle Ha
 	}
 
 	const auto ActorLocation{Character->GetActorLocation()};
-	const auto ActorYawAngle{UE_REAL_TO_FLOAT(FRotator::NormalizeAxis(Character->GetActorRotation().Yaw))};
+	const auto ActorYawAngle{UE_REAL_TO_FLOAT(FMath::UnwindDegrees(Character->GetActorRotation().Yaw))};
 	const auto& LocomotionState{Character->GetLocomotionState()};
 
 	float ForwardTraceAngle;
@@ -91,7 +91,7 @@ bool UAlsGameplayAbility_Mantling::CanMantle(const FGameplayAbilitySpecHandle Ha
 		ForwardTraceAngle = LocomotionState.bHasInput ? LocomotionState.InputYawAngle : ActorYawAngle;
 	}
 
-	const auto ForwardTraceDeltaAngle{FRotator3f::NormalizeAxis(ForwardTraceAngle - ActorYawAngle)};
+	const auto ForwardTraceDeltaAngle{FMath::UnwindDegrees(ForwardTraceAngle - ActorYawAngle)};
 	if (FMath::Abs(ForwardTraceDeltaAngle) > TraceAngleThreshold)
 	{
 		return false;

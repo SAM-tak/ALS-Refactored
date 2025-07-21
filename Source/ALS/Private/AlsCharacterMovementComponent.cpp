@@ -27,7 +27,7 @@ void FAlsCharacterNetworkMoveData::ClientFillNetworkMoveData(const FSavedMove_Ch
 }
 
 bool FAlsCharacterNetworkMoveData::Serialize(UCharacterMovementComponent& Movement, FArchive& Archive,
-                                             UPackageMap* Map, const ENetworkMoveType MoveType)
+											 UPackageMap* Map, const ENetworkMoveType MoveType)
 {
 	Super::Serialize(Movement, Archive, Map, MoveType);
 
@@ -55,7 +55,7 @@ void FAlsSavedMove::Clear()
 }
 
 void FAlsSavedMove::SetMoveFor(ACharacter* Character, const float NewDeltaTime, const FVector& NewAcceleration,
-                               FNetworkPredictionData_Client_Character& PredictionData)
+							   FNetworkPredictionData_Client_Character& PredictionData)
 {
 	Super::SetMoveFor(Character, NewDeltaTime, NewAcceleration, PredictionData);
 
@@ -74,13 +74,13 @@ bool FAlsSavedMove::CanCombineWith(const FSavedMovePtr& NewMovePtr, ACharacter* 
 	const auto* NewMove{static_cast<FAlsSavedMove*>(NewMovePtr.Get())};
 
 	return RotationMode == NewMove->RotationMode &&
-	       Stance == NewMove->Stance &&
-	       MaxAllowedGait == NewMove->MaxAllowedGait &&
-	       Super::CanCombineWith(NewMovePtr, Character, MaxDelta);
+		   Stance == NewMove->Stance &&
+		   MaxAllowedGait == NewMove->MaxAllowedGait &&
+		   Super::CanCombineWith(NewMovePtr, Character, MaxDelta);
 }
 
 void FAlsSavedMove::CombineWith(const FSavedMove_Character* PreviousMove, ACharacter* Character,
-                                APlayerController* Player, const FVector& PreviousStartLocation)
+								APlayerController* Player, const FVector& PreviousStartLocation)
 {
 	// Calling Super::CombineWith() will force change the character's rotation to the rotation from the previous move, which is
 	// undesirable because it will erase our rotation changes made in the AAlsCharacter class. So, to keep the rotation unchanged,
@@ -172,7 +172,7 @@ UAlsCharacterMovementComponent::UAlsCharacterMovementComponent(const FObjectInit
 
 	NavAgentProps.bCanCrouch = true;
 	NavAgentProps.bCanFly = true;
-	//bUseAccelerationForPaths = true;
+	NavMovementProperties.bUseAccelerationForPaths = true;
 
 	bWantsToLie = false;
 }
@@ -181,16 +181,16 @@ UAlsCharacterMovementComponent::UAlsCharacterMovementComponent(const FObjectInit
 bool UAlsCharacterMovementComponent::CanEditChange(const FProperty* Property) const
 {
 	return Super::CanEditChange(Property) &&
-	       Property->GetFName() != GET_MEMBER_NAME_CHECKED(ThisClass, RotationRate) &&
-	       Property->GetFName() != GET_MEMBER_NAME_CHECKED(ThisClass, bUseControllerDesiredRotation) &&
-	       Property->GetFName() != GET_MEMBER_NAME_CHECKED(ThisClass, bOrientRotationToMovement);
+		   Property->GetFName() != GET_MEMBER_NAME_CHECKED(ThisClass, RotationRate) &&
+		   Property->GetFName() != GET_MEMBER_NAME_CHECKED(ThisClass, bUseControllerDesiredRotation) &&
+		   Property->GetFName() != GET_MEMBER_NAME_CHECKED(ThisClass, bOrientRotationToMovement);
 }
 #endif
 
 void UAlsCharacterMovementComponent::BeginPlay()
 {
 	ALS_ENSURE_MESSAGE(!bUseControllerDesiredRotation && !bOrientRotationToMovement,
-	                   TEXT("These settings are not allowed and must be turned off!"));
+					   TEXT("These settings are not allowed and must be turned off!"));
 
 	Super::BeginPlay();
 }
@@ -266,7 +266,7 @@ void UAlsCharacterMovementComponent::UpdateBasedRotation(FRotator& FinalRotation
 	FQuat MovementBaseRotation;
 
 	MovementBaseUtility::GetMovementBaseTransform(BasedMovement.MovementBase, BasedMovement.BoneName,
-	                                              MovementBaseLocation, MovementBaseRotation);
+												  MovementBaseLocation, MovementBaseRotation);
 
 	if (!OldBaseQuat.Equals(MovementBaseRotation, UE_SMALL_NUMBER))
 	{
@@ -282,15 +282,15 @@ void UAlsCharacterMovementComponent::UpdateBasedRotation(FRotator& FinalRotation
 }
 
 bool UAlsCharacterMovementComponent::ApplyRequestedMove(const float DeltaTime, const float CurrentMaxAcceleration,
-                                                        const float MaxSpeed, const float Friction, const float BrakingDeceleration,
-                                                        FVector& RequestedAcceleration, float& RequestedSpeed)
+														const float MaxSpeed, const float Friction, const float BrakingDeceleration,
+														FVector& RequestedAcceleration, float& RequestedSpeed)
 {
 	return !bInputBlocked && Super::ApplyRequestedMove(DeltaTime, CurrentMaxAcceleration, MaxSpeed, Friction,
-	                                                   BrakingDeceleration, RequestedAcceleration, RequestedSpeed);
+													   BrakingDeceleration, RequestedAcceleration, RequestedSpeed);
 }
 
 void UAlsCharacterMovementComponent::CalcVelocity(const float DeltaTime, const float Friction,
-                                                  const bool bFluid, const float BrakingDeceleration)
+												  const bool bFluid, const float BrakingDeceleration)
 {
 	FRotator BaseRotationSpeed;
 	if (!bIgnoreBaseRotation && UAlsUtility::TryGetMovementBaseRotationSpeed(CharacterOwner->GetBasedMovement(), BaseRotationSpeed))
@@ -307,8 +307,8 @@ float UAlsCharacterMovementComponent::GetMaxAcceleration() const
 	// Get the acceleration using the movement curve. This allows for fine control over movement behavior at each speed.
 
 	return IsMovingOnGround() && ALS_ENSURE(IsValid(GaitSettings.AccelerationAndDecelerationAndGroundFrictionCurve))
-		       ? GaitSettings.AccelerationAndDecelerationAndGroundFrictionCurve->FloatCurves[0].Eval(CalculateGaitAmount())
-		       : Super::GetMaxAcceleration();
+			   ? GaitSettings.AccelerationAndDecelerationAndGroundFrictionCurve->FloatCurves[0].Eval(CalculateGaitAmount())
+			   : Super::GetMaxAcceleration();
 }
 
 float UAlsCharacterMovementComponent::GetMaxBrakingDeceleration() const
@@ -316,8 +316,8 @@ float UAlsCharacterMovementComponent::GetMaxBrakingDeceleration() const
 	// Get the deceleration using the movement curve. This allows for fine control over movement behavior at each speed.
 
 	return IsMovingOnGround() && ALS_ENSURE(IsValid(GaitSettings.AccelerationAndDecelerationAndGroundFrictionCurve))
-		       ? GaitSettings.AccelerationAndDecelerationAndGroundFrictionCurve->FloatCurves[1].Eval(CalculateGaitAmount())
-		       : Super::GetMaxBrakingDeceleration();
+			   ? GaitSettings.AccelerationAndDecelerationAndGroundFrictionCurve->FloatCurves[1].Eval(CalculateGaitAmount())
+			   : Super::GetMaxBrakingDeceleration();
 }
 
 void UAlsCharacterMovementComponent::ControlledCharacterMove(const FVector& InputVector, const float DeltaTime)
@@ -472,7 +472,7 @@ void UAlsCharacterMovementComponent::PhysWalking(const float DeltaTime, int32 It
 		{
 			// calculate possible alternate movement
 			//const FVector GravDir = GetGravityDirection();
-			const FVector NewDelta = bTriedLedgeMove ? FVector::ZeroVector : GetLedgeMove(OldLocation, Delta, CurrentFloor/*GravDir*/);
+			const FVector NewDelta = bTriedLedgeMove ? FVector::ZeroVector : GetLedgeMove(OldLocation, Delta, OldFloor);
 			if ( !NewDelta.IsZero() )
 			{
 				// first revert this move
@@ -657,8 +657,8 @@ FVector UAlsCharacterMovementComponent::ConsumeInputVector()
 }
 
 void UAlsCharacterMovementComponent::ComputeFloorDist(const FVector& CapsuleLocation, float LineDistance, float SweepDistance,
-                                                      FFindFloorResult& OutFloorResult, float SweepRadius,
-                                                      const FHitResult* DownwardSweepResult) const
+													  FFindFloorResult& OutFloorResult, float SweepRadius,
+													  const FHitResult* DownwardSweepResult) const
 {
 	// TODO Copied with modifications from UCharacterMovementComponent::ComputeFloorDist().
 	// TODO After the release of a new engine version, this code should be updated to match the source code.
@@ -824,7 +824,7 @@ void UAlsCharacterMovementComponent::PerformMovement(const float DeltaTime)
 	const auto* Controller{HasValidData() ? CharacterOwner->GetController() : nullptr};
 
 	if (Controller != nullptr && IsValid(Controller) && CharacterOwner->GetLocalRole() >= ROLE_Authority &&
-	    PreviousControlRotation != Controller->GetControlRotation())
+		PreviousControlRotation != Controller->GetControlRotation())
 	{
 		if (CharacterOwner->GetRemoteRole() == ROLE_AutonomousProxy)
 		{
@@ -871,7 +871,7 @@ void UAlsCharacterMovementComponent::SmoothClientPosition(const float DeltaTime)
 }
 
 void UAlsCharacterMovementComponent::MoveAutonomous(const float ClientTimeStamp, const float DeltaTime,
-                                                    const uint8 CompressedFlags, const FVector& NewAcceleration)
+													const uint8 CompressedFlags, const FVector& NewAcceleration)
 {
 	const auto* MoveData{static_cast<FAlsCharacterNetworkMoveData*>(GetCurrentNetworkMoveData())};
 	if (MoveData != nullptr)
@@ -919,7 +919,7 @@ void UAlsCharacterMovementComponent::ApplyPendingPenetrationAdjustment()
 	}
 
 	ResolvePenetration(ConstrainDirectionToPlane(PendingPenetrationAdjustment),
-	                   CurrentFloor.HitResult, UpdatedComponent->GetComponentQuat());
+					   CurrentFloor.HitResult, UpdatedComponent->GetComponentQuat());
 
 	PendingPenetrationAdjustment = FVector::ZeroVector;
 }
