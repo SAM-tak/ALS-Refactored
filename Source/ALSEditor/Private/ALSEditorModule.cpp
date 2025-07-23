@@ -22,8 +22,8 @@ void FALSEditorModule::StartupModule()
 
 	StyleSetInstance->SetContentRoot(IPluginManager::Get().FindPlugin(TEXT("ALS"))->GetContentDir());
 
-	StyleSetInstance->Set("ClassIcon.AlsCameraMovementComponent", SLATE_IMAGE_SVG("Icons/AlsCamera_16", 16.0f));
-	StyleSetInstance->Set("ClassThumbnail.AlsCameraMovementComponent", SLATE_IMAGE_SVG("Icons/AlsCamera_64", 64.0f));
+	StyleSetInstance->Set("ClassIcon.AlsCameraRigComponent", SLATE_IMAGE_SVG("Icons/AlsCamera_16", 16.0f));
+	StyleSetInstance->Set("ClassThumbnail.AlsCameraRigComponent", SLATE_IMAGE_SVG("Icons/AlsCamera_64", 64.0f));
 
 	FSlateStyleRegistry::RegisterSlateStyle(*StyleSetInstance);
 }

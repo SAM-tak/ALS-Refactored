@@ -1,4 +1,4 @@
-#include "AlsCameraMovementComponent.h"
+#include "AlsCameraRigComponent.h"
 
 #include "AlsCameraSettings.h"
 #include "AlsCharacter.h"
@@ -19,9 +19,9 @@
 #include "Utility/AlsUtility.h"
 #include "Utility/AlsLog.h"
 
-#include UE_INLINE_GENERATED_CPP_BY_NAME(AlsCameraMovementComponent)
+#include UE_INLINE_GENERATED_CPP_BY_NAME(AlsCameraRigComponent)
 
-UAlsCameraMovementComponent::UAlsCameraMovementComponent(const FObjectInitializer& ObjectInitializer) : Super(ObjectInitializer)
+UAlsCameraRigComponent::UAlsCameraRigComponent(const FObjectInitializer& ObjectInitializer) : Super(ObjectInitializer)
 {
 	PrimaryComponentTick.bStartWithTickEnabled = false;
 	PrimaryComponentTick.TickGroup = TG_PostPhysics;
@@ -37,7 +37,7 @@ UAlsCameraMovementComponent::UAlsCameraMovementComponent(const FObjectInitialize
 	SetCastShadow(false);
 }
 
-void UAlsCameraMovementComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+void UAlsCameraRigComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
@@ -49,7 +49,7 @@ void UAlsCameraMovementComponent::GetLifetimeReplicatedProps(TArray<FLifetimePro
 	DOREPLIFETIME_WITH_PARAMS_FAST(ThisClass, ShoulderMode, Parameters)
 }
 
-void UAlsCameraMovementComponent::OnRegister()
+void UAlsCameraRigComponent::OnRegister()
 {
 	Super::OnRegister();
 
@@ -57,13 +57,13 @@ void UAlsCameraMovementComponent::OnRegister()
 
 	if (!Character.IsValid())
 	{
-		UE_LOG(LogAls, Error, TEXT("[UAlsCameraMovementComponent::OnRegister] This component has been added to a blueprint whose base class is not a child of AlsCharacter. To use this component, it MUST be placed on a child of AlsCharacter Blueprint."));
+		UE_LOG(LogAls, Error, TEXT("[UAlsCameraRigComponent::OnRegister] This component has been added to a blueprint whose base class is not a child of AlsCharacter. To use this component, it MUST be placed on a child of AlsCharacter Blueprint."));
 
 #if WITH_EDITOR
 		if (GIsEditor)
 		{
-			static const FText Message = NSLOCTEXT("UAlsCameraMovementComponent", "NotOnAlsCharacterError", "has been added to a blueprint whose base class is not a child of AlsCharacter. To use this component, it MUST be placed on a child of AlsCharacter Blueprint. This will cause a crash if you PIE!");
-			static const FName MessageLogName = TEXT("UAlsCameraMovementComponent");
+			static const FText Message = NSLOCTEXT("UAlsCameraRigComponent", "NotOnAlsCharacterError", "has been added to a blueprint whose base class is not a child of AlsCharacter. To use this component, it MUST be placed on a child of AlsCharacter Blueprint. This will cause a crash if you PIE!");
+			static const FName MessageLogName = TEXT("UAlsCameraRigComponent");
 			
 			FMessageLog(MessageLogName).Error()
 				->AddToken(FUObjectToken::Create(this, FText::FromString(GetNameSafe(this))))
@@ -79,7 +79,7 @@ void UAlsCameraMovementComponent::OnRegister()
 	}
 }
 
-void UAlsCameraMovementComponent::OnControllerChanged_Implementation(AController* PreviousController, AController* NewController)
+void UAlsCameraRigComponent::OnControllerChanged_Implementation(AController* PreviousController, AController* NewController)
 {
 	if (!bAutoActivate)
 	{
@@ -95,7 +95,7 @@ void UAlsCameraMovementComponent::OnControllerChanged_Implementation(AController
 	}
 }
 
-void UAlsCameraMovementComponent::Activate(const bool bReset)
+void UAlsCameraRigComponent::Activate(const bool bReset)
 {
 	Super::Activate(bReset);
 #if !UE_BUILD_SHIPPING
@@ -122,7 +122,7 @@ void UAlsCameraMovementComponent::Activate(const bool bReset)
 	TickCamera(0.0f, false);
 }
 
-void UAlsCameraMovementComponent::Deactivate()
+void UAlsCameraRigComponent::Deactivate()
 {
 	SetComponentTickEnabled(false);
 	if (TargetCamera.IsValid())
@@ -139,7 +139,7 @@ void UAlsCameraMovementComponent::Deactivate()
 	Super::Deactivate();
 }
 
-void UAlsCameraMovementComponent::RegisterComponentTickFunctions(const bool bRegister)
+void UAlsCameraRigComponent::RegisterComponentTickFunctions(const bool bRegister)
 {
 	Super::RegisterComponentTickFunctions(bRegister);
 
@@ -148,7 +148,7 @@ void UAlsCameraMovementComponent::RegisterComponentTickFunctions(const bool bReg
 	AddTickPrerequisiteActor(GetOwner());
 }
 
-void UAlsCameraMovementComponent::BeginPlay()
+void UAlsCameraRigComponent::BeginPlay()
 {
 	ALS_ENSURE(IsValid(Settings));
 	ALS_ENSURE(IsValid(GetAnimInstance()));
@@ -179,7 +179,7 @@ void UAlsCameraMovementComponent::BeginPlay()
 	SetConfirmedDesiredViewMode(DesiredViewMode);
 }
 
-void UAlsCameraMovementComponent::TickComponent(float DeltaTime, const ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
+void UAlsCameraRigComponent::TickComponent(float DeltaTime, const ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
 {
 	if (IsValid(Settings) && Settings->bIgnoreTimeDilation)
 	{
@@ -203,7 +203,7 @@ void UAlsCameraMovementComponent::TickComponent(float DeltaTime, const ELevelTic
 	}
 }
 
-void UAlsCameraMovementComponent::CompleteParallelAnimationEvaluation(const bool bDoPostAnimationEvaluation)
+void UAlsCameraRigComponent::CompleteParallelAnimationEvaluation(const bool bDoPostAnimationEvaluation)
 {
 	Super::CompleteParallelAnimationEvaluation(bDoPostAnimationEvaluation);
 
@@ -213,7 +213,7 @@ void UAlsCameraMovementComponent::CompleteParallelAnimationEvaluation(const bool
 	}
 }
 
-void UAlsCameraMovementComponent::SetCameraComponent(UCameraComponent* NewCameraComponent)
+void UAlsCameraRigComponent::SetCameraComponent(UCameraComponent* NewCameraComponent)
 {
 	if (TargetCamera.IsValid())
 	{
@@ -226,19 +226,19 @@ void UAlsCameraMovementComponent::SetCameraComponent(UCameraComponent* NewCamera
 	}
 }
 
-FVector UAlsCameraMovementComponent::GetFirstPersonCameraLocation() const
+FVector UAlsCameraRigComponent::GetFirstPersonCameraLocation() const
 {
 	return Character->GetMesh()->GetSocketLocation(Settings->FirstPerson.CameraSocketName);
 }
 
-FVector UAlsCameraMovementComponent::GetEyeCameraLocation() const
+FVector UAlsCameraRigComponent::GetEyeCameraLocation() const
 {
 	return Character->GetMesh()->GetSocketLocation(Settings->FirstPerson.bLeftDominantEye
 												   ? Settings->FirstPerson.LeftEyeCameraSocketName
 												   : Settings->FirstPerson.RightEyeCameraSocketName);
 }
 
-FVector UAlsCameraMovementComponent::GetThirdPersonPivotLocation() const
+FVector UAlsCameraRigComponent::GetThirdPersonPivotLocation() const
 {
 	const auto* Mesh{Character->GetMesh()};
 
@@ -259,16 +259,16 @@ FVector UAlsCameraMovementComponent::GetThirdPersonPivotLocation() const
 	return (FirstPivotLocation + Mesh->GetSocketLocation(Settings->ThirdPerson.SecondPivotSocketName)) * 0.5f;
 }
 
-FVector UAlsCameraMovementComponent::GetThirdPersonTraceStartLocation() const
+FVector UAlsCameraRigComponent::GetThirdPersonTraceStartLocation() const
 {
 	return Character->GetMesh()->GetSocketLocation(ShoulderMode == AlsCameraShoulderModeTags::Right
 		                                           ? Settings->ThirdPerson.TraceShoulderRightSocketName
 		                                           : Settings->ThirdPerson.TraceShoulderLeftSocketName);
 }
 
-void UAlsCameraMovementComponent::TickCamera(const float DeltaTime, bool bAllowLag)
+void UAlsCameraRigComponent::TickCamera(const float DeltaTime, bool bAllowLag)
 {
-	DECLARE_SCOPE_CYCLE_COUNTER(TEXT("UAlsCameraMovementComponent::TickCamera()"), STAT_UAlsCameraMovementComponent_TickCamera, STATGROUP_Als)
+	DECLARE_SCOPE_CYCLE_COUNTER(TEXT("UAlsCameraRigComponent::TickCamera()"), STAT_UAlsCameraRigComponent_TickCamera, STATGROUP_Als)
 
 	if (!IsValid(GetAnimInstance()) || !IsValid(Settings) || !Character.IsValid())
 	{
@@ -576,7 +576,7 @@ void UAlsCameraMovementComponent::TickCamera(const float DeltaTime, bool bAllowL
 	RefreshTanHalfFov(DeltaTime);
 }
 
-FRotator UAlsCameraMovementComponent::CalculateCameraRotation(const FRotator& CameraTargetRotation, const float DeltaTime, const bool bAllowLag) const
+FRotator UAlsCameraRigComponent::CalculateCameraRotation(const FRotator& CameraTargetRotation, const float DeltaTime, const bool bAllowLag) const
 {
 	if (!bAllowLag)
 	{
@@ -588,7 +588,7 @@ FRotator UAlsCameraMovementComponent::CalculateCameraRotation(const FRotator& Ca
 	return UAlsMath::ExponentialDecay(CameraRotation, CameraTargetRotation, DeltaTime, RotationLag);
 }
 
-FVector UAlsCameraMovementComponent::CalculatePivotLagLocation(const FQuat& CameraYawRotation, const float DeltaTime, const bool bAllowLag) const
+FVector UAlsCameraRigComponent::CalculatePivotLagLocation(const FQuat& CameraYawRotation, const float DeltaTime, const bool bAllowLag) const
 {
 	if (!bAllowLag)
 	{
@@ -609,7 +609,7 @@ FVector UAlsCameraMovementComponent::CalculatePivotLagLocation(const FQuat& Came
 	});
 }
 
-FVector UAlsCameraMovementComponent::CalculatePivotOffset() const
+FVector UAlsCameraRigComponent::CalculatePivotOffset() const
 {
 	return Character->GetMesh()->GetComponentQuat().RotateVector(
 		FVector{
@@ -619,7 +619,7 @@ FVector UAlsCameraMovementComponent::CalculatePivotOffset() const
 		} * Character->GetMesh()->GetComponentScale().Z);
 }
 
-FVector UAlsCameraMovementComponent::CalculateCameraOffset() const
+FVector UAlsCameraRigComponent::CalculateCameraOffset() const
 {
 	return CameraRotation.RotateVector(
 		FVector{
@@ -629,7 +629,7 @@ FVector UAlsCameraMovementComponent::CalculateCameraOffset() const
 		} * Character->GetMesh()->GetComponentScale().Z);
 }
 
-FVector UAlsCameraMovementComponent::CalculateCameraTrace(const FVector& CameraTargetLocation, const FVector& PivotOffset, const float DeltaTime, const bool bAllowLag)
+FVector UAlsCameraRigComponent::CalculateCameraTrace(const FVector& CameraTargetLocation, const FVector& PivotOffset, const float DeltaTime, const bool bAllowLag)
 {
 #if ENABLE_DRAW_DEBUG
 	const auto bDisplayDebugCameraTraces{
@@ -743,7 +743,7 @@ FVector UAlsCameraMovementComponent::CalculateCameraTrace(const FVector& CameraT
 	return TraceStart + TraceVector * TraceDistanceRatio;
 }
 
-bool UAlsCameraMovementComponent::TryAdjustLocationBlockedByGeometry(FVector& Location, const bool bDisplayDebugCameraTraces) const
+bool UAlsCameraRigComponent::TryAdjustLocationBlockedByGeometry(FVector& Location, const bool bDisplayDebugCameraTraces) const
 {
 	// Based on ComponentEncroachesBlockingGeometry_WithAdjustment().
 
@@ -823,7 +823,7 @@ bool UAlsCameraMovementComponent::TryAdjustLocationBlockedByGeometry(FVector& Lo
 	                                                 {FreeSpaceTraceTag, false, GetOwner()});
 }
 
-void UAlsCameraMovementComponent::UpdateAimingFirstPersonCamera(float AimingAmount, const FRotator& TargetRotation)
+void UAlsCameraRigComponent::UpdateAimingFirstPersonCamera(float AimingAmount, const FRotator& TargetRotation)
 {
 	if (AimingAmount > 0.0f && Character->HasSight())
 	{
@@ -867,7 +867,7 @@ void UAlsCameraMovementComponent::UpdateAimingFirstPersonCamera(float AimingAmou
 	bFullAim = false;
 }
 
-void UAlsCameraMovementComponent::UpdateFocalLength()
+void UAlsCameraRigComponent::UpdateFocalLength()
 {
 #if ENABLE_DRAW_DEBUG
 	const auto bDisplayDebugTraces{
@@ -914,7 +914,7 @@ void UAlsCameraMovementComponent::UpdateFocalLength()
 	FocalLength = FMath::Max(Settings->MinFocalLength, FVector::Distance(TraceResult, CameraLocation));
 }
 
-void UAlsCameraMovementComponent::UpdateADSCameraShake(float FirstPersonOverride, float AimingAmount)
+void UAlsCameraRigComponent::UpdateADSCameraShake(float FirstPersonOverride, float AimingAmount)
 {
 	auto GetCameraManager = [this]() {
 		const auto* PlayerController{Character.IsValid() ? Cast<APlayerController>(Character->GetController()) : nullptr};
@@ -941,7 +941,7 @@ void UAlsCameraMovementComponent::UpdateADSCameraShake(float FirstPersonOverride
 	}
 }
 
-void UAlsCameraMovementComponent::RefreshTanHalfFov(float DeltaTime)
+void UAlsCameraRigComponent::RefreshTanHalfFov(float DeltaTime)
 {
 	if (Character.IsValid())
 	{
@@ -961,12 +961,12 @@ void UAlsCameraMovementComponent::RefreshTanHalfFov(float DeltaTime)
 	}
 }
 
-void UAlsCameraMovementComponent::SetDesiredViewMode(const FGameplayTag& NewDesiredViewMode)
+void UAlsCameraRigComponent::SetDesiredViewMode(const FGameplayTag& NewDesiredViewMode)
 {
 	DesiredViewMode = NewDesiredViewMode;
 }
 
-void UAlsCameraMovementComponent::SetConfirmedDesiredViewMode(const FGameplayTag& NewConfirmedDesiredViewMode)
+void UAlsCameraRigComponent::SetConfirmedDesiredViewMode(const FGameplayTag& NewConfirmedDesiredViewMode)
 {
 	if (ConfirmedDesiredViewMode == NewConfirmedDesiredViewMode || Character->GetLocalRole() < ROLE_AutonomousProxy)
 	{
@@ -983,12 +983,12 @@ void UAlsCameraMovementComponent::SetConfirmedDesiredViewMode(const FGameplayTag
 	}
 }
 
-void UAlsCameraMovementComponent::ServerSetConfirmedDesiredViewMode_Implementation(const FGameplayTag& NewViewMode)
+void UAlsCameraRigComponent::ServerSetConfirmedDesiredViewMode_Implementation(const FGameplayTag& NewViewMode)
 {
 	SetConfirmedDesiredViewMode(NewViewMode);
 }
 
-void UAlsCameraMovementComponent::SetShoulderMode(const FGameplayTag& NewShoulderMode)
+void UAlsCameraRigComponent::SetShoulderMode(const FGameplayTag& NewShoulderMode)
 {
 	if (ShoulderMode == NewShoulderMode || Character->GetLocalRole() < ROLE_AutonomousProxy)
 	{
@@ -1005,12 +1005,12 @@ void UAlsCameraMovementComponent::SetShoulderMode(const FGameplayTag& NewShoulde
 	}
 }
 
-void UAlsCameraMovementComponent::ServerSetShoulderMode_Implementation(const FGameplayTag& NewShoulderMode)
+void UAlsCameraRigComponent::ServerSetShoulderMode_Implementation(const FGameplayTag& NewShoulderMode)
 {
 	SetShoulderMode(NewShoulderMode);
 }
 
-void UAlsCameraMovementComponent::ToggleShoulder()
+void UAlsCameraRigComponent::ToggleShoulder()
 {
 	if (ShoulderMode != AlsCameraShoulderModeTags::Center)
 	{
