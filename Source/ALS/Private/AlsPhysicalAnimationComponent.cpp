@@ -9,7 +9,6 @@
 #include "AlsAbilitySystemComponent.h"
 #include "AlsCharacterMovementComponent.h"
 #include "Abilities/Actions/AlsGameplayAbility_Ragdolling.h"
-#include "Components/SkeletalMeshComponent.h"
 #include "PhysicsEngine/PhysicalAnimationComponent.h"
 #include "PhysicsEngine/PhysicsAsset.h"
 #include "PhysicsEngine/BodySetup.h"

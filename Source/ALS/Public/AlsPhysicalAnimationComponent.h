@@ -102,10 +102,10 @@ struct ALS_API FAlsRagdollingState
 	FVector_NetQuantize TargetLocation{NAN, NAN, NAN};
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
-	AAlsCharacter* Character;
+	AAlsCharacter* Character{nullptr};
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
-	UAlsRagdollingSettings* Settings;
+	UAlsRagdollingSettings* Settings{nullptr};
 
 	void Start(UAlsRagdollingSettings* NewSettings);
 
