@@ -29,6 +29,44 @@
 
 #include UE_INLINE_GENERATED_CPP_BY_NAME(AlsPhysicalAnimationComponent)
 
+//# The naming convention for Physical Animation Profile names
+//
+//If a Physical Animation Profile with a name corresponding to ALS’s LocomotionMode, LocomotionAction, Stance, Gait, and OverlayMode exists, it will be applied.Only the physical bodies included in the Physical Animation Profile will be subject to simulation, and all others will be set to kinematic.
+//
+//Names should either match exactly with LocomotionMode or LocomotionAction, Stance, Gait, OverlayMode(such as Grounded or Ragdolling), or they should be a concatenation of LocomotionMode or LocomotionAction, Stance, Gait, OverlayMode in that order, separated by `:`.
+//
+//For example, if you want a profile to be applied only when LocomotionMode = Grounded, Stance = Standing, and Gait = Running, you would name it `Grounded:Standing:Running`.
+//
+//If there is no profile with a name that matches the current state, and there is a profile named “Default”, then the “Default” profile will be selected.
+//If a name starts with `+`, it means that the profile is to be added and applied to any other matching profiles.
+//
+//If a name starts with `*`, it can overwrite only the physical animation parameters without affecting the on / off state of the physical simulation, after applying other matching profiles.
+//
+//![Example of physical aniImation profile](https://github.com/Sixze/ALS-Refactored/assets/250165/455644f3-e7cf-4885-a858-2124f8f3d1c5)
+//
+//The `*Injured` profile, when the overlay mode is Injured, changes only the physical animation parameters without changing the range of physical simulation, after the Default or Mantle profile is applied.
+//
+//During ragdolling, only profiles named `Ragdolling` or those containing `Ragdolling` in their names, such as `Ragdolling:Injured`, will be applied.
+//
+//If you only create the `Ragdolling` profile and do not create a `Default` profile, the effects of the physical animation will only be applied during ragdolling.
+//
+//# Animation Curve
+//
+//Added new curves below :
+//
+//-PALockArmLeft
+//- PALockArmRight
+//- PALockLegLeft
+//- PALockLegRight
+//- PALockHandLeft
+//- PALockHandRight
+//- PALockFootLeft
+//- PALockFootRight
+//
+//By setting a value greater than 0 to these animation curves in animation sequence or animation montage, you can temporarily disable the corresponding physical animation without switching profiles.
+//
+//For example, during Mantling, these curves are set to disable the physical animation of the corresponding parts temporarily, so as not to interfere with the action of lifting the leg high.
+
 void FAlsPhysicalAnimationCurveValues::Refresh(AAlsCharacter *Character)
 {
 	auto AnimInstance{Character->GetAlsAnimationInstace()};
@@ -197,7 +235,8 @@ void UAlsPhysicalAnimationComponent::RefreshBodyState(float DeltaTime)
 					{
 						if (Body->IsInstanceSimulatingPhysics())
 						{
-							Body->PhysicsBlendWeight = FMath::FInterpConstantTo(Body->PhysicsBlendWeight, 1.0f - LockedValue, DeltaTime, 15.0f);
+							Body->PhysicsBlendWeight = FMath::FInterpConstantTo(Body->PhysicsBlendWeight,
+								FMath::Max(MinimumBlendWeight, 1.0f - LockedValue), DeltaTime, 15.0f);
 						}
 						else
 						{
@@ -211,7 +250,7 @@ void UAlsPhysicalAnimationComponent::RefreshBodyState(float DeltaTime)
 					else
 					{
 						float Speed = 1.0f / FMath::Max(0.000001f, BlendTimeOfBlendWeightOnDeactivate);
-						Body->PhysicsBlendWeight = FMath::FInterpConstantTo(Body->PhysicsBlendWeight, 0.0f, DeltaTime, Speed);
+						Body->PhysicsBlendWeight = FMath::FInterpConstantTo(Body->PhysicsBlendWeight, MinimumBlendWeight, DeltaTime, Speed);
 					}
 					if (Body->PhysicsBlendWeight == 0.0f)
 					{
