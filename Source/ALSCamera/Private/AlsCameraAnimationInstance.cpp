@@ -1,6 +1,6 @@
 #include "AlsCameraAnimationInstance.h"
 
-#include "AlsCameraMovementComponent.h"
+#include "AlsCameraRigComponent.h"
 #include "AlsCharacter.h"
 #include "AlsCharacterMovementComponent.h"
 #include "Camera/CameraComponent.h"
@@ -13,23 +13,23 @@ void UAlsCameraAnimationInstance::NativeInitializeAnimation()
 	Super::NativeInitializeAnimation();
 
 	Character = Cast<AAlsCharacter>(GetOwningActor());
-	CameraMovement = Cast<UAlsCameraMovementComponent>(GetSkelMeshComponent());
+	CameraRig = Cast<UAlsCameraRigComponent>(GetSkelMeshComponent());
 }
 
 void UAlsCameraAnimationInstance::NativeUpdateAnimation(const float DeltaTime)
 {
 	Super::NativeUpdateAnimation(DeltaTime);
 
-	if (!Character.IsValid() || !CameraMovement.IsValid())
+	if (!Character.IsValid() || !CameraRig.IsValid())
 	{
 		return;
 	}
 
 	Character->GetOwnedGameplayTags(CurrentGameplayTags);
 
-	CurrentGameplayTags.AddTag(CameraMovement->GetConfirmedDesiredViewMode());
-	CurrentGameplayTags.AddTag(CameraMovement->GetShoulderMode());
+	CurrentGameplayTags.AddTag(CameraRig->GetConfirmedDesiredViewMode());
+	CurrentGameplayTags.AddTag(CameraRig->GetShoulderMode());
 
-	TanHalfVfov = CameraMovement->GetTanHalfVfov();
+	TanHalfVfov = CameraRig->GetTanHalfVfov();
 	bFalling = Character->GetLocomotionMode() == AlsLocomotionModeTags::InAir && Character->GetCharacterMovement()->Velocity.Z < -700.f;
 }

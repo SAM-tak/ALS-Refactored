@@ -3,13 +3,14 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "NativeGameplayTags.h"
 #include "PhysicsEngine/PhysicalAnimationComponent.h"
+#include "Utility/AlsGameplayTags.h"
 #include "AlsPhysicalAnimationComponent.generated.h"
 
 class AAlsCharacter;
 class USkeletalBodySetup;
 class UAlsRagdollingSettings;
+class UAlsRagdollingAnimInstance;
 
 USTRUCT(BlueprintType)
 struct ALS_API FAlsPhysicalAnimationCurveValues
@@ -102,10 +103,10 @@ struct ALS_API FAlsRagdollingState
 	FVector_NetQuantize TargetLocation{NAN, NAN, NAN};
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
-	AAlsCharacter* Character;
+	AAlsCharacter* Character{nullptr};
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
-	UAlsRagdollingSettings* Settings;
+	UAlsRagdollingSettings* Settings{nullptr};
 
 	void Start(UAlsRagdollingSettings* NewSettings);
 
@@ -136,6 +137,9 @@ protected:
 	// Not used when ragdolling deactivate. In the case of a ragdoll, the weight becomes zero immediately.
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "PhysicalAnimation|Settings", Meta = (ClampMin = 0, ForceUnits = "s"))
 	float BlendTimeOfBlendWeightOnDeactivate{0.1f};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "PhysicalAnimation|Settings", Meta = (ClampMin = 0, ForceUnits = "s"))
+	float MinimumBlendWeight{0.0f};
 
 	// A mask of GameplayTags used to determine the Profile. The order in the list is used as a priority.
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "PhysicalAnimation|Settings")

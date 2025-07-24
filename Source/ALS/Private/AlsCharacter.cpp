@@ -227,7 +227,8 @@ void AAlsCharacter::PostInitializeComponents()
 
 	AnimationInstance = Cast<UAlsAnimationInstance>(GetMesh()->GetAnimInstance());
 
-	PhysicalAnimation->SetSkeletalMeshComponent(GetMesh());
+	// workaround for crash since 5.6
+	//PhysicalAnimation->SetSkeletalMeshComponent(GetMesh());
 
 	if (IsValid(AbilitySystem))
 	{
@@ -250,6 +251,9 @@ void AAlsCharacter::BeginPlay()
 
 	ALS_ENSURE_MESSAGE(!bUseControllerRotationPitch && !bUseControllerRotationYaw && !bUseControllerRotationRoll,
 					   TEXT("These settings are not allowed and must be turned off!"));
+
+	// workaround for crash since 5.6
+	PhysicalAnimation->SetSkeletalMeshComponent(GetMesh());
 
 	Super::BeginPlay();
 

@@ -5,7 +5,7 @@
 #include "AlsCameraAnimationInstance.generated.h"
 
 class AAlsCharacter;
-class UAlsCameraMovementComponent;
+class UAlsCameraRigComponent;
 
 UCLASS()
 class ALSCAMERA_API UAlsCameraAnimationInstance : public UAnimInstance
@@ -17,7 +17,7 @@ protected:
 	TWeakObjectPtr<AAlsCharacter> Character;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient)
-	TWeakObjectPtr<UAlsCameraMovementComponent> CameraMovement;
+	TWeakObjectPtr<UAlsCameraRigComponent> CameraRig;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient)
 	FGameplayTagContainer CurrentGameplayTags;

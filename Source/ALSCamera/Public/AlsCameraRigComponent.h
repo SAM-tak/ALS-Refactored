@@ -2,7 +2,7 @@
 
 #include "Components/SkeletalMeshComponent.h"
 #include "Utility/AlsCameraGameplayTags.h"
-#include "AlsCameraMovementComponent.generated.h"
+#include "AlsCameraRigComponent.generated.h"
 
 class UCameraComponent;
 class UAlsCameraSettings;
@@ -11,7 +11,7 @@ class AAlsCharacter;
 UCLASS(HideCategories = (Object, Mobility, Clothing, Physics, MasterPoseComponent, Collision, AnimationRig, Lighting, Deformer,
 						 Rendering, PathTracing, HLOD, Navigation, VirtualTexture, Materials, LeaderPoseComponent,
 						 Optimization, LOD, MaterialParameters, TextureStreaming, Mobile, RayTracing))
-class ALSCAMERA_API UAlsCameraMovementComponent : public USkeletalMeshComponent
+class ALSCAMERA_API UAlsCameraRigComponent : public USkeletalMeshComponent
 {
 	GENERATED_UCLASS_BODY()
 
@@ -227,32 +227,32 @@ private:
 #endif // !UE_BUILD_SHIPPING
 };
 
-inline FVector UAlsCameraMovementComponent::GetCurrentFocusLocation() const
+inline FVector UAlsCameraRigComponent::GetCurrentFocusLocation() const
 {
 	return CameraLocation + CameraRotation.Vector() * FocalLength;
 }
 
-inline UCameraComponent* UAlsCameraMovementComponent::GetCameraComponent() const
+inline UCameraComponent* UAlsCameraRigComponent::GetCameraComponent() const
 {
 	return TargetCamera.Get();
 }
 
-inline const FGameplayTag& UAlsCameraMovementComponent::GetDesiredViewMode() const
+inline const FGameplayTag& UAlsCameraRigComponent::GetDesiredViewMode() const
 {
 	return DesiredViewMode;
 }
 
-inline const FGameplayTag& UAlsCameraMovementComponent::GetConfirmedDesiredViewMode() const
+inline const FGameplayTag& UAlsCameraRigComponent::GetConfirmedDesiredViewMode() const
 {
 	return ConfirmedDesiredViewMode;
 }
 
-inline const FGameplayTag& UAlsCameraMovementComponent::GetShoulderMode() const
+inline const FGameplayTag& UAlsCameraRigComponent::GetShoulderMode() const
 {
 	return ShoulderMode;
 }
 
-inline float UAlsCameraMovementComponent::GetTanHalfVfov() const
+inline float UAlsCameraRigComponent::GetTanHalfVfov() const
 {
 	return TanHalfVfov;
 }
