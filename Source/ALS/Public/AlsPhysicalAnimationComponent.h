@@ -138,7 +138,7 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "PhysicalAnimation|Settings", Meta = (ClampMin = 0, ForceUnits = "s"))
 	float BlendTimeOfBlendWeightOnDeactivate{0.1f};
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "PhysicalAnimation|Settings", Meta = (ClampMin = 0, ForceUnits = "s"))
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "PhysicalAnimation|Settings", Meta = (ClampMin = 0))
 	float MinimumBlendWeight{0.0f};
 
 	// A mask of GameplayTags used to determine the Profile. The order in the list is used as a priority.
