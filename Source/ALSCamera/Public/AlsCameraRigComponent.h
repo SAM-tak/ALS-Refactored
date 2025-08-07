@@ -16,94 +16,94 @@ class ALSCAMERA_API UAlsCameraRigComponent : public USkeletalMeshComponent
 	GENERATED_UCLASS_BODY()
 
 protected:
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AlsCameraMovement|Settings")
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AlsCameraRig|Settings")
 	TObjectPtr<UAlsCameraSettings> Settings;
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AlsCameraMovement|Settings")
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AlsCameraRig|Settings")
 	TSubclassOf<UCameraShakeBase> ADSCameraShakeClass;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AlsCameraMovement|Settings", Meta = (ClampMin = 0, ClampMax = 1))
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AlsCameraRig|Settings", Meta = (ClampMin = 0, ClampMax = 1))
 	float ADSCameraShakeScale{0.2f};
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AlsCameraMovement|Settings")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AlsCameraRig|Settings")
 	FGameplayTag DesiredViewMode{AlsCameraViewModeTags::ThirdPerson};
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "AlsCameraMovement|State", Transient)
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "AlsCameraRig|State", Transient)
 	TWeakObjectPtr<AAlsCharacter> Character;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "AlsCameraMovement|State", Transient)
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "AlsCameraRig|State", Transient)
 	TWeakObjectPtr<UCameraComponent> TargetCamera;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "AlsCameraMovement|State", Transient, Meta = (ForceUnits = "x"))
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "AlsCameraRig|State", Transient, Meta = (ForceUnits = "x"))
 	float PreviousGlobalTimeDilation{1.0f};
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "AlsCameraMovement|State", Transient)
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "AlsCameraRig|State", Transient)
 	FVector PivotTargetLocation;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "AlsCameraMovement|State", Transient)
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "AlsCameraRig|State", Transient)
 	FVector PivotLagLocation;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "AlsCameraMovement|State", Transient)
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "AlsCameraRig|State", Transient)
 	FVector PivotLocation;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "AlsCameraMovement|State", Transient)
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "AlsCameraRig|State", Transient)
 	FVector CameraLocation;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "AlsCameraMovement|State", Transient)
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "AlsCameraRig|State", Transient)
 	FRotator CameraRotation;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "AlsCameraMovement|State", Transient)
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "AlsCameraRig|State", Transient)
 	TWeakObjectPtr<UPrimitiveComponent> MovementBasePrimitive;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "AlsCameraMovement|State", Transient)
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "AlsCameraRig|State", Transient)
 	FName MovementBaseBoneName;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "AlsCameraMovement|State", Transient)
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "AlsCameraRig|State", Transient)
 	FVector PivotMovementBaseRelativeLagLocation;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "AlsCameraMovement|State", Transient)
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "AlsCameraRig|State", Transient)
 	FQuat CameraMovementBaseRelativeRotation;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "AlsCameraMovement|State", Transient, Meta = (ClampMin = 0, ClampMax = 1, ForceUnits = "%"))
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "AlsCameraRig|State", Transient, Meta = (ClampMin = 0, ClampMax = 1, ForceUnits = "%"))
 	float TraceDistanceRatio{1.0f};
 	
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "AlsCameraMovement|State", Transient, Meta = (ClampMin = 0, ForceUnits = "cm"))
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "AlsCameraRig|State", Transient, Meta = (ClampMin = 0, ForceUnits = "cm"))
 	float FocalLength{500.0f};
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "AlsCameraMovement|State", Transient)
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "AlsCameraRig|State", Transient)
 	uint8 bIsFocusPawn : 1 {false};
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "AlsCameraMovement|State", Transient, Replicated)
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "AlsCameraRig|State", Transient, Replicated)
 	FGameplayTag ConfirmedDesiredViewMode{AlsCameraViewModeTags::ThirdPerson};
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "AlsCameraMovement|State", Transient)
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "AlsCameraRig|State", Transient)
 	FGameplayTag PreviousConfirmedDesiredViewMode{AlsCameraViewModeTags::ThirdPerson};
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "AlsCameraMovement|State", Transient, Meta = (ClampMin = 0, ForceUnits = "s"))
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "AlsCameraRig|State", Transient, Meta = (ClampMin = 0, ForceUnits = "s"))
 	float ViewModeChangeBlockTime{0.f};
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "AlsCameraMovement|State", Transient)
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "AlsCameraRig|State", Transient)
 	uint8 bInAutoFPP : 1 {false};
 		
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "AlsCameraMovement|State", Transient, Replicated)
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "AlsCameraRig|State", Transient, Replicated)
 	FGameplayTag ShoulderMode{AlsCameraShoulderModeTags::Right};
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "AlsCameraMovement|State", Transient)
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "AlsCameraRig|State", Transient)
 	FGameplayTag PreviousShoulderMode{AlsCameraShoulderModeTags::Right};
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "AlsCameraMovement|State", Transient)
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "AlsCameraRig|State", Transient)
 	TObjectPtr<UCameraShakeBase> CurrentADSCameraShake;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "AlsCameraMovement|State", Transient)
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "AlsCameraRig|State", Transient)
 	float TanHalfVfov{0.57f}; // ≒tan(60°/2)
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "AlsCameraMovement|State", Transient)
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "AlsCameraRig|State", Transient)
 	FRotator LastFullAimSightRot;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "AlsCameraMovement|State", Transient)
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "AlsCameraRig|State", Transient)
 	uint8 bFullAim : 1{false};
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "AlsCameraMovement|State", Transient)
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "AlsCameraRig|State", Transient)
 	FRotator SightRotOffset;
 
 public:
@@ -118,7 +118,7 @@ public:
 protected:
 	virtual void OnRegister() override;
 
-	UFUNCTION(BlueprintNativeEvent, Category = "ALS|Camera Movement")
+	UFUNCTION(BlueprintNativeEvent, Category = "ALS|Camera Rig")
 	void OnControllerChanged(AController* PreviousController, AController* NewController);
 
 	virtual void BeginPlay() override;
@@ -130,25 +130,25 @@ protected:
 	void RefreshTanHalfFov(float DeltaTime);
 
 public:
-	UFUNCTION(BlueprintCallable, Category = "ALS|Camera Movement")
+	UFUNCTION(BlueprintCallable, Category = "ALS|Camera Rig")
 	void SetCameraComponent(UCameraComponent* NewCameraComponent);
 
-	UFUNCTION(BlueprintCallable, Category = "ALS|Camera Movement")
+	UFUNCTION(BlueprintCallable, Category = "ALS|Camera Rig")
 	UCameraComponent* GetCameraComponent() const;
 
-	UFUNCTION(BlueprintPure, Category = "ALS|Camera Movement", Meta = (ReturnDisplayName = "Camera Location"))
+	UFUNCTION(BlueprintPure, Category = "ALS|Camera Rig", Meta = (ReturnDisplayName = "Camera Location"))
 	FVector GetFirstPersonCameraLocation() const;
 
-	UFUNCTION(BlueprintPure, Category = "ALS|Camera Movement", Meta = (ReturnDisplayName = "Camera Location"))
+	UFUNCTION(BlueprintPure, Category = "ALS|Camera Rig", Meta = (ReturnDisplayName = "Camera Location"))
 	FVector GetEyeCameraLocation() const;
 
-	UFUNCTION(BlueprintPure, Category = "ALS|Camera Movement", Meta = (ReturnDisplayName = "Pivot Location"))
+	UFUNCTION(BlueprintPure, Category = "ALS|Camera Rig", Meta = (ReturnDisplayName = "Pivot Location"))
 	FVector GetThirdPersonPivotLocation() const;
 
-	UFUNCTION(BlueprintPure, Category = "ALS|Camera Movement", Meta = (ReturnDisplayName = "Trace Start"))
+	UFUNCTION(BlueprintPure, Category = "ALS|Camera Rig", Meta = (ReturnDisplayName = "Trace Start"))
 	FVector GetThirdPersonTraceStartLocation() const;
 
-	UFUNCTION(BlueprintPure, Category = "ALS|Camera Movement", Meta = (ReturnDisplayName = "Focus Location"))
+	UFUNCTION(BlueprintPure, Category = "ALS|Camera Rig", Meta = (ReturnDisplayName = "Focus Location"))
 	FVector GetCurrentFocusLocation() const;
 
 	float GetTanHalfVfov() const;
@@ -174,10 +174,10 @@ private:
 public:
 	const FGameplayTag& GetShoulderMode() const;
 
-	UFUNCTION(BlueprintCallable, Category = "ALS|Camera Movement")
+	UFUNCTION(BlueprintCallable, Category = "ALS|Camera Rig")
 	void SetShoulderMode(const FGameplayTag& NewShoulderMode);
 
-	UFUNCTION(BlueprintCallable, Category = "ALS|Camera Movement")
+	UFUNCTION(BlueprintCallable, Category = "ALS|Camera Rig")
 	void ToggleShoulder();
 
 private:

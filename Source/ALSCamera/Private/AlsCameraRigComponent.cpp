@@ -567,7 +567,10 @@ void UAlsCameraRigComponent::TickCamera(const float DeltaTime, bool bAllowLag)
 			TargetCamera->FieldOfView = FMath::Lerp(Settings->ThirdPerson.FOV, Settings->FirstPerson.FOV, FirstPersonOverride);
 			TargetCamera->bPanoramic = Settings->ThirdPerson.bPanoramic | Settings->FirstPerson.bPanoramic;
 			TargetCamera->PanoramicFieldOfView = FMath::Lerp(Settings->ThirdPerson.PanoramaFOV, Settings->FirstPerson.PanoramaFOV, FirstPersonOverride);
-			TargetCamera->PanoramaSideViewRate = FMath::Lerp(Settings->ThirdPerson.PanoramaSideViewRate, Settings->FirstPerson.PanoramaSideViewRate, FirstPersonOverride);
+			TargetCamera->PanoramaSideViewRate = FMath::Lerp(
+				Settings->ThirdPerson.bPanoramic ? Settings->ThirdPerson.PanoramaSideViewRate : 0.0f,
+				Settings->FirstPerson.bPanoramic ? Settings->FirstPerson.PanoramaSideViewRate : 0.0f,
+				FirstPersonOverride);
 			TargetCamera->SetWorldLocationAndRotation(CameraLocation, CameraRotation);
 		}
 	}
