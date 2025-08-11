@@ -7,7 +7,7 @@
 #include "Core/CameraVariableTableFwd.h"
 #include "AlsGameplayCameraState.generated.h"
 
-class UAlsCameraSettings;
+class UAlsGameplayCameraStateSettings;
 class AAlsCharacter;
 class UGameplayCameraComponentBase;
 class UFloatCameraVariable;
@@ -19,34 +19,13 @@ class ALSCAMERA_API UAlsGameplayCameraState : public UObject
 
 protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings")
-	TObjectPtr<UAlsCameraSettings> Settings;
-
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings")
-	TSubclassOf<UCameraShakeBase> ADSCameraShakeClass;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Settings", Meta = (ClampMin = 0, ClampMax = 1))
-	float ADSCameraShakeScale{0.2f};
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Settings")
-	FGameplayTag DesiredViewMode{AlsCameraViewModeTags::ThirdPerson};
+	TObjectPtr<UAlsGameplayCameraStateSettings> Settings;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient)
 	TWeakObjectPtr<AAlsCharacter> Character;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient)
 	TWeakObjectPtr<UGameplayCameraComponentBase> GameplayCameraComponent;
-
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient, Meta = (ForceUnits = "x"))
-	float PreviousGlobalTimeDilation{1.0f};
-
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient)
-	FVector PivotTargetLocation;
-
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient)
-	FVector PivotLagLocation;
-
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient)
-	FVector PivotLocation;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient)
 	FVector CameraLocation;
@@ -74,6 +53,12 @@ protected:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient)
 	uint8 bIsFocusPawn : 1 {false};
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient)
+	FGameplayTag ViewMode{AlsCameraViewModeTags::ThirdPerson};
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "State", Transient)
+	FGameplayTag DesiredViewMode{AlsCameraViewModeTags::ThirdPerson};
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient, Replicated)
 	FGameplayTag ConfirmedDesiredViewMode{AlsCameraViewModeTags::ThirdPerson};
@@ -176,15 +161,7 @@ private:
 	void ServerSetShoulderMode(const FGameplayTag& NewShoulderMode);
 
 private:
-	FRotator CalculateCameraRotation(const FRotator& CameraTargetRotation, float DeltaTime, bool bAllowLag) const;
-
-	FVector CalculatePivotLagLocation(const FQuat& CameraYawRotation, float DeltaTime, bool bAllowLag) const;
-
-	FVector CalculatePivotOffset() const;
-
-	FVector CalculateCameraOffset() const;
-
-	FVector CalculateCameraTrace(const FVector& CameraTargetLocation, const FVector& PivotOffset, float DeltaTime, bool bAllowLag);
+	FVector CalculateCameraTrace(const FVector& CameraTargetLocation, const FVector& PivotOffset, float DeltaTime);
 
 	bool TryAdjustLocationBlockedByGeometry(FVector& Location, bool bDisplayDebugCameraTraces) const;
 

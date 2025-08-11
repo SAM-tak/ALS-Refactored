@@ -1,6 +1,6 @@
 #include "AlsGameplayCameraState.h"
 
-#include "AlsCameraSettings.h"
+#include "AlsGameplayCameraStateSettings.h"
 #include "AlsCharacter.h"
 #include "AlsCharacterMovementComponent.h"
 #include "DrawDebugHelpers.h"
@@ -53,8 +53,12 @@ void UAlsGameplayCameraState::SetUp(AAlsCharacter* NewCharacter, UGameplayCamera
 #endif
 	Character = NewCharacter;
 	GameplayCameraComponent = NewGameplayCameraComponent;
+	if (!IsValid(Settings) || !Character.IsValid() || !GameplayCameraComponent.IsValid())
+	{
+		return;
+	}
 	PreviousShoulderMode = ShoulderMode = Settings->ThirdPerson.ShoulderMode;
-	PreviousConfirmedDesiredViewMode = DesiredViewMode;
+	PreviousConfirmedDesiredViewMode = DesiredViewMode = Settings->DesiredViewMode;
 	Character->SetViewMode(DesiredViewMode);
 	SetConfirmedDesiredViewMode(DesiredViewMode);
 }
@@ -69,12 +73,15 @@ void UAlsGameplayCameraState::Tick(const float DeltaTime)
 	}
 
 	FirstPersonFactor = 0.0f;
-	if(FirstPersonFactorVariableId.IsValid())
+
+	auto CameraSystemEvaluator = GameplayCameraComponent->GetCameraSystemEvaluator();
+	if (CameraSystemEvaluator.IsValid())
 	{
-		auto CameraSystemEvaluator = GameplayCameraComponent->GetCameraSystemEvaluator();
-		if (CameraSystemEvaluator.IsValid())
+		const auto& Result = CameraSystemEvaluator->GetEvaluatedResult();
+		CameraLocation = Result.CameraPose.GetLocation();
+		CameraRotation = Result.CameraPose.GetRotation();
+		if(FirstPersonFactorVariableId.IsValid())
 		{
-			const auto& Result = CameraSystemEvaluator->GetEvaluatedResult();
 			float OutValue;
 			if (Result.VariableTable.TryGetValue<float>(FirstPersonFactorVariableId, OutValue))
 			{
@@ -120,8 +127,7 @@ void UAlsGameplayCameraState::Tick(const float DeltaTime)
 
 	if (bMovementBaseHasRelativeRotation)
 	{
-		MovementBaseUtility::GetMovementBaseTransform(BasedMovement.MovementBase, BasedMovement.BoneName,
-			MovementBaseLocation, MovementBaseRotation);
+		MovementBaseUtility::GetMovementBaseTransform(BasedMovement.MovementBase, BasedMovement.BoneName, MovementBaseLocation, MovementBaseRotation);
 	}
 
 	if (BasedMovement.MovementBase != MovementBasePrimitive || BasedMovement.BoneName != MovementBaseBoneName)
@@ -133,7 +139,7 @@ void UAlsGameplayCameraState::Tick(const float DeltaTime)
 		{
 			const auto MovementBaseRotationInverse{ MovementBaseRotation.Inverse() };
 
-			PivotMovementBaseRelativeLagLocation = MovementBaseRotationInverse.RotateVector(PivotLagLocation - MovementBaseLocation);
+			PivotMovementBaseRelativeLagLocation = MovementBaseRotationInverse.RotateVector(CameraLocation - MovementBaseLocation);
 			CameraMovementBaseRelativeRotation = MovementBaseRotationInverse * CameraRotation.Quaternion();
 		}
 		else
@@ -147,21 +153,16 @@ void UAlsGameplayCameraState::Tick(const float DeltaTime)
 
 	UpdateADSCameraShake(FirstPersonFactor, AimingAmount);
 
-	const auto CameraTargetRotation{ Character->GetViewRotation() };
-
-	const auto PreviousPivotTargetLocation{ PivotTargetLocation };
-
-	PivotTargetLocation = GetThirdPersonPivotLocation();
+	//PivotTargetLocation = GetThirdPersonPivotLocation();
 
 	if (FAnimWeight::IsFullWeight(FirstPersonFactor))
 	{
 		// Skip other calculations if the character is fully in first-person mode.
 
-		PivotLagLocation = PivotTargetLocation;
-		PivotLocation = PivotTargetLocation;
+		ViewMode = ConfirmedDesiredViewMode;
 		bInAutoFPP = false;
 
-		UpdateAimingFirstPersonCamera(AimingAmount, CameraTargetRotation);
+		UpdateAimingFirstPersonCamera(AimingAmount, CameraRotation);
 		UpdateFocalLength();
 		Character->SetLookRotation(Character->GetViewRotation());
 		Character->SetViewMode(AlsViewModeTags::FirstPerson);
@@ -169,85 +170,55 @@ void UAlsGameplayCameraState::Tick(const float DeltaTime)
 		return;
 	}
 
-	// Force disable camera lag if the character was teleported.
-
-	bool bAllowLag = Settings->TeleportDistanceThreshold <= 0.0f ||
-		FVector::DistSquared(PreviousPivotTargetLocation, PivotTargetLocation) <= FMath::Square(Settings->TeleportDistanceThreshold);
-
 	// Calculate camera rotation.
 
-	if (bMovementBaseHasRelativeRotation)
-	{
-		CameraRotation = (MovementBaseRotation * CameraMovementBaseRelativeRotation).Rotator();
+	//if (bMovementBaseHasRelativeRotation)
+	//{
+	//	CameraRotation = (MovementBaseRotation * CameraMovementBaseRelativeRotation).Rotator();
 
-		CameraRotation = CalculateCameraRotation(CameraTargetRotation, DeltaTime, bAllowLag);
-
-		CameraMovementBaseRelativeRotation = MovementBaseRotation.Inverse() * CameraRotation.Quaternion();
-	}
-	else
-	{
-		CameraRotation = CalculateCameraRotation(CameraTargetRotation, DeltaTime, bAllowLag);
-	}
+	//	CameraMovementBaseRelativeRotation = MovementBaseRotation.Inverse() * CameraRotation.Quaternion();
+	//}
+	//else
+	//{
+	//	CameraRotation = CameraTargetRotation;
+	//}
 
 	const FRotator CameraYawRotation{ 0.0f, CameraRotation.Yaw, 0.0f };
 
-#if ENABLE_DRAW_DEBUG
-	if (bDisplayDebugCameraShapes)
-	{
-		UAlsUtility::DrawDebugSphereAlternative(GetWorld(), PivotTargetLocation, CameraYawRotation, 16.0f, FLinearColor::Green);
-	}
-#endif
+//#if ENABLE_DRAW_DEBUG
+//	if (bDisplayDebugCameraShapes)
+//	{
+//		UAlsUtility::DrawDebugSphereAlternative(GetWorld(), PivotTargetLocation, CameraYawRotation, 16.0f, FLinearColor::Green);
+//	}
+//#endif
 
 	// Calculate pivot lag location. Get the pivot target location and interpolate using axis-independent lag for maximum control.
 
-	if (bMovementBaseHasRelativeRotation)
-	{
-		PivotLagLocation = MovementBaseLocation + MovementBaseRotation.RotateVector(PivotMovementBaseRelativeLagLocation);
+	//if (bMovementBaseHasRelativeRotation)
+	//{
+	//	PivotLagLocation = MovementBaseLocation + MovementBaseRotation.RotateVector(PivotMovementBaseRelativeLagLocation);
 
-		PivotLagLocation = CalculatePivotLagLocation(CameraYawRotation.Quaternion(), DeltaTime, bAllowLag);
+	//	PivotMovementBaseRelativeLagLocation = MovementBaseRotation.UnrotateVector(PivotLagLocation - MovementBaseLocation);
+	//}
 
-		PivotMovementBaseRelativeLagLocation = MovementBaseRotation.UnrotateVector(PivotLagLocation - MovementBaseLocation);
-	}
-	else
-	{
-		PivotLagLocation = CalculatePivotLagLocation(CameraYawRotation.Quaternion(), DeltaTime, bAllowLag);
-	}
-
-#if ENABLE_DRAW_DEBUG
-	if (bDisplayDebugCameraShapes)
-	{
-		DrawDebugLine(GetWorld(), PivotLagLocation, PivotTargetLocation,
-			FLinearColor{ 1.0f, 0.5f, 0.0f }.ToFColor(true),
-			false, 0.0f, 0, UAlsUtility::DrawLineThickness);
-
-		UAlsUtility::DrawDebugSphereAlternative(GetWorld(), PivotLagLocation, CameraYawRotation, 16.0f, { 1.0f, 0.5f, 0.0f });
-	}
-#endif
-
-	// Calculate pivot location.
-
-	const auto PivotOffset{ CalculatePivotOffset() };
-
-	PivotLocation = PivotLagLocation + PivotOffset;
-
-#if ENABLE_DRAW_DEBUG
-	if (bDisplayDebugCameraShapes)
-	{
-		DrawDebugLine(GetWorld(), PivotLocation, PivotLagLocation,
-			FLinearColor{ 0.0f, 0.75f, 1.0f }.ToFColor(true),
-			false, 0.0f, 0, UAlsUtility::DrawLineThickness);
-
-		UAlsUtility::DrawDebugSphereAlternative(GetWorld(), PivotLocation, CameraYawRotation, 16.0f, { 0.0f, 0.75f, 1.0f });
-	}
-#endif
+//#if ENABLE_DRAW_DEBUG
+//	if (bDisplayDebugCameraShapes)
+//	{
+//		DrawDebugLine(GetWorld(), PivotLagLocation, PivotTargetLocation,
+//			FLinearColor{ 1.0f, 0.5f, 0.0f }.ToFColor(true),
+//			false, 0.0f, 0, UAlsUtility::DrawLineThickness);
+//
+//		UAlsUtility::DrawDebugSphereAlternative(GetWorld(), PivotLagLocation, CameraYawRotation, 16.0f, { 1.0f, 0.5f, 0.0f });
+//	}
+//#endif
 
 	// Calculate target camera location.
 
-	const auto CameraTargetLocation{ PivotLocation + CalculateCameraOffset() };
+	const auto CameraTargetLocation{ CameraLocation };
 
 	// Trace for an object between the camera and character to apply a corrective offset.
 
-	const auto CameraResultLocation{ CalculateCameraTrace(CameraTargetLocation, PivotOffset, DeltaTime, bAllowLag) };
+	const auto CameraResultLocation{ CalculateCameraTrace(CameraTargetLocation, FVector::Zero(), DeltaTime)};
 
 	if (PreviousConfirmedDesiredViewMode != ConfirmedDesiredViewMode)
 	{
@@ -256,10 +227,11 @@ void UAlsGameplayCameraState::Tick(const float DeltaTime)
 		if (PreviousConfirmedDesiredViewMode == AlsCameraViewModeTags::FirstPerson)
 		{
 			// FPP -> TPP
-			auto TPPCameraLocation{ FVector::PointPlaneProject(CameraResultLocation, PivotLocation, -CameraRotation.Vector()) };
+			auto TPPCameraLocation{ FVector::PointPlaneProject(CameraResultLocation, FVector::Zero(), -CameraRotation.Vector()) };
 			auto FocalRotation{ (FocusLocation - TPPCameraLocation).Rotation() };
 			FocalRotation.Roll = Character->GetViewRotation().Roll;
-			if(Settings->HeuristicPitchMapping && IsValid(Settings->HeuristicPitchMapping)) {
+			if (Settings->HeuristicPitchMapping && IsValid(Settings->HeuristicPitchMapping))
+			{
 				FocalRotation.Normalize();
 				auto Mapped = FMath::Lerp(-180.0, 180.0, Settings->HeuristicPitchMapping->GetFloatValue((FocalRotation.Pitch + 180.0) / 360.0));
 				//UE_LOG(LogTemp, Log, TEXT("%.2f -> %.2f"), FocalRotation.Pitch, Mapped);
@@ -297,7 +269,7 @@ void UAlsGameplayCameraState::Tick(const float DeltaTime)
 		{
 			// Set aim point correction during change shoulder
 			auto FocusLocation{ GetCurrentFocusLocation() };
-			auto CounterpartCameraLocation{ FVector::PointPlaneProject(CameraResultLocation, PivotLocation, -CameraRotation.Vector())
+			auto CounterpartCameraLocation{ FVector::PointPlaneProject(CameraResultLocation, FVector::Zero(), -CameraRotation.Vector())
 				.MirrorByPlane(FPlane(Character->GetActorLocation(), CameraRotation.RotateVector(FVector::RightVector))) };
 			auto FocalRotation{ (FocusLocation - CounterpartCameraLocation).Rotation() };
 			FocalRotation.Roll = Character->GetViewRotation().Roll;
@@ -328,11 +300,12 @@ void UAlsGameplayCameraState::Tick(const float DeltaTime)
 	}
 	else
 	{
-		//auto FirstPersonCameraLocation{ GetFirstPersonCameraLocation() - GetForwardVector() * Settings->FirstPerson.HeadSize };
-		//CameraLocation = FMath::Lerp(CameraResultLocation, FirstPersonCameraLocation, FirstPersonOverride);
+		auto FirstPersonCameraLocation{ GetFirstPersonCameraLocation() - Character->GetMesh()->GetForwardVector() * Settings->FirstPerson.HeadSize };
+		CameraLocation = FMath::Lerp(CameraResultLocation, FirstPersonCameraLocation, FirstPersonFactor);
 	}
 
-	Character->SetViewMode(bInAutoFPP ? AlsViewModeTags::FirstPerson : AlsViewModeTags::ThirdPerson);
+	ViewMode = bInAutoFPP ? AlsCameraViewModeTags::FirstPerson : ConfirmedDesiredViewMode;
+	Character->SetViewMode(AlsViewModeTags::ThirdPerson);
 	RefreshTanHalfFov(DeltaTime);
 }
 
@@ -344,78 +317,19 @@ void UAlsGameplayCameraState::SetFirstPersonFactorVariable(UFloatCameraVariable*
 	}
 }
 
-FRotator UAlsGameplayCameraState::CalculateCameraRotation(const FRotator& CameraTargetRotation, const float DeltaTime, const bool bAllowLag) const
+FVector UAlsGameplayCameraState::CalculateCameraTrace(const FVector& CameraTargetLocation, const FVector& PivotOffset, const float DeltaTime)
 {
-	if(!bAllowLag) {
-		return CameraTargetRotation;
-	}
-	return CameraTargetRotation;
-
-	//const auto RotationLag{ GetAnimInstance()->GetCurveValue(UAlsCameraConstants::RotationLagCurveName()) };
-
-	//return UAlsMath::ExponentialDecay(CameraRotation, CameraTargetRotation, DeltaTime, RotationLag);
-}
-
-FVector UAlsGameplayCameraState::CalculatePivotLagLocation(const FQuat& CameraYawRotation, const float DeltaTime, const bool bAllowLag) const
-{
-	if(!bAllowLag) {
-		return PivotTargetLocation;
-	}
-
-	return PivotTargetLocation;
-
-	//const auto RelativePivotInitialLagLocation{ CameraYawRotation.UnrotateVector(PivotLagLocation) };
-	//const auto RelativePivotTargetLocation{ CameraYawRotation.UnrotateVector(PivotTargetLocation) };
-
-	//const auto LocationLagX{ GetAnimInstance()->GetCurveValue(UAlsCameraConstants::LocationLagXCurveName()) };
-	//const auto LocationLagY{ GetAnimInstance()->GetCurveValue(UAlsCameraConstants::LocationLagYCurveName()) };
-	//const auto LocationLagZ{ GetAnimInstance()->GetCurveValue(UAlsCameraConstants::LocationLagZCurveName()) };
-
-	//return CameraYawRotation.RotateVector({
-	//	UAlsMath::ExponentialDecay(RelativePivotInitialLagLocation.X, RelativePivotTargetLocation.X, DeltaTime, LocationLagX),
-	//	UAlsMath::ExponentialDecay(RelativePivotInitialLagLocation.Y, RelativePivotTargetLocation.Y, DeltaTime, LocationLagY),
-	//	UAlsMath::ExponentialDecay(RelativePivotInitialLagLocation.Z, RelativePivotTargetLocation.Z, DeltaTime, LocationLagZ)
-	//	});
-}
-
-FVector UAlsGameplayCameraState::CalculatePivotOffset() const
-{
-	return Character->GetMesh()->GetComponentQuat().RotateVector(
-		FVector{
-			//GetAnimInstance()->GetCurveValue(UAlsCameraConstants::PivotOffsetXCurveName()),
-			//GetAnimInstance()->GetCurveValue(UAlsCameraConstants::PivotOffsetYCurveName()),
-			//GetAnimInstance()->GetCurveValue(UAlsCameraConstants::PivotOffsetZCurveName())
-		} *Character->GetMesh()->GetComponentScale().Z);
-}
-
-FVector UAlsGameplayCameraState::CalculateCameraOffset() const
-{
-	return CameraRotation.RotateVector(
-		FVector{
-			//GetAnimInstance()->GetCurveValue(UAlsCameraConstants::CameraOffsetXCurveName()),
-			//GetAnimInstance()->GetCurveValue(UAlsCameraConstants::CameraOffsetYCurveName()),
-			//GetAnimInstance()->GetCurveValue(UAlsCameraConstants::CameraOffsetZCurveName())
-		} *Character->GetMesh()->GetComponentScale().Z);
-}
-
-FVector UAlsGameplayCameraState::CalculateCameraTrace(const FVector& CameraTargetLocation, const FVector& PivotOffset, const float DeltaTime, const bool bAllowLag)
-{
-	#if ENABLE_DRAW_DEBUG
+#if ENABLE_DRAW_DEBUG
 	const auto bDisplayDebugCameraTraces{
 		UAlsUtility::ShouldDisplayDebugForActor(Character.Get(), UAlsCameraConstants::CameraTracesDebugDisplayName())
 	};
-	#endif
+#endif
 
 	const auto MeshScale{ UE_REAL_TO_FLOAT(Character->GetMesh()->GetComponentScale().Z) };
 
 	static const FName MainTraceTag{ FString::Printf(TEXT("%hs (Main Trace)"), __FUNCTION__) };
 
-	auto TraceStart{
-		FMath::Lerp(
-			GetThirdPersonTraceStartLocation(),
-			PivotTargetLocation + PivotOffset + FVector{Settings->ThirdPerson.TraceOverrideOffset},
-			1.0f/*UAlsMath::Clamp01(GetAnimInstance()->GetCurveValue(UAlsCameraConstants::TraceOverrideCurveName()))*/)
-	};
+	auto TraceStart{ GetThirdPersonTraceStartLocation() };
 
 	const FVector TraceEnd{ CameraTargetLocation };
 	const auto CollisionShape{ FCollisionShape::MakeSphere(Settings->ThirdPerson.TraceRadius * MeshScale) };
@@ -457,20 +371,26 @@ FVector UAlsGameplayCameraState::CalculateCameraTrace(const FVector& CameraTarge
 
 	// Auto FPP processing
 
-	if(bInAutoFPP || (Settings->ThirdPerson.AutoFPPStartDistance > 0.0f && !Character->GetLocomotionAction().IsValid() && Hit.IsValidBlockingHit())) {
+	if (bInAutoFPP || (Settings->ThirdPerson.AutoFPPStartDistance > 0.0f && !Character->GetLocomotionAction().IsValid() && Hit.IsValidBlockingHit()))
+	{
 		auto Distance{ FVector::Dist(TraceStart, TraceResult) };
-		if(bInAutoFPP) {
-			if(Distance > Settings->ThirdPerson.AutoFPPEndDistance) {
+		if (bInAutoFPP)
+		{
+			if (Distance > Settings->ThirdPerson.AutoFPPEndDistance)
+			{
 				bInAutoFPP = false;
 				TraceDistanceRatio = Settings->ThirdPerson.AutoFPPStartDistance / FVector::Dist(TraceStart, TraceEnd);
 			}
-			else {
+			else
+			{
 				TraceDistanceRatio = 1.0f;
 				return GetFirstPersonCameraLocation();
 			}
 		}
-		else {
-			if(Distance < Settings->ThirdPerson.AutoFPPStartDistance) {
+		else
+		{
+			if (Distance < Settings->ThirdPerson.AutoFPPStartDistance)
+			{
 				TraceDistanceRatio = 1.0f;
 				bInAutoFPP = true;
 				return GetFirstPersonCameraLocation();
@@ -480,7 +400,8 @@ FVector UAlsGameplayCameraState::CalculateCameraTrace(const FVector& CameraTarge
 
 	// Apply trace distance smoothing.
 
-	if(!bAllowLag || !Settings->ThirdPerson.bEnableTraceDistanceSmoothing) {
+	if (!Settings->ThirdPerson.bEnableTraceDistanceSmoothing)
+	{
 		TraceDistanceRatio = 1.0f;
 		return TraceResult;
 	}
@@ -488,7 +409,8 @@ FVector UAlsGameplayCameraState::CalculateCameraTrace(const FVector& CameraTarge
 	const auto TraceVector{ TraceEnd - TraceStart };
 	const auto TraceDistance{ TraceVector.Size() };
 
-	if(TraceDistance <= UE_KINDA_SMALL_NUMBER) {
+	if (TraceDistance <= UE_KINDA_SMALL_NUMBER)
+	{
 		TraceDistanceRatio = 1.0f;
 		return TraceResult;
 	}
@@ -498,7 +420,7 @@ FVector UAlsGameplayCameraState::CalculateCameraTrace(const FVector& CameraTarge
 	TraceDistanceRatio = TargetTraceDistanceRatio <= TraceDistanceRatio
 		? TargetTraceDistanceRatio
 		: UAlsMath::ExponentialDecay(TraceDistanceRatio, TargetTraceDistanceRatio, DeltaTime,
-			Settings->ThirdPerson.TraceDistanceSmoothing.InterpolationSpeed);
+			Settings->ThirdPerson.TraceDistanceInterpolationSpeed);
 
 	return TraceStart + TraceVector * TraceDistanceRatio;
 }
@@ -512,15 +434,16 @@ bool UAlsGameplayCameraState::TryAdjustLocationBlockedByGeometry(FVector& Locati
 
 	check(Overlaps.IsEmpty())
 
-		ON_SCOPE_EXIT
+	ON_SCOPE_EXIT
 	{
 		Overlaps.Reset();
 	};
 
 	static const FName OverlapMultiTraceTag{ FString::Printf(TEXT("%hs (Overlap Multi)"), __FUNCTION__) };
 
-	if(!GetWorld()->OverlapMultiByChannel(Overlaps, Location, FQuat::Identity, Settings->ThirdPerson.TraceChannel,
-		CollisionShape, { OverlapMultiTraceTag, false, Character.Get() })) {
+	if (!GetWorld()->OverlapMultiByChannel(Overlaps, Location, FQuat::Identity, Settings->ThirdPerson.TraceChannel,
+		CollisionShape, { OverlapMultiTraceTag, false, Character.Get() }))
+	{
 		return false;
 	}
 
@@ -529,42 +452,48 @@ bool UAlsGameplayCameraState::TryAdjustLocationBlockedByGeometry(FVector& Locati
 
 	FMTDResult MtdResult;
 
-	for(const auto& Overlap : Overlaps) {
-		if(!Overlap.Component.IsValid() ||
-			Overlap.Component->GetCollisionResponseToChannel(Settings->ThirdPerson.TraceChannel) != ECR_Block) {
+	for (const auto& Overlap : Overlaps)
+	{
+		if (!Overlap.Component.IsValid() || Overlap.Component->GetCollisionResponseToChannel(Settings->ThirdPerson.TraceChannel) != ECR_Block)
+		{
 			continue;
 		}
 
 		const auto* OverlapBody{ Overlap.Component->GetBodyInstance(NAME_None, true, Overlap.ItemIndex) };
 
-		if(OverlapBody == nullptr || !OverlapBody->OverlapTest(Location, FQuat::Identity, CollisionShape, &MtdResult)) {
+		if (OverlapBody == nullptr || !OverlapBody->OverlapTest(Location, FQuat::Identity, CollisionShape, &MtdResult))
+		{
 			return false;
 		}
 
-		if(!FMath::IsNearlyZero(MtdResult.Distance)) {
+		if (!FMath::IsNearlyZero(MtdResult.Distance))
+		{
 			Adjustment += MtdResult.Direction * MtdResult.Distance;
 			bAnyValidBlock = true;
 		}
 	}
 
-	if(!bAnyValidBlock) {
+	if (!bAnyValidBlock)
+	{
 		return false;
 	}
 
 	auto AdjustmentDirection{ Adjustment };
 
-	if(!AdjustmentDirection.Normalize() ||
-		((Character->GetActorLocation() - Location).GetSafeNormal() | AdjustmentDirection) < -UE_KINDA_SMALL_NUMBER) {
+	if (!AdjustmentDirection.Normalize() ||
+		((Character->GetActorLocation() - Location).GetSafeNormal() | AdjustmentDirection) < -UE_KINDA_SMALL_NUMBER)
+	{
 		return false;
 	}
 
-	#if ENABLE_DRAW_DEBUG
-	if(bDisplayDebugCameraTraces) {
+#if ENABLE_DRAW_DEBUG
+	if (bDisplayDebugCameraTraces)
+	{
 		DrawDebugLine(GetWorld(), Location, Location + Adjustment,
 			FLinearColor{ 0.0f, 0.75f, 1.0f }.ToFColor(true),
 			false, 5.0f, 0, UAlsUtility::DrawLineThickness);
 	}
-	#endif
+#endif
 
 	Location += Adjustment;
 
@@ -700,13 +629,13 @@ void UAlsGameplayCameraState::UpdateADSCameraShake(float FirstPersonOverride, fl
 		return PlayerController && IsValid(PlayerController) ? PlayerController->PlayerCameraManager.Get() : nullptr;
 	};
 
-	if (!CurrentADSCameraShake && AimingAmount > Settings->FirstPerson.ADSThreshold && IsValid(ADSCameraShakeClass) &&
+	if (!CurrentADSCameraShake && AimingAmount > Settings->FirstPerson.ADSThreshold && IsValid(Settings->FirstPerson.ADSCameraShakeClass) &&
 		Character->HasSight() && (FAnimWeight::IsFullWeight(FirstPersonOverride) || bInAutoFPP))
 	{
 		auto* CameraManager{GetCameraManager()};
 		if (CameraManager)
 		{
-			CurrentADSCameraShake = CameraManager->StartCameraShake(ADSCameraShakeClass, ADSCameraShakeScale);
+			CurrentADSCameraShake = CameraManager->StartCameraShake(Settings->FirstPerson.ADSCameraShakeClass, Settings->FirstPerson.ADSCameraShakeScale);
 		}
 	}
 	else if(CurrentADSCameraShake && AimingAmount < Settings->FirstPerson.ADSThreshold)
@@ -724,19 +653,23 @@ void UAlsGameplayCameraState::RefreshTanHalfFov(float DeltaTime)
 {
 	if (Character.IsValid())
 	{
-		//auto* Camera{GetCameraComponent()};
-		//auto* PlayerController{Cast<APlayerController>(Character->GetController())};
-		//if (IsValid(Camera) && IsValid(PlayerController))
-		//{
-		//	TanHalfVfov = FMath::Tan(FMath::DegreesToRadians(Camera->FieldOfView) * 0.5f);
-		//	if (Camera->bPanoramic)
-		//	{
-		//		int32 SizeX, SizeY;
-		//		PlayerController->GetViewportSize(SizeX, SizeY);
-		//		float AspectRatio{SizeX * (1 - Camera->PanoramaSideViewRate * 2 / 3) / (float)SizeY};
-		//		TanHalfVfov /= AspectRatio;
-		//	}
-		//}
+		auto* PlayerController{Cast<APlayerController>(Character->GetController())};
+		if (GameplayCameraComponent.IsValid() && IsValid(PlayerController))
+		{
+			auto CameraSystemEvaluator = GameplayCameraComponent->GetCameraSystemEvaluator();
+			if (CameraSystemEvaluator.IsValid())
+			{
+				const auto& Result = CameraSystemEvaluator->GetEvaluatedResult();
+				TanHalfVfov = FMath::Tan(FMath::DegreesToRadians(Result.CameraPose.GetEffectiveFieldOfView()) * 0.5f);
+				if (Result.CameraPose.GetPanoramic())
+				{
+					int32 SizeX, SizeY;
+					PlayerController->GetViewportSize(SizeX, SizeY);
+					float AspectRatio{SizeX * (1 - Result.CameraPose.GetPanoramaSideViewRate() * 2 / 3) / (float)SizeY};
+					TanHalfVfov /= AspectRatio;
+				}
+			}
+		}
 	}
 }
 

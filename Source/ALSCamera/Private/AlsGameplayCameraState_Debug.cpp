@@ -24,7 +24,7 @@ void UAlsGameplayCameraState::DisplayDebug(UCanvas* Canvas, const FDebugDisplayI
 	auto MaxVerticalLocation{VerticalLocation};
 	auto HorizontalLocation{5.0f * Scale};
 
-	static const auto CameraCurvesHeaderText{FText::AsCultureInvariant(FString{TEXTVIEW("Als.CameraCurves (Shift + 7)")})};
+	static const auto StateHeaderText{FText::AsCultureInvariant(FString{TEXTVIEW("Als.CameraState (Shift + 7)")})};
 	static const auto ShapesHeaderText{FText::AsCultureInvariant(FString{TEXTVIEW("Als.CameraShapes (Shift + 8)")})};
 	static const auto TracesHeaderText{FText::AsCultureInvariant(FString{TEXTVIEW("Als.CameraTraces (Shift + 9)")})};
 
@@ -42,7 +42,7 @@ void UAlsGameplayCameraState::DisplayDebug(UCanvas* Canvas, const FDebugDisplayI
 			return;
 		}
 
-		DisplayDebugHeader(Canvas, CameraCurvesHeaderText, {0.0f, 0.333333f, 0.0f}, Scale, HorizontalLocation, VerticalLocation);
+		DisplayDebugHeader(Canvas, StateHeaderText, {0.0f, 0.333333f, 0.0f}, Scale, HorizontalLocation, VerticalLocation);
 		VerticalLocation += RowOffset;
 		DisplayDebugHeader(Canvas, ShapesHeaderText, {0.0f, 0.333333f, 0.0f}, Scale, HorizontalLocation, VerticalLocation);
 		VerticalLocation += RowOffset;
@@ -55,7 +55,7 @@ void UAlsGameplayCameraState::DisplayDebug(UCanvas* Canvas, const FDebugDisplayI
 
 	if (DisplayInfo.IsDisplayOn(UAlsCameraConstants::CameraCurvesDebugDisplayName()))
 	{
-		DisplayDebugHeader(Canvas, CameraCurvesHeaderText, FLinearColor::Green, Scale, HorizontalLocation, VerticalLocation);
+		DisplayDebugHeader(Canvas, StateHeaderText, FLinearColor::Green, Scale, HorizontalLocation, VerticalLocation);
 		DisplayDebugState(Canvas, Scale, HorizontalLocation, VerticalLocation);
 
 		MaxVerticalLocation = FMath::Max(MaxVerticalLocation, VerticalLocation + RowOffset);
@@ -64,7 +64,7 @@ void UAlsGameplayCameraState::DisplayDebug(UCanvas* Canvas, const FDebugDisplayI
 	}
 	else
 	{
-		DisplayDebugHeader(Canvas, CameraCurvesHeaderText, {0.0f, 0.333333f, 0.0f}, Scale, HorizontalLocation, VerticalLocation);
+		DisplayDebugHeader(Canvas, StateHeaderText, {0.0f, 0.333333f, 0.0f}, Scale, HorizontalLocation, VerticalLocation);
 
 		VerticalLocation += RowOffset;
 	}
@@ -136,6 +136,18 @@ void UAlsGameplayCameraState::DisplayDebugState(const UCanvas* Canvas, const flo
 
 	const auto RowOffset{12.0f * Scale};
 	const auto ColumnOffset{145.0f * Scale};
+
+	static const auto ViewModeText{
+		FText::AsCultureInvariant(FName::NameToDisplayString(GET_MEMBER_NAME_STRING_CHECKED(ThisClass, ViewMode), false))
+	};
+
+	Text.Text = ViewModeText;
+	Text.Draw(Canvas->Canvas, { HorizontalLocation, VerticalLocation });
+
+	Text.Text = FText::AsCultureInvariant(FName::NameToDisplayString(UAlsUtility::GetSimpleTagName(ViewMode).ToString(), false));
+	Text.Draw(Canvas->Canvas, { HorizontalLocation + ColumnOffset, VerticalLocation });
+
+	VerticalLocation += RowOffset;
 
 	static const auto DesiredViewModeText{
 		FText::AsCultureInvariant(FName::NameToDisplayString(GET_MEMBER_NAME_STRING_CHECKED(ThisClass, DesiredViewMode), false))
@@ -234,89 +246,77 @@ void UAlsGameplayCameraState::DisplayDebugShapes(const UCanvas* Canvas, const fl
 	const auto RowOffset{12.0f * Scale};
 	const auto ColumnOffset{120.0f * Scale};
 	
-	static const auto DesiredViewModeText{
-		FText::AsCultureInvariant(FName::NameToDisplayString(GET_MEMBER_NAME_STRING_CHECKED(ThisClass, DesiredViewMode), false))
-	};
+	//static const auto PivotTargetLocationText{
+	//	FText::AsCultureInvariant(FName::NameToDisplayString(GET_MEMBER_NAME_STRING_CHECKED(ThisClass, PivotTargetLocation), false))
+	//};
 
-	Text.Text = DesiredViewModeText;
-	Text.Draw(Canvas->Canvas, {HorizontalLocation, VerticalLocation});
+	//auto Color{FLinearColor::Green};
+	//Text.SetColor(Color);
 
-	Text.Text = FText::AsCultureInvariant(FName::NameToDisplayString(UAlsUtility::GetSimpleTagName(DesiredViewMode).ToString(), false));
-	Text.Draw(Canvas->Canvas, {HorizontalLocation + ColumnOffset, VerticalLocation});
+	//Text.Text = PivotTargetLocationText;
+	//Text.Draw(Canvas->Canvas, {HorizontalLocation, VerticalLocation});
 
-	VerticalLocation += RowOffset;
+	//DebugStringBuilder << TEXTVIEW("X:");
+	//DebugStringBuilder.Appendf(TEXT("%.2f"), PivotTargetLocation.X);
+	//DebugStringBuilder << TEXTVIEW(" Y:");
+	//DebugStringBuilder.Appendf(TEXT("%.2f"), PivotTargetLocation.Y);
+	//DebugStringBuilder << TEXTVIEW(" Z:");
+	//DebugStringBuilder.Appendf(TEXT("%.2f"), PivotTargetLocation.Z);
 
-	static const auto PivotTargetLocationText{
-		FText::AsCultureInvariant(FName::NameToDisplayString(GET_MEMBER_NAME_STRING_CHECKED(ThisClass, PivotTargetLocation), false))
-	};
+	//Text.Text = FText::AsCultureInvariant(FString{DebugStringBuilder});
+	//Text.Draw(Canvas->Canvas, {HorizontalLocation + ColumnOffset, VerticalLocation});
 
-	auto Color{FLinearColor::Green};
-	Text.SetColor(Color);
+	//DebugStringBuilder.Reset();
 
-	Text.Text = PivotTargetLocationText;
-	Text.Draw(Canvas->Canvas, {HorizontalLocation, VerticalLocation});
+	//VerticalLocation += RowOffset;
 
-	DebugStringBuilder << TEXTVIEW("X:");
-	DebugStringBuilder.Appendf(TEXT("%.2f"), PivotTargetLocation.X);
-	DebugStringBuilder << TEXTVIEW(" Y:");
-	DebugStringBuilder.Appendf(TEXT("%.2f"), PivotTargetLocation.Y);
-	DebugStringBuilder << TEXTVIEW(" Z:");
-	DebugStringBuilder.Appendf(TEXT("%.2f"), PivotTargetLocation.Z);
+	//static const auto PivotLagLocationText{
+	//	FText::AsCultureInvariant(FName::NameToDisplayString(GET_MEMBER_NAME_STRING_CHECKED(ThisClass, PivotLagLocation), false))
+	//};
 
-	Text.Text = FText::AsCultureInvariant(FString{DebugStringBuilder});
-	Text.Draw(Canvas->Canvas, {HorizontalLocation + ColumnOffset, VerticalLocation});
+	//Color = {1.0f, 0.5f, 0.0f};
+	//Text.SetColor(Color);
 
-	DebugStringBuilder.Reset();
+	//Text.Text = PivotLagLocationText;
+	//Text.Draw(Canvas->Canvas, {HorizontalLocation, VerticalLocation});
 
-	VerticalLocation += RowOffset;
+	//DebugStringBuilder << TEXTVIEW("X:");
+	//DebugStringBuilder.Appendf(TEXT("%.2f"), PivotLagLocation.X);
+	//DebugStringBuilder << TEXTVIEW(" Y:");
+	//DebugStringBuilder.Appendf(TEXT("%.2f"), PivotLagLocation.Y);
+	//DebugStringBuilder << TEXTVIEW(" Z:");
+	//DebugStringBuilder.Appendf(TEXT("%.2f"), PivotLagLocation.Z);
 
-	static const auto PivotLagLocationText{
-		FText::AsCultureInvariant(FName::NameToDisplayString(GET_MEMBER_NAME_STRING_CHECKED(ThisClass, PivotLagLocation), false))
-	};
+	//Text.Text = FText::AsCultureInvariant(FString{DebugStringBuilder});
+	//Text.Draw(Canvas->Canvas, {HorizontalLocation + ColumnOffset, VerticalLocation});
 
-	Color = {1.0f, 0.5f, 0.0f};
-	Text.SetColor(Color);
+	//DebugStringBuilder.Reset();
 
-	Text.Text = PivotLagLocationText;
-	Text.Draw(Canvas->Canvas, {HorizontalLocation, VerticalLocation});
+	//VerticalLocation += RowOffset;
 
-	DebugStringBuilder << TEXTVIEW("X:");
-	DebugStringBuilder.Appendf(TEXT("%.2f"), PivotLagLocation.X);
-	DebugStringBuilder << TEXTVIEW(" Y:");
-	DebugStringBuilder.Appendf(TEXT("%.2f"), PivotLagLocation.Y);
-	DebugStringBuilder << TEXTVIEW(" Z:");
-	DebugStringBuilder.Appendf(TEXT("%.2f"), PivotLagLocation.Z);
+	//static const auto PivotLocationText{
+	//	FText::AsCultureInvariant(FName::NameToDisplayString(GET_MEMBER_NAME_STRING_CHECKED(ThisClass, PivotLocation), false))
+	//};
 
-	Text.Text = FText::AsCultureInvariant(FString{DebugStringBuilder});
-	Text.Draw(Canvas->Canvas, {HorizontalLocation + ColumnOffset, VerticalLocation});
+	//Color = {0.0f, 0.75f, 1.0f};
+	//Text.SetColor(Color);
 
-	DebugStringBuilder.Reset();
+	//Text.Text = PivotLocationText;
+	//Text.Draw(Canvas->Canvas, {HorizontalLocation, VerticalLocation});
 
-	VerticalLocation += RowOffset;
+	//DebugStringBuilder << TEXTVIEW("X:");
+	//DebugStringBuilder.Appendf(TEXT("%.2f"), PivotLocation.X);
+	//DebugStringBuilder << TEXTVIEW(" Y:");
+	//DebugStringBuilder.Appendf(TEXT("%.2f"), PivotLocation.Y);
+	//DebugStringBuilder << TEXTVIEW(" Z:");
+	//DebugStringBuilder.Appendf(TEXT("%.2f"), PivotLocation.Z);
 
-	static const auto PivotLocationText{
-		FText::AsCultureInvariant(FName::NameToDisplayString(GET_MEMBER_NAME_STRING_CHECKED(ThisClass, PivotLocation), false))
-	};
+	//Text.Text = FText::AsCultureInvariant(FString{DebugStringBuilder});
+	//Text.Draw(Canvas->Canvas, {HorizontalLocation + ColumnOffset, VerticalLocation});
 
-	Color = {0.0f, 0.75f, 1.0f};
-	Text.SetColor(Color);
+	//DebugStringBuilder.Reset();
 
-	Text.Text = PivotLocationText;
-	Text.Draw(Canvas->Canvas, {HorizontalLocation, VerticalLocation});
-
-	DebugStringBuilder << TEXTVIEW("X:");
-	DebugStringBuilder.Appendf(TEXT("%.2f"), PivotLocation.X);
-	DebugStringBuilder << TEXTVIEW(" Y:");
-	DebugStringBuilder.Appendf(TEXT("%.2f"), PivotLocation.Y);
-	DebugStringBuilder << TEXTVIEW(" Z:");
-	DebugStringBuilder.Appendf(TEXT("%.2f"), PivotLocation.Z);
-
-	Text.Text = FText::AsCultureInvariant(FString{DebugStringBuilder});
-	Text.Draw(Canvas->Canvas, {HorizontalLocation + ColumnOffset, VerticalLocation});
-
-	DebugStringBuilder.Reset();
-
-	VerticalLocation += RowOffset;
+	//VerticalLocation += RowOffset;
 
 	//static const auto CameraFovText{
 	//	FText::AsCultureInvariant(FName::NameToDisplayString(GET_MEMBER_NAME_STRING_CHECKED(ThisClass, TargetCamera->FieldOfView), false))
@@ -336,19 +336,6 @@ void UAlsGameplayCameraState::DisplayDebugShapes(const UCanvas* Canvas, const fl
 	//DebugStringBuilder.Reset();
 
 	//VerticalLocation += RowOffset;
-
-	
-	static const auto RightShoulderText{
-		FText::AsCultureInvariant(FName::NameToDisplayString(GET_MEMBER_NAME_STRING_CHECKED(ThisClass, ShoulderMode), false))
-	};
-
-	Text.Text = RightShoulderText;
-	Text.Draw(Canvas->Canvas, {HorizontalLocation, VerticalLocation});
-
-	Text.Text = FText::AsCultureInvariant(FName::NameToDisplayString(UAlsUtility::GetSimpleTagName(ShoulderMode).ToString(), false));
-	Text.Draw(Canvas->Canvas, {HorizontalLocation + ColumnOffset, VerticalLocation});
-
-	VerticalLocation += RowOffset;
 }
 
 void UAlsGameplayCameraState::DisplayDebugTraces(const UCanvas* Canvas, const float Scale,
