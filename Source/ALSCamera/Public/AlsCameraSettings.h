@@ -29,6 +29,12 @@ struct ALSCAMERA_API FAlsFirstPersonCameraSettings
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS", Meta = (ClampMin = 0, ClampMax = 0.99))
 	float ADSThreshold{0.9f};
 
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "ALS")
+	TSubclassOf<UCameraShakeBase> ADSCameraShakeClass;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS", Meta = (ClampMin = 0, ClampMax = 1))
+	float ADSCameraShakeScale{0.2f};
+
 	// If bLeftDominantEye is true, use LeftEyeCameraSocketName instead of RightEyeCameraSocketName.
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS")
 	uint8 bLeftDominantEye : 1 {false};
@@ -140,6 +146,9 @@ class ALSCAMERA_API UAlsCameraSettings : public UDataAsset
 	GENERATED_BODY()
 
 public:
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings")
+	FGameplayTag DesiredViewMode{AlsCameraViewModeTags::ThirdPerson};
+
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings")
 	uint8 bIgnoreTimeDilation : 1 {true};
 

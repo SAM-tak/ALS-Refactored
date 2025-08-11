@@ -174,8 +174,12 @@ void UAlsCameraRigComponent::BeginPlay()
 			Character->SetViewMode(AlsViewModeTags::ThirdPerson);
 		}
 	}
-	PreviousShoulderMode = ShoulderMode = Settings->ThirdPerson.ShoulderMode;
-	PreviousConfirmedDesiredViewMode = DesiredViewMode;
+
+	if (IsValid(Settings))
+	{
+		PreviousShoulderMode = ShoulderMode = Settings->ThirdPerson.ShoulderMode;
+		PreviousConfirmedDesiredViewMode = DesiredViewMode = Settings->DesiredViewMode;
+	}
 	SetConfirmedDesiredViewMode(DesiredViewMode);
 }
 
@@ -924,13 +928,13 @@ void UAlsCameraRigComponent::UpdateADSCameraShake(float FirstPersonOverride, flo
 		return PlayerController && IsValid(PlayerController) ? PlayerController->PlayerCameraManager.Get() : nullptr;
 	};
 
-	if (!CurrentADSCameraShake && AimingAmount > Settings->FirstPerson.ADSThreshold && IsValid(ADSCameraShakeClass) &&
+	if (!CurrentADSCameraShake && AimingAmount > Settings->FirstPerson.ADSThreshold && IsValid(Settings->FirstPerson.ADSCameraShakeClass) &&
 		Character->HasSight() && (FAnimWeight::IsFullWeight(FirstPersonOverride) || bInAutoFPP))
 	{
 		auto* CameraManager{GetCameraManager()};
 		if (CameraManager)
 		{
-			CurrentADSCameraShake = CameraManager->StartCameraShake(ADSCameraShakeClass, ADSCameraShakeScale);
+			CurrentADSCameraShake = CameraManager->StartCameraShake(Settings->FirstPerson.ADSCameraShakeClass, Settings->FirstPerson.ADSCameraShakeScale);
 		}
 	}
 	else if(CurrentADSCameraShake && AimingAmount < Settings->FirstPerson.ADSThreshold)

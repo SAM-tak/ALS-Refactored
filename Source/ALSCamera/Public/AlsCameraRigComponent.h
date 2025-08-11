@@ -19,15 +19,6 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AlsCameraRig|Settings")
 	TObjectPtr<UAlsCameraSettings> Settings;
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "AlsCameraRig|Settings")
-	TSubclassOf<UCameraShakeBase> ADSCameraShakeClass;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AlsCameraRig|Settings", Meta = (ClampMin = 0, ClampMax = 1))
-	float ADSCameraShakeScale{0.2f};
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AlsCameraRig|Settings")
-	FGameplayTag DesiredViewMode{AlsCameraViewModeTags::ThirdPerson};
-
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "AlsCameraRig|State", Transient)
 	TWeakObjectPtr<AAlsCharacter> Character;
 
@@ -72,6 +63,9 @@ protected:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "AlsCameraRig|State", Transient)
 	uint8 bIsFocusPawn : 1 {false};
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "AlsCameraRig|State", Transient)
+	FGameplayTag DesiredViewMode{AlsCameraViewModeTags::ThirdPerson};
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "AlsCameraRig|State", Transient, Replicated)
 	FGameplayTag ConfirmedDesiredViewMode{AlsCameraViewModeTags::ThirdPerson};
