@@ -5,6 +5,7 @@
 namespace AlsCameraTags
 {
 	ALSCAMERA_API UE_DECLARE_GAMEPLAY_TAG_EXTERN(Root)
+	ALSCAMERA_API UE_DECLARE_GAMEPLAY_TAG_EXTERN(Recoiling)
 }
 
 namespace AlsCameraViewModeTags

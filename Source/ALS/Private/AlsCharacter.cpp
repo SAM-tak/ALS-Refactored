@@ -254,9 +254,6 @@ void AAlsCharacter::BeginPlay()
 
 	Super::BeginPlay();
 
-	// workaround for crash since 5.6
-	PhysicalAnimation->SetSkeletalMeshComponent(GetMesh());
-
 	if (GetLocalRole() >= ROLE_AutonomousProxy)
 	{
 		// Teleportation of simulated proxies is detected differently, see
@@ -273,6 +270,9 @@ void AAlsCharacter::BeginPlay()
 	}
 
 	RefreshMeshProperties();
+
+	// workaround for crash since 5.6
+	PhysicalAnimation->SetSkeletalMeshComponent(GetMesh());
 
 	ViewState.NetworkSmoothing.bEnabled |= IsValid(Settings) && Settings->View.bEnableNetworkSmoothing && GetLocalRole() == ROLE_SimulatedProxy;
 

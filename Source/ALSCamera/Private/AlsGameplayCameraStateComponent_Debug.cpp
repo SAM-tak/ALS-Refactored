@@ -1,4 +1,4 @@
-#include "AlsGameplayCameraState.h"
+#include "AlsGameplayCameraStateComponent.h"
 #include "AlsCharacter.h"
 
 #include "DisplayDebugHelpers.h"
@@ -11,10 +11,10 @@
 #include "Utility/AlsMath.h"
 #include "Utility/AlsUtility.h"
 
-#define LOCTEXT_NAMESPACE "AlsGameplayCameraStateDebug"
+#define LOCTEXT_NAMESPACE "AlsGameplayCameraStateComponentDebug"
 
 #if !UE_BUILD_SHIPPING
-void UAlsGameplayCameraState::DisplayDebug(UCanvas* Canvas, const FDebugDisplayInfo& DisplayInfo, float& Unused, float& VerticalLocation)
+void UAlsGameplayCameraStateComponent::DisplayDebug(UCanvas* Canvas, const FDebugDisplayInfo& DisplayInfo, float& Unused, float& VerticalLocation)
 {
 	const auto Scale{FMath::Min(Canvas->SizeX / (1280.0f * Canvas->GetDPIScale()), Canvas->SizeY / (720.0f * Canvas->GetDPIScale()))};
 
@@ -100,7 +100,7 @@ void UAlsGameplayCameraState::DisplayDebug(UCanvas* Canvas, const FDebugDisplayI
 	VerticalLocation = MaxVerticalLocation;
 }
 
-void UAlsGameplayCameraState::DisplayDebugHeader(const UCanvas* Canvas, const FText& HeaderText, const FLinearColor& HeaderColor,
+void UAlsGameplayCameraStateComponent::DisplayDebugHeader(const UCanvas* Canvas, const FText& HeaderText, const FLinearColor& HeaderColor,
 														 const float Scale, const float HorizontalLocation, float& VerticalLocation)
 {
 	FCanvasTextItem Text{
@@ -118,7 +118,7 @@ void UAlsGameplayCameraState::DisplayDebugHeader(const UCanvas* Canvas, const FT
 	VerticalLocation += 15.0f * Scale;
 }
 
-void UAlsGameplayCameraState::DisplayDebugState(const UCanvas* Canvas, const float Scale, const float HorizontalLocation, float& VerticalLocation) const
+void UAlsGameplayCameraStateComponent::DisplayDebugState(const UCanvas* Canvas, const float Scale, const float HorizontalLocation, float& VerticalLocation) const
 {
 	VerticalLocation += 4.0f * Scale;
 
@@ -226,7 +226,7 @@ void UAlsGameplayCameraState::DisplayDebugState(const UCanvas* Canvas, const flo
 	VerticalLocation += RowOffset;
 }
 
-void UAlsGameplayCameraState::DisplayDebugShapes(const UCanvas* Canvas, const float Scale,
+void UAlsGameplayCameraStateComponent::DisplayDebugShapes(const UCanvas* Canvas, const float Scale,
 														 const float HorizontalLocation, float& VerticalLocation) const
 {
 	VerticalLocation += 4.0f * Scale;
@@ -338,7 +338,7 @@ void UAlsGameplayCameraState::DisplayDebugShapes(const UCanvas* Canvas, const fl
 	//VerticalLocation += RowOffset;
 }
 
-void UAlsGameplayCameraState::DisplayDebugTraces(const UCanvas* Canvas, const float Scale,
+void UAlsGameplayCameraStateComponent::DisplayDebugTraces(const UCanvas* Canvas, const float Scale,
 														 const float HorizontalLocation, float& VerticalLocation) const
 {
 	VerticalLocation += 4.0f * Scale;

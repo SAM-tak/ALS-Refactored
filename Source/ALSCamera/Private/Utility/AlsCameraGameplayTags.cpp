@@ -3,6 +3,7 @@
 namespace AlsCameraTags
 {
 	UE_DEFINE_GAMEPLAY_TAG(Root, "Als.Camera")
+	UE_DEFINE_GAMEPLAY_TAG(Recoiling, "Als.Camera.Recoiling")
 }
 
 namespace AlsCameraViewModeTags

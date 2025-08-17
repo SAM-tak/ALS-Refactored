@@ -16,7 +16,7 @@ public class ALSCamera : ModuleRules
 
 		PrivateDependencyModuleNames.AddRange(
 		[
-			"EngineSettings", "GameplayAbilities", "NetCore"
+			"EngineSettings", "GameplayAbilities", "ModularGameplay", "NetCore"
 		]);
 	}
 }

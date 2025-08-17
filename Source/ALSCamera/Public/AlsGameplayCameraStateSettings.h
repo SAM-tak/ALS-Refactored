@@ -1,8 +1,6 @@
 #pragma once
 
 #include "Engine/DataAsset.h"
-#include "Engine/Scene.h"
-#include "Utility/AlsConstants.h"
 #include "Utility/AlsCameraGameplayTags.h"
 #include "AlsGameplayCameraStateSettings.generated.h"
 
@@ -22,15 +20,12 @@ struct ALSCAMERA_API FAlsFirstPersonCameraStateSettings
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS")
 	FName RightEyeCameraSocketName{TEXTVIEW("ADSCameraRight")};
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS", Meta = (ClampMin = 0, ClampMax = 0.99))
+	float FirstPersonFactorThreshold{0.7f};
+
 	// Threshold of Aiming Amount value for aim down sight.
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS", Meta = (ClampMin = 0, ClampMax = 0.99))
 	float ADSThreshold{0.9f};
-
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "ALS")
-	TSubclassOf<UCameraShakeBase> ADSCameraShakeClass{nullptr};
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS", Meta = (ClampMin = 0, ClampMax = 1))
-	float ADSCameraShakeScale{0.2f};
 
 	// If bLeftDominantEye is true, use LeftEyeCameraSocketName instead of RightEyeCameraSocketName.
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS")
@@ -40,9 +35,13 @@ struct ALSCAMERA_API FAlsFirstPersonCameraStateSettings
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS", Meta = (ClampMin = 0, ForceUnits = "cm"))
 	float RetreatDistance{10.0f};
 
-	// The warp threshold distance in trasitioning to first person view from third person view.
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS", Meta = (ClampMin = 0, ForceUnits = "cm"))
-	float HeadSize{30.0f};
+	// Initial Value
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS")
+	FGameplayTagContainer RecoilStateTags{AlsCameraTags::Recoiling};
+
+	// The distance to move backward from the camera sokcet position.
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS", Meta = (ClampMin = 0, ForceUnits = "s"))
+	float SightInterpSpeed{20.0f};
 };
 
 USTRUCT(BlueprintType)
@@ -50,36 +49,9 @@ struct ALSCAMERA_API FAlsThirdPersonCameraStateSettings
 {
 	GENERATED_BODY()
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS")
-	FName FirstPivotSocketName{UAlsConstants::RootBoneName()};
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS")
-	FName SecondPivotSocketName{UAlsConstants::HeadBoneName()};
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS", Meta = (ClampMin = 0, ForceUnits = "cm"))
-	float TraceRadius{15.0f};
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS")
-	TEnumAsByte<ECollisionChannel> TraceChannel{ECC_Visibility};
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS")
-	FName TraceShoulderLeftSocketName{TEXTVIEW("ThirdPersonTraceShoulderLeft")};
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS")
-	FName TraceShoulderRightSocketName{TEXTVIEW("ThirdPersonTraceShoulderRight")};
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS")
-	FVector3f TraceOverrideOffset{0.0f, 0.0f, 40.0f};
-
 	// Initial Value
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS")
 	FGameplayTag ShoulderMode{AlsCameraShoulderModeTags::Right};
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS", Meta = (InlineEditConditionToggle))
-	uint8 bEnableTraceDistanceSmoothing : 1 {true};
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS", Meta = (ClampMin = 0, EditCondition = "bEnableTraceDistanceSmoothing"))
-	float TraceDistanceInterpolationSpeed{3.0f};
 
 	// If greater than zero, camera location same as FPP when distance from third person camera pivot by blocking by geometry less than this value.
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS", Meta = (ClampMin = 0, ForceUnits = "cm"))
@@ -92,6 +64,9 @@ struct ALSCAMERA_API FAlsThirdPersonCameraStateSettings
 	// The horizontal field of view (in degrees) in panoramic rendering.
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS", Meta = (ClampMin = 0, ForceUnits = "cm"))
 	float FocusTraceStartOffset{10.0f};
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS")
+	TEnumAsByte<ECollisionChannel> TraceChannel{ECC_Visibility};
 };
 
 UCLASS(Blueprintable, BlueprintType)
