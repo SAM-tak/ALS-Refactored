@@ -38,10 +38,6 @@ struct ALSCAMERA_API FAlsFirstPersonCameraStateSettings
 	// Initial Value
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS")
 	FGameplayTagContainer RecoilStateTags{AlsCameraTags::Recoiling};
-
-	// The distance to move backward from the camera sokcet position.
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ALS", Meta = (ClampMin = 0, ForceUnits = "s"))
-	float SightInterpSpeed{20.0f};
 };
 
 USTRUCT(BlueprintType)

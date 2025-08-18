@@ -75,6 +75,9 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient)
 	FQuat SightRotationOffset;
 
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient)
+	uint8 bIsSightOffsetValid : 1{false};
+
 protected:
 
 	FCameraVariableID FirstPersonFactorVariableId;
@@ -98,8 +101,6 @@ protected:
 
 	virtual void Deactivate() override;
 
-	//virtual void RegisterComponentTickFunctions(bool bRegister) override;
-
 public:
 	UFUNCTION(BlueprintCallable, Category = "ALS|Gameplay Camera State")
 	void InitializeByCameraVariables(UVector3dCameraVariable* BoomOffsetVariable,
@@ -121,11 +122,11 @@ public:
 	UFUNCTION(BlueprintPure, Category = "ALS|Gameplay Camera State", Meta = (ReturnDisplayName = "Camera Location"))
 	FVector GetEyeCameraLocation() const;
 
-	UFUNCTION(BlueprintPure, Category = "ALS|Gameplay Camera State", Meta = (ReturnDisplayName = "Pivot Location"))
-	FVector GetThirdPersonPivotLocation() const;
-
 	UFUNCTION(BlueprintPure, Category = "ALS|Gameplay Camera State", Meta = (ReturnDisplayName = "Trace Start"))
 	FVector GetThirdPersonTraceStartLocation() const;
+
+	UFUNCTION(BlueprintPure, Category = "ALS|Gameplay Camera State", Meta = (ReturnDisplayName = "Trace Start"))
+	FVector GetFirstPersonTraceStartLocation() const;
 
 	UFUNCTION(BlueprintPure, Category = "ALS|Gameplay Camera State", Meta = (ReturnDisplayName = "Focus Location"))
 	FVector GetCurrentFocusLocation() const;

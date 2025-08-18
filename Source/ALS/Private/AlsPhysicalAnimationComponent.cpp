@@ -236,7 +236,7 @@ void UAlsPhysicalAnimationComponent::RefreshBodyState(float DeltaTime)
 						if (Body->IsInstanceSimulatingPhysics())
 						{
 							Body->PhysicsBlendWeight = FMath::FInterpConstantTo(Body->PhysicsBlendWeight,
-								FMath::Max(MinimumBlendWeight, 1.0f - LockedValue), DeltaTime, 15.0f);
+								FMath::Max(0.0f, 1.0f - LockedValue), DeltaTime, 15.0f);
 						}
 						else
 						{
@@ -250,7 +250,7 @@ void UAlsPhysicalAnimationComponent::RefreshBodyState(float DeltaTime)
 					else
 					{
 						float Speed = 1.0f / FMath::Max(0.000001f, BlendTimeOfBlendWeightOnDeactivate);
-						Body->PhysicsBlendWeight = FMath::FInterpConstantTo(Body->PhysicsBlendWeight, MinimumBlendWeight, DeltaTime, Speed);
+						Body->PhysicsBlendWeight = FMath::FInterpConstantTo(Body->PhysicsBlendWeight, 0.0f, DeltaTime, Speed);
 					}
 					if (Body->PhysicsBlendWeight == 0.0f)
 					{

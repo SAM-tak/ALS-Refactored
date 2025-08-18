@@ -188,15 +188,6 @@ void UAlsGameplayCameraStateComponent::BindCameraVariables(UFloatCameraVariable*
 	}
 }
 
-//void UAlsGameplayCameraStateComponent::RegisterComponentTickFunctions(const bool bRegister)
-//{
-//	Super::RegisterComponentTickFunctions(bRegister);
-//
-//	// Tick after the owner to have access to the most up-to-date character state.
-//
-//	AddTickPrerequisiteComponent(GameplayCameraComponent.Get());
-//}
-
 void UAlsGameplayCameraStateComponent::BeginPlay()
 {
 	Super::BeginPlay();
@@ -314,7 +305,7 @@ void UAlsGameplayCameraStateComponent::TickComponent(float DeltaTime, enum ELeve
 		else if(PreviousConfirmedDesiredViewMode == AlsCameraViewModeTags::ThirdPerson)
 		{
 			// TPP -> FPP
-			auto TraceStart{Character->GetAimAmount() > Settings->FirstPerson.ADSThreshold ? GetEyeCameraLocation() : GetFirstPersonCameraLocation()};
+			auto TraceStart{GetFirstPersonTraceStartLocation()};
 			auto FocalRotation{(FocusLocation - TraceStart).Rotation()};
 			FocalRotation.Roll = Character->GetViewRotation().Roll;
 			if (Settings->HeuristicPitchMapping && IsValid(Settings->HeuristicPitchMapping))
@@ -366,7 +357,26 @@ void UAlsGameplayCameraStateComponent::TickComponent(float DeltaTime, enum ELeve
 	}
 	else
 	{
-		Character->SetLookRotation((GetCurrentFocusLocation() - GetEyeCameraLocation()).Rotation());
+		if (Character->HasMatchingGameplayTag(AlsAimingModeTags::AimDownSight))
+		{
+			if (bIsSightOffsetValid)
+			{
+				auto ControlRotation = Character->GetControlRotation();
+				auto Location{ControlRotation.RotateVector(SightLocationOffset) + GetEyeCameraLocation()};
+				auto Rotation{(ControlRotation.Quaternion() * SightRotationOffset).Rotator()};
+				Location = FVector::PointPlaneProject(Location, GetEyeCameraLocation(), Rotation.Vector())
+					- Rotation.Vector() * Settings->FirstPerson.RetreatDistance;
+				Character->SetLookRotation((GetCurrentFocusLocation() - Location).Rotation());
+			}
+			else
+			{
+				Character->SetLookRotation((GetCurrentFocusLocation() - GetEyeCameraLocation()).Rotation());
+			}
+		}
+		else
+		{
+			Character->SetLookRotation((GetCurrentFocusLocation() - GetFirstPersonCameraLocation()).Rotation());
+		}
 	}
 
 	Character->SetViewMode(FirstPersonFactor > Settings->FirstPerson.FirstPersonFactorThreshold ? AlsViewModeTags::FirstPerson : AlsViewModeTags::ThirdPerson);
@@ -402,26 +412,33 @@ void UAlsGameplayCameraStateComponent::UpdateState(const float DeltaTime)
 			- ControlRotation.Vector() * Settings->FirstPerson.RetreatDistance);
 	}
 
+	if(Character->GetAimAmount() < Settings->FirstPerson.ADSThreshold)
+	{
+		bIsSightOffsetValid = false;
+	}
+
 	FVector Location;
 	FRotator Rotation;
-	if (Character->HasSight())
+	if(Character->HasSight() && Character->GetAimAmount() >= Settings->FirstPerson.ADSThreshold
+		&& Character->HasMatchingGameplayTag(AlsAimingModeTags::AimDownSight)
+		&& !Character->HasAnyMatchingGameplayTags(Settings->FirstPerson.RecoilStateTags))
 	{
-		if (!Character->HasAnyMatchingGameplayTags(Settings->FirstPerson.RecoilStateTags))
-		{
-			Character->GetSightLocAndRot(Location, Rotation);
-			auto ControlRotationInverse{ControlRotation.Quaternion().Inverse()};
-			SightLocationOffset = ControlRotationInverse.RotateVector(Location - GetEyeCameraLocation());
-			SightRotationOffset = Rotation.Quaternion() * ControlRotationInverse;
-			Location = FVector::PointPlaneProject(Location, GetEyeCameraLocation(), Rotation.Vector())
-				- Rotation.Vector() * Settings->FirstPerson.RetreatDistance;
-		}
-		else
-		{
-			Location = ControlRotation.RotateVector(SightLocationOffset) + GetEyeCameraLocation();
-			Rotation = (ControlRotation.Quaternion() * SightRotationOffset).Rotator();
-			Location = FVector::PointPlaneProject(Location, GetEyeCameraLocation(), Rotation.Vector())
-				- Rotation.Vector() * Settings->FirstPerson.RetreatDistance;
-		}
+		Character->GetSightLocAndRot(Location, Rotation);
+		Rotation.Roll = Character->GetControlRotation().Roll;
+		auto ControlRotationInverse{ControlRotation.Quaternion().Inverse()};
+		SightLocationOffset = ControlRotationInverse.RotateVector(Location - GetEyeCameraLocation());
+		SightRotationOffset = Rotation.Quaternion() * ControlRotationInverse;
+		bIsSightOffsetValid = true;
+		Location = FVector::PointPlaneProject(Location, GetEyeCameraLocation(), Rotation.Vector())
+			- Rotation.Vector() * Settings->FirstPerson.RetreatDistance;
+	}
+	else if(bIsSightOffsetValid)
+	{
+		Location = ControlRotation.RotateVector(SightLocationOffset) + GetEyeCameraLocation();
+		Rotation = (ControlRotation.Quaternion() * SightRotationOffset).Rotator();
+		Rotation.Roll = Character->GetControlRotation().Roll;
+		Location = FVector::PointPlaneProject(Location, GetEyeCameraLocation(), Rotation.Vector())
+			- Rotation.Vector() * Settings->FirstPerson.RetreatDistance;
 	}
 	else
 	{
@@ -451,11 +468,6 @@ FVector UAlsGameplayCameraStateComponent::GetEyeCameraLocation() const
 												   : Settings->FirstPerson.RightEyeCameraSocketName);
 }
 
-FVector UAlsGameplayCameraStateComponent::GetThirdPersonPivotLocation() const
-{
-	return Character->GetActorLocation() + Character->GetActorUpVector() * Character->GetActorRelativeScale3D().Z * Character->BaseEyeHeight;
-}
-
 FVector UAlsGameplayCameraStateComponent::GetThirdPersonTraceStartLocation() const
 {
 	auto ShoulderOffset{
@@ -463,7 +475,27 @@ FVector UAlsGameplayCameraStateComponent::GetThirdPersonTraceStartLocation() con
 		ShoulderMode == AlsCameraShoulderModeTags::Left ? LeftShoulderOffset :
 		CenterShoulderOffset
 	};
-	return GetThirdPersonPivotLocation() + CameraRotation.RotateVector(BoomOffset) + CameraRotation.RotateVector(ShoulderOffset);
+	return GameplayCameraComponent->GetComponentLocation() + CameraRotation.RotateVector(BoomOffset) + CameraRotation.RotateVector(ShoulderOffset);
+}
+
+FVector UAlsGameplayCameraStateComponent::GetFirstPersonTraceStartLocation() const
+{
+	auto ViewRotation = Character->GetViewRotation();
+	if (Character->HasMatchingGameplayTag(AlsAimingModeTags::AimDownSight))
+	{
+		if (bIsSightOffsetValid)
+		{
+			auto Location{ViewRotation.RotateVector(SightLocationOffset) + GetEyeCameraLocation()};
+			auto Rotation{(ViewRotation.Quaternion() * SightRotationOffset).Rotator()};
+			return FVector::PointPlaneProject(Location, GetEyeCameraLocation(), Rotation.Vector())
+				- Rotation.Vector() * Settings->FirstPerson.RetreatDistance;
+		}
+		else
+		{
+			return GetEyeCameraLocation() - ViewRotation.Vector() * Settings->FirstPerson.RetreatDistance;
+		}
+	};
+	return GetFirstPersonCameraLocation() - ViewRotation.Vector() * Settings->FirstPerson.RetreatDistance;
 }
 
 void UAlsGameplayCameraStateComponent::UpdateViewMode()

@@ -1158,8 +1158,7 @@ void AAlsCharacter::SetLookRotation(const FRotator& NewLookRotation)
 
 void AAlsCharacter::SetFocalRotation(const FRotator& NewFocalRotation)
 {
-	PendingFocalRotationRelativeAdjustment = NewFocalRotation - GetViewRotation();
-	PendingFocalRotationRelativeAdjustment.Normalize();
+	PendingFocalRotationRelativeAdjustment = (NewFocalRotation - GetViewRotation()).GetNormalized();
 	PendingFocalRotationRelativeAdjustment.Yaw = FMath::Clamp(PendingFocalRotationRelativeAdjustment.Yaw, -90.0, 90.0);
 	PendingFocalRotationRelativeAdjustment.Pitch = FMath::Clamp(PendingFocalRotationRelativeAdjustment.Pitch, -45.0, 45.0);
 	PendingFocalRotationRelativeAdjustment.Roll = 0.0;
