@@ -54,7 +54,7 @@
 //
 //Added new curves below :
 //
-//-PALockArmLeft
+//- PALockArmLeft
 //- PALockArmRight
 //- PALockLegLeft
 //- PALockLegRight

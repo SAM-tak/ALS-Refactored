@@ -250,9 +250,6 @@ void UAlsGameplayCameraStateComponent::TickComponent(float DeltaTime, enum ELeve
 	}
 
 #if ENABLE_DRAW_DEBUG
-	const auto bDisplayDebugCameraShapes{
-		UAlsUtility::ShouldDisplayDebugForActor(Character.Get(), UAlsCameraConstants::CameraShapesDebugDisplayName())
-	};
 	const auto bDisplayDebugCameraTraces{
 		UAlsUtility::ShouldDisplayDebugForActor(Character.Get(), UAlsCameraConstants::CameraTracesDebugDisplayName())
 	};

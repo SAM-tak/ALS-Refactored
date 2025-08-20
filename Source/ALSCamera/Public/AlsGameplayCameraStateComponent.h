@@ -133,6 +133,8 @@ public:
 
 	float GetTanHalfVfov() const;
 
+	float GetFirstPersonFactor() const;
+
 	// Desired View Mode
 
 public:
@@ -184,8 +186,6 @@ private:
 
 	void DisplayDebugState(const UCanvas* Canvas, float Scale, float HorizontalLocation, float& VerticalLocation) const;
 
-	void DisplayDebugShapes(const UCanvas* Canvas, float Scale, float HorizontalLocation, float& VerticalLocation) const;
-
 	void DisplayDebugTraces(const UCanvas* Canvas, float Scale, float HorizontalLocation, float& VerticalLocation) const;
 #endif // !UE_BUILD_SHIPPING
 };
@@ -213,4 +213,9 @@ inline const FGameplayTag& UAlsGameplayCameraStateComponent::GetShoulderMode() c
 inline float UAlsGameplayCameraStateComponent::GetTanHalfVfov() const
 {
 	return TanHalfVfov;
+}
+
+inline float UAlsGameplayCameraStateComponent::GetFirstPersonFactor() const
+{
+	return FirstPersonFactor;
 }
