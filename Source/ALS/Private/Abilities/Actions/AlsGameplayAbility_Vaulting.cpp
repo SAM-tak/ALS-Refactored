@@ -1,17 +1,18 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 #include "Abilities/Actions/AlsGameplayAbility_Vaulting.h"
+
+#include "Components/CapsuleComponent.h"
+#include "Components/SkeletalMeshComponent.h"
+#include "Net/UnrealNetwork.h"
 #include "Abilities/Tasks/AlsAbilityTask_Tick.h"
 #include "AlsCharacter.h"
 #include "AlsCharacterMovementComponent.h"
 #include "AlsAbilitySystemComponent.h"
 #include "AlsAnimationInstance.h"
 #include "AlsMotionWarpingComponent.h"
-#include "Components/CapsuleComponent.h"
-#include "Components/SkeletalMeshComponent.h"
-#include "Net/UnrealNetwork.h"
-#include "Utility/AlsGameplayTags.h"
-#include "Utility/AlsConstants.h"
+#include "AlsGameplayTags.h"
+#include "AlsConstants.h"
 #include "Utility/AlsMath.h"
 #include "Utility/AlsMacros.h"
 #include "Utility/AlsUtility.h"
@@ -29,7 +30,7 @@ UAlsGameplayAbility_Vaulting::UAlsGameplayAbility_Vaulting(const FObjectInitiali
 	CancelAbilitiesWithTag.AddTag(AlsLocomotionActionTags::Root);
 	BlockAbilitiesWithTag.AddTag(AlsLocomotionActionTags::Vaulting);
 	BlockAbilitiesWithTag.AddTag(AlsLocomotionActionTags::Rolling);
-	ActivationBlockedTags.AddTag(AlsLocomotionActionTags::BeingKnockedDown);
+	ActivationBlockedTags.AddTag(AlsLocomotionActionTags::Unconsious);
 	ActivationBlockedTags.AddTag(AlsLocomotionActionTags::Dying);
 
 	VaultingTraceResponses.WorldStatic = ECR_Block;

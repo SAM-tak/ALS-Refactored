@@ -127,6 +127,8 @@ UAlsCharacterMovementComponent::UAlsCharacterMovementComponent(const FObjectInit
 {
 	SetNetworkMoveDataContainer(MoveDataContainer);
 
+	PrimaryComponentTick.TickGroup = TG_PostPhysics;
+
 	bTickBeforeOwner = true;
 
 	// NetworkMaxSmoothUpdateDistance = 92.0f;

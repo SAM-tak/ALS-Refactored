@@ -4,7 +4,7 @@
 #include "AlsCharacter.h"
 #include "AlsCharacterMovementComponent.h"
 #include "AlsAbilitySystemComponent.h"
-#include "Utility/AlsGameplayTags.h"
+#include "AlsGameplayTags.h"
 #include "Utility/AlsMath.h"
 
 #include UE_INLINE_GENERATED_CPP_BY_NAME(AlsGameplayAbility_Landing)
@@ -59,7 +59,7 @@ void UAlsGameplayAbility_Landing::ActivateAbility(const FGameplayAbilitySpecHand
 
 		EndAbility(CurrentSpecHandle, GetCurrentActorInfo(), GetCurrentActivationInfo(), false, false);
 
-		GetAlsAbilitySystemComponentFromActorInfo()->TryActivateAbilitiesBySingleTag(AlsLocomotionActionTags::BeingKnockedDown);
+		GetAlsAbilitySystemComponentFromActorInfo()->TryActivateAbilitiesBySingleTag(AlsLocomotionActionTags::Unconsious);
 	}
 	else if (bStartRollingOnLand && Character->GetLocomotionState().Velocity.Z <= -RollingOnLandSpeedThreshold)
 	{

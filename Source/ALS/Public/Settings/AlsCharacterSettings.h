@@ -2,7 +2,7 @@
 
 #include "AlsInAirRotationMode.h"
 #include "AlsViewSettings.h"
-#include "Utility/AlsGameplayTags.h"
+#include "AlsGameplayTags.h"
 #include "AlsCharacterSettings.generated.h"
 
 UCLASS(Blueprintable, BlueprintType)

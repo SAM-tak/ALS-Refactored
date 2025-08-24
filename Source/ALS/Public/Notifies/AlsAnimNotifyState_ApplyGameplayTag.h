@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Animation/AnimNotifies/AnimNotifyState.h"
-#include "Utility/AlsGameplayTags.h"
+#include "AlsGameplayTags.h"
 #include "AlsAnimNotifyState_ApplyGameplayTag.generated.h"
 
 UCLASS(DisplayName = "Als Apply GameplayTag Animation Notify State")

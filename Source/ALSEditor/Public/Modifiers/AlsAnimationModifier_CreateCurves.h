@@ -1,7 +1,7 @@
 #pragma once
 
 #include "AnimationModifier.h"
-#include "Utility/AlsConstants.h"
+#include "AlsConstants.h"
 #include "AlsAnimationModifier_CreateCurves.generated.h"
 
 USTRUCT(BlueprintType)

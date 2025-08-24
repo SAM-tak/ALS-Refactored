@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Engine/DataAsset.h"
-#include "Utility/AlsCameraGameplayTags.h"
+#include "AlsCameraGameplayTags.h"
 #include "AlsGameplayCameraStateSettings.generated.h"
 
 class UCurveFloat;

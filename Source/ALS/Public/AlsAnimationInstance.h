@@ -13,7 +13,7 @@
 #include "State/AlsRotateInPlaceState.h"
 #include "State/AlsTransitionsState.h"
 #include "State/AlsTurnInPlaceState.h"
-#include "Utility/AlsGameplayTags.h"
+#include "AlsGameplayTags.h"
 #include "AlsAnimationInstance.generated.h"
 
 struct FAlsFootLimitsSettings;

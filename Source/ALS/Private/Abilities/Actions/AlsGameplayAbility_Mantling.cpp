@@ -6,13 +6,13 @@
 #include "AlsCharacterMovementComponent.h"
 #include "AlsAbilitySystemComponent.h"
 #include "AlsAnimationInstance.h"
+#include "AlsGameplayTags.h"
+#include "AlsConstants.h"
 #include "RootMotionSources/AlsRootMotionSource_Mantling.h"
 #include "Components/AlsRootMotionComponent.h"
 #include "Components/CapsuleComponent.h"
 #include "Components/SkeletalMeshComponent.h"
 #include "Net/UnrealNetwork.h"
-#include "Utility/AlsGameplayTags.h"
-#include "Utility/AlsConstants.h"
 #include "Utility/AlsMath.h"
 #include "Utility/AlsMacros.h"
 #include "Utility/AlsUtility.h"
@@ -30,7 +30,7 @@ UAlsGameplayAbility_Mantling::UAlsGameplayAbility_Mantling(const FObjectInitiali
 	CancelAbilitiesWithTag.AddTag(AlsLocomotionActionTags::Root);
 	BlockAbilitiesWithTag.AddTag(AlsLocomotionActionTags::Mantling);
 	BlockAbilitiesWithTag.AddTag(AlsLocomotionActionTags::Rolling);
-	ActivationBlockedTags.AddTag(AlsLocomotionActionTags::BeingKnockedDown);
+	ActivationBlockedTags.AddTag(AlsLocomotionActionTags::Unconsious);
 	ActivationBlockedTags.AddTag(AlsLocomotionActionTags::Dying);
 
 	MantlingTraceResponses.WorldStatic = ECR_Block;

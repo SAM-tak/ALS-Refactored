@@ -1,7 +1,7 @@
-﻿#include "Modifiers/AlsAnimationModifier_CalculateRotationYawSpeed.h"
+#include "Modifiers/AlsAnimationModifier_CalculateRotationYawSpeed.h"
 
 #include "Animation/AnimSequence.h"
-#include "Utility/AlsConstants.h"
+#include "AlsConstants.h"
 
 #include UE_INLINE_GENERATED_CPP_BY_NAME(AlsAnimationModifier_CalculateRotationYawSpeed)
 

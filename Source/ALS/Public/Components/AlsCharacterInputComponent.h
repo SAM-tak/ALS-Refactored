@@ -2,7 +2,7 @@
 
 #include "AlsCharacterComponent.h"
 #include "Abilities/AlsAbilityInputAction.h"
-#include "Utility/AlsGameplayTags.h"
+#include "AlsGameplayTags.h"
 #include "AlsCharacterInputComponent.generated.h"
 
 class UInputMappingContext;

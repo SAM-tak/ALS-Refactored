@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Components/PawnComponent.h"
-#include "Utility/AlsCameraGameplayTags.h"
+#include "AlsCameraGameplayTags.h"
 #include "Core/CameraVariableTableFwd.h"
 #include "AlsGameplayCameraStateComponent.generated.h"
 

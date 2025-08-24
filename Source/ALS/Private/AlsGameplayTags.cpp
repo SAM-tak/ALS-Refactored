@@ -1,4 +1,4 @@
-#include "Utility/AlsGameplayTags.h"
+#include "AlsGameplayTags.h"
 
 namespace AlsTags
 {
@@ -88,14 +88,6 @@ namespace AlsOverlayModeTags
 	UE_DEFINE_GAMEPLAY_TAG(Feminine, "Als.OverlayMode.Feminine")
 	UE_DEFINE_GAMEPLAY_TAG(Injured, "Als.OverlayMode.Injured")
 	UE_DEFINE_GAMEPLAY_TAG(HandsTied, "Als.OverlayMode.HandsTied")
-	UE_DEFINE_GAMEPLAY_TAG(M4, "Als.OverlayMode.M4")
-	UE_DEFINE_GAMEPLAY_TAG(PistolOneHanded, "Als.OverlayMode.PistolOneHanded")
-	UE_DEFINE_GAMEPLAY_TAG(PistolTwoHanded, "Als.OverlayMode.PistolTwoHanded")
-	UE_DEFINE_GAMEPLAY_TAG(Bow, "Als.OverlayMode.Bow")
-	UE_DEFINE_GAMEPLAY_TAG(Torch, "Als.OverlayMode.Torch")
-	UE_DEFINE_GAMEPLAY_TAG(Binoculars, "Als.OverlayMode.Binoculars")
-	UE_DEFINE_GAMEPLAY_TAG(Box, "Als.OverlayMode.Box")
-	UE_DEFINE_GAMEPLAY_TAG(Barrel, "Als.OverlayMode.Barrel")
 }
 
 namespace AlsLocomotionActionTags
@@ -108,7 +100,7 @@ namespace AlsLocomotionActionTags
 	UE_DEFINE_GAMEPLAY_TAG(Rolling, "Als.LocomotionAction.Rolling")
 	UE_DEFINE_GAMEPLAY_TAG(Landing, "Als.LocomotionAction.Landing")
 	UE_DEFINE_GAMEPLAY_TAG(FreeFalling, "Als.LocomotionAction.FreeFalling")
-	UE_DEFINE_GAMEPLAY_TAG(BeingKnockedDown, "Als.LocomotionAction.BeingKnockedDown")
+	UE_DEFINE_GAMEPLAY_TAG(Unconsious, "Als.LocomotionAction.Unconsious")
 	UE_DEFINE_GAMEPLAY_TAG(Dying, "Als.LocomotionAction.Dying")
 }
 

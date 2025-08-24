@@ -12,7 +12,7 @@
 #include "GameFramework/CharacterMovementComponent.h"
 #include "PhysicsEngine/PhysicsAsset.h"
 #include "AlsPhysicalAnimationComponent.h"
-#include "Utility/AlsConstants.h"
+#include "AlsConstants.h"
 #include "Utility/AlsMath.h"
 #include "Utility/AlsUtility.h"
 

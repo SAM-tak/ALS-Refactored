@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Engine/DataAsset.h"
-#include "Utility/AlsGameplayTags.h"
+#include "AlsGameplayTags.h"
 #include "AlsMovementSettings.generated.h"
 
 class UCurveFloat;

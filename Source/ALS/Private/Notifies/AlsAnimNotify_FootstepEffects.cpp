@@ -1,6 +1,5 @@
 #include "Notifies/AlsAnimNotify_FootstepEffects.h"
 
-#include "AlsCharacter.h"
 #include "DrawDebugHelpers.h"
 #include "NiagaraFunctionLibrary.h"
 #include "Animation/AnimInstance.h"
@@ -11,7 +10,8 @@
 #include "Kismet/GameplayStatics.h"
 #include "PhysicalMaterials/PhysicalMaterial.h"
 #include "Sound/SoundBase.h"
-#include "Utility/AlsConstants.h"
+#include "AlsCharacter.h"
+#include "AlsConstants.h"
 #include "Utility/AlsEnumUtility.h"
 #include "Utility/AlsMacros.h"
 #include "Utility/AlsMath.h"

@@ -6,8 +6,8 @@
 #include "Camera/CameraComponent.h"
 #include "Engine/Canvas.h"
 #include "Engine/Engine.h"
-#include "Utility/AlsConstants.h"
-#include "Utility/AlsCameraConstants.h"
+#include "AlsConstants.h"
+#include "AlsCameraConstants.h"
 #include "Utility/AlsMath.h"
 #include "Utility/AlsUtility.h"
 

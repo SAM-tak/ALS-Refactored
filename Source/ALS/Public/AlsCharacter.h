@@ -4,7 +4,7 @@
 #include "State/AlsLocomotionState.h"
 #include "State/AlsMovementBaseState.h"
 #include "State/AlsViewState.h"
-#include "Utility/AlsGameplayTags.h"
+#include "AlsGameplayTags.h"
 #include "AbilitySystemInterface.h"
 #include "GameplayCueInterface.h"
 #include "GameplayTagAssetInterface.h"

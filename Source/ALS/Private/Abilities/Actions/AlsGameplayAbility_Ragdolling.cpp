@@ -1,19 +1,19 @@
 // Fill out your copyright notice in the Description page of Project Settings.
-
 #include "Abilities/Actions/AlsGameplayAbility_Ragdolling.h"
-#include "Abilities/Tasks/AlsAbilityTask_Tick.h"
-#include "AlsCharacter.h"
-#include "AlsCharacterMovementComponent.h"
-#include "AlsAnimationInstance.h"
-#include "AlsAbilitySystemComponent.h"
-#include "AlsPhysicalAnimationComponent.h"
+
 #include "LinkedAnimLayers/AlsRagdollingAnimInstance.h"
 #include "Components/CapsuleComponent.h"
 #include "Components/SkeletalMeshComponent.h"
 #include "Components/AlsOverrideModeComponent.h"
 #include "Net/UnrealNetwork.h"
-#include "Utility/AlsGameplayTags.h"
-#include "Utility/AlsConstants.h"
+#include "AlsCharacter.h"
+#include "AlsCharacterMovementComponent.h"
+#include "AlsAnimationInstance.h"
+#include "AlsAbilitySystemComponent.h"
+#include "AlsPhysicalAnimationComponent.h"
+#include "AlsGameplayTags.h"
+#include "AlsConstants.h"
+#include "Abilities/Tasks/AlsAbilityTask_Tick.h"
 #include "Utility/AlsMath.h"
 #include "Utility/AlsLog.h"
 #include "Utility/AlsMacros.h"
@@ -22,10 +22,10 @@
 
 UAlsGameplayAbility_Ragdolling::UAlsGameplayAbility_Ragdolling(const FObjectInitializer& ObjectInitializer) : Super(ObjectInitializer)
 {
-	SetAssetTags(FGameplayTagContainer(AlsLocomotionActionTags::BeingKnockedDown));
-	ActivationOwnedTags.AddTag(AlsLocomotionActionTags::BeingKnockedDown);
+	SetAssetTags(FGameplayTagContainer(AlsLocomotionActionTags::Unconsious));
+	ActivationOwnedTags.AddTag(AlsLocomotionActionTags::Unconsious);
 	CancelAbilitiesWithTag.AddTag(AlsLocomotionActionTags::Root);
-	BlockAbilitiesWithTag.AddTag(AlsLocomotionActionTags::BeingKnockedDown);
+	BlockAbilitiesWithTag.AddTag(AlsLocomotionActionTags::Unconsious);
 }
 
 bool UAlsGameplayAbility_Ragdolling::CanActivateAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo,

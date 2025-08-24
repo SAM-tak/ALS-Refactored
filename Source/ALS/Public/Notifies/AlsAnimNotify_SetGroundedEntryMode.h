@@ -5,7 +5,7 @@
 #include "AlsAnimNotify_SetGroundedEntryMode.generated.h"
 
 USTRUCT(BlueprintType)
-struct FGroundedEntryMode
+struct FAlsGroundedEntryMode
 {
 	GENERATED_BODY()
 
@@ -26,7 +26,7 @@ class ALS_API UAlsAnimNotify_SetGroundedEntryMode : public UAnimNotify
 
 protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Settings")
-	TArray<FGroundedEntryMode> GroundedEntryMode;
+	TArray<FAlsGroundedEntryMode> GroundedEntryMode;
 
 public:
 	UAlsAnimNotify_SetGroundedEntryMode();

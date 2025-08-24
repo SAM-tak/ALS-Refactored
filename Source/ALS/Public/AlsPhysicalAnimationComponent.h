@@ -4,7 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "PhysicsEngine/PhysicalAnimationComponent.h"
-#include "Utility/AlsGameplayTags.h"
+#include "AlsGameplayTags.h"
 #include "AlsPhysicalAnimationComponent.generated.h"
 
 class AAlsCharacter;

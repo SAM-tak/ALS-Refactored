@@ -1,4 +1,4 @@
-#include "Utility/AlsCameraGameplayTags.h"
+#include "AlsCameraGameplayTags.h"
 
 namespace AlsCameraTags
 {

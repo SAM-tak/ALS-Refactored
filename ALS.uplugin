@@ -15,28 +15,6 @@
 	"IsBetaVersion": false,
 	"IsExperimentalVersion": false,
 	"Installed": false,
-	"Modules": [
-		{
-			"Name": "ALS",
-			"Type": "Runtime",
-			"LoadingPhase": "Default"
-		},
-		{
-			"Name": "ALSCamera",
-			"Type": "Runtime",
-			"LoadingPhase": "Default"
-		},
-		{
-			"Name": "ALSExtras",
-			"Type": "Runtime",
-			"LoadingPhase": "Default"
-		},
-		{
-			"Name": "ALSEditor",
-			"Type": "UncookedOnly",
-			"LoadingPhase": "PreDefault"
-		}
-	],
 	"Plugins": [
 		{
 			"Name": "ControlRig",
@@ -77,6 +55,28 @@
 		{
 			"Name": "MotionWarping",
 			"Enabled": true
+		}
+	],
+	"Modules": [
+		{
+			"Name": "ALS",
+			"Type": "Runtime",
+			"LoadingPhase": "Default"
+		},
+		{
+			"Name": "ALSCamera",
+			"Type": "Runtime",
+			"LoadingPhase": "Default"
+		},
+		{
+			"Name": "ALSExtras",
+			"Type": "Runtime",
+			"LoadingPhase": "Default"
+		},
+		{
+			"Name": "ALSEditor",
+			"Type": "UncookedOnly",
+			"LoadingPhase": "PreDefault"
 		}
 	]
 }

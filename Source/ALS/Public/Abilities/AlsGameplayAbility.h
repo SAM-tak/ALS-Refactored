@@ -3,7 +3,7 @@
 #pragma once
 
 #include "Abilities/GameplayAbility.h"
-#include "Utility/AlsGameplayTags.h"
+#include "AlsGameplayTags.h"
 #include "AlsGameplayAbility.generated.h"
 
 class AAlsCharacter;
