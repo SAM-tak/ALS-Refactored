@@ -1,10 +1,10 @@
-﻿#pragma once
+#pragma once
 
 #include "AlsTurnInPlaceSettings.generated.h"
 
 class UAnimSequenceBase;
 
-UCLASS(BlueprintType)
+UCLASS(BlueprintType, EditInlineNew)
 class ALS_API UAlsTurnInPlaceSettings : public UObject
 {
 	GENERATED_BODY()
