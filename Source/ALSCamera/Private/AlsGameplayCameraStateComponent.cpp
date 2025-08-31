@@ -59,8 +59,12 @@ void UAlsGameplayCameraStateComponent::OnRegister()
 		}
 #endif
 	}
+	else
+	{
+		Character->OnContollerChanged.AddUObject(this, &ThisClass::OnControllerChanged);
 
-	GameplayCameraComponent = Character->GetComponentByClass<UGameplayCameraComponentBase>();
+		GameplayCameraComponent = Character->GetComponentByClass<UGameplayCameraComponentBase>();
+	}
 }
 
 void UAlsGameplayCameraStateComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
@@ -102,6 +106,15 @@ void UAlsGameplayCameraStateComponent::Deactivate()
 	}
 #endif
 	Super::Deactivate();
+}
+
+void UAlsGameplayCameraStateComponent::OnControllerChanged_Implementation(AController* PreviousController, AController* NewController)
+{
+	auto* NewPlayerController{Cast<APlayerController>(NewController)};
+	if(IsValid(NewPlayerController) && GameplayCameraComponent.IsValid())
+	{
+		GameplayCameraComponent->ActivateCameraForPlayerController(NewPlayerController);
+	}
 }
 
 void UAlsGameplayCameraStateComponent::InitializeByCameraVariables(

@@ -80,6 +80,11 @@ protected:
 
 protected:
 
+	UFUNCTION(BlueprintNativeEvent, Category = "ALS|Gameplay Camera State")
+	void OnControllerChanged(AController* PreviousController, AController* NewController);
+
+protected:
+
 	FCameraVariableID FirstPersonFactorVariableId;
 	FCameraVariableID TraceSphreRadiusVariableId;
 	FCameraVariableID FirstPersonLocationVariableId;
