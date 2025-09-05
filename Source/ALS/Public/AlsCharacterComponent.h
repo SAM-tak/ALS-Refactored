@@ -11,7 +11,7 @@ class ALS_API UAlsCharacterComponent : public UPawnComponent
 	GENERATED_UCLASS_BODY()
 
 protected:
-	UPROPERTY(BlueprintReadOnly, Transient, Category = "AlsCharacterComponent|State")
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Als Character Component|State", Transient)
 	TWeakObjectPtr<AAlsCharacter> Character;
 
 protected:
@@ -24,7 +24,10 @@ protected:
 	virtual void OnRegister() override;
 
 	UFUNCTION(BlueprintNativeEvent, Category = "ALS|CharacterComponent")
-	void OnControllerChanged(AController *PreviousController, AController* NewController);
+	void OnPossessed(AController* NewController);
+
+	UFUNCTION(BlueprintNativeEvent, Category = "ALS|CharacterComponent")
+	void OnUnPossessed(AController* PreviousController);
 
 	UFUNCTION(BlueprintNativeEvent, Category = "ALS|CharacterComponent")
 	void OnRefresh(float DeltaTime);

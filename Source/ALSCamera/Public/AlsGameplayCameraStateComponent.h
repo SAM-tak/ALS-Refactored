@@ -81,7 +81,7 @@ protected:
 protected:
 
 	UFUNCTION(BlueprintNativeEvent, Category = "ALS|Gameplay Camera State")
-	void OnControllerChanged(AController* PreviousController, AController* NewController);
+	void OnPossessed(AController* NewController);
 
 protected:
 

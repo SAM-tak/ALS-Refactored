@@ -22,7 +22,8 @@ void UAlsAbilitySystemComponent::OnRegister()
 	if (IsValid(Character))
 	{
 		Character->OnRefresh.AddUObject(this, &ThisClass::OnRefresh);
-		Character->OnContollerChanged.AddUObject(this, &ThisClass::OnControllerChanged);
+		Character->OnPossessed_Client.AddUObject(this, &ThisClass::OnPossessed);
+		Character->OnUnPossessed_Client.AddUObject(this, &ThisClass::OnUnPossessed);
 	}
 }
 
@@ -54,7 +55,7 @@ void UAlsAbilitySystemComponent::ActivateOnInputAction(FGameplayTag InputTag)
 	TryActivateAbilitiesBySingleTag(InputTag);
 }
 
-void UAlsAbilitySystemComponent::OnControllerChanged_Implementation(AController* PreviousController, AController* NewController)
+void UAlsAbilitySystemComponent::OnPossessed_Implementation(AController* NewController)
 {
 	RefreshAbilityActorInfo();
 
@@ -65,7 +66,24 @@ void UAlsAbilitySystemComponent::OnControllerChanged_Implementation(AController*
 			auto* AlsAbility{Cast<UAlsGameplayAbility>(Spec.Ability)};
 			if (IsValid(AlsAbility))
 			{
-				AlsAbility->OnControllerChanged(PreviousController, NewController);
+				AlsAbility->OnPossessed(NewController);
+			}
+		}
+	}
+}
+
+void UAlsAbilitySystemComponent::OnUnPossessed_Implementation(AController* PreviousController)
+{
+	RefreshAbilityActorInfo();
+
+	for (FGameplayAbilitySpec& Spec : ActivatableAbilities.Items)
+	{
+		if (Spec.IsActive())
+		{
+			auto* AlsAbility{Cast<UAlsGameplayAbility>(Spec.Ability)};
+			if (IsValid(AlsAbility))
+			{
+				AlsAbility->OnUnPossessed(PreviousController);
 			}
 		}
 	}

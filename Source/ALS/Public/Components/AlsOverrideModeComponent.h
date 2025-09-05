@@ -35,7 +35,9 @@ protected:
 
 	virtual void OnRefresh_Implementation(float DeltaTime) override;
 
-	virtual void OnControllerChanged_Implementation(AController* PreviousController, AController* NewController) override;
+	virtual void OnPossessed_Implementation(AController* NewController) override;
+
+	virtual void OnUnPossessed_Implementation(AController* PreviousController) override;
 
 	void ChangeOverrideTaskIfNeeded(const FGameplayTag& Tag);
 };

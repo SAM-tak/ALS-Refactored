@@ -22,7 +22,9 @@ void UAlsAbilityTask_PlayLocalMontage::Activate()
 	Super::Activate();
 	const auto* ActorInfo = Ability->GetCurrentActorInfo();
 	auto* Character{Cast<AAlsCharacter>(ActorInfo->OwnerActor)};
+	ensure(Character);
 	auto* Component{Character->FindComponentByClass<UAlsLocalMontageComponent>()};
+	ensure(Component);
 
 	LocalMontageTask = Component->Play(LocalMontageTag);
 	if (LocalMontageTask.IsValid())

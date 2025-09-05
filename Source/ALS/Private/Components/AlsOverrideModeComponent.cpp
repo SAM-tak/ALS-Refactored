@@ -88,11 +88,20 @@ void UAlsOverrideModeComponent::OnRefresh_Implementation(float DeltaTime)
 	}
 }
 
-void UAlsOverrideModeComponent::OnControllerChanged_Implementation(AController* PreviousController, AController* NewController)
+void UAlsOverrideModeComponent::OnPossessed_Implementation(AController* NewController)
 {
-	Super::OnControllerChanged_Implementation(PreviousController, NewController);
+	Super::OnPossessed_Implementation(NewController);
 	if (CurrentOverrideTask.IsValid())
 	{
-		CurrentOverrideTask->OnControllerChanged(PreviousController, NewController);
+		CurrentOverrideTask->OnPossessed(NewController);
+	}
+}
+
+void UAlsOverrideModeComponent::OnUnPossessed_Implementation(AController* PreviousController)
+{
+	Super::OnUnPossessed_Implementation(PreviousController);
+	if (CurrentOverrideTask.IsValid())
+	{
+		CurrentOverrideTask->OnUnPossessed(PreviousController);
 	}
 }

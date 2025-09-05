@@ -61,8 +61,7 @@ void UAlsGameplayCameraStateComponent::OnRegister()
 	}
 	else
 	{
-		Character->OnContollerChanged.AddUObject(this, &ThisClass::OnControllerChanged);
-
+		Character->OnPossessed_Client.AddUObject(this, &ThisClass::OnPossessed);
 		GameplayCameraComponent = Character->GetComponentByClass<UGameplayCameraComponentBase>();
 	}
 }
@@ -108,7 +107,7 @@ void UAlsGameplayCameraStateComponent::Deactivate()
 	Super::Deactivate();
 }
 
-void UAlsGameplayCameraStateComponent::OnControllerChanged_Implementation(AController* PreviousController, AController* NewController)
+void UAlsGameplayCameraStateComponent::OnPossessed_Implementation(AController* NewController)
 {
 	auto* NewPlayerController{Cast<APlayerController>(NewController)};
 	if(IsValid(NewPlayerController) && GameplayCameraComponent.IsValid())

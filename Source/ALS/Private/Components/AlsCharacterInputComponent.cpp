@@ -23,17 +23,9 @@ void UAlsCharacterInputComponent::OnRegister()
 	}
 }
 
-void UAlsCharacterInputComponent::OnControllerChanged_Implementation(AController* PreviousController, AController* NewController)
+void UAlsCharacterInputComponent::OnPossessed_Implementation(AController* NewController)
 {
-	auto* PreviousPlayerController{Cast<APlayerController>(PreviousController)};
-	if (IsValid(PreviousPlayerController))
-	{
-		auto* InputSubsystem{ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(PreviousPlayerController->GetLocalPlayer())};
-		if (IsValid(InputSubsystem))
-		{
-			InputSubsystem->RemoveMappingContext(InputMappingContext);
-		}
-	}
+	Super::OnPossessed_Implementation(NewController);
 
 	auto* NewPlayerController{Cast<APlayerController>(NewController)};
 	if (IsValid(NewPlayerController))
@@ -51,8 +43,20 @@ void UAlsCharacterInputComponent::OnControllerChanged_Implementation(AController
 			InputSubsystem->AddMappingContext(InputMappingContext, 0, Options);
 		}
 	}
+}
 
-	Super::OnControllerChanged_Implementation(PreviousController, NewController);
+void UAlsCharacterInputComponent::OnUnPossessed_Implementation(AController* PreviousController)
+{
+	Super::OnUnPossessed_Implementation(PreviousController);
+	auto* PreviousPlayerController{Cast<APlayerController>(PreviousController)};
+	if (IsValid(PreviousPlayerController))
+	{
+		auto* InputSubsystem{ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(PreviousPlayerController->GetLocalPlayer())};
+		if (IsValid(InputSubsystem))
+		{
+			InputSubsystem->RemoveMappingContext(InputMappingContext);
+		}
+	}
 }
 
 void UAlsCharacterInputComponent::OnSetupPlayerInputComponent_Implementation(UInputComponent* Input)

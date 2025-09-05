@@ -52,8 +52,8 @@ protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = AlsAbility)
 	float OverrideBlendOutTimeOnEndAbility{-1.0f};
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "AlsAbility|State", Transient)
-	uint8 bInputBinded : 1{false};
+	UPROPERTY(VisibleInstanceOnly, BlueprintReadOnly, Category = "AlsAbility|State", Transient)
+	TWeakObjectPtr<UInputComponent> BindedInputComponent{nullptr};
 
 public:
 	UFUNCTION(BlueprintPure, Category = "ALS|Ability")
@@ -89,7 +89,9 @@ protected:
 	UFUNCTION(BlueprintCallable, Category = "ALS|Ability|MotionWarping")
 	void AddOrUpdateWarpTargetFromComponent(FName WarpTargetName, const USceneComponent* Component, FName BoneName, bool bFollowComponent);
 
-	virtual void OnControllerChanged(AController* PreviousController, AController* NewController);
+	virtual void OnPossessed(AController* NewController);
+
+	virtual void OnUnPossessed(AController* PreviousController);
 
 	void BindInput(UInputComponent* InputComponent);
 

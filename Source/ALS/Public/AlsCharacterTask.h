@@ -16,17 +16,17 @@ protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Settings")
 	uint8 bEnableInputBinding : 1{true};
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient)
+	UPROPERTY(VisibleInstanceOnly, BlueprintReadOnly, Category = "State", Transient)
 	TWeakObjectPtr<AAlsCharacter> Character;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient)
+	UPROPERTY(VisibleInstanceOnly, BlueprintReadOnly, Category = "State", Transient)
 	uint8 bActive : 1{false};
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient)
-	uint8 bInputBinded : 1{false};
-
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient)
+	UPROPERTY(VisibleInstanceOnly, BlueprintReadOnly, Category = "State", Transient)
 	uint8 bEpilogRunningCurrently : 1{false};
+
+	UPROPERTY(VisibleInstanceOnly, BlueprintReadOnly, Category = "State", Transient)
+	TWeakObjectPtr<UInputComponent> BindedInputComponent{nullptr};
 
 public:
 	virtual bool IsActive() const { return bActive; }
@@ -37,7 +37,9 @@ public:
 
 	virtual void Refresh(float DeltaTime);
 
-	virtual void OnControllerChanged(AController* PreviousController, AController* NewController);
+	virtual void OnPossessed(AController* NewController);
+
+	virtual void OnUnPossessed(AController* PreviousController);
 
 	void End();
 

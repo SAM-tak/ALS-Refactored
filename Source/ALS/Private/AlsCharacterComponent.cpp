@@ -43,11 +43,14 @@ void UAlsCharacterComponent::OnRegister()
 	}
 	else
 	{
-		Character->OnContollerChanged.AddUObject(this, &ThisClass::OnControllerChanged);
+		Character->OnPossessed_Client.AddUObject(this, &ThisClass::OnPossessed);
+		Character->OnUnPossessed_Client.AddUObject(this, &ThisClass::OnUnPossessed);
 		Character->OnRefresh.AddUObject(this, &ThisClass::OnRefresh);
 	}
 }
 
-void UAlsCharacterComponent::OnControllerChanged_Implementation(AController* PreviousController, AController* NewController) {}
+void UAlsCharacterComponent::OnPossessed_Implementation(AController* NewController) {}
+
+void UAlsCharacterComponent::OnUnPossessed_Implementation(AController* PreviousController) {}
 
 void UAlsCharacterComponent::OnRefresh_Implementation(float DeltaTime) {}

@@ -20,7 +20,10 @@ protected:
 	virtual void OnRegister() override;
 
 	UFUNCTION(BlueprintNativeEvent, Category = "ALS|AbilitySystem")
-	void OnControllerChanged(AController* PreviousController, AController* NewController);
+	void OnPossessed(AController* NewController);
+
+	UFUNCTION(BlueprintNativeEvent, Category = "ALS|AbilitySystem")
+	void OnUnPossessed(AController* PreviousController);
 
 	UFUNCTION(BlueprintNativeEvent, Category = "ALS|AbilitySystem")
 	void OnRefresh(float DeltaTime);

@@ -37,7 +37,9 @@ protected:
 
 	virtual void OnRefresh_Implementation(float DeltaTime) override;
 
-	virtual void OnControllerChanged_Implementation(AController* PreviousController, AController* NewController) override;
+	virtual void OnPossessed_Implementation(AController* NewController) override;
+
+	virtual void OnUnPossessed_Implementation(AController* PreviousController) override;
 
 	UFUNCTION(BlueprintCallable, Category = "AlsLocalMontageModeComponent")
 	void AddOrUpdateReplicatedWarpTargetFromLocationAndRotation(FName WarpTargetName, FVector TargetLocation, FRotator TargetRotation);

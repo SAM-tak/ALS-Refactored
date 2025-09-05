@@ -68,12 +68,21 @@ void UAlsOverlayModeComponent::OnRefresh_Implementation(float DeltaTime)
 	}
 }
 
-void UAlsOverlayModeComponent::OnControllerChanged_Implementation(AController* PreviousController, AController* NewController)
+void UAlsOverlayModeComponent::OnPossessed_Implementation(AController* NewController)
 {
-	Super::OnControllerChanged_Implementation(PreviousController, NewController);
+	Super::OnPossessed_Implementation(NewController);
 	if (CurrentOverlayTask.IsValid())
 	{
-		CurrentOverlayTask->OnControllerChanged(PreviousController, NewController);
+		CurrentOverlayTask->OnPossessed(NewController);
+	}
+}
+
+void UAlsOverlayModeComponent::OnUnPossessed_Implementation(AController* PreviousController)
+{
+	Super::OnUnPossessed_Implementation(PreviousController);
+	if (CurrentOverlayTask.IsValid())
+	{
+		CurrentOverlayTask->OnUnPossessed(PreviousController);
 	}
 }
 

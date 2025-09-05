@@ -93,34 +93,38 @@ bool UAlsCharacterTask::IsEpilogRunning_Implementation() const
 	return false;
 }
 
-void UAlsCharacterTask::OnControllerChanged(AController* PreviousController, AController* NewController)
+void UAlsCharacterTask::OnPossessed(AController* NewController)
 {
-	if (IsValid(PreviousController) && IsValid(PreviousController->InputComponent))
-	{
-		UnbindInput(PreviousController->InputComponent);
-	}
 	if (IsValid(NewController) && IsValid(NewController->InputComponent))
 	{
 		BindInput(NewController->InputComponent);
 	}
 }
 
+void UAlsCharacterTask::OnUnPossessed(AController* PreviousController)
+{
+	if (IsValid(PreviousController) && IsValid(PreviousController->InputComponent))
+	{
+		UnbindInput(PreviousController->InputComponent);
+	}
+}
+
 void UAlsCharacterTask::BindInput(UInputComponent* InputComponent)
 {
-	if(bEnableInputBinding && !bInputBinded && IsValid(InputComponent))
+	if(bEnableInputBinding && !BindedInputComponent.IsValid() && IsValid(InputComponent))
 	{
 		UInputDelegateBinding::BindInputDelegates(GetClass(), InputComponent, this);
-		bInputBinded = true;
+		BindedInputComponent = InputComponent;
 	}
 }
 
 void UAlsCharacterTask::UnbindInput(UInputComponent* InputComponent)
 {
-	if(bInputBinded && IsValid(InputComponent))
+	if(BindedInputComponent.IsValid() && BindedInputComponent == InputComponent)
 	{
 		InputComponent->ClearBindingsForObject(this);
+		BindedInputComponent = InputComponent;
 	}
-	bInputBinded = false;
 }
 
 UWorld* UAlsCharacterTask::GetWorld() const

@@ -289,13 +289,6 @@ void AAlsCharacter::BeginPlay()
 	RefreshGait();
 }
 
-void AAlsCharacter::NotifyControllerChanged()
-{
-	OnContollerChanged.Broadcast(PreviousController, Controller);
-
-	Super::NotifyControllerChanged();
-}
-
 void AAlsCharacter::SetupPlayerInputComponent(UInputComponent* Input)
 {
 	Super::SetupPlayerInputComponent(Input);
@@ -423,6 +416,31 @@ void AAlsCharacter::PossessedBy(AController* NewController)
 
 	ViewState.NetworkSmoothing.bEnabled |= IsValid(Settings) && Settings->View.bEnableListenServerNetworkSmoothing &&
 		IsNetMode(NM_ListenServer) && GetRemoteRole() == ROLE_AutonomousProxy;
+
+	if (GetLocalRole() >= ROLE_Authority)
+	{
+		ClientPossessed(NewController);
+	}
+}
+
+void AAlsCharacter::UnPossessed()
+{
+	Super::UnPossessed();
+
+	if (GetLocalRole() >= ROLE_Authority)
+	{
+		ClientUnPossessed();
+	}
+}
+
+void AAlsCharacter::ClientPossessed_Implementation(AController* NewContoller)
+{
+	OnPossessed_Client.Broadcast(NewContoller);
+}
+
+void AAlsCharacter::ClientUnPossessed_Implementation()
+{
+	OnUnPossessed_Client.Broadcast(GetController());
 }
 
 void AAlsCharacter::Restart()
@@ -619,6 +637,7 @@ void AAlsCharacter::OnMovementModeChanged(const EMovementMode PreviousMovementMo
 			break;
 
 		case MOVE_Falling:
+		case MOVE_Flying:
 			SetLocomotionMode(AlsLocomotionModeTags::InAir);
 			break;
 	}

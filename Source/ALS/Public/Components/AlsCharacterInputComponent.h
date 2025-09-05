@@ -2,7 +2,6 @@
 
 #include "AlsCharacterComponent.h"
 #include "Abilities/AlsAbilityInputAction.h"
-#include "AlsGameplayTags.h"
 #include "AlsCharacterInputComponent.generated.h"
 
 class UInputMappingContext;
@@ -22,7 +21,9 @@ protected:
 protected:
 	virtual void OnRegister() override;
 
-	virtual void OnControllerChanged_Implementation(AController* PreviousController, AController* NewController) override;
+	virtual void OnPossessed_Implementation(AController* NewController) override;
+
+	virtual void OnUnPossessed_Implementation(AController* PreviousController) override;
 
 	UFUNCTION(BlueprintNativeEvent, Category = "ALS|CharacterInput")
 	void OnSetupPlayerInputComponent(UInputComponent* Input);

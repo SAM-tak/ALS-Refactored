@@ -97,12 +97,21 @@ void UAlsLocalMontageComponent::OnRefresh_Implementation(float DeltaTime)
 	}
 }
 
-void UAlsLocalMontageComponent::OnControllerChanged_Implementation(AController* PreviousController, AController* NewController)
+void UAlsLocalMontageComponent::OnPossessed_Implementation(AController* NewController)
 {
-	Super::OnControllerChanged_Implementation(PreviousController, NewController);
+	Super::OnPossessed_Implementation(NewController);
 	if (CurrentLocalMontageTask.IsValid())
 	{
-		CurrentLocalMontageTask->OnControllerChanged(PreviousController, NewController);
+		CurrentLocalMontageTask->OnPossessed(NewController);
+	}
+}
+
+void UAlsLocalMontageComponent::OnUnPossessed_Implementation(AController* PreviousController)
+{
+	Super::OnUnPossessed_Implementation(PreviousController);
+	if (CurrentLocalMontageTask.IsValid())
+	{
+		CurrentLocalMontageTask->OnUnPossessed(PreviousController);
 	}
 }
 

@@ -22,7 +22,7 @@ class UAlsMantlingSettings;
 class UAlsAbilitySystemComponent;
 class UAlsMotionWarpingComponent;
 
-DECLARE_EVENT_TwoParams(AAlsCharacter, FAlsCharacter_OnContollerChanged, AController*, AController*);
+DECLARE_EVENT_OneParam(AAlsCharacter, FAlsCharacter_Possessed, AController*);
 
 DECLARE_EVENT_OneParam(AAlsCharacter, FAlsCharacter_OnSetupPlayerInputComponent, UInputComponent*);
 
@@ -158,12 +158,12 @@ public:
 protected:
 	virtual void BeginPlay() override;
 
-	virtual void NotifyControllerChanged() override;
-
 	virtual void SetupPlayerInputComponent(UInputComponent* Input) override;
 
 public:
-	FAlsCharacter_OnContollerChanged OnContollerChanged;
+	FAlsCharacter_Possessed OnPossessed_Client;
+
+	FAlsCharacter_Possessed OnUnPossessed_Client;
 
 	FAlsCharacter_OnSetupPlayerInputComponent OnSetupPlayerInputComponent;
 
@@ -176,6 +176,8 @@ public:
 	virtual void Tick(float DeltaTime) override;
 
 	virtual void PossessedBy(AController* NewController) override;
+
+	virtual void UnPossessed() override;
 
 	virtual void Restart() override;
 
@@ -193,6 +195,12 @@ public:
 	void ReplaceAlsAbilitySystem(UAlsAbilitySystemComponent *NewAbilitySystem);
 
 private:
+	UFUNCTION(Client, Reliable)
+	void ClientPossessed(AController *NewContoller);
+
+	UFUNCTION(Client, Reliable)
+	void ClientUnPossessed();
+
 	mutable FGameplayTagContainer TempTagContainer;
 
 	void RefreshMeshProperties() const;

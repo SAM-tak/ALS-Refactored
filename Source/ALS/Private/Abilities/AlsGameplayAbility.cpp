@@ -141,32 +141,36 @@ void UAlsGameplayAbility::SetInputBlocked(bool bBlocked) const
 	}
 }
 
-void UAlsGameplayAbility::OnControllerChanged(AController* PreviousController, AController* NewController)
+void UAlsGameplayAbility::OnPossessed(AController* NewController)
 {
-	if (IsValid(PreviousController) && IsValid(PreviousController->InputComponent))
-	{
-		UnbindInput(PreviousController->InputComponent);
-	}
 	if (IsValid(NewController) && IsValid(NewController->InputComponent))
 	{
 		BindInput(NewController->InputComponent);
 	}
 }
 
+void UAlsGameplayAbility::OnUnPossessed(AController* PreviousController)
+{
+	if (IsValid(PreviousController) && IsValid(PreviousController->InputComponent))
+	{
+		UnbindInput(PreviousController->InputComponent);
+	}
+}
+
 void UAlsGameplayAbility::BindInput(UInputComponent* InputComponent)
 {
-	if(bEnableInputBinding && !bInputBinded && IsValid(InputComponent))
+	if(bEnableInputBinding && IsValid(InputComponent))
 	{
 		UInputDelegateBinding::BindInputDelegates(GetClass(), InputComponent, this);
-		bInputBinded = true;
+		BindedInputComponent = InputComponent;
 	}
 }
 
 void UAlsGameplayAbility::UnbindInput(UInputComponent* InputComponent)
 {
-	if(bInputBinded && IsValid(InputComponent))
+	if(IsValid(InputComponent) && BindedInputComponent == InputComponent)
 	{
-		InputComponent->ClearBindingsForObject(this);
+		BindedInputComponent->ClearBindingsForObject(this);
+		BindedInputComponent.Reset();
 	}
-	bInputBinded = false;
 }
