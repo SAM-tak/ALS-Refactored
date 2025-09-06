@@ -1218,7 +1218,7 @@ void AAlsCharacter::RefreshView(const float DeltaTime)
 
 	ViewState.PreviousYawAngle = UE_REAL_TO_FLOAT(ViewState.Rotation.Yaw);
 
-	if (GetLocalRole() == ROLE_AutonomousProxy)
+	if (IsLocallyControlled())
 	{
 		if (MovementBase.bHasRelativeRotation)
 		{
