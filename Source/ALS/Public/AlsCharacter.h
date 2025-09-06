@@ -97,7 +97,7 @@ protected:
 	// Replicated raw view rotation. Depending on the context, this rotation can be in world space, or in movement
 	// base space. In most cases, it is better to use FAlsViewState::Rotation to take advantage of network smoothing.
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Als Character|State", Transient, ReplicatedUsing = OnReplicated_ReplicatedViewRotation)
-	FRotator ReplicatedViewRotation;
+	FRotator ReplicatedViewRotation{ForceInit};
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Als Character|State", Transient)
 	FAlsViewState ViewState;

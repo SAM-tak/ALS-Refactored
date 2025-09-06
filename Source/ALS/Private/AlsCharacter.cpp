@@ -289,6 +289,43 @@ void AAlsCharacter::BeginPlay()
 	RefreshGait();
 }
 
+void AAlsCharacter::PossessedBy(AController* NewController)
+{
+	Super::PossessedBy(NewController);
+
+	RefreshMeshProperties();
+
+	// Enable view network smoothing on the listen server here because the remote role may not be valid yet during begin play.
+
+	ViewState.NetworkSmoothing.bEnabled |= IsValid(Settings) && Settings->View.bEnableListenServerNetworkSmoothing &&
+		IsNetMode(NM_ListenServer) && GetRemoteRole() == ROLE_AutonomousProxy;
+
+	if (GetLocalRole() >= ROLE_Authority)
+	{
+		ClientPossessed(NewController);
+	}
+}
+
+void AAlsCharacter::UnPossessed()
+{
+	Super::UnPossessed();
+
+	if (GetLocalRole() >= ROLE_Authority)
+	{
+		ClientUnPossessed();
+	}
+}
+
+void AAlsCharacter::ClientPossessed_Implementation(AController* NewContoller)
+{
+	OnPossessed_Client.Broadcast(NewContoller);
+}
+
+void AAlsCharacter::ClientUnPossessed_Implementation()
+{
+	OnUnPossessed_Client.Broadcast(GetController());
+}
+
 void AAlsCharacter::SetupPlayerInputComponent(UInputComponent* Input)
 {
 	Super::SetupPlayerInputComponent(Input);
@@ -404,43 +441,6 @@ void AAlsCharacter::Tick(const float DeltaTime)
 	Super::Tick(DeltaTime);
 
 	RefreshLocomotionLate(DeltaTime);
-}
-
-void AAlsCharacter::PossessedBy(AController* NewController)
-{
-	Super::PossessedBy(NewController);
-
-	RefreshMeshProperties();
-
-	// Enable view network smoothing on the listen server here because the remote role may not be valid yet during begin play.
-
-	ViewState.NetworkSmoothing.bEnabled |= IsValid(Settings) && Settings->View.bEnableListenServerNetworkSmoothing &&
-		IsNetMode(NM_ListenServer) && GetRemoteRole() == ROLE_AutonomousProxy;
-
-	if (GetLocalRole() >= ROLE_Authority)
-	{
-		ClientPossessed(NewController);
-	}
-}
-
-void AAlsCharacter::UnPossessed()
-{
-	Super::UnPossessed();
-
-	if (GetLocalRole() >= ROLE_Authority)
-	{
-		ClientUnPossessed();
-	}
-}
-
-void AAlsCharacter::ClientPossessed_Implementation(AController* NewContoller)
-{
-	OnPossessed_Client.Broadcast(NewContoller);
-}
-
-void AAlsCharacter::ClientUnPossessed_Implementation()
-{
-	OnUnPossessed_Client.Broadcast(GetController());
 }
 
 void AAlsCharacter::Restart()
@@ -1177,16 +1177,19 @@ void AAlsCharacter::SetLookRotation(const FRotator& NewLookRotation)
 
 void AAlsCharacter::SetFocalRotation(const FRotator& NewFocalRotation)
 {
-	PendingFocalRotationRelativeAdjustment = (NewFocalRotation - GetViewRotation()).GetNormalized();
-	PendingFocalRotationRelativeAdjustment.Yaw = FMath::Clamp(PendingFocalRotationRelativeAdjustment.Yaw, -90.0, 90.0);
-	PendingFocalRotationRelativeAdjustment.Pitch = FMath::Clamp(PendingFocalRotationRelativeAdjustment.Pitch, -45.0, 45.0);
-	PendingFocalRotationRelativeAdjustment.Roll = 0.0;
-	UE_LOG(LogAls, Verbose, TEXT("SetFocalRotation PendingFocalRotationRelativeAdjustment %s"), *PendingFocalRotationRelativeAdjustment.ToString());
+	if (IsLocallyControlled())
+	{
+		PendingFocalRotationRelativeAdjustment = (NewFocalRotation - GetViewRotation()).GetNormalized();
+		PendingFocalRotationRelativeAdjustment.Yaw = FMath::Clamp(PendingFocalRotationRelativeAdjustment.Yaw, -90.0, 90.0);
+		PendingFocalRotationRelativeAdjustment.Pitch = FMath::Clamp(PendingFocalRotationRelativeAdjustment.Pitch, -45.0, 45.0);
+		PendingFocalRotationRelativeAdjustment.Roll = 0.0;
+		UE_LOG(LogAls, Verbose, TEXT("SetFocalRotation PendingFocalRotationRelativeAdjustment %s"), *PendingFocalRotationRelativeAdjustment.ToString());
+	}
 }
 
 void AAlsCharacter::TryAdjustControllRotation(float DeltaTime)
 {
-	if (IsValid(GetController()) && !PendingFocalRotationRelativeAdjustment.IsNearlyZero(0.01))
+	if (IsLocallyControlled() && IsValid(GetController()) && !PendingFocalRotationRelativeAdjustment.IsNearlyZero(0.01))
 	{
 		const auto ControlRotation{Controller->GetControlRotation()};
 		const auto PreviousPendingFocalRotationRelativeAdjustment{PendingFocalRotationRelativeAdjustment};
@@ -1215,24 +1218,18 @@ void AAlsCharacter::RefreshView(const float DeltaTime)
 
 	ViewState.PreviousYawAngle = UE_REAL_TO_FLOAT(ViewState.Rotation.Yaw);
 
-	if (MovementBase.bHasRelativeRotation)
+	if (GetLocalRole() == ROLE_AutonomousProxy)
 	{
-		if (IsLocallyControlled())
+		if (MovementBase.bHasRelativeRotation)
 		{
 			// We can't depend on the view rotation sent by the character movement component
 			// since it's in world space, so in this case we always send it ourselves.
 
 			SetReplicatedViewRotation((MovementBase.Rotation.Inverse() * Super::GetViewRotation().Quaternion()).Rotator(), true);
 		}
-	}
-	else
-	{
-		if (IsLocallyControlled() || (IsReplicatingMovement() && GetLocalRole() >= ROLE_Authority && IsValid(GetController())))
+		else
 		{
-			// The character movement component already sends the view rotation to the
-			// server if movement is replicated, so we don't have to do this ourselves.
-
-			SetReplicatedViewRotation(Super::GetViewRotation().GetNormalized(), !IsReplicatingMovement());
+			SetReplicatedViewRotation(Super::GetViewRotation().GetNormalized(), true);
 		}
 	}
 

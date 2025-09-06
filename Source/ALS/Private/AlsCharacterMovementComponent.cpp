@@ -69,14 +69,14 @@ void FAlsSavedMove::SetMoveFor(ACharacter* Character, const float NewDeltaTime, 
 	}
 }
 
-bool FAlsSavedMove::CanCombineWith(const FSavedMovePtr& NewMovePtr, ACharacter* Character, const float MaxDelta) const
+bool FAlsSavedMove::CanCombineWith(const FSavedMovePtr& NewMovePtr, ACharacter* Character, const float MaxDeltaTime) const
 {
 	const auto* NewMove{static_cast<FAlsSavedMove*>(NewMovePtr.Get())};
 
 	return RotationMode == NewMove->RotationMode &&
 		   Stance == NewMove->Stance &&
 		   MaxAllowedGait == NewMove->MaxAllowedGait &&
-		   Super::CanCombineWith(NewMovePtr, Character, MaxDelta);
+		   Super::CanCombineWith(NewMovePtr, Character, MaxDeltaTime);
 }
 
 void FAlsSavedMove::CombineWith(const FSavedMove_Character* PreviousMove, ACharacter* Character,
@@ -343,7 +343,7 @@ void UAlsCharacterMovementComponent::PhysicsRotation(const float DeltaTime)
 	}
 }
 
-void UAlsCharacterMovementComponent::PhysWalking(const float DeltaTime, int32 Iterations)
+void UAlsCharacterMovementComponent::PhysWalking(const float DeltaTime, int32 IterationCount)
 {
 	if (ALS_ENSURE(IsValid(GaitSettings.AccelerationAndDecelerationAndGroundFrictionCurve)))
 	{
@@ -385,11 +385,11 @@ void UAlsCharacterMovementComponent::PhysWalking(const float DeltaTime, int32 It
 	float RemainingTime = DeltaTime;
 
 	// Perform the move
-	while ( (RemainingTime >= MIN_TICK_TIME) && (Iterations < MaxSimulationIterations) && CharacterOwner && (CharacterOwner->Controller || bRunPhysicsWithNoController || HasAnimRootMotion() || CurrentRootMotion.HasOverrideVelocity() || (CharacterOwner->GetLocalRole() == ROLE_SimulatedProxy)) )
+	while ( (RemainingTime >= MIN_TICK_TIME) && (IterationCount < MaxSimulationIterations) && CharacterOwner && (CharacterOwner->Controller || bRunPhysicsWithNoController || HasAnimRootMotion() || CurrentRootMotion.HasOverrideVelocity() || (CharacterOwner->GetLocalRole() == ROLE_SimulatedProxy)) )
 	{
-		Iterations++;
+		IterationCount++;
 		bJustTeleported = false;
-		const float TimeTick = GetSimulationTimeStep(RemainingTime, Iterations);
+		const float TimeTick = GetSimulationTimeStep(RemainingTime, IterationCount);
 		RemainingTime -= TimeTick;
 
 		// Save current values
@@ -425,7 +425,7 @@ void UAlsCharacterMovementComponent::PhysWalking(const float DeltaTime, int32 It
 		{
 			// Root motion could have put us into Falling.
 			// No movement has taken place this movement tick so we pass on full time/past iteration count
-			StartNewPhysics(RemainingTime+TimeTick, Iterations-1);
+			StartNewPhysics(RemainingTime+TimeTick, IterationCount-1);
 			return;
 		}
 
@@ -453,12 +453,12 @@ void UAlsCharacterMovementComponent::PhysWalking(const float DeltaTime, int32 It
 					const float ActualDist = UE_REAL_TO_FLOAT(ProjectToGravityFloor(UpdatedComponent->GetComponentLocation() - OldLocation).Size());
 					RemainingTime += TimeTick * (1.f - FMath::Min(1.f,ActualDist/DesiredDist));
 				}
-				StartNewPhysics(RemainingTime,Iterations);
+				StartNewPhysics(RemainingTime,IterationCount);
 				return;
 			}
 			else if ( IsSwimming() ) //just entered water
 			{
-				StartSwimming(OldLocation, OldVelocity, TimeTick, RemainingTime, Iterations);
+				StartSwimming(OldLocation, OldVelocity, TimeTick, RemainingTime, IterationCount);
 				return;
 			}
 		}
@@ -491,7 +491,7 @@ void UAlsCharacterMovementComponent::PhysWalking(const float DeltaTime, int32 It
 				// Try new movement direction
 				Velocity = NewDelta/TimeTick;
 				RemainingTime += TimeTick;
-				Iterations--;
+				IterationCount--;
 				continue;
 			}
 			else
@@ -499,7 +499,7 @@ void UAlsCharacterMovementComponent::PhysWalking(const float DeltaTime, int32 It
 				// see if it is OK to jump
 				// @todo collision : only thing that can be problem is that oldbase has world collision on
 				bool bMustJump = bZeroDelta || (OldBase == NULL || (!OldBase->IsQueryCollisionEnabled() && MovementBaseUtility::IsDynamicBase(OldBase)));
-				if ( (bMustJump || !bCheckedFall) && CheckFall(OldFloor, CurrentFloor.HitResult, Delta, OldLocation, RemainingTime, TimeTick, Iterations, bMustJump) )
+				if ( (bMustJump || !bCheckedFall) && CheckFall(OldFloor, CurrentFloor.HitResult, Delta, OldLocation, RemainingTime, TimeTick, IterationCount, bMustJump) )
 				{
 					return;
 				}
@@ -522,7 +522,7 @@ void UAlsCharacterMovementComponent::PhysWalking(const float DeltaTime, int32 It
 					if (IsMovingOnGround())
 					{
 						// If still walking, then fall. If not, assume the user set a different mode they want to keep.
-						StartFalling(Iterations, RemainingTime, TimeTick, Delta, OldLocation);
+						StartFalling(IterationCount, RemainingTime, TimeTick, Delta, OldLocation);
 					}
 					return;
 				}
@@ -547,7 +547,7 @@ void UAlsCharacterMovementComponent::PhysWalking(const float DeltaTime, int32 It
 			// check if just entered water
 			if ( IsSwimming() )
 			{
-				StartSwimming(OldLocation, Velocity, TimeTick, RemainingTime, Iterations);
+				StartSwimming(OldLocation, Velocity, TimeTick, RemainingTime, IterationCount);
 				return;
 			}
 
@@ -555,7 +555,7 @@ void UAlsCharacterMovementComponent::PhysWalking(const float DeltaTime, int32 It
 			if (!CurrentFloor.IsWalkableFloor() && !CurrentFloor.HitResult.bStartPenetrating)
 			{
 				const bool bMustJump = bJustTeleported || bZeroDelta || (OldBase == NULL || (!OldBase->IsQueryCollisionEnabled() && MovementBaseUtility::IsDynamicBase(OldBase)));
-				if ((bMustJump || !bCheckedFall) && CheckFall(OldFloor, CurrentFloor.HitResult, Delta, OldLocation, RemainingTime, TimeTick, Iterations, bMustJump) )
+				if ((bMustJump || !bCheckedFall) && CheckFall(OldFloor, CurrentFloor.HitResult, Delta, OldLocation, RemainingTime, TimeTick, IterationCount, bMustJump) )
 				{
 					return;
 				}
@@ -599,7 +599,7 @@ void UAlsCharacterMovementComponent::PhysWalking(const float DeltaTime, int32 It
 	// ReSharper restore All
 }
 
-void UAlsCharacterMovementComponent::PhysNavWalking(const float DeltaTime, const int32 Iterations)
+void UAlsCharacterMovementComponent::PhysNavWalking(const float DeltaTime, const int32 IterationCount)
 {
 	if (ALS_ENSURE(IsValid(GaitSettings.AccelerationAndDecelerationAndGroundFrictionCurve)))
 	{
@@ -608,18 +608,18 @@ void UAlsCharacterMovementComponent::PhysNavWalking(const float DeltaTime, const
 		GroundFriction = GaitSettings.AccelerationAndDecelerationAndGroundFrictionCurve->FloatCurves[2].Eval(CalculateGaitAmount());
 	}
 
-	Super::PhysNavWalking(DeltaTime, Iterations);
+	Super::PhysNavWalking(DeltaTime, IterationCount);
 }
 
-void UAlsCharacterMovementComponent::PhysCustom(const float DeltaTime, int32 Iterations)
+void UAlsCharacterMovementComponent::PhysCustom(const float DeltaTime, int32 IterationCount)
 {
 	if (DeltaTime < MIN_TICK_TIME)
 	{
-		Super::PhysCustom(DeltaTime, Iterations);
+		Super::PhysCustom(DeltaTime, IterationCount);
 		return;
 	}
 
-	Iterations += 1;
+	IterationCount += 1;
 	bJustTeleported = false;
 
 	RestorePreAdditiveRootMotionVelocity();
@@ -633,7 +633,7 @@ void UAlsCharacterMovementComponent::PhysCustom(const float DeltaTime, int32 Ite
 
 	MoveUpdatedComponent(Velocity * DeltaTime, UpdatedComponent->GetComponentQuat(), false);
 
-	Super::PhysCustom(DeltaTime, Iterations);
+	Super::PhysCustom(DeltaTime, IterationCount);
 }
 
 FVector UAlsCharacterMovementComponent::ConsumeInputVector()
