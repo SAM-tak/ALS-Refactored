@@ -591,9 +591,9 @@ void UAlsPhysicalAnimationComponent::OnRefresh(float DeltaTime)
 			RagdollingState.Start(RagdollingSettingsMap[CurrentRagdolling]);
 			SetRagdollingTargetLocation(RagdollingState.TargetLocation);
 
-			GetSkeletalMesh()->SetAllBodiesBelowSimulatePhysics(UAlsConstants::PelvisBoneName(), true);
-			GetSkeletalMesh()->SetAllBodiesPhysicsBlendWeight(1.0f);
-			ApplyPhysicalAnimationProfileBelow(NAME_None, NAME_None, true, true);
+			//GetSkeletalMesh()->SetAllBodiesBelowSimulatePhysics(UAlsConstants::PelvisBoneName(), true);
+			//GetSkeletalMesh()->SetAllBodiesPhysicsBlendWeight(1.0f);
+			//ApplyPhysicalAnimationProfileBelow(NAME_None, NAME_None, true, true);
 		}
 
 		RagdollingState.TargetLocation = RagdollingTargetLocation;
